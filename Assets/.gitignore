@@ -1,0 +1,35 @@
+Library/
+Logs/
+obj/
+Packages/
+ProjectSettings/
+Resources/
+Temp/
+UIElementsSchema/
+UserSettings/
+*.sln
+*.csproj
+*.unityproj
+*.userprefs
+*.DS_Store
+*.png
+*.tss
+Assets/AddressableAssetsData/
+Assets/Animators/
+Assets/Editor/
+Assets/Fantasy Cursor Pack/
+Assets/Font/
+Assets/GameData/
+Assets/Material/
+Assets/PictureTemplate/
+Assets/Plugins/
+Assets/Prefabs/
+Assets/Resources/
+Assets/Scenes/
+Assets/Setting/
+Assets/Shader/
+Assets/Sound/
+Assets/Sprite Atlas/
+Assets/TextMesh Pro/
+Assets/TileMap/
+Assets/ZZAdditons/
