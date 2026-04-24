@@ -33,6 +33,7 @@ namespace MFarm.Inventory
                 {
                     SlotType.Bag => InventoryLocation.Player,
                     SlotType.Box => InventoryLocation.Box,
+                    SlotType.SellBox => InventoryLocation.SellBox,
                     _ => InventoryLocation.Player
                 };              
             }
@@ -161,14 +162,20 @@ namespace MFarm.Inventory
                     //拿到拖拽目的点的组件和slot序号
                     var targetSlot = eventData.pointerCurrentRaycast.gameObject.GetComponent<SlotUI>();
                     int targetIndex = targetSlot.slotIndex;
-
+                   // Debug.Log(" slotType:" + slotType + "   targetSlot: " + targetSlot.slotType);
                     //当初始和目标拖拽的背包类型都是Bag，即玩家自身的背包内拖拽
-                    if (slotType == SlotType.Bag && targetSlot.slotType == SlotType.Bag)
-                    {
-                        InventoryManager.Instance.Swapitem(slotIndex, targetIndex);
-                    }
+                    // if (slotType == SlotType.Bag && targetSlot.slotType == SlotType.Bag)
+                    // {
+                    //     InventoryManager.Instance.Swapitem(slotIndex, targetIndex);
+                    // }
+                    //从背包格拖出
                     if (slotType == SlotType.Bag)
                     {
+                        //拖到背包格
+                        if (targetSlot.slotType == slotType)
+                        {
+                            InventoryManager.Instance.Swapitem(slotIndex, targetIndex);
+                        }
                         //从玩家背包拖拽到装备(头)上
                         if (targetSlot.slotType == SlotType.Equipment_Head)
                         {
@@ -196,12 +203,37 @@ namespace MFarm.Inventory
                                 return;
                             }
                         }
+                        //拖到出售箱
+                        if(targetSlot.slotType == SlotType.SellBox)
+                        {
+                            //打开交易选择物品UI
+                            EventHandler.CallShowTradeUI(itemDetails, true, itemAmount, slotIndex, targetIndex,Location,targetSlot.Location);
+                            //InventoryManager.Instance.SwapItem(Location, slotIndex, targetSlot.Location, targetSlot.slotIndex);
+                        }
                         inventoryUI.UpdatePlayerDefenseNum();
-
+                        return;
                     }
+                    //从出售箱拖出
+                    if (slotType == SlotType.SellBox)
+                    {
+                        //拖到玩家背包中
+                        if (targetSlot.slotType == SlotType.Bag)
+                        {
+                            InventoryManager.Instance.SwapItem(Location, slotIndex, targetSlot.Location, targetSlot.slotIndex,false,0);
+                        }
+                        //拖到出售箱中
+                        if (targetSlot.slotType == slotType)
+                        {
+                            InventoryManager.Instance.SwapSellBoxItem(slotIndex, targetIndex);
+                        }
+                        return;
+                        
+                    }
+                   
                     //从头装备栏拖出
                     else if (slotType == SlotType.Equipment_Head)
                     {
+                        
                         //不可以从头部位置拖拽到身体位置，反之亦然
                         if (targetSlot.slotType == SlotType.Equipment_Body)
                         {
@@ -218,7 +250,7 @@ namespace MFarm.Inventory
                     //从身体装备拖出
                     else if (slotType == SlotType.Equipment_Body)
                     {
-
+                        
                         //不可以从身体位置拖拽到头部位置，反之亦然
                         if (targetSlot.slotType == SlotType.Equipment_Head)
                         {
@@ -232,21 +264,24 @@ namespace MFarm.Inventory
                         }
                         inventoryUI.UpdatePlayerDefenseNum();
                     }
-
+                    
                     //买
                     else if (slotType == SlotType.Shop && targetSlot.slotType == SlotType.Bag)
                     {
-                        EventHandler.CallShowTradeUI(itemDetails, false);
+                        
+                        //EventHandler.CallShowTradeUI(itemDetails, false);
                     }
                     //卖
                     else if (slotType == SlotType.Bag && targetSlot.slotType == SlotType.Shop)
                     {
-                        EventHandler.CallShowTradeUI(itemDetails, true);
+                    
+                        //EventHandler.CallShowTradeUI(itemDetails, true);
                     }
                     //跨背包交换物品数据
                     else if (slotType != SlotType.Shop && targetSlot.slotType != SlotType.Shop && slotType != targetSlot.slotType)
                     {
-                        InventoryManager.Instance.SwapItem(Location, slotIndex, targetSlot.Location, targetSlot.slotIndex);
+ 
+                        InventoryManager.Instance.SwapItem(Location, slotIndex, targetSlot.Location, targetSlot.slotIndex,false, 0);
                     }
 
                     //取消所有高亮显示，因为Slot序号不可能为-1

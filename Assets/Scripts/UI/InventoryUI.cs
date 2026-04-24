@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using static UnityEngine.Rendering.DebugUI;
@@ -28,8 +29,11 @@ namespace MFarm.Inventory
         public GameObject boxSlotPrefab;
         [Header("交易UI")]
         public TradeUI tradeUI;
-        public Text playerMoneyText;
+        public TextMeshProUGUI playerMoneyText;
         public SlotUI[] playerSlots;
+        public SlotUI[] sellBoxSlots;
+        public GameObject sellBoxUI;
+        public TextMeshProUGUI allValueText;
         [SerializeField] private List<SlotUI> baseBagSlots;
         [Header("物品拾取提示")]
         //物品提示UI生成位置
@@ -54,7 +58,7 @@ namespace MFarm.Inventory
         public Dictionary<string, Image> equipImageDict = new Dictionary<string, Image>();
         private void OnEnable()
         {
-            EventHandler.UpdateInventoryUI += OnUpdateInventory;
+            EventHandler.UpdateInventoryUI += OnUpdateInventoryUI;
             EventHandler.BeforeSceneUnloadEvent += OnBeforeSceneUnloadEvent;
             EventHandler.BaseBagOpenEvent += OnBaseBagOpenEvent;
             EventHandler.BaseBagCloseEvent += OnBaseBagCloseEvent;
@@ -66,7 +70,7 @@ namespace MFarm.Inventory
 
         private void OnDisable()
         {
-            EventHandler.UpdateInventoryUI -= OnUpdateInventory;
+            EventHandler.UpdateInventoryUI -= OnUpdateInventoryUI;
             EventHandler.BeforeSceneUnloadEvent -= OnBeforeSceneUnloadEvent;
             EventHandler.BaseBagOpenEvent -= OnBaseBagOpenEvent;
             EventHandler.BaseBagCloseEvent -= OnBaseBagCloseEvent;
@@ -103,7 +107,7 @@ namespace MFarm.Inventory
                 SlotType.Box => boxSlotPrefab,
                 _ => null,
             };
-
+           
             //生成背包UI
             baseBag.SetActive(true);
             baseBagSlots = new List<SlotUI>();
@@ -118,6 +122,8 @@ namespace MFarm.Inventory
             }
             //强制重建背包格局，使每次增加物品格时背包显示正常
             LayoutRebuilder.ForceRebuildLayoutImmediate(baseBag.GetComponent<RectTransform>());
+            sellBoxUI.gameObject.SetActive(true);
+            
             //打开商店时也顺便打开玩家背包,并重新设置背包位置
             if (slotType == SlotType.Shop)
             {
@@ -126,7 +132,7 @@ namespace MFarm.Inventory
                 bagOpened = true;
             }
             //更新UI显示
-            OnUpdateInventory(InventoryLocation.Box, bagData.itemList);
+            OnUpdateInventoryUI(InventoryLocation.Box, bagData.itemList);
 
         }
         /// <summary>
@@ -145,6 +151,7 @@ namespace MFarm.Inventory
                 Destroy(slot.gameObject);
             }
             baseBagSlots.Clear();
+            sellBoxUI.gameObject.SetActive(false);
             //关闭商店后背包一起关闭,还原背包位置
             if (slotType == SlotType.Shop)
             {
@@ -158,10 +165,18 @@ namespace MFarm.Inventory
         /// </summary>
         /// <param name="item"></param>
         /// <param name="isSell"></param>
-        private void OnShowTradeUI(ItemDetails item, bool isSell)
+        private void OnShowTradeUI(ItemDetails item, bool isSell,int maxAmount,int bagIndex,int sellIndex,InventoryLocation startLocation , InventoryLocation endLocation)
         {
+            //拖的目标物体如果不是被拖物体就不打开交易UI
+            if (sellBoxSlots[sellIndex].itemDetails != null)
+            {
+                if (sellBoxSlots[sellIndex].itemDetails.itemID != playerSlots[bagIndex].itemDetails.itemID)
+                {
+                    return;
+                }
+            }
             tradeUI.gameObject.SetActive(true);
-            tradeUI.SetupTradeUI(item, isSell);
+            tradeUI.SetupTradeUI(item, isSell, maxAmount, bagIndex, sellIndex,startLocation,endLocation);
         }
         /// <summary>
         /// 将刚拾取到的物品添加到ItemTipList列表中
@@ -287,7 +302,7 @@ namespace MFarm.Inventory
         /// </summary>
         /// <param name="location">更新哪个位置的背包</param>
         /// <param name="list"></param>
-        private void OnUpdateInventory(InventoryLocation location, List<InventoryItem> list)
+        private void OnUpdateInventoryUI(InventoryLocation location, List<InventoryItem> list)
         {
             switch (location)
             {
@@ -320,6 +335,23 @@ namespace MFarm.Inventory
                         }
                     }
                     break;
+                case InventoryLocation.SellBox:
+                    for (int i = 0; i < sellBoxSlots.Length; i++)
+                    {
+                        if (list[i].itemAmount > 0)
+                        {
+                            var item = InventoryManager.Instance.GetItemDetails(list[i].itemID);
+                            sellBoxSlots[i].UpdateSlot(item, list[i].itemAmount);
+                        }
+                        else
+                        {
+                            sellBoxSlots[i].UpdateEmptySlot();
+                        }
+                    }
+                    //修改出售箱显示的总价值
+                    allValueText.text = InventoryManager.Instance.ModifySellBoxValue().ToString();
+                    break;
+                    
             }
             //更新玩家金钱
             playerMoneyText.text = InventoryManager.Instance.playerMoney.ToString();
@@ -571,6 +603,14 @@ namespace MFarm.Inventory
             //更新玩家防御力
             EventHandler.CallEquipArmorEven(num);
             defenseNumber.text = num.ToString();
+        }
+        /// <summary>
+        /// 按下sellButton开始出售,调用在sellButton按钮上
+        /// </summary>
+        public void ClickSellButton()
+        {
+            InventoryManager.Instance.IncreasePlayerMoney(InventoryManager.Instance.ModifySellBoxValue());
+            playerMoneyText.text = InventoryManager.Instance.playerMoney.ToString();
         }
     }
 }
