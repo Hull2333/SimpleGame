@@ -61,7 +61,7 @@ namespace MFarm.Task
             //每次开启玩家任务面板都获取一次InventoryUI上的playerSlot
             var inventoryUI = GameObject.FindWithTag("InventoryUI").gameObject.GetComponent<InventoryUI>();
             //判断玩家背包是否有任务物品
-            if (InventoryManager.Instance.GetItemIndexInBag(taskDetail.itemID) == -1)
+            if (InventoryManager.Instance.GetItemIndexInBag(taskDetail.itemID, InventoryManager.Instance.playerBag.itemList) == -1)
             {
                 taskNum.text = ("0/" + taskDetail.finishNum.ToString());
             }

@@ -14,6 +14,7 @@ namespace MFarm.Inventory
         public ItemTooltip itemTooltip;
         [Header("拖拽图片")]
         public Image dragItem;
+        public TextMeshProUGUI dragItemAmount;
         [Header("玩家背包UI")]
         [SerializeField] private GameObject bagUI;
         [SerializeField] private GameObject playerEquipUI;
@@ -28,6 +29,7 @@ namespace MFarm.Inventory
         public GameObject shopSlotPrefab;
         public GameObject boxSlotPrefab;
         [Header("交易UI")]
+        public UnityEngine.UI.Button quitShopButton;
         public TradeUI tradeUI;
         public TextMeshProUGUI playerMoneyText;
         public SlotUI[] playerSlots;
@@ -35,12 +37,20 @@ namespace MFarm.Inventory
         public GameObject sellBoxUI;
         public TextMeshProUGUI allValueText;
         [SerializeField] private List<SlotUI> baseBagSlots;
+        //点击摇杆出售提示
+        public GameObject SellTip;
+        [Header("金币")]
+        //金币预制体
+        public GameObject coinPrefab;
+        //金币生成物体的Parent
+        public Transform coinParent;
+        private List<GameObject> coinList = new List<GameObject>();
+        private int coinNum;
         [Header("物品拾取提示")]
         //物品提示UI生成位置
         [SerializeField] private Transform itemGetBg;
         //物品提示UI
-        public GameObject itemGetTipPrefab;
-       
+        public GameObject itemGetTipPrefab; 
         //玩家等级UI
         public GameObject skillPanel;
         [HideInInspector] public bool skillBarOpened;
@@ -79,12 +89,6 @@ namespace MFarm.Inventory
             EventHandler.DisplayCollectItemSprite -= OnDisplayCollectItemSprite;
             EventHandler.ItemSelectEvent -= OnItemSelectEvent;
         }
-
-       
-
-
-
-
         /// <summary>
         /// 加载新场景后物品高亮取消
         /// </summary>
@@ -99,7 +103,6 @@ namespace MFarm.Inventory
         /// <param name="bag_SO"></param>
         private void OnBaseBagOpenEvent(SlotType slotType, InventoryBag_SO bagData)
         {
-            Debug.Log(bagData.itemList.Count);
             //TODO:通用箱子Prefab
             GameObject prefab = slotType switch
             {
@@ -123,7 +126,7 @@ namespace MFarm.Inventory
             //强制重建背包格局，使每次增加物品格时背包显示正常
             LayoutRebuilder.ForceRebuildLayoutImmediate(baseBag.GetComponent<RectTransform>());
             sellBoxUI.gameObject.SetActive(true);
-            
+            SellTip.SetActive(false);
             //打开商店时也顺便打开玩家背包,并重新设置背包位置
             if (slotType == SlotType.Shop)
             {
@@ -142,6 +145,7 @@ namespace MFarm.Inventory
         /// <param name="bagData"></param>
         private void OnBaseBagCloseEvent(SlotType slotType, InventoryBag_SO bagData)
         {
+            InventoryManager.Instance.isSellState = false;
             baseBag.SetActive(false);
             itemTooltip.gameObject.SetActive(false);
             UpdateSlotHighlight(-1);
@@ -165,9 +169,9 @@ namespace MFarm.Inventory
         /// </summary>
         /// <param name="item"></param>
         /// <param name="isSell"></param>
-        private void OnShowTradeUI(ItemDetails item, bool isSell,int maxAmount,int bagIndex,int sellIndex,InventoryLocation startLocation , InventoryLocation endLocation)
+        private void OnShowTradeUI(ItemDetails item, bool isSell,int maxAmount,int bagIndex,int sellIndex,InventoryLocation startLocation , InventoryLocation endLocation , bool isToSellBox)
         {
-            //拖的目标物体如果不是被拖物体就不打开交易UI
+            //物品和目的物品不是用一种就不执行交易UI显示
             if (sellBoxSlots[sellIndex].itemDetails != null)
             {
                 if (sellBoxSlots[sellIndex].itemDetails.itemID != playerSlots[bagIndex].itemDetails.itemID)
@@ -176,7 +180,7 @@ namespace MFarm.Inventory
                 }
             }
             tradeUI.gameObject.SetActive(true);
-            tradeUI.SetupTradeUI(item, isSell, maxAmount, bagIndex, sellIndex,startLocation,endLocation);
+            tradeUI.SetupTradeUI(item, isSell, maxAmount, bagIndex, sellIndex,startLocation,endLocation, isToSellBox);
         }
         /// <summary>
         /// 将刚拾取到的物品添加到ItemTipList列表中
@@ -287,6 +291,7 @@ namespace MFarm.Inventory
             {
                 equipImageDict.Add(image.name, image);
             }
+            quitShopButton.onClick.AddListener(ClickQuitShopButton);
         }
 
         private void Update()
@@ -350,11 +355,21 @@ namespace MFarm.Inventory
                     }
                     //修改出售箱显示的总价值
                     allValueText.text = InventoryManager.Instance.ModifySellBoxValue().ToString();
+                    //根据出售箱金额来显示出售提示
+                    if(InventoryManager.Instance.ModifySellBoxValue() > 0)
+                    {
+                        SellTip.SetActive(true);
+                    }
+                    else
+                    {
+                        SellTip.SetActive(false);
+                    }
                     break;
                     
             }
             //更新玩家金钱
             playerMoneyText.text = InventoryManager.Instance.playerMoney.ToString();
+            
         }
         /// <summary>
         /// 控制背包UI的开关
@@ -609,8 +624,124 @@ namespace MFarm.Inventory
         /// </summary>
         public void ClickSellButton()
         {
+            if(InventoryManager.Instance.ModifySellBoxValue() > 0)
+            {
+                GenerateCoins();
+                MakeTween();
+            }
             InventoryManager.Instance.IncreasePlayerMoney(InventoryManager.Instance.ModifySellBoxValue());
             playerMoneyText.text = InventoryManager.Instance.playerMoney.ToString();
+        }
+        /// <summary>
+        /// 点击商店关闭按钮
+        /// </summary>
+        public void ClickQuitShopButton()
+        {
+            EventHandler.CallBaseBagCloseEvent(SlotType.Shop, null);
+            EventHandler.CallUpdateGameStateEvent(GameState.Gameplay);
+        }
+        /// <summary>
+        ///  获取对方箱子的已有物品index或者空的格子index
+        /// </summary>
+        /// <param name="currentItemID">当前物品</param>
+        /// <param name="lists">对方箱子的InventoryItem队列</param>
+        /// <param name="location">自身的箱子位置</param>
+        /// <returns></returns>
+        public int GetEmptySellBoxIndex(int currentItemID,List<InventoryItem> lists,InventoryLocation location)
+        {
+            int index = -1;
+            index = InventoryManager.Instance.GetItemIndexInBag(currentItemID, lists);
+           
+            if(location == InventoryLocation.Player)
+            {
+                //出售箱没有这个物品
+                if (index == -1)
+                {
+                    foreach (var slot in sellBoxSlots)
+                    {
+                        if (slot.itemDetails == null)
+                        {
+                            index = slot.slotIndex;
+                            return index;
+                        }
+                    }
+                }
+                //有这个物品
+                else
+                {
+                    return index;
+                }
+            }
+            if(location == InventoryLocation.SellBox)
+            {
+                //没有这个物品 
+                if (index == -1)
+                {
+                    foreach (var slot in playerSlots)
+                    {
+                        Debug.Log(slot.slotIndex);
+                        if (slot.itemDetails == null)
+                        {
+                            index = slot.slotIndex;
+                            return index;
+                        }
+                    }
+                }
+                //有这个物品
+                else
+                {
+                    return index;
+                }
+            }
+            return index;
+        }
+        /// <summary>
+        /// 实现金币划到玩家金钱UI上
+        /// </summary>
+        private void MakeTween()
+        {
+            float delay = 0f;
+           
+            for (int i = 0; i < coinNum; i++)
+            {
+                Vector3 originPos = new Vector3(UnityEngine.Random.Range(-50, 50), (UnityEngine.Random.Range(-40, 40)));
+                coinList[i].GetComponent<CoinTween>().PlayTween(delay, originPos);
+                delay += 0.1f;
+            }
+        }
+        /// <summary>
+        /// 生成金币
+        /// </summary>
+        private void GenerateCoins()
+        {
+            coinList.Clear();
+            //金币生成个数
+            int num = 1;
+            if(InventoryManager.Instance.ModifySellBoxValue() > 50)
+            {
+                num = 2;
+            }
+            if (InventoryManager.Instance.ModifySellBoxValue() > 100)
+            {
+                num = 3;
+            }
+            if (InventoryManager.Instance.ModifySellBoxValue() > 300)
+            {
+                num = 10;
+            }
+            if(InventoryManager.Instance.ModifySellBoxValue() > 500)
+            {
+                num = 5;
+            }
+            for (int i = 0; i < num; i++)
+            {
+                GameObject coin = Instantiate(coinPrefab, Vector3.zero, Quaternion.identity, coinParent);
+                //金币开始生成的位置
+                //coin.transform.localPosition = new Vector3(UnityEngine.Random.Range(-50, 50), (UnityEngine.Random.Range(-40, 40)));\
+                coin.transform.localPosition = Vector3.zero;
+                coinList.Add(coin);
+            }
+            coinNum = num;
         }
     }
 }

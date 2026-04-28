@@ -24,7 +24,8 @@ namespace MFarm.Inventory
         //每个背包格子的序号
         public int slotIndex;
         public Image slotHighlight;
-        
+        public int currentAmount;
+        private CursorManager cursorManager;
         public InventoryLocation Location
         {
             get
@@ -43,6 +44,7 @@ namespace MFarm.Inventory
         /// </summary>
         private void Start()
         {
+            cursorManager = GameObject.FindWithTag("CursorManager").GetComponent<CursorManager>();
             isSelected = false;
             if (itemDetails == null)
             {
@@ -111,6 +113,30 @@ namespace MFarm.Inventory
                 InventoryManager.Instance.currentSelectedItem = itemDetails;
                 EventHandler.CallItemSelectEvent(itemDetails,isSelected);
             }
+            //在商店里右键点击Slot
+            if(eventData.button == PointerEventData.InputButton.Right && InventoryManager.Instance.isSellState )
+            {
+                //右键点击的是背包格
+                if(Location == InventoryLocation.Player)
+                {
+                    if (inventoryUI.GetEmptySellBoxIndex(itemDetails.itemID,InventoryManager.Instance.sellBoxBag.itemList,Location) >= 0)
+                    {
+                        InventoryManager.Instance.SwapItem(Location, slotIndex, InventoryLocation.SellBox, inventoryUI.GetEmptySellBoxIndex(itemDetails.itemID, InventoryManager.Instance.sellBoxBag.itemList, Location), false, 0);
+                    }
+                    return;
+                }
+                //右键点击的是出售箱格子
+                if(Location == InventoryLocation.SellBox)
+                {
+                   
+                    if (inventoryUI.GetEmptySellBoxIndex(itemDetails.itemID, InventoryManager.Instance.playerBag.itemList, Location) >= 0)
+                    {
+                        InventoryManager.Instance.SwapItem(Location, slotIndex, InventoryLocation.Player, inventoryUI.GetEmptySellBoxIndex(itemDetails.itemID, InventoryManager.Instance.playerBag.itemList, Location), false, 0);
+                    }
+                    return;
+                }
+               
+            }
         }
         /// <summary>
         /// 物品开始拖拽
@@ -118,11 +144,34 @@ namespace MFarm.Inventory
         /// <param name="eventData"></param>
         public void OnBeginDrag(PointerEventData eventData)
         {
+            //关闭鼠标Image
+            cursorManager.cursorImage.enabled = false;
             //空格子不可以拖拽和任务栏的奖励物品也不可以拖拽
-            if(itemDetails != null &&itemDetails.itemID != 0 && slotType != SlotType.Reward)
+            if (itemDetails != null &&itemDetails.itemID != 0 && slotType != SlotType.Reward)
             {
+                if (Input.GetKey(KeyCode.LeftControl) && slotType == SlotType.Bag) 
+                {
+                    InventoryManager.Instance.isHalfAmount = true;
+                    if(itemAmount != 1)
+                    {
+                        if(itemAmount % 2 != 0)
+                        {
+                            itemAmount = itemAmount / 2;
+                            currentAmount = itemAmount + 1;
+                        }
+                        else
+                        {
+                            itemAmount = itemAmount / 2;
+                            currentAmount = itemAmount;
+                        }
+                    }
+                    //同时刷新一下玩家背包
+                    amountText.text = itemAmount.ToString();
+                }
                 inventoryUI.dragItem.enabled = true;
+                inventoryUI.dragItemAmount.enabled = true;
                 inventoryUI.dragItem.sprite = slotImage.sprite;
+                inventoryUI.dragItemAmount.text = itemAmount.ToString();
                 //自带的方法，使拖出来的dragItem图片尺寸为你提前设置好的尺寸
                 //inventoryUI.dragItem.SetNativeSize();
                 inventoryUI.dragItem.transform.localScale = new Vector3(3, 3, 0);
@@ -147,7 +196,9 @@ namespace MFarm.Inventory
         /// <param name="eventData"></param>
         public void OnEndDrag(PointerEventData eventData)
         {
-           inventoryUI.dragItem.enabled = false;
+            cursorManager.cursorImage.enabled = true;
+            inventoryUI.dragItem.enabled = false;
+            inventoryUI.dragItemAmount.enabled = false;
             //Debug.Log(eventData.pointerCurrentRaycast.gameObject);
             if (itemDetails != null)
             {
@@ -162,19 +213,14 @@ namespace MFarm.Inventory
                     //拿到拖拽目的点的组件和slot序号
                     var targetSlot = eventData.pointerCurrentRaycast.gameObject.GetComponent<SlotUI>();
                     int targetIndex = targetSlot.slotIndex;
-                   // Debug.Log(" slotType:" + slotType + "   targetSlot: " + targetSlot.slotType);
-                    //当初始和目标拖拽的背包类型都是Bag，即玩家自身的背包内拖拽
-                    // if (slotType == SlotType.Bag && targetSlot.slotType == SlotType.Bag)
-                    // {
-                    //     InventoryManager.Instance.Swapitem(slotIndex, targetIndex);
-                    // }
                     //从背包格拖出
                     if (slotType == SlotType.Bag)
                     {
                         //拖到背包格
                         if (targetSlot.slotType == slotType)
                         {
-                            InventoryManager.Instance.Swapitem(slotIndex, targetIndex);
+                            InventoryManager.Instance.Swapitem(slotIndex, targetIndex, itemAmount,currentAmount);
+                            return;
                         }
                         //从玩家背包拖拽到装备(头)上
                         if (targetSlot.slotType == SlotType.Equipment_Head)
@@ -182,8 +228,8 @@ namespace MFarm.Inventory
                             if (itemDetails.itemType == ItemType.Equipment_Head)
                             {
                                 inventoryUI.SetEquipImage(itemDetails, targetSlot);
-                                InventoryManager.Instance.Swapitem(slotIndex, targetIndex);
-
+                                InventoryManager.Instance.Swapitem(slotIndex, targetIndex,1,0);
+                                return;
                             }
                             else
                             {
@@ -196,7 +242,8 @@ namespace MFarm.Inventory
                             if (itemDetails.itemType == ItemType.Equipment_Body)
                             {
                                 inventoryUI.SetEquipImage(itemDetails, targetSlot);
-                                InventoryManager.Instance.Swapitem(slotIndex, targetIndex);  
+                                InventoryManager.Instance.Swapitem(slotIndex, targetIndex,1,0);
+                                return;
                             }
                             else
                             {
@@ -206,9 +253,44 @@ namespace MFarm.Inventory
                         //拖到出售箱
                         if(targetSlot.slotType == SlotType.SellBox)
                         {
-                            //打开交易选择物品UI
-                            EventHandler.CallShowTradeUI(itemDetails, true, itemAmount, slotIndex, targetIndex,Location,targetSlot.Location);
-                            //InventoryManager.Instance.SwapItem(Location, slotIndex, targetSlot.Location, targetSlot.slotIndex);
+                            if (InventoryManager.Instance.isHalfAmount)
+                            {
+                                //同时刷新一下玩家背包
+                                EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, InventoryManager.Instance.playerBag.itemList);
+                                InventoryManager.Instance.isHalfAmount = false;
+                                return;
+                            }
+                            else
+                            {
+                                //数量只有一个就直接加到出售箱
+                                if (itemAmount == 1)
+                                {
+                                    InventoryManager.Instance.SwapItem(Location, slotIndex, targetSlot.Location, targetSlot.slotIndex, false, 0);
+                                }
+                                else
+                                {
+                                    InventoryManager.Instance.isHalfAmount = true;
+                                    //打开交易选择物品UI
+                                    EventHandler.CallShowTradeUI(itemDetails, true, itemAmount, slotIndex, targetIndex, Location, targetSlot.Location, true);
+                                }
+                            }
+                            
+                           
+                        }
+                        //拖到商店
+                        if(targetSlot.slotType == SlotType.Shop)
+                        {
+                            if (InventoryManager.Instance.isHalfAmount)
+                            {
+                                //同时刷新一下玩家背包
+                                EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, InventoryManager.Instance.playerBag.itemList);
+                                InventoryManager.Instance.isHalfAmount = false;
+                                return;
+                            }
+                            else
+                            {
+                                EventHandler.CallShowTradeUI(itemDetails, true, itemAmount, slotIndex, targetIndex, Location, targetSlot.Location, false);
+                            }
                         }
                         inventoryUI.UpdatePlayerDefenseNum();
                         return;
@@ -243,7 +325,7 @@ namespace MFarm.Inventory
                         if(targetSlot.slotType == SlotType.Bag)
                         {
                             inventoryUI.ResetEquipImage(slotType);
-                            InventoryManager.Instance.Swapitem(slotIndex, targetIndex);
+                            InventoryManager.Instance.Swapitem(slotIndex, targetIndex,1,0);
                         }
                         inventoryUI.UpdatePlayerDefenseNum();
                     }
@@ -260,7 +342,7 @@ namespace MFarm.Inventory
                         if (targetSlot.slotType == SlotType.Bag)
                         {
                             inventoryUI.ResetEquipImage(slotType);
-                            InventoryManager.Instance.Swapitem(slotIndex, targetIndex);
+                            InventoryManager.Instance.Swapitem(slotIndex, targetIndex ,1,0);
                         }
                         inventoryUI.UpdatePlayerDefenseNum();
                     }

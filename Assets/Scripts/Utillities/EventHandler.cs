@@ -167,10 +167,10 @@ public static class EventHandler
     }
 
     //商品买卖事件
-    public static event Action<ItemDetails, bool,int,int,int,InventoryLocation,InventoryLocation> ShowTradeUI;
-    public static void CallShowTradeUI(ItemDetails item, bool isSell,int maxAmount, int startIndex,int endIndex,InventoryLocation startLocation,InventoryLocation endLocation)
+    public static event Action<ItemDetails, bool,int,int,int,InventoryLocation,InventoryLocation,bool> ShowTradeUI;
+    public static void CallShowTradeUI(ItemDetails item, bool isSell,int maxAmount, int startIndex,int endIndex,InventoryLocation startLocation,InventoryLocation endLocation, bool isToSellBox)
     {
-        ShowTradeUI?.Invoke(item, isSell, maxAmount, startIndex, endIndex, startLocation, endLocation);
+        ShowTradeUI?.Invoke(item, isSell, maxAmount, startIndex, endIndex, startLocation, endLocation, isToSellBox);
     }
 
     //建造物品生成事件

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
 namespace MFarm.Inventory
@@ -14,32 +15,34 @@ namespace MFarm.Inventory
         public TextMeshProUGUI tradeAmountText;
         public Button submitButton;
         public Button cancelButton;
-        //增加减少选择物品数量
-        public Button increaseButton;
-        public Button decreaseButton;
         private ItemDetails item;
+        //是否是交易
         private bool isSellTrade;
+        //是否是直接拖到出售箱
+        private bool isToSellBox;
         //交易数量
         private int tradeAmount;
         //拥有的最大物品数
         private int maxAmount;
+        //全部添加按钮
+        public Button allIncreaseButton;
         //背包的slotindex和出售箱的index
         private int startIndex, endIndex;
         private InventoryLocation startLocation, endLocation;
         private void Awake()
         {
             //点击按钮触发其中的方法
+            allIncreaseButton.onClick.AddListener(ClickAllIncreaseButton);
             cancelButton.onClick.AddListener(CancelTrade);
             submitButton.onClick.AddListener(ClickSubmitButton);
-            increaseButton.onClick.AddListener(ClickIncreaseButton);
-            decreaseButton.onClick.AddListener(ClickDecreaseButton);
+           
         }
         /// <summary>
         /// 设置TradeUI显示详情
         /// </summary>
         /// <param name="item"></param>
         /// <param name="isSell"></param>
-        public void SetupTradeUI(ItemDetails item, bool isSell,int amount,int index1,int index2,InventoryLocation location1,InventoryLocation location2)
+        public void SetupTradeUI(ItemDetails item, bool isSell,int amount,int index1,int index2,InventoryLocation location1,InventoryLocation location2,bool toSellBox)
         {
             this.item = item;
             itemIcon.sprite = item.itemIcon;
@@ -52,6 +55,7 @@ namespace MFarm.Inventory
             startLocation = location1;
             endLocation = location2;
             tradeAmountText.text = tradeAmount.ToString();
+            isToSellBox = toSellBox;
         }
         /// <summary>
         /// 点击交易提交按钮
@@ -60,7 +64,7 @@ namespace MFarm.Inventory
         {
             //将tradeAmount输入的文本数字转换为Int
             //var amount = Convert.ToInt32(tradeAmountText.text);
-            InventoryManager.Instance.TradeItem(item, tradeAmount, isSellTrade,startIndex,endIndex, startLocation,endLocation);
+            InventoryManager.Instance.TradeItem(item, tradeAmount, isSellTrade,startIndex,endIndex, startLocation,endLocation, isToSellBox);
             //交易结束后关闭TradeUI;
             CancelTrade();
         }
@@ -69,25 +73,70 @@ namespace MFarm.Inventory
             this.gameObject.SetActive(false);
         }
         /// <summary>
-        /// 点击增加按钮
+        /// 点击增加按钮,调用在IncreaseButton按钮上
         /// </summary>
-        private void ClickIncreaseButton()
+        public void ClickIncreaseButton()
         {
-            if(tradeAmount< maxAmount && tradeAmount < 99)
+            if(tradeAmount< maxAmount)
             {
                 tradeAmount++;
             }
             tradeAmountText.text = tradeAmount.ToString();
         }
         /// <summary>
-        /// 点击减少按钮
+        /// 点击减少按钮，调用在DecreaseButton按钮上
         /// </summary>
-        private void ClickDecreaseButton()
+        public void ClickDecreaseButton()
         {
             if (tradeAmount > 1)
             {
                 tradeAmount--;
             }
+            tradeAmountText.text = tradeAmount.ToString();
+        }
+        /// <summary>
+        /// 双击增加10个数量，调用在调用在IncreaseButton按钮上
+        /// </summary>
+        public void DoubleClickInCreaseButton()
+        {
+            if(tradeAmount < maxAmount)
+            {
+                if (maxAmount - tradeAmount >= 10)
+                {
+                    tradeAmount += 10;
+                }
+                else
+                {
+                    tradeAmount += maxAmount - tradeAmount;
+                }
+            }
+            tradeAmountText.text = tradeAmount.ToString();
+        }
+        /// <summary>
+        /// 双击减少10个数量，调用在调用在DecreaseButton按钮上
+        /// </summary>
+        public void DoubleClickDeCreaseButton()
+        {
+            if (tradeAmount > 1)
+            {
+                Debug.Log(tradeAmount - 10);
+                if (tradeAmount - 10 > 0)
+                {
+                    tradeAmount -= 10;
+                }
+                else
+                {
+                    tradeAmount = 1;
+                }
+            }
+            tradeAmountText.text = tradeAmount.ToString();
+        }
+        /// <summary>
+        /// 点击全部交易按钮
+        /// </summary>
+        public void ClickAllIncreaseButton()
+        {
+            tradeAmount = maxAmount;
             tradeAmountText.text = tradeAmount.ToString();
         }
     }

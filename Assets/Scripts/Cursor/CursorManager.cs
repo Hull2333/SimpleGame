@@ -11,7 +11,7 @@ using Unity.VisualScripting;
 
 public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
 {
-    private Image cursorImage;
+    public Image cursorImage;
     private RectTransform cursorCanvas;
     //建造图标跟随
     private Image buildImage;
