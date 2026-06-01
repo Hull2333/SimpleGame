@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using MFarm.Save;
+using Unity.VisualScripting;
 
 public class TimeManager : Singleton<TimeManager>,ISaveable    //调用在TimeManager对象上
 {
@@ -21,7 +22,7 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //调用在TimeManag
 
     //灯光时间差
     private float timeDifference;
-   
+    public PlayerController playerController;
     private void OnEnable()
     {
         EventHandler.BeforeSceneUnloadEvent += OnBeforeSceneUnloadEvent;
@@ -88,7 +89,15 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //调用在TimeManag
     /// <param name="gameState"></param>
     private void OnUpdateGameStateEvent(GameState gameState)
     {
-        gameClockPause = gameState == GameState.Pause;
+        if (playerController.isNpcEvent)
+        {
+            gameClockPause = true;
+        }
+        else
+        {
+            gameClockPause = gameState == GameState.Pause;
+        }
+       
     }
 
     /// <summary>

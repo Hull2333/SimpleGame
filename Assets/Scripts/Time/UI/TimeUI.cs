@@ -13,17 +13,21 @@ public class TimeUI : MonoBehaviour //调用在GameTime对象上
     public Text timeText;
     //四个季节的图片
     public Sprite[] seasonSprites;
-
+    
     private void OnEnable()
     {
         EventHandler.GameMinuteEvent += OnGameMinuteEvent;
         EventHandler.GameDateEvent += OnGameDateEvent;
+        EventHandler.StartNPCEvent += OnStartNPCEvent;
+        EventHandler.EndNPCEvent += OnEndNPCEvent;
     }
 
     private void OnDisable()
     {
         EventHandler.GameMinuteEvent -= OnGameMinuteEvent;
         EventHandler.GameDateEvent -= OnGameDateEvent;
+        EventHandler.StartNPCEvent -= OnStartNPCEvent;
+        EventHandler.EndNPCEvent -= OnEndNPCEvent;
     }
     /// <summary>
     /// 小时分钟UI显示
@@ -51,5 +55,12 @@ public class TimeUI : MonoBehaviour //调用在GameTime对象上
         seasonImage.sprite = seasonSprites[(int)season];
     }
 
-
+    private void OnStartNPCEvent()
+    {
+        transform.GetComponentInParent<Canvas>().enabled = false;
+    }
+    private void OnEndNPCEvent()
+    {
+        transform.GetComponentInParent<Canvas>().enabled = true;
+    }
 }

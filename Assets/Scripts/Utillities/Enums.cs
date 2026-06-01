@@ -35,7 +35,7 @@ public enum SlotType
 /// </summary>
 public enum InventoryLocation
 {
-    Player, Box, SellBox,
+    Player, Box, SellBox,Shop
 }
 
 /// <summary>
@@ -80,6 +80,7 @@ public enum GridType
 public enum ParticalEffectType
 {
     None,LeavesFall01,LeavesFall02,Rock,ReapableScenery,EnemyHit01,Eat01,HoeEffect,WeedFall,WaterEffect01,EarthenEffect,WoodEffect01,CropEffect01,FeatherEffect01, FeatherEffect02
+    
 }
 /// <summary>
 /// 游戏状态
@@ -142,7 +143,7 @@ public enum QuestType
 /// </summary>
 public enum CursorType 
 {
-    Normal,Check,Fishing,Attack
+    Normal,Check,Fishing,Attack,Pat
 }
 
 

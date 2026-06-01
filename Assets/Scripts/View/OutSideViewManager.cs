@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class OutSideViewManager : MonoBehaviour //调用在OutSideViewManager对象上
@@ -32,38 +33,40 @@ public class OutSideViewManager : MonoBehaviour //调用在OutSideViewManager对象上
     private bool canSetOutside;
     public void FixedUpdate()
     {
-        if(cloudAppearPos != null && cloudDisappearPos != null && butterflyAppearPos != null && butterflyDisappearPos != null && canSetOutside)
+        if(SceneManager.GetActiveScene().name == "Farm" || SceneManager.GetActiveScene().name == "WestPath" || SceneManager.GetActiveScene().name == "Town")
         {
-            if (startCloudTime)
+            if (cloudAppearPos != null && cloudDisappearPos != null && butterflyAppearPos != null && butterflyDisappearPos != null && canSetOutside)
             {
-                currentCloudAppearTime += Time.fixedDeltaTime;
-                if (currentCloudAppearTime >= cloudAppearTimer)
+                if (startCloudTime)
                 {
-                    CloudAppear();
-                    currentCloudAppearTime = 0;
-                    startCloudTime = false;
+                    currentCloudAppearTime += Time.fixedDeltaTime;
+                    if (currentCloudAppearTime >= cloudAppearTimer)
+                    {
+                        CloudAppear();
+                        currentCloudAppearTime = 0;
+                        startCloudTime = false;
+                    }
                 }
-            }
-            if (cloudMove)
-            {
-                CloudMove();
-            }
-            if (startButterTime)
-            {
-                currentButterAppearTime += Time.fixedDeltaTime;
-                if(currentButterAppearTime >= butterflyAppearTimer)
+                if (cloudMove)
                 {
-                    ButterAppear();
-                    currentButterAppearTime = 0;
-                    startButterTime = false;
+                    CloudMove();
                 }
-            }
-            if (butterMove)
-            {
-                ButterMove();
+                if (startButterTime)
+                {
+                    currentButterAppearTime += Time.fixedDeltaTime;
+                    if (currentButterAppearTime >= butterflyAppearTimer)
+                    {
+                        ButterAppear();
+                        currentButterAppearTime = 0;
+                        startButterTime = false;
+                    }
+                }
+                if (butterMove)
+                {
+                    ButterMove();
+                }
             }
         }
-        
     }
     public void OnEnable()
     {
@@ -79,29 +82,36 @@ public class OutSideViewManager : MonoBehaviour //调用在OutSideViewManager对象上
 
     private void BeforeSceneUnloadEvent()
     {
-        canSetOutside = false;
+        if (SceneManager.GetActiveScene().name == "Farm" || SceneManager.GetActiveScene().name == "WestPath" || SceneManager.GetActiveScene().name == "Town")
+        {
+            canSetOutside = false;
+        }
     }
 
     private void OnAfterSceneLoadedEvent()
     {
-        cloudAppearPos = GameObject.FindGameObjectsWithTag("CloudAppear");
-        cloudDisappearPos = GameObject.FindGameObjectsWithTag("CloudDisappear");
-        butterflyAppearPos = GameObject.FindGameObjectsWithTag("ButterflyAppear");
-        butterflyDisappearPos = GameObject.FindGameObjectsWithTag("ButterflyDisappear");
-        birdLeftDownPos = GameObject.FindGameObjectWithTag("BirdLeftDownPos").transform;
-        birdRightUpPos = GameObject.FindGameObjectWithTag("BirdRightUpPos").transform;
-        canSetOutside = true;
-        //初始化场景云各项参数
-        cloud.GetComponent<SpriteRenderer>().enabled = false;
-        cloudMove = false;
-        currentCloudAppearTime = 0;
-        startCloudTime = true;
-        //初始化场景蝴蝶各项参数
-        butterfly01.transform.GetChild(0).GetComponent<SpriteRenderer>().enabled = false;
-        butterfly01.transform.GetChild(1).GetComponent<SpriteRenderer>().enabled = false;
-        butterMove = false;
-        currentButterAppearTime = 0;
-        startButterTime = true;
+        if (SceneManager.GetActiveScene().name == "Farm" || SceneManager.GetActiveScene().name == "WestPath" || SceneManager.GetActiveScene().name == "Town")
+        {
+            cloudAppearPos = GameObject.FindGameObjectsWithTag("CloudAppear");
+            cloudDisappearPos = GameObject.FindGameObjectsWithTag("CloudDisappear");
+            butterflyAppearPos = GameObject.FindGameObjectsWithTag("ButterflyAppear");
+            butterflyDisappearPos = GameObject.FindGameObjectsWithTag("ButterflyDisappear");
+            birdLeftDownPos = GameObject.FindGameObjectWithTag("BirdLeftDownPos").transform;
+            birdRightUpPos = GameObject.FindGameObjectWithTag("BirdRightUpPos").transform;
+            canSetOutside = true;
+            //初始化场景云各项参数
+            cloud.GetComponent<SpriteRenderer>().enabled = false;
+            cloudMove = false;
+            currentCloudAppearTime = 0;
+            startCloudTime = true;
+            //初始化场景蝴蝶各项参数
+            butterfly01.transform.GetChild(0).GetComponent<SpriteRenderer>().enabled = false;
+            butterfly01.transform.GetChild(1).GetComponent<SpriteRenderer>().enabled = false;
+            butterMove = false;
+            currentButterAppearTime = 0;
+            startButterTime = true;
+        }
+        
     }
     /// <summary>
     /// 场景云出现

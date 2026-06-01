@@ -13,6 +13,9 @@ namespace MFarm.Inventory
 {
     public class InventoryManager : Singleton<InventoryManager>,ISaveable   //调用在InventoryManager对象上
     {
+        private InventoryUI inventoryUI;
+        //任何一个格子UI被打开
+        public bool anyBagOpened;
         [Header("物品数据")]
         public ItemDataList_SO itemDataList_SO;
         [Header("建造蓝图")]
@@ -29,7 +32,7 @@ namespace MFarm.Inventory
         public InventoryBag_SO sellBoxBag;
         public InventoryBag_SO sellBoxBagTemp;
        [Header("交易")]
-        public int playerMoney;
+        [HideInInspector]public int playerMoney;
         //存储地图中所有的箱子里的物品数据
         private Dictionary<string, List<InventoryItem>> boxDataDict = new Dictionary<string, List<InventoryItem>>();
         public int boxDataAmount => boxDataDict.Count;
@@ -56,6 +59,7 @@ namespace MFarm.Inventory
             ISaveable saveable = this;
             saveable.RegisterSaveable();
             animatorOverride = GameObject.FindAnyObjectByType<AnimatorOverride>();
+            inventoryUI = GameObject.FindWithTag("InventoryUI").gameObject.GetComponent<InventoryUI>();
             //EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, playerBag.itemList);
 
         }
@@ -76,6 +80,7 @@ namespace MFarm.Inventory
             EventHandler.UseItemRecoverEvent += OnUseItemRecoverEvent;
             EventHandler.FishListInSpriteDayFreshEvent += OnFishListInSpriteDayFreshEvent;
             EventHandler.RemoveTreeSeedCount += OnRemoveTreeSeedCount;
+            EventHandler.ClickHaveItemYesEvent += OnClickHaveItemYesEvent;
         }
 
         private void OnDisable()
@@ -90,6 +95,7 @@ namespace MFarm.Inventory
             EventHandler.UseItemRecoverEvent += OnUseItemRecoverEvent;
             EventHandler.FishListInSpriteDayFreshEvent -= OnFishListInSpriteDayFreshEvent;
             EventHandler.RemoveTreeSeedCount -= OnRemoveTreeSeedCount;
+            EventHandler.ClickHaveItemYesEvent -= OnClickHaveItemYesEvent;
         }
 
        
@@ -103,7 +109,6 @@ namespace MFarm.Inventory
 
         private void OnBaseBagOpenEvent(SlotType slotType, InventoryBag_SO bag_SO)
         {
-            isSellState = true;
             currentBoxBag = bag_SO;
         }
 
@@ -135,9 +140,9 @@ namespace MFarm.Inventory
         private void OnHarvestAtPlayerPosition(int ID)
         {
             var index = GetItemIndexInBag(ID,playerBag.itemList);
-            AddItemAtIndex(ID, index, 1);
+            AddItemAtIndex(ID, index, 1 ,false);
             //刷新玩家背包
-            EventHandler.CallUpdateInventoryUI(InventoryLocation.Player,playerBag.itemList);
+            EventHandler.CallUpdateInventoryUI(InventoryLocation.Player,playerBag.itemList,0);
         }
 
         /// <summary>
@@ -175,14 +180,10 @@ namespace MFarm.Inventory
             //刷新当前时段的渔获列表
             EventHandler.CallFishListInSpriteDayFreshEvent(fishList);
             //更新玩家背包UI
-            EventHandler.CallUpdateInventoryUI(InventoryLocation.Player,playerBag.itemList);
+            EventHandler.CallUpdateInventoryUI(InventoryLocation.Player,playerBag.itemList,0);
             //初始化并刷新出售箱
             sellBoxBag = Instantiate(sellBoxBagTemp);
-            //for (int i = 0; i < sellBoxBag.itemList.Count; i++)
-            //{
-            //    sellBoxBag.itemList[i] = new InventoryItem();
-            //}
-            EventHandler.CallUpdateInventoryUI(InventoryLocation.SellBox, sellBoxBag.itemList);
+            EventHandler.CallUpdateInventoryUI(InventoryLocation.SellBox, sellBoxBag.itemList,0);
 
         }
         private void OnFishListInSpriteDayFreshEvent(List<ItemDetails> list)
@@ -225,6 +226,20 @@ namespace MFarm.Inventory
         {
             RemoveItem(seedID, 1);
         }
+        private void OnClickHaveItemYesEvent(List<InventoryItem> haveItemList)
+        {
+            
+            foreach (var item in haveItemList)
+            {
+                int index = inventoryUI.GetEmptySellBoxIndex(item.itemID, playerBag.itemList, InventoryLocation.Player);
+                AddItemAtIndex(item.itemID, index, item.itemAmount, true);
+            }
+            sellBoxBag = Instantiate(sellBoxBagTemp);
+            inventoryUI.haveItemUIPanel.SetActive(false);
+            EventHandler.CallUpdateInventoryUI(InventoryLocation.SellBox, sellBoxBag.itemList, 0);
+            EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, playerBag.itemList, 0);
+            EventHandler.CallBaseBagCloseEvent(SlotType.Shop,null);
+        }
         /// <summary>
         /// 通过ID返回物品信息
         /// </summary>
@@ -248,10 +263,10 @@ namespace MFarm.Inventory
             }
             //背包格序号
             var index = GetItemIndexInBag(item.itemID, playerBag.itemList);
-            AddItemAtIndex(item.itemID, index, 1);
+            AddItemAtIndex(item.itemID, index, 1,false);
             
             //更新UI,将需要更新的背包位置和此背包的item列表输入进去
-            EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, playerBag.itemList);
+            EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, playerBag.itemList,0);
         }
         /// <summary>
         /// 获取任务奖励物品
@@ -261,8 +276,8 @@ namespace MFarm.Inventory
         public void AddRewardItem(int itemID,int amount)
         {
             var index = GetItemIndexInBag(itemID, playerBag.itemList);
-            AddItemAtIndex(itemID, index, amount);
-            EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, playerBag.itemList);
+            AddItemAtIndex(itemID, index, amount,false);
+            EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, playerBag.itemList,0);
         }
         /// <summary>
         /// 检查背包是否有空位
@@ -296,43 +311,156 @@ namespace MFarm.Inventory
             return -1;
         }
         /// <summary>
-        /// 找到背包空位位置或者已有物品位置
+        /// 通过物品ID查找指定bagList中的相同物品的index集合
         /// </summary>
-        /// <param name="ID">拾取物品的itemID</param>
-        /// <param name="index">已有物品在背包的位置</param>
-        /// <param name="amount">物品的数量</param>
-        private void AddItemAtIndex(int ID,int index,int amount)
+        /// <param name="ID">需要查找的物品ID</param>
+        /// <param name="bagList">需要查找的bagList</param>
+        /// <returns>相同物品index集合</returns>
+        public List<int> GetItemsIndexInBag(int ID,List<InventoryItem> bagList)
         {
-            //背包没有该物品,且有空位
-            if (index == -1&& CheckBagCapacity())
+            List<int> indexList = new List<int>();
+            for (int i = 0; i < bagList.Count; i++)
             {
-                //初始化这个物品
-                var item = new InventoryItem { itemID = ID, itemAmount = amount };
-                //找到背包空位的位置并把新物品赋值到空位上
-                for (int i = 0; i < playerBag.itemList.Count; i++)
+                if (bagList[i].itemID == ID)
                 {
-                    if (playerBag.itemList[i].itemID == 0)
-                    {
-                        playerBag.itemList[i] = item;
-                        break;
-                    }
+                    indexList.Add(i);
                 }
             }
-            //背包中已有该物品
+            return indexList;
+        }
+        /// <summary>
+        /// 找到背包空位位置或者已有物品位置后添加物品到玩家背包
+        /// </summary>
+        /// <param name="ID">拾取物品的itemID</param>
+        /// <param name="index">已有物品在背包的位置或空的格子</param>
+        /// <param name="amount">选择的物品的数量</param>
+        private void AddItemAtIndex(int ID,int index,int amount,bool isBuy)
+        {
+            //购买的物品添加到玩家背包
+            if (isBuy)
+            {
+                //送到空的玩家背包格子
+                if (playerBag.itemList[index].itemID == null)
+                {
+                    var newItem = new InventoryItem { itemID = ID, itemAmount = amount };
+                    playerBag.itemList[index] = newItem;
+                }
+                //送到有相同物品的玩家背包格子
+                else
+                {
+                    int newAmount = playerBag.itemList[index].itemAmount + amount;
+                    if(newAmount <= 99)
+                    {
+                        var newItem = new InventoryItem { itemID = ID, itemAmount = newAmount };
+                        playerBag.itemList[index] = newItem;
+                    }
+                    else
+                    {
+                        //还有多少数量没加到玩家背包中
+                        int remainingAmount = amount - (99 - playerBag.itemList[index].itemAmount);
+                        var newItem = new InventoryItem { itemID = ID, itemAmount = 99 };
+                        playerBag.itemList[index] = newItem;
+                        List<int> itemIndexList = GetItemsIndexInBag(ID, playerBag.itemList);
+                        //有其他相同物品的格子
+                        if(itemIndexList.Count > 1)
+                        {
+                           
+                            for (int i = 0; i < itemIndexList.Count; i++)
+                            {
+                                //忽略选择的已有物品格
+                                if(i == index)
+                                {
+                                    continue;
+                                }
+                                //刚好这一格可以把剩余数量全部加完
+                                if (playerBag.itemList[itemIndexList[i]].itemAmount + remainingAmount <= 99)
+                                {
+                                    var otherItem = new InventoryItem { itemID = ID, itemAmount = playerBag.itemList[itemIndexList[i]].itemAmount + remainingAmount };
+                                    playerBag.itemList[itemIndexList[i]] = otherItem;
+                                    remainingAmount = 0;
+                                    return;
+                                }
+                                //这一格加到99还是有剩余数量
+                                else
+                                {
+                                    remainingAmount -= (99 - playerBag.itemList[itemIndexList[i]].itemAmount);
+                                    var otherItem = new InventoryItem { itemID = ID, itemAmount = 99 };
+                                    playerBag.itemList[itemIndexList[i]] = otherItem;
+                                }
+                                //剩余数量已加完，就退出
+                                //if(remainingAmount <= 0)
+                                //{
+                                //    return;
+                                //}
+                            }
+                           
+                            //如果全部已有物品都加到了99数量还是有剩余的数量
+                            if(remainingAmount > 0)
+                            {
+                                //获取玩家背包格内其他空的格子
+                                for (int i = 0; i < playerBag.itemList.Count; i++)
+                                {
+                                    if (playerBag.itemList[i].itemID == 0)
+                                    {
+                                        playerBag.itemList[i] = new InventoryItem { itemID = ID, itemAmount = remainingAmount };
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        //背包内除自己没有其他相同的物品格子
+                        else
+                        {
+                            //获取玩家背包格内其他空的格子
+                            for (int i = 0; i < playerBag.itemList.Count; i++)
+                            {
+                                if (playerBag.itemList[i].itemID == 0)
+                                {
+                                    playerBag.itemList[i] = new InventoryItem { itemID = ID, itemAmount = remainingAmount };
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                }
+            }
             else
             {
-                //增加当前物品的数量,并初始化物品的ID和数量和找到该物品的位置重新赋值新的物品信息
-                int currentAmount = playerBag.itemList[index].itemAmount + amount;
-                var item = new InventoryItem { itemID = ID, itemAmount = currentAmount };
-                playerBag.itemList[index] = item; 
+                //背包没有该物品,且有空位
+                if (index == -1 && CheckBagCapacity())
+                {
+                    //初始化这个物品
+                    var item = new InventoryItem { itemID = ID, itemAmount = amount };
+                    //找到背包空位的位置并把新物品赋值到空位上
+                    for (int i = 0; i < playerBag.itemList.Count; i++)
+                    {
+                        if (playerBag.itemList[i].itemID == 0)
+                        {
+                            playerBag.itemList[i] = item;
+                            break;
+                        }
+                    }
+                }
+                //背包中已有该物品
+                else
+                {
+                    //增加当前物品的数量,并初始化物品的ID和数量和找到该物品的位置重新赋值新的物品信息
+                    int currentAmount = playerBag.itemList[index].itemAmount + amount;
+                    var item = new InventoryItem { itemID = ID, itemAmount = currentAmount };
+                    playerBag.itemList[index] = item;
 
+                }
             }
+            
         }
         /// <summary>
         /// 交换slot的序号
         /// </summary>
-        /// <param name="fromIndex">开始拖拽的slot的序号</param>
-        /// <param name="targetIndex">结束拖拽的slot的序号</param>
+        /// <param name="fromIndex"></param>
+        /// <param name="targetIndex"></param>
+        /// <param name="currentAmount">取出的半数</param>
+        /// <param name="halfAmount">自己的半数</param>
         public void Swapitem(int fromIndex,int targetIndex,int currentAmount,int halfAmount)
         {
             InventoryItem currentItem = playerBag.itemList[fromIndex];
@@ -363,7 +491,7 @@ namespace MFarm.Inventory
                     if(fromIndex == targetIndex)
                     {
                         //同时刷新一下玩家背包
-                        EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, playerBag.itemList);
+                        EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, playerBag.itemList,0);
                         return;
                     }
                     //添加物品数量
@@ -372,17 +500,40 @@ namespace MFarm.Inventory
                         if (isHalfAmount)
                         {
                             var amount = targetItem.itemAmount + currentAmount;
-                            var item = new InventoryItem { itemID = currentItem.itemID, itemAmount = amount };
-                            playerBag.itemList[targetIndex] = item;
-                            playerBag.itemList[fromIndex] = new InventoryItem { itemID = currentItem.itemID, itemAmount = halfAmount };
-                            isHalfAmount = false;
+                            //个数不超过99
+                            if(amount <= 99)
+                            {
+                                var item = new InventoryItem { itemID = currentItem.itemID, itemAmount = amount };
+                                playerBag.itemList[targetIndex] = item;
+                                playerBag.itemList[fromIndex] = new InventoryItem { itemID = currentItem.itemID, itemAmount = halfAmount };
+                                isHalfAmount = false;
+                            }
+                            else
+                            {
+                                var item = new InventoryItem { itemID = currentItem.itemID, itemAmount = 99 };
+                                playerBag.itemList[targetIndex] = item;
+                                playerBag.itemList[fromIndex] = new InventoryItem { itemID = currentItem.itemID, itemAmount = halfAmount + (currentAmount - (99 - targetItem.itemAmount)) };
+                                isHalfAmount = false;
+                            }
+                           
                         }
                         else
                         {
                             var amount = targetItem.itemAmount + currentItem.itemAmount;
-                            var item = new InventoryItem { itemID = currentItem.itemID, itemAmount = amount };
-                            playerBag.itemList[targetIndex] = item;
-                            playerBag.itemList[fromIndex] = new InventoryItem();
+                            if(amount <= 99)
+                            {
+                                //目标物品
+                                var item = new InventoryItem { itemID = currentItem.itemID, itemAmount = amount };
+                                playerBag.itemList[targetIndex] = item;
+                                playerBag.itemList[fromIndex] = new InventoryItem();
+                            }
+                            else
+                            {
+                                //目标物品
+                                var item = new InventoryItem { itemID = currentItem.itemID, itemAmount = 99 };
+                                playerBag.itemList[fromIndex] = new InventoryItem { itemID = currentItem.itemID, itemAmount = currentItem.itemAmount - (99 - targetItem.itemAmount) };
+                                playerBag.itemList[targetIndex] = item;
+                            }
                         } 
                     }
                 }
@@ -406,7 +557,7 @@ namespace MFarm.Inventory
               
             }
             //同时刷新一下玩家背包
-            EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, playerBag.itemList);
+            EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, playerBag.itemList,0);
         }
         /// <summary>
         /// 在出售箱内拖拽物品
@@ -439,9 +590,20 @@ namespace MFarm.Inventory
                     else
                     {
                         var amount = targetItem.itemAmount + currentItem.itemAmount;
-                        var item = new InventoryItem { itemID = currentItem.itemID, itemAmount = amount };
-                        sellBoxBag.itemList[targetIndex] = item;
-                        sellBoxBag.itemList[fromIndex] = new InventoryItem();
+                        if (amount <= 99)
+                        {
+                            //目标物品
+                            var item = new InventoryItem { itemID = currentItem.itemID, itemAmount = amount };
+                            sellBoxBag.itemList[targetIndex] = item;
+                            sellBoxBag.itemList[fromIndex] = new InventoryItem();
+                        }
+                        else
+                        {
+                            //目标物品
+                            var item = new InventoryItem { itemID = currentItem.itemID, itemAmount = 99 };
+                            sellBoxBag.itemList[fromIndex] = new InventoryItem { itemID = currentItem.itemID, itemAmount = currentItem.itemAmount - (99 - targetItem.itemAmount) };
+                            sellBoxBag.itemList[targetIndex] = item;
+                        }
                     }
                    
                 }
@@ -454,7 +616,7 @@ namespace MFarm.Inventory
                 sellBoxBag.itemList[fromIndex] = new InventoryItem();
             }
             //同时刷新一下出售箱
-            EventHandler.CallUpdateInventoryUI(InventoryLocation.SellBox, sellBoxBag.itemList);
+            EventHandler.CallUpdateInventoryUI(InventoryLocation.SellBox, sellBoxBag.itemList,0);
         }
         /// <summary>
         /// 跨背包交换数据
@@ -464,7 +626,7 @@ namespace MFarm.Inventory
         /// <param name="locationTarget"></param>
         /// <param name="targetIndex"></param>
         /// <param name="isSelect">是否询问数量</param>
-        /// <param name="selectAmount"></param>
+        /// <param name="selectAmount">选择的数量</param>
         public void SwapItem(InventoryLocation locationFrom, int fromIndex, InventoryLocation locationTarget, int targetIndex, bool isSelect, int selectAmount)
         {
             var currentList = GetItemList(locationFrom);
@@ -473,29 +635,91 @@ namespace MFarm.Inventory
             //不询问数量
             if (!isSelect)
             {
+              
                 if (targetIndex < targetList.Count)
                 {
                     InventoryItem targetItem = targetList[targetIndex];
                     //当箱子和玩家背包交换的物品不同时
                     if (targetItem.itemID != 0 && currentItem.itemID != targetItem.itemID)
                     {
-                        Debug.Log("diff");
                         currentList[fromIndex] = targetItem;
                         targetList[targetIndex] = currentItem;
                     }
                     //两个物品相等时
                     else if (currentItem.itemID == targetItem.itemID)
                     {
-                        Debug.Log("same");
-                        targetItem.itemAmount += currentItem.itemAmount;
-                        targetList[targetIndex] = targetItem;
+                       
                         currentList[fromIndex] = new InventoryItem();
+                       
+                        //添加目标物品的数量小于99时
+                        if (targetItem.itemAmount + currentItem.itemAmount <= 99)
+                        {
+                            targetItem.itemAmount += currentItem.itemAmount;
+                            targetList[targetIndex] = targetItem;
+                        }
+                        //添加目标物品的数量大于99时
+                        else
+                        {
+                            
+                            List<int> itemIndexList = GetItemsIndexInBag(currentItem.itemID, targetList);
+                            int remainingAmount = selectAmount -  (99 - targetList[targetIndex].itemAmount);
+                            targetList[targetIndex] = new InventoryItem { itemID = currentItem.itemID, itemAmount = 99 };
+                            //玩家背包内只有一个相同物品
+                            if (itemIndexList.Count <= 1)
+                            {
+                                for (int i = 0; i < targetList.Count; i++)
+                                {
+                                    if (targetList[i].itemID == 0)
+                                    {
+                                        targetList[i] = new InventoryItem { itemID = currentItem.itemID, itemAmount = remainingAmount };
+                                       
+                                        break;
+                                    }
+                                }
+                            }
+                            //玩家背包内有多个相同物品
+                            else
+                            {
+                                for (int i = 0; i < itemIndexList.Count; i++)
+                                {
+                                    if(itemIndexList[i] == targetIndex)
+                                    {
+                                        continue;
+                                    }
+                                    if (targetList[itemIndexList[i]].itemAmount + remainingAmount <= 99)
+                                    {
+
+                                        targetList[itemIndexList[i]] = new InventoryItem { itemID = currentItem.itemID, itemAmount = targetList[itemIndexList[i]].itemAmount + remainingAmount };
+                                        remainingAmount = 0;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        remainingAmount -= 99 - targetList[itemIndexList[i]].itemAmount;
+                                        targetList[itemIndexList[i]] = new InventoryItem { itemID = currentItem.itemID, itemAmount = 99 };
+                                    }
+                                }
+                                //如果全部已有物品都加到了99数量还是有剩余的数量
+                                if (remainingAmount > 0)
+                                {
+                                    //获取玩家背包格内其他空的格子
+                                    for (int i = 0; i < targetList.Count; i++)
+                                    {
+                                        if (targetList[i].itemID == 0)
+                                        {
+                                            targetList[i] = new InventoryItem { itemID = currentItem.itemID, itemAmount = remainingAmount };
+                                            break;
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                       
                     }
                     //目标是空格子
                     else
                     {
-                        Debug.Log(locationTarget);
-                        Debug.Log("empty");
                         targetList[targetIndex] = currentItem;
                         currentList[fromIndex] = new InventoryItem();
 
@@ -505,7 +729,6 @@ namespace MFarm.Inventory
             //询问数量
             else
             {
-                Debug.Log(fromIndex + "  " + targetIndex);
                 if (targetIndex < targetList.Count)
                 {
                     InventoryItem targetItem = targetList[targetIndex];
@@ -517,19 +740,78 @@ namespace MFarm.Inventory
                     //两个物品相等时
                     else if (currentItem.itemID == targetItem.itemID)
                     {
-                        targetItem.itemAmount += selectAmount;
-                        targetList[targetIndex] = targetItem;
-                        currentItem.itemAmount -= selectAmount;
-                        currentList[fromIndex] = currentItem;
+                        //添加目标物品的数量小于99时
+                        if (targetItem.itemAmount + selectAmount <= 99)
+                        {
+                            targetItem.itemAmount += selectAmount;
+                            targetList[targetIndex] = targetItem;
+                            currentItem.itemAmount -= selectAmount;
+                            currentList[fromIndex] = currentItem;
+                        }
+                        //添加目标物品的数量大于99时
+                        else
+                        {
+
+                            List<int> itemIndexList = GetItemsIndexInBag(currentItem.itemID, targetList);
+                            int remainingAmount = selectAmount - (99 - targetList[targetIndex].itemAmount);
+                            targetList[targetIndex] = new InventoryItem { itemID = currentItem.itemID, itemAmount = 99 };
+                            currentItem.itemAmount -= selectAmount;
+                            currentList[fromIndex] = currentItem;
+                            //玩家背包内只有一个相同物品
+                            if (itemIndexList.Count <= 1)
+                            {
+                                for (int i = 0; i < targetList.Count; i++)
+                                {
+                                    if (targetList[i].itemID == 0)
+                                    {
+                                        targetList[i] = new InventoryItem { itemID = currentItem.itemID, itemAmount = remainingAmount };
+
+                                        break;
+                                    }
+                                }
+                            }
+                            //玩家背包内有多个相同物品
+                            else
+                            {
+                                for (int i = 0; i < itemIndexList.Count; i++)
+                                {
+                                    if (itemIndexList[i] == targetIndex)
+                                    {
+                                        continue;
+                                    }
+                                    if (targetList[itemIndexList[i]].itemAmount + remainingAmount <= 99)
+                                    {
+
+                                        targetList[itemIndexList[i]] = new InventoryItem { itemID = currentItem.itemID, itemAmount = targetList[itemIndexList[i]].itemAmount + remainingAmount };
+                                        remainingAmount = 0;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        remainingAmount -= 99 - targetList[itemIndexList[i]].itemAmount;
+                                        targetList[itemIndexList[i]] = new InventoryItem { itemID = currentItem.itemID, itemAmount = 99 };
+                                    }
+                                }
+                                //如果全部已有物品都加到了99数量还是有剩余的数量
+                                if (remainingAmount > 0)
+                                {
+                                    //获取玩家背包格内其他空的格子
+                                    for (int i = 0; i < targetList.Count; i++)
+                                    {
+                                        if (targetList[i].itemID == 0)
+                                        {
+                                            targetList[i] = new InventoryItem { itemID = currentItem.itemID, itemAmount = remainingAmount };
+                                            break;
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
                     }
                     //目标是空格子
                     else
                     {
-                        
-                        //var amount = targetItem.itemAmount + currentItem.itemAmount;
-                        //var item = new InventoryItem { itemID = currentItem.itemID, itemAmount = amount };
-                        //sellBoxBag.itemList[targetIndex] = item;
-                        //sellBoxBag.itemList[fromIndex] = new InventoryItem();
                         var tempTargetItem = new InventoryItem { itemID = currentItem.itemID, itemAmount = selectAmount };
                         var tempCurrentItem = new InventoryItem { itemID = currentItem.itemID, itemAmount = currentItem.itemAmount - selectAmount };
                         targetList[targetIndex] = tempTargetItem;
@@ -538,8 +820,8 @@ namespace MFarm.Inventory
                 }
             }
             //更新双方的格子UI
-            EventHandler.CallUpdateInventoryUI(locationFrom, currentList);
-            EventHandler.CallUpdateInventoryUI(locationTarget, targetList);
+            EventHandler.CallUpdateInventoryUI(locationFrom, currentList,0);
+            EventHandler.CallUpdateInventoryUI(locationTarget, targetList,0);
         }
         /// <summary>
         /// 根据位置返回背包数据列表
@@ -578,7 +860,7 @@ namespace MFarm.Inventory
                 playerBag.itemList[index] = item;
             }
             //同时对UI也要刷新数量
-            EventHandler.CallUpdateInventoryUI(InventoryLocation.Player,playerBag.itemList);
+            EventHandler.CallUpdateInventoryUI(InventoryLocation.Player,playerBag.itemList,0);
         }
         /// <summary>
         /// 交易物品
@@ -586,7 +868,7 @@ namespace MFarm.Inventory
         /// <param name="itemDetails">交易物品的信息</param>
         /// <param name="amount">交易数量</param>
         /// <param name="isSellTrade">是否卖东西</param>
-        public void TradeItem(ItemDetails itemDetails,int amount,bool isSellTrade,int playerBagIndex,int sellBoxIndex,InventoryLocation startLocation,InventoryLocation endLocation,bool isToSellBox)
+        public void TradeItem(ItemDetails itemDetails,int amount,bool isSellTrade,int startIndex,int endIndex,InventoryLocation startLocation,InventoryLocation endLocation,bool isToSellBox)
         {
             int cost = itemDetails.itemPrice * amount;
             //获得物品背包位置
@@ -597,7 +879,7 @@ namespace MFarm.Inventory
                 //到出售箱
                 if (isToSellBox)
                 {
-                    SwapItem(startLocation, playerBagIndex, endLocation, sellBoxIndex, true, amount);
+                    SwapItem(startLocation, startIndex, endLocation, endIndex, true, amount);
                 }
                 //到商店
                 else
@@ -606,18 +888,24 @@ namespace MFarm.Inventory
                     playerMoney += (int)(cost * itemDetails.sellPercentage);
                 }
             }
-            //买，要有足够的钱
-            else if(playerMoney - cost >= 0)
+            //买
+            else
             {
+                AddItemAtIndex(itemDetails.itemID, endIndex, amount, true);
+                EventHandler.CallDoTweenPlayerMoneyChageEvent(playerMoney, -cost);
                 //检查背包是否还有空位
-                if (CheckBagCapacity())
-                {
-                    AddItemAtIndex(itemDetails.itemID, playerBagIndex, amount);
-                }
-                playerMoney -= cost;
+                //if (CheckBagCapacity())
+                //{
+                   
+                //}
             }
+            //买，要有足够的钱
+            //else if(playerMoney - cost >= 0)
+            //{
+               
+            //}
             //刷新UI
-            EventHandler.CallUpdateInventoryUI(InventoryLocation.Player,playerBag.itemList);
+            EventHandler.CallUpdateInventoryUI(InventoryLocation.Player,playerBag.itemList,0);
         }
         /// <summary>
         /// 检查图纸建造所需的库存
@@ -692,7 +980,6 @@ namespace MFarm.Inventory
         /// <param name="ID"></param>
         public void CheckQuestItemInBag(int ID)
         {
-            var inventoryUI = GameObject.FindWithTag("InventoryUI").gameObject.GetComponent<InventoryUI>();
             for (int i = 0; i < inventoryUI.playerSlots.Length; i++)
             {
                 if (inventoryUI.playerSlots[i].itemDetails != null)
@@ -727,10 +1014,9 @@ namespace MFarm.Inventory
         /// <param name="value"></param>
         public void IncreasePlayerMoney(int value)
         {
-            playerMoney += value;
             //清空出售箱数据
             sellBoxBag = Instantiate(sellBoxBagTemp);
-            EventHandler.CallUpdateInventoryUI(InventoryLocation.SellBox, sellBoxBag.itemList);
+            EventHandler.CallUpdateInventoryUI(InventoryLocation.SellBox, sellBoxBag.itemList, value);
             
         }
         public GameSaveData GenerateSaveData()
@@ -765,7 +1051,7 @@ namespace MFarm.Inventory
                 }
             }
             //刷新UI
-            EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, playerBag.itemList);
+            EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, playerBag.itemList,0);
             //玩家金币UI更新
             
         }

@@ -38,7 +38,7 @@ public class Settings //不需要调用在任何物体上
     //主角初始坐标
     public static Vector3 playerStartPos = new Vector3(3.5f,-7f,0);
     //初始金额
-    public const int playerStartMoney = 100;
+    public const int playerStartMoney = 10000;
     //捉鱼进度
     public const float fishCatchProgress = 3f;
     //鱼钩抛物线中点比例

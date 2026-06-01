@@ -39,6 +39,7 @@ namespace MFarm.Save
         {
             if (Input.GetKeyDown(KeyCode.I))
             {
+                Debug.Log("Save");
                 Save(currentDataIndex);
             }
             if (Input.GetKeyUp(KeyCode.O))
@@ -55,6 +56,7 @@ namespace MFarm.Save
 
         private void OnEndGameEvent()
         {
+            Debug.Log("Save");
             //保存当前游戏进度
             Save(currentDataIndex);
         }

@@ -58,50 +58,57 @@ public class AnimatorOverride : MonoBehaviour   //调用在Player对象上
     /// <param name="isSelected"></param>
     private void OnItemSelectEvent(ItemDetails itemDetails, bool isSelected)
     {
-        //不同的ItemType返回不同的PartType
-        PartType currentType = itemDetails.itemType switch
+        if(itemDetails == null)
         {
-
-            ItemType.Seed => PartType.Carry,
-            ItemType.Commodity => PartType.Carry,
-            ItemType.cooked => PartType.Carry,
-            ItemType.HoeTool => PartType.Hoe,
-            ItemType.AxeTool => PartType.Axe,
-            ItemType.BreakTool => PartType.Break,
-            ItemType.WaterTool => PartType.Water,
-            ItemType.ReapTool => PartType.Reap,
-            ItemType.Furniture => PartType.Carry,
-            ItemType.Sword => PartType.Attack1,
-            ItemType.FishingRod => PartType.Fishing,
-            ItemType.Laterfish => PartType.Carry,
-            ItemType.Seafish => PartType.Carry,
-            ItemType.Equipment_Body => PartType.Carry,
-            ItemType.Equipment_Head => PartType.Carry,
-            _ => PartType.None
-
-        };
-        //取消选中物品时，结束举手动画,同时关闭头顶的物品图片
-        if (isSelected == false)
-        {
-            currentType = PartType.None;
+            SwitchAnimator(PartType.None);
             holdItem.enabled = false;
         }
         else
         {
-            if (currentType == PartType.Carry)
+            //不同的ItemType返回不同的PartType
+            PartType currentType = itemDetails.itemType switch
             {
-                holdItem.sprite = itemDetails.itemOnWorldSprite;
-                holdItem.enabled = true;
+
+                ItemType.Seed => PartType.Carry,
+                ItemType.Commodity => PartType.Carry,
+                ItemType.cooked => PartType.Carry,
+                ItemType.HoeTool => PartType.Hoe,
+                ItemType.AxeTool => PartType.Axe,
+                ItemType.BreakTool => PartType.Break,
+                ItemType.WaterTool => PartType.Water,
+                ItemType.ReapTool => PartType.Reap,
+                ItemType.Furniture => PartType.Carry,
+                ItemType.Sword => PartType.Attack1,
+                ItemType.FishingRod => PartType.Fishing,
+                ItemType.Laterfish => PartType.Carry,
+                ItemType.Seafish => PartType.Carry,
+                ItemType.Equipment_Body => PartType.Carry,
+                ItemType.Equipment_Head => PartType.Carry,
+                _ => PartType.None
+
+            };
+            //取消选中物品时，结束举手动画,同时关闭头顶的物品图片
+            if (isSelected == false)
+            {
+                currentType = PartType.None;
+                holdItem.enabled = false;
             }
             else
             {
-                holdItem.enabled = false;
+                if (currentType == PartType.Carry)
+                {
+                    holdItem.sprite = itemDetails.itemOnWorldSprite;
+                    holdItem.enabled = true;
+                }
+                else
+                {
+                    holdItem.enabled = false;
+                }
+
             }
-
+            SwitchAnimator(currentType);
         }
-        SwitchAnimator(currentType);
-
-
+        
     }
     private void OnEquipSlotEvent(SlotUI headSlot, SlotUI bodySlot)
     {

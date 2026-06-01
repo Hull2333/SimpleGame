@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class HealthBar : Singleton<HealthBar>  //调用在HealthBar对象上
+public class HealthBar : Singleton<HealthBar>  //调用在StateBar对象上
 {
     
     public Image hpImage;
@@ -14,10 +14,29 @@ public class HealthBar : Singleton<HealthBar>  //调用在HealthBar对象上
     private float bufferTime = 0.5f;
     //血量缓冲协程
     private Coroutine updateCoroutine;
+    public void OnEnable()
+    {
+        EventHandler.StartNPCEvent += OnStartNPCEvent;
+        EventHandler.EndNPCEvent += OnEndNPCEvent;
+    }
+    public void OnDisable()
+    {
+        EventHandler.StartNPCEvent -= OnStartNPCEvent;
+        EventHandler.EndNPCEvent -= OnEndNPCEvent;
+    }
     private void Update()
     {
         UpdateHealthBar();
         UpdateStminaBar();
+    }
+    private void OnStartNPCEvent()
+    {
+        GetComponent<Canvas>().enabled = false;
+    }
+
+    private void OnEndNPCEvent()
+    {
+        GetComponent<Canvas>().enabled = true;
     }
     /// <summary>
     /// 更新玩家血条

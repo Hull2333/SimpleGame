@@ -1,6 +1,5 @@
 using DG.Tweening;
-using System.Collections;
-using System.Collections.Generic;
+using MFarm.Inventory;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,6 +7,8 @@ public class CoinTween : MonoBehaviour //调用在Coin预制体上
 {
     private Image image;
     public Vector2 targetPos;
+    //是否是第一个生成的金币
+    public bool isfirst = false;
     private void Awake()
     {
         image = GetComponent<Image>();
@@ -20,7 +21,7 @@ public class CoinTween : MonoBehaviour //调用在Coin预制体上
     /// <param name="originPos">初始位置</param>
     public void PlayTween(float delay , Vector3 originPos)
     {
-        //OnComplete(() = >{});指待前面的方法完成开始接下来的方法
+        //OnComplete(() =>{});指待前面的方法完成开始接下来的方法
         //开始移动到originPos
         image.rectTransform.DOAnchorPos(originPos, 0.5f).SetEase(Ease.OutQuad).SetDelay(delay).OnComplete(() =>
         {
@@ -32,7 +33,12 @@ public class CoinTween : MonoBehaviour //调用在Coin预制体上
                 {
                     //最后摧毁该物体
                     Destroy(gameObject);
-                    //TODO:金钱增加
+                    //在第一个金币到达时，金钱增加
+                    if (isfirst)
+                    {
+                        InventoryManager.Instance.IncreasePlayerMoney(InventoryManager.Instance.ModifySellBoxValue());
+                    }
+                   
                 });
             });
         });

@@ -38,7 +38,6 @@ public class DialogueUI : Singleton<DialogueUI> //调用在DialogueCanvas01上
     /// </summary>
     private void ContinueDialogue()
     {
-        Debug.Log(currentIndex);
         //避免报错，只有currentIndex小于当前对话数据库的piece数才显示对话
         if (currentIndex < currentData.dialoguePieces.Count)
         {
@@ -50,8 +49,8 @@ public class DialogueUI : Singleton<DialogueUI> //调用在DialogueCanvas01上
                 dialoguePanel.SetActive(false);
                 //有nextButton的对话结束后时间恢复
                 EventHandler.CallUpdateGameStateEvent(GameState.Gameplay);
+                EventHandler.CallPromoteNPCEvent();
                 talkWithNPC = false;
-                Debug.Log("2" + talkWithNPC);
             }
             else
             {
@@ -60,7 +59,6 @@ public class DialogueUI : Singleton<DialogueUI> //调用在DialogueCanvas01上
                     ShakePartraitImage();
                 }
                 UpdateMainDialogue(currentData.dialoguePieces[currentIndex]);
-                Debug.Log("1" + talkWithNPC);
             } 
         }
         //点击nextButton后面没有对话后关闭对话UI
@@ -71,8 +69,8 @@ public class DialogueUI : Singleton<DialogueUI> //调用在DialogueCanvas01上
             dialoguePanel.SetActive(false);
             //有nextButton的对话结束后时间恢复
             EventHandler.CallUpdateGameStateEvent(GameState.Gameplay);
+            EventHandler.CallPromoteNPCEvent();
             talkWithNPC = false;
-            Debug.Log("2" + talkWithNPC);
         }
     }
     /// <summary>

@@ -813,7 +813,7 @@ namespace MFarm.Map
                     {
                         
                         canSetTile = false;
-                        valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), unAvailableTilemap);
+                        valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), null);
                     }
                     //Tile在工具使用范围内
                     else
@@ -875,67 +875,6 @@ namespace MFarm.Map
                                 break;
 
                         }
-
-                        ////若工具为锄头类
-                        //if (toolDetails.itemType == ItemType.HoeTool)
-                        //{
-                        //    //Tile可以挖掘
-                        //    if (currentTile.canDig && currentTile.daysSinceDug == -1)
-                        //    {
-                        //        canSetTile = true;
-                        //        valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), availableTilemap);
-                        //    }
-                        //    //Tile不可以被挖掘
-                        //    else
-                        //    {
-                        //        canSetTile = false;
-                        //        valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), unAvailableTilemap);
-                        //    }
-                        //}
-                        ////若工具为浇水壶类
-                        //if(toolDetails.itemType == ItemType.WaterTool)
-                        //{
-                        //    //Tile可以浇水
-                        //    if(currentTile.daysSinceDug > -1 && currentTile.daysSinceWatered == -1)
-                        //    {
-                        //        canSetTile = true;
-                        //        valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), availableTilemap);
-                        //    }
-                        //    //Tile不可以浇水
-                        //    else
-                        //    {
-                        //        canSetTile = false;
-                        //        valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), unAvailableTilemap);
-                        //    }
-                        //}
-                        ////若工具为树种类型
-                        //if(toolDetails.itemType == ItemType.TreeSeed)
-                        //{
-                        //    if(currentTile.canTree && currentTile.haveTree == -1)
-                        //    {
-                        //        canSetTile = true;
-                        //        valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), availableTilemap);
-                        //    }
-                        //    else
-                        //    {
-                        //        canSetTile = false;
-                        //        valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), unAvailableTilemap);
-                        //    }
-                        //}
-                        ////若手持种子
-                        //if(toolDetails.itemType == ItemType.Seed)
-                        //{
-                        //    if(currentTile.daysSinceDug > -1 && currentTile.seedItemID == -1)
-                        //    {
-                        //        canSetTile = true;
-                        //        valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), availableTilemap);
-                        //    }
-                        //    else
-                        //    {
-                        //        canSetTile = false;
-                        //        valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), unAvailableTilemap);
-                        //    }
-                        //}
                     }
                 }
                 //鼠标没选中的Tile

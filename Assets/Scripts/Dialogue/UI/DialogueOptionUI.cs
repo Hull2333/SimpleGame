@@ -14,6 +14,7 @@ public class DialogueOptionUI : MonoBehaviour //调用预制体OptionButton
     private bool takeQuest;
     private bool takeBag;
     private InventoryBag_SO bag_SO;
+    private int friendlinessValue;
     private void Awake()
     {
         thisButton = GetComponent<Button>();
@@ -32,6 +33,7 @@ public class DialogueOptionUI : MonoBehaviour //调用预制体OptionButton
         takeQuest = option.takeQuest;
         takeBag = option.takeBag;
         bag_SO = option.bag_SO;
+        friendlinessValue = option.friendlinessValue;
     }
     /// <summary>
     /// 当optionButton点击时
@@ -83,27 +85,33 @@ public class DialogueOptionUI : MonoBehaviour //调用预制体OptionButton
                     {
                         InventoryManager.Instance.CheckQuestItemInBag(requireItem);
                     }
-
                 }
 
             }
         }
-        //开启NPC背包
+       
+        //有对话选项触发NPC背包
         if (takeBag)
         {
             EventHandler.CallBaseBagOpenEvent(SlotType.Shop, bag_SO);
             DialogueUI.Instance.QuitDialogueUI();
             EventHandler.CallUpdateGameStateEvent(GameState.Pause);
+            return;
         }
+       
         //点击此选项后没有对话那就结束对话
-        if (nextPieceID == null)
+        if (nextPieceID == null || nextPieceID == "0")
         {
             DialogueUI.Instance.QuitDialogueUI();
+            //增加好感度
+            EventHandler.CallIncreaseFriendliness(friendlinessValue, currentPiece.name.ToString());
             return;
         }
         //有对话就显示对应的piece
         else
         {
+            //增加好感度
+            EventHandler.CallIncreaseFriendliness(friendlinessValue,currentPiece.name.ToString());
             if (DialogueUI.Instance.currentData.dialogueIndex[nextPieceID].shakeImage)
             {
                 DialogueUI.Instance.ShakePartraitImage();

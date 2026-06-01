@@ -18,7 +18,7 @@ namespace MFarm.Inventory
         public GameObject pausePanel;
         //音量控制Slider
         public Slider volumeSlider;
-
+        public Canvas blackBoardCanvas;
 
 
         private void Awake()
@@ -32,12 +32,18 @@ namespace MFarm.Inventory
         private void OnEnable()
         {
             EventHandler.AfterSceneLoadedEvent += OnAfterSceneLoadedEvent;
+            EventHandler.StartNPCEvent += OnStartNPCEvent;
+            EventHandler.EndNPCEvent += OnEndNPCEvent;
         }
 
         private void OnDisable()
         {
             EventHandler.AfterSceneLoadedEvent -= OnAfterSceneLoadedEvent;
+            EventHandler.StartNPCEvent -= OnStartNPCEvent;
+            EventHandler.EndNPCEvent -= OnEndNPCEvent;
         }
+
+     
 
         private void Start()
         {
@@ -51,6 +57,18 @@ namespace MFarm.Inventory
             {
                 Destroy(menuCanvas.transform.GetChild(0).gameObject);
             }
+        }
+        private void OnStartNPCEvent()
+        {
+            EventHandler.CallUpdateGameStateEvent(GameState.Pause);
+            GetComponent<Canvas>().enabled = false;
+            blackBoardCanvas.gameObject.SetActive(true);
+        }
+        private void OnEndNPCEvent()
+        {
+            EventHandler.CallUpdateGameStateEvent(GameState.Gameplay);
+            GetComponent<Canvas>().enabled = true;
+            blackBoardCanvas.gameObject.SetActive(false);
         }
         /// <summary>
         /// 切出暂停菜单

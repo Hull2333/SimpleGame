@@ -13,6 +13,7 @@ namespace MFarm.Inventory
         public Image itemIcon;
         public Text itemName;
         public TextMeshProUGUI tradeAmountText;
+        public TextMeshProUGUI currentTradeValueText;
         public Button submitButton;
         public Button cancelButton;
         private ItemDetails item;
@@ -29,6 +30,8 @@ namespace MFarm.Inventory
         //背包的slotindex和出售箱的index
         private int startIndex, endIndex;
         private InventoryLocation startLocation, endLocation;
+        //当前这个物品交易金额
+        private int currentTradeValue; 
         private void Awake()
         {
             //点击按钮触发其中的方法
@@ -36,6 +39,7 @@ namespace MFarm.Inventory
             cancelButton.onClick.AddListener(CancelTrade);
             submitButton.onClick.AddListener(ClickSubmitButton);
            
+
         }
         /// <summary>
         /// 设置TradeUI显示详情
@@ -49,13 +53,25 @@ namespace MFarm.Inventory
             itemName.text = item.itemName;
             isSellTrade = isSell;
             tradeAmount = 1;
-            maxAmount = amount;
+            if (isSell)
+            {
+                maxAmount = amount;
+                currentTradeValue = (int)(item.itemPrice * item.sellPercentage * 1);
+                currentTradeValueText.text = currentTradeValue.ToString();
+            }
+            else
+            {
+                maxAmount = 99;
+                currentTradeValue = (int)(item.itemPrice);
+                currentTradeValueText.text = currentTradeValue.ToString();
+            }
             startIndex = index1;
             endIndex = index2;
             startLocation = location1;
             endLocation = location2;
             tradeAmountText.text = tradeAmount.ToString();
             isToSellBox = toSellBox;
+           
         }
         /// <summary>
         /// 点击交易提交按钮
@@ -70,47 +86,123 @@ namespace MFarm.Inventory
         }
         private void CancelTrade()
         {
-            this.gameObject.SetActive(false);
+            transform.parent.gameObject.SetActive(false);
         }
         /// <summary>
         /// 点击增加按钮,调用在IncreaseButton按钮上
         /// </summary>
         public void ClickIncreaseButton()
         {
-            if(tradeAmount< maxAmount)
+            //卖
+            if (isSellTrade)
             {
-                tradeAmount++;
+                if (tradeAmount < maxAmount)
+                {
+                    tradeAmount++;
+                }
+                tradeAmountText.text = tradeAmount.ToString();
+                currentTradeValue = (int)(item.itemPrice * item.sellPercentage * tradeAmount);
+                currentTradeValueText.text = currentTradeValue.ToString();
             }
-            tradeAmountText.text = tradeAmount.ToString();
+            //买
+            else
+            {
+                if (item.itemPrice * (tradeAmount + 1) <= InventoryManager.Instance.playerMoney && tradeAmount < maxAmount)
+                {
+                    tradeAmount++;
+                }
+                tradeAmountText.text = tradeAmount.ToString();
+                currentTradeValue = (int)(item.itemPrice * tradeAmount);
+                currentTradeValueText.text = currentTradeValue.ToString();
+            }
         }
         /// <summary>
         /// 点击减少按钮，调用在DecreaseButton按钮上
         /// </summary>
         public void ClickDecreaseButton()
         {
-            if (tradeAmount > 1)
+            //卖
+            if (isSellTrade)
             {
-                tradeAmount--;
+                if (tradeAmount > 1)
+                {
+                    tradeAmount--;
+                }
+                tradeAmountText.text = tradeAmount.ToString();
+                currentTradeValue = (int)(item.itemPrice * item.sellPercentage * tradeAmount);
+                currentTradeValueText.text = currentTradeValue.ToString();
             }
-            tradeAmountText.text = tradeAmount.ToString();
+            //买
+            else
+            {
+                if (tradeAmount > 1)
+                {
+                    tradeAmount--;
+                }
+                tradeAmountText.text = tradeAmount.ToString();
+                currentTradeValue = (int)(item.itemPrice * tradeAmount);
+                currentTradeValueText.text = currentTradeValue.ToString();
+            }
         }
         /// <summary>
         /// 双击增加10个数量，调用在调用在IncreaseButton按钮上
         /// </summary>
         public void DoubleClickInCreaseButton()
         {
-            if(tradeAmount < maxAmount)
+            //卖
+            if (isSellTrade)
             {
-                if (maxAmount - tradeAmount >= 10)
+                if (tradeAmount < maxAmount)
                 {
-                    tradeAmount += 10;
+                    if (maxAmount - tradeAmount >= 10)
+                    {
+                        tradeAmount += 10;
+                    }
+                    else
+                    {
+                        tradeAmount += maxAmount - tradeAmount;
+                    }
                 }
-                else
-                {
-                    tradeAmount += maxAmount - tradeAmount;
-                }
+                tradeAmountText.text = tradeAmount.ToString();
+                currentTradeValue = (int)(item.itemPrice * item.sellPercentage * tradeAmount);
+                currentTradeValueText.text = currentTradeValue.ToString();
             }
-            tradeAmountText.text = tradeAmount.ToString();
+            //买
+            else
+            {
+                if(tradeAmount < 99)
+                {
+                    if (item.itemPrice * (tradeAmount + 10) <= InventoryManager.Instance.playerMoney)
+                    {
+                        if(tradeAmount + 10 < 99)
+                        {
+                            tradeAmount += 10;
+                        }
+                        else
+                        {
+                            tradeAmount = 99;
+                        }
+                    }
+                    else
+                    {
+                        int gap = item.itemPrice * (tradeAmount + 10) - InventoryManager.Instance.playerMoney;
+                        int gapAmount = gap / item.itemPrice;
+                        if(tradeAmount + gapAmount < 99)
+                        {
+                            tradeAmount += gapAmount;
+                        }
+                        else
+                        {
+                            tradeAmount = 99;
+                        }
+                        
+                    }
+                }
+                tradeAmountText.text = tradeAmount.ToString();
+                currentTradeValue = (int)(item.itemPrice * tradeAmount);
+                currentTradeValueText.text = currentTradeValue.ToString();
+            }
+           
         }
         /// <summary>
         /// 双击减少10个数量，调用在调用在DecreaseButton按钮上
@@ -119,7 +211,6 @@ namespace MFarm.Inventory
         {
             if (tradeAmount > 1)
             {
-                Debug.Log(tradeAmount - 10);
                 if (tradeAmount - 10 > 0)
                 {
                     tradeAmount -= 10;
@@ -129,15 +220,54 @@ namespace MFarm.Inventory
                     tradeAmount = 1;
                 }
             }
-            tradeAmountText.text = tradeAmount.ToString();
+            if (isSellTrade)
+            {
+                tradeAmountText.text = tradeAmount.ToString();
+                currentTradeValue = (int)(item.itemPrice * item.sellPercentage * tradeAmount);
+                currentTradeValueText.text = currentTradeValue.ToString();
+            }
+            else
+            {
+                tradeAmountText.text = tradeAmount.ToString();
+                currentTradeValue = (int)(item.itemPrice * tradeAmount);
+                currentTradeValueText.text = currentTradeValue.ToString();
+            }
+
         }
         /// <summary>
         /// 点击全部交易按钮
         /// </summary>
         public void ClickAllIncreaseButton()
         {
-            tradeAmount = maxAmount;
-            tradeAmountText.text = tradeAmount.ToString();
+            if (isSellTrade)
+            {
+                tradeAmount = maxAmount;
+                tradeAmountText.text = tradeAmount.ToString();
+                currentTradeValue = (int)(item.itemPrice * item.sellPercentage * tradeAmount);
+                currentTradeValueText.text = currentTradeValue.ToString();
+            }
+            else
+            {
+                if(tradeAmount < 99)
+                {
+                    if (item.itemPrice * maxAmount <= InventoryManager.Instance.playerMoney)
+                    {
+                        tradeAmount = maxAmount;
+                        tradeAmountText.text = tradeAmount.ToString();
+                        currentTradeValue = (int)(item.itemPrice * tradeAmount);
+                        currentTradeValueText.text = currentTradeValue.ToString();
+                    }
+                    else
+                    {
+                        tradeAmount = InventoryManager.Instance.playerMoney / item.itemPrice;
+                        tradeAmountText.text = tradeAmount.ToString();
+                        currentTradeValue = (int)(item.itemPrice * tradeAmount);
+                        currentTradeValueText.text = currentTradeValue.ToString();
+                    }
+                }
+               
+            }
+          
         }
     }
 }

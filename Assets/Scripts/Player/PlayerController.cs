@@ -65,7 +65,6 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     //动画使用工具面朝方向
     private float mouseX;
     private float mouseY;
-    private bool useTool;
     //获取该对象的GUID
     public string GUID => GetComponent<DataGUID>().guid;
     //人物面朝方向
@@ -171,6 +170,8 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     //防御碰撞特效
     public GameObject[] defenceEffects;
     public int effectIndex;
+    //正在继续NPC事件
+    public bool isNpcEvent;
     public void Awake()
     {
 
@@ -198,7 +199,6 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     }
     void Update()
     {
-
         if (inputDisable == false)
         {
             PlayerInput();
@@ -261,7 +261,6 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
             confirmFishGet = false;
             StartCoroutine(WaitTime());
             cM.fishingEventDisable = false;
-            cM.cursorPositionValid = true;
         }
     }
     private void FixedUpdate()
@@ -310,8 +309,12 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         EventHandler.IncreaseFightSkillEvent += OnIncreaseFightSkillEvent;
         EventHandler.IncreaseExploreSkillEvent += OnIncreaseExploreSkillEvent;
         EventHandler.DisplayCollectItemSprite += OnDisplayCollectItemSprite;
-        EventHandler.EquipArmorEven += OnEquipArmorEven;
+        EventHandler.EquipArmorEvent += OnEquipArmorEven;
+        EventHandler.StartNPCEvent += OnStartNPCEvent;
+        EventHandler.EndNPCEvent += OnEndNPCEvent;
     }
+
+   
 
     private void OnDisable()
     {
@@ -331,7 +334,9 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         EventHandler.IncreaseFightSkillEvent -= OnIncreaseFightSkillEvent;
         EventHandler.IncreaseExploreSkillEvent -= OnIncreaseExploreSkillEvent;
         EventHandler.DisplayCollectItemSprite -= OnDisplayCollectItemSprite;
-        EventHandler.EquipArmorEven -= OnEquipArmorEven;
+        EventHandler.EquipArmorEvent -= OnEquipArmorEven;
+        EventHandler.StartNPCEvent -= OnStartNPCEvent;
+        EventHandler.EndNPCEvent -= OnEndNPCEvent;
     }
 
 
@@ -354,8 +359,6 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
                 mouseX = 0;
             }
             StartCoroutine(UseToolRoutine(mouseWorldPos, itemDetails));
-            StartCoroutine(WaitTime());
-
         }
         //不是工具就直接执行
         else
@@ -420,7 +423,6 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     private void OnMouseUpEvent()
     {
         cM.fishingEventDisable = true;
-        cM.cursorPositionValid = false;
         isMouseDownTimerIncrease = true;
         fishPowerProcessCanvas.SetActive(false);
         //鱼竿抛出动作
@@ -470,7 +472,14 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         switch (gameState)
         {
             case GameState.Gameplay:
-                inputDisable = false;
+                if (isNpcEvent)
+                {
+                    inputDisable = true;
+                }
+                else
+                {
+                    inputDisable = false;
+                }
                 break;
             case GameState.Pause:
                 inputDisable = true;
@@ -496,8 +505,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     /// <returns></returns>
     private IEnumerator UseToolRoutine(Vector3 mouseWorldPos, ItemDetails itemDetails)
     {
-        //使用工具时不可移动
-        useTool = true;
+        cM.cursorEnable = false;
         inputDisable = true;
         //确保上面的代码执行完在执行下面的代码
         yield return null;
@@ -513,8 +521,8 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         EventHandler.CallExecuteActionAfterAnimation(mouseWorldPos, itemDetails);
         yield return new WaitForSeconds(0.5f);
         //工具使用动画结束后恢复未使用工具状态
-        useTool = false;
         inputDisable = false;
+        cM.cursorEnable = true;
     }
     /// <summary>
     /// 长按鼠标左键触发的动作
@@ -522,7 +530,6 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     /// <returns></returns>
     private IEnumerator UseToolHoldRoutine()
     {
-        useTool = true;
         yield return null;
         foreach (var anim in animators)
         {
@@ -982,6 +989,17 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     private void OnEquipArmorEven(int value)
     {
         defenceValue = value;
+    }
+   
+    private void OnStartNPCEvent()
+    {
+        isNpcEvent = true;
+        inputDisable = true; ;
+    }
+    private void OnEndNPCEvent()
+    {
+        isNpcEvent = false;
+        inputDisable = false;
     }
 
     /// <summary>

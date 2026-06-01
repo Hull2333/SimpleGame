@@ -196,3 +196,31 @@ public class ScenePath
     public Vector2Int gotoGridCell;
 }
 #endregion
+[System.Serializable]
+public class NPCEvent
+{
+    public string npcName;
+    //该事件是否已经发生
+    public bool isHappened;
+    //好感度
+    public float friendliness;
+    //开始场景和位置
+    public string startScene;
+    //速度
+    public float normalSpeed;
+    public float maxSpeed;
+    public Vector2 startPos;
+    //下一个位置
+    public Vector2[] nextPos;
+    //对话内容
+    public DialogueData_OS[] dialogueData;
+    public AnimationClip[] animClip;
+}
+[System.Serializable]
+public class NPCFriendLiness 
+{
+    //NPC名字和对应的好感度
+    public string NPCname;
+    public float friendlinessValue;
+}
+

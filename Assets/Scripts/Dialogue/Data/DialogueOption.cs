@@ -8,6 +8,8 @@ public class DialogueOption
     public string text;
     [Header("下一段对话ID")]
     public string targetID;
+    [Header("好感度")]
+    public int friendlinessValue;
     [Header("触发任务事件")]
     public bool takeQuest;
     [Header("触发背包事件")]

@@ -8,15 +8,15 @@ using MFarm.Dialogue;
 public static class EventHandler
 {
     //注册事件，当触发该事件UpdateInventoryUI时，会同时调用InventoryLocation和List<InventoryItem>
-    public static event Action<InventoryLocation, List<InventoryItem>> UpdateInventoryUI;
+    public static event Action<InventoryLocation, List<InventoryItem>,int> UpdateInventoryUI;
     /// <summary>
     /// 调用事件
     /// </summary>
     /// <param name="location"></param>
     /// <param name="list"></param>
-    public static void CallUpdateInventoryUI(InventoryLocation location, List<InventoryItem> list)
+    public static void CallUpdateInventoryUI(InventoryLocation location, List<InventoryItem> list,int difference)
     {   //if简写，当UpdateInventoryUI != null时调用
-        UpdateInventoryUI?.Invoke(location, list);
+        UpdateInventoryUI?.Invoke(location, list, difference);
     }
     //在指定位置生成物品的事件
     public static event Action<int, Vector3> InstantiateItemInScene;
@@ -104,6 +104,12 @@ public static class EventHandler
     {
         MouseUpEvent?.Invoke();
     }
+    //恢复为默认鼠标图片事件
+    public static event Action RestoreNormalCursorImageEvent;
+    public static void CallRestoreNormalCursorImageEvent()
+    {
+        RestoreNormalCursorImageEvent?.Invoke();
+    }
     //在玩家执行完对应动画之后执行的操作
     public static event Action<Vector3, ItemDetails> ExecuteActionAfterAnimation;
     public static void CallExecuteActionAfterAnimation(Vector3 pos, ItemDetails itemDetails)
@@ -172,7 +178,12 @@ public static class EventHandler
     {
         ShowTradeUI?.Invoke(item, isSell, maxAmount, startIndex, endIndex, startLocation, endLocation, isToSellBox);
     }
-
+    //点击残存出售箱UI的确认按钮事件
+    public static event Action<List<InventoryItem>> ClickHaveItemYesEvent;
+    public static void CallClickHaveItemYesEvent(List<InventoryItem> haveItemList)
+    {
+        ClickHaveItemYesEvent?.Invoke(haveItemList);
+    }
     //建造物品生成事件
     public static event Action<int, Vector3> BuildFurnitureEvent;
     public static void CallBuildFurnitureEvent(int ID, Vector3 pos)
@@ -315,9 +326,49 @@ public static class EventHandler
         DisplayCollectItemSprite?.Invoke(itemID);
     }
     //装备护甲的事件
-    public static event Action<int> EquipArmorEven;
+    public static event Action<int> EquipArmorEvent;
     public static void CallEquipArmorEven(int value)
     {
-        EquipArmorEven?.Invoke(value);
+        EquipArmorEvent?.Invoke(value);
     }
+    //修改玩家金钱并“流动”变化的事件
+    public static event Action<int, int> DoTweenPlayerMoneyChageEvent;
+    public static void CallDoTweenPlayerMoneyChageEvent(int fromValue,int difference)
+    {
+        DoTweenPlayerMoneyChageEvent?.Invoke(fromValue, difference);
+    }
+    //开始NPC事件的事件
+    public static event Action StartNPCEvent;
+    public static void CallStartNPCEvent()
+    {
+        StartNPCEvent?.Invoke();
+    }
+
+    //推进NPC事件的事件
+    public static event Action PromoteNPCEvent;
+    public static void CallPromoteNPCEvent()
+    {
+        PromoteNPCEvent?.Invoke();
+    }
+    //增加NPC的好感度
+    public static event Action<float,string> IncreaseFriendliness;
+    public static void CallIncreaseFriendliness(float value,string name)
+    {
+        IncreaseFriendliness?.Invoke(value,name);
+    }
+    //结束NPC事件的事件
+    public static event Action EndNPCEvent;
+    public static void CallEndNPCEvent()
+    {
+        EndNPCEvent?.Invoke();
+    }
+ 
+    //更新好感度UI事件
+    public static event Action<string, float> UpdateNPCFriendlinessUIPanel;
+    public static void CallUpdateNPCFriendlinessUIPanel(string name,float value)
+    {
+        UpdateNPCFriendlinessUIPanel?.Invoke(name, value);
+    }
+
+
 }

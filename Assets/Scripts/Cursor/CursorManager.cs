@@ -24,7 +24,6 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
     private Vector3Int mouseGridPos;
     private Vector3Int playerGridPos;
     public bool cursorEnable;
-    public bool cursorPositionValid;
     //鼠标当前选择的物品
     public ItemDetails currentItem;
     public TileDetails currentTile;
@@ -45,9 +44,11 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
     public Collider2D checkCollider;
     //鼠标检查检测的图层
     public LayerMask checkLayer;
-    public Collider2D[] roundColliders = new Collider2D[10];
+    private Collider2D[] roundColliders = new Collider2D[10];
     //可以检查或交谈
     public bool canCheck;
+    //可以拍打
+    public bool canPat;
     //是否可以检测鼠标的世界坐标
     public bool canDetectionMouseWorldPos;
     private void OnEnable()
@@ -56,7 +57,9 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         EventHandler.BeforeSceneUnloadEvent += OnBeforeSceneUnloadEvent;
         EventHandler.AfterSceneLoadedEvent += OnAfterSceneLoadedEvent;
         EventHandler.ItemUselessEvent += OnItemUselessEvent;
+        EventHandler.RestoreNormalCursorImageEvent += OnRestoreNormalCursorImageEvent;
     }
+
 
     private void OnDisable()
     {
@@ -64,7 +67,7 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         EventHandler.BeforeSceneUnloadEvent -= OnBeforeSceneUnloadEvent;
         EventHandler.AfterSceneLoadedEvent -= OnAfterSceneLoadedEvent;
         EventHandler.ItemUselessEvent -= OnItemUselessEvent;
-
+        EventHandler.RestoreNormalCursorImageEvent -= OnRestoreNormalCursorImageEvent;
     }
 
    
@@ -117,7 +120,6 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         //当鼠标移动到任何UI的范围时，图片都变为normal
         if (!InteractWithUI() && cursorEnable )
         {
-            
             CheckCursorValid();
             CheckPlayerInput();
         }
@@ -132,13 +134,17 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         if(currentItem == null || currentItem.itemID == 0)
         {
             
-            SwitchCheckCursorImage();
+            SwitchCursorImage();
         }
        
         //点击鼠标左键执行鼠标Clicked动画 
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButton(0))
         {
-            cursorAnim.SetTrigger("Clicked");
+            cursorAnim.SetBool("Clicked",true);
+        }
+        if (Input.GetMouseButtonUp(0))
+        {
+            cursorAnim.SetBool("Clicked", false);
         }
         EmptyHandHatvestCrop();
 
@@ -154,13 +160,13 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
             if (currentItem.itemType == ItemType.FishingRod)
             {
                 //长按鼠标左键
-                if (Input.GetMouseButton(0) && cursorPositionValid && fishingEventDisable == false)
+                if (Input.GetMouseButton(0) && fishingEventDisable == false)
                 {
                     canDetectionMouseWorldPos = false;
                     EventHandler.CallMouseHoldEvent(mouseWorldPos, currentItem);
                 }
                 //松开鼠标长按
-                if (Input.GetMouseButtonUp(0) && cursorPositionValid && fishingEventDisable == false)
+                if (Input.GetMouseButtonUp(0) && fishingEventDisable == false)
                 {
                     canDetectionMouseWorldPos = true;
                     EventHandler.CallMouseUpEvent();
@@ -169,12 +175,12 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
             if(currentItem.itemType == ItemType.Sword)
             {
                 //点击左键攻击
-                if (Input.GetMouseButtonDown(0) && cursorPositionValid)
+                if (Input.GetMouseButtonDown(0))
                 {
                     EventHandler.CallMouseClickedEvent(mouseWorldPos, currentItem);
                 }
                 //点击右键防御
-                if(Input.GetMouseButtonDown(1) && cursorPositionValid && !playerController.isKnocking)
+                if(Input.GetMouseButtonDown(1) && !playerController.isKnocking)
                 {
                     StartCoroutine(playerController.PlayerDefence(mouseWorldPos));
                 }
@@ -187,12 +193,12 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
             else
             {
                 //点击左键
-                if (Input.GetMouseButtonDown(0) && cursorPositionValid )
+                if (Input.GetMouseButtonDown(0))
                 {
                     EventHandler.CallMouseClickedEvent(mouseWorldPos, currentItem);
                 }
                 //点击右键吃东西
-                if (Input.GetMouseButtonDown(1) && cursorPositionValid)
+                if (Input.GetMouseButtonDown(1))
                 {
                     if (currentItem.canEat == true)
                     {
@@ -215,6 +221,12 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         cursorEnable = false;
         GridMapManager.Instance.canGetPlayerPos = false;
     }
+
+    private void OnRestoreNormalCursorImageEvent()
+    {
+        cursorAnim.runtimeAnimatorController = cursorAnimList[0].cursorController;
+        canCheck = false;
+    }
     /// <summary>
     /// 设置鼠标图片
     /// </summary>
@@ -228,30 +240,27 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
     /// <summary>
     /// 设置鼠标可用状态
     /// </summary>
-    private void SetCursorValid()
-    {
-        cursorPositionValid = true;
-        cursorImage.color = new Color(1, 1, 1, 1);
-        buildImage.color = new Color(1, 1, 1, 0.5f);
-    }
+    //private void SetCursorValid()
+    //{
+    //    cursorImage.color = new Color(1, 1, 1, 1);
+    //    buildImage.color = new Color(1, 1, 1, 0.5f);
+    //}
     /// <summary>
     /// 设置鼠标不可用状态
     /// </summary>
-    private void SetCursorInvalid()
-    {
-        cursorPositionValid = false;
-        cursorImage.color = new Color(1,0,0,0.4f);
-        buildImage.color = new Color(1, 0, 0, 0.5f);
-    }
+    //private void SetCursorInvalid()
+    //{
+    //    cursorImage.color = new Color(1,0,0,0.4f);
+    //    buildImage.color = new Color(1, 0, 0, 0.5f);
+    //}
     /// <summary>
     /// 设置鼠标可用但颜色变为不可以
     /// </summary>
-    private void SetCursorIncompleteInvalid()
-    {
-        cursorPositionValid = true;
-        cursorImage.color = new Color(1, 0, 0, 0.4f);
-        buildImage.color = new Color(1, 0, 0, 0.5f);
-    }
+    //private void SetCursorIncompleteInvalid()
+    //{
+    //    cursorImage.color = new Color(1, 0, 0, 0.4f);
+    //    buildImage.color = new Color(1, 0, 0, 0.5f);
+    //}
    
     #endregion
     /// <summary>
@@ -321,24 +330,35 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
     }
  
     /// <summary>
-    /// 切换成检查鼠标
+    /// 鼠标移动到对应物体切换成不一样的鼠标图片
     /// </summary>
-    private void SwitchCheckCursorImage()
+    private void SwitchCursorImage()
     {
-        checkCollider = Physics2D.OverlapPoint(mouseWorldPos, checkLayer);
-        if (checkCollider != null)
+        //任何背包UI打开都不换检查图片
+        if (!InventoryManager.Instance.anyBagOpened)
         {
-            if (checkCollider.CompareTag("NPC") || checkCollider.CompareTag("BulletinBoard"))
+            checkCollider = Physics2D.OverlapPoint(mouseWorldPos, checkLayer);
+            if (checkCollider != null)
             {
-                cursorAnim.runtimeAnimatorController = cursorAnimList[1].cursorController;
-                canCheck = true;
+                if (checkCollider.CompareTag("NPC") || checkCollider.CompareTag("BulletinBoard"))
+                {
+                    cursorAnim.runtimeAnimatorController = cursorAnimList[1].cursorController;
+                    canCheck = true;
+                }
+                if (checkCollider.CompareTag("Door"))
+                {
+                    cursorAnim.runtimeAnimatorController = cursorAnimList[4].cursorController;
+                    canPat = true;
+                }
+            }
+            else
+            {
+                cursorAnim.runtimeAnimatorController = cursorAnimList[0].cursorController;
+                canCheck = false;
+                canPat = false;
             }
         }
-        else
-        {
-            cursorAnim.runtimeAnimatorController = cursorAnimList[0].cursorController;
-            canCheck = false;
-        }
+        
 
     }
     /// <summary>
@@ -373,19 +393,19 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         //建造图片跟随鼠标移动
         buildImage.rectTransform.position = Input.mousePosition;
         //判断是否鼠标丢弃的位置超过该物品的使用范围
-        if(currentItem != null && currentItem.canDropped)
-        {
-            if (Mathf.Abs(mouseGridPos.x - playerGridPos.x) > currentItem.itemUseRadius || Mathf.Abs(mouseGridPos.y - playerGridPos.y) > currentItem.itemUseRadius)
-            {
-                SetCursorInvalid();
-                return;
-            }
-        }
+        //if(currentItem != null && currentItem.canDropped)
+        //{
+        //    if (Mathf.Abs(mouseGridPos.x - playerGridPos.x) > currentItem.itemUseRadius || Mathf.Abs(mouseGridPos.y - playerGridPos.y) > currentItem.itemUseRadius)
+        //    {
+        //        SetCursorInvalid();
+        //        return;
+        //    }
+        //}
         currentTile = GridMapManager.Instance.GetTileDetailsOnMousePosition(mouseGridPos);
-        if(currentItem != null)
-        {
-            SetCursorValid();
-        }
+        //if(currentItem != null)
+        //{
+        //    SetCursorValid();
+        //}
         //根据选择的物品类型来决定鼠标是否可用
         if (currentTile != null && currentItem != null)
         {
@@ -399,29 +419,21 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
                 case ItemType.Seed:
                     //GridMapManager.Instance.QuitDigAvailableGround();
                     GridMapManager.Instance.DisplayerAvailableGround(currentItem, currentTile);
-                    SetCursorValid();
+                    //SetCursorValid();
                     break;
                 case ItemType.Commodity:
                     //GridMapManager.Instance.QuitDigAvailableGround();
                     //当前选择的瓦片是可丢瓦片且选择的物品是可以丢弃的
-                    if (currentTile.canDropItem&&currentItem.canDropped)
+                    if (currentTile.canDropItem && currentItem.canDropped)
                     {
-                        SetCursorValid();
-                    }
-                    else
-                    {
-                        SetCursorInvalid();
+                        //SetCursorValid();
                     }
                     break;
                 case ItemType.cooked:
                     //GridMapManager.Instance.QuitDigAvailableGround();
                     if (currentTile.canDropItem && currentItem.canDropped)
                     {
-                        SetCursorValid();
-                    }
-                    else
-                    {
-                        SetCursorInvalid();
+                        //SetCursorValid();
                     }
                     break;
                 case ItemType.TreeSeed:
@@ -429,7 +441,7 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
                 //判断选择的瓦片是否可以挖坑
                 case ItemType.HoeTool:
                     GridMapManager.Instance.DisplayerAvailableGround(currentItem,currentTile);
-                    SetCursorValid();
+                    //SetCursorValid();
                     break;
                 case ItemType.AxeTool:
                     //GridMapManager.Instance.QuitDigAvailableGround();
@@ -438,22 +450,22 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
                         if (crop.canHarvest == true && crop.cropDetails.CheckToolAvailable(currentItem.itemID)==true)
                         {
                             
-                            SetCursorValid();
+                            //SetCursorValid();
                         }
                         else
                         {
-                            SetCursorIncompleteInvalid();
+                            //SetCursorIncompleteInvalid();
                         }
                     }
                     else
                     {
-                        SetCursorIncompleteInvalid();
+                        //SetCursorIncompleteInvalid();
                     }
                     break;
                 case ItemType.ReapTool:
                 case ItemType.Sword:
                 case ItemType.BreakTool:
-                    SetCursorValid();
+                    //SetCursorValid();
                     //GridMapManager.Instance.QuitDigAvailableGround();
                     break;
                 //图纸
@@ -465,22 +477,18 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
 
                     if (currentTile.canPlaceFurniture && InventoryManager.Instance.CheckStock(currentItem.itemID) && !HaveFurnitrueInRadius(bluePrintDetails))
                     {
-                        SetCursorValid();
-                    }
-                    else
-                    {
-                        SetCursorInvalid();
+                        //SetCursorValid();
                     }
                     break;
                 case ItemType.FishingRod:
                     //GridMapManager.Instance.QuitDigAvailableGround();
                     if (currentTile.canLaterFishing || currentTile.canSeaFishing)
                     {
-                        SetCursorValid();
+                       // SetCursorValid();
                     }
                     else
                     {
-                        SetCursorIncompleteInvalid();
+                        //SetCursorIncompleteInvalid();
                     }
                     break;   
             }
@@ -499,10 +507,10 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
             //}
         }
         //当该瓦片上什么信息都没有时，直接调用鼠标不可用
-        if(currentTile == null)
-        {
-            SetCursorInvalid();
-        }
+        //if(currentTile == null)
+        //{
+        //    SetCursorInvalid();
+        //}
     }
     /// <summary>
     /// 检查建造范围内是否有其他家具
