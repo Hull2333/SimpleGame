@@ -12,14 +12,16 @@ public class ItemDetails
     public string itemName;
     //物品类型，根据枚举ItemType
     public ItemType itemType;
-    //装备数值
+    [Header("装备数值")]
     public int minValue;
     public int maxValue;
-    //武器力度
+    [Header("武器击退力")]
     public float forceValue;
+    [Header("鱼类相关")]
     public FishLevel fishLevel;
     public FishlifeSeason fishlifeSeason;
     public FishlifeTime fishlifeTime;
+    public int[] likeBaits;
     public Sprite itemIcon;
     public Sprite itemOnWorldSprite;
     [TextArea]
@@ -29,10 +31,15 @@ public class ItemDetails
     public bool canDropped;
     public bool canCarried;
     public bool canEat;
+    [Header("鱼饵相关")]
+    public bool isBait;
+    public float decreaseFishingTime;
     public int itemPrice;
     public int recoverHealth;
     public int recoverStmina;
     public EquipType equipType;
+    [Header("是否缩放，不缩放就选normal")]
+    public SpriteScale scale;
     [Range(0,1)]
     public float sellPercentage;
 }
@@ -107,7 +114,28 @@ public class SceneFurniture
     //箱子编号
     public int boxIndex;
 }
+//场景中的建造建筑
+[System.Serializable]
+public class SceneBuilding 
+{
+    public int buildID;
+    //建造时间
+    public int buildDay;
+    public SerializableVector3 position;
+}
 
+[System.Serializable]
+public class SceneKnockItem 
+{
+    public SerializableVector3 position;
+    public int itemIndex;
+}
+[System.Serializable]
+public class SceneReapableItem
+{
+    public SerializableVector3 position;
+    public Sprite sprite;
+}
 
 [System.Serializable]
 public class TileProperty
@@ -132,6 +160,8 @@ public class TileDetails
     public bool canLaterFishing;
     public bool canSeaFishing;
     public bool canTree;
+    public bool canChopItem;
+    public bool canBigWeeds;
     //是否被挖坑，没有挖则是-1，有则是1，过了一天为2，以此类推
     public int daysSinceDug = -1;
     //是否已浇水
@@ -146,12 +176,17 @@ public class TileDetails
     public int predictHaveWeeds = -1;
     //是否有杂草
     public int haveWeeds = -1;
+    public int haveBigWeeds = -1;
     //是否有石矿
     public int haveRock = -1;
     //是否有大石矿
     public int haveBigRock = -1;
     //是否有树
     public int haveTree = -1;
+    //是否有可劈砍物体
+    public int haveChop = -1;
+    //是否有放置东西
+    public int havePlace = -1;
 }
 [System.Serializable]
 public class NPCPosition
@@ -204,12 +239,14 @@ public class NPCEvent
     public bool isHappened;
     //好感度
     public float friendliness;
+    //NPC事件开始和结束的时间
+    public int eventStartHour;
+    public int eventEndHour;
     //开始场景和位置
     public string startScene;
     //速度
     public float normalSpeed;
     public float maxSpeed;
-    public Vector2 startPos;
     //下一个位置
     public Vector2[] nextPos;
     //对话内容
@@ -223,4 +260,11 @@ public class NPCFriendLiness
     public string NPCname;
     public float friendlinessValue;
 }
+[System.Serializable]
+public class MineScene 
+{
+    public string sceneName;
+    public Vector2 GoToPos;
+}
+
 

@@ -22,8 +22,10 @@ public class ReapableItem : MonoBehaviour  //调用在地图杂草、地图小麦对象上
     private Vector3Int weedGridPos;
     //收割次数
     private int reapCount;
-    //是否是小麦
+    //是否是杂草
     public bool isWeeds;
+    //是否是大杂草
+    public bool isBigWeeds;
     private void Start()
     {
         if (!isWeeds)
@@ -33,7 +35,15 @@ public class ReapableItem : MonoBehaviour  //调用在地图杂草、地图小麦对象上
         //获取与当前生成地图杂草的地图坐标
         weedGrid = FindObjectOfType<Grid>();
         weedGridPos = weedGrid.WorldToCell(transform.position);
-        reapCount = Random.Range(1, 4);
+        if (!isBigWeeds)
+        {
+            reapCount = Random.Range(1, 4);
+        }
+        else
+        {
+            reapCount = 1;
+        }
+       
     }
    
     /// <summary>
@@ -42,15 +52,19 @@ public class ReapableItem : MonoBehaviour  //调用在地图杂草、地图小麦对象上
     public void SpawnItems()
     {
         reapCount --;
-        //判断播放杂草还是小麦动画
-        if (isWeeds)
+        //大杂草不执行动画
+        if (!isBigWeeds)
         {
-            //让镰刀触碰杂草也摇晃一下
-            grassAnim.PlayLeftShakeAnim();
-        }
-        else
-        {
-            crop.PlayLeftShakeAnim();
+            //判断播放杂草还是小麦动画
+            if (isWeeds)
+            {
+                //让镰刀触碰杂草也摇晃一下
+                grassAnim.PlayLeftShakeAnim();
+            }
+            else
+            {
+                crop.PlayLeftShakeAnim();
+            }
         }
         if (reapCount <= 0)
         {
@@ -66,17 +80,25 @@ public class ReapableItem : MonoBehaviour  //调用在地图杂草、地图小麦对象上
             EventHandler.CallParticleEffectEvent(particalEffectType, transform.position + Vector3.up, Vector2.zero);
             //获取当前生成地图杂草地块的TileDetail
             var currentTileDetails = GridMapManager.Instance.GetTileDetailsOnMousePosition(weedGridPos);
-            if (isWeeds)
+            if (!isBigWeeds)
             {
-                //杂草已收割,可继续生成杂草
-                currentTileDetails.haveWeeds = -1;
-                currentTileDetails.predictHaveWeeds = -1;
+                if (isWeeds)
+                {
+                    //杂草已收割,可继续生成杂草
+                    currentTileDetails.haveWeeds = -1;
+                    currentTileDetails.predictHaveWeeds = -1;
+                }
+                else
+                {
+                    //小麦已收割，可继续种植
+                    currentTileDetails.daysSinceLastHarvest = -1;
+                    currentTileDetails.seedItemID = -1;
+                }
             }
             else
             {
-                //小麦已收割，可继续种植
-                currentTileDetails.daysSinceLastHarvest = -1;
-                currentTileDetails.seedItemID = -1;
+                //大杂草已收割，可继续长出大杂草
+                currentTileDetails.haveBigWeeds = -1;
             }
             Destroy(gameObject);
         }

@@ -5,6 +5,7 @@ using UnityEditor.Experimental;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using static UnityEditor.Progress;
 namespace MFarm.Inventory
 {
     //IPointerClickHandler 点击事件的接口;IBeginDragHandler,IDragHandler,IEndDragHandler 分别是物品开始拖拽，拖拽过程，拖拽结束的接口方法
@@ -29,6 +30,8 @@ namespace MFarm.Inventory
         public Image slotHighlight;
         public int currentAmount;
         private CursorManager cursorManager;
+        //字体原来的颜色
+        public Color originColor;
         public InventoryLocation Location
         {
             get
@@ -43,12 +46,15 @@ namespace MFarm.Inventory
                 };              
             }
         }
+       
+
         /// <summary>
         /// 游戏开始时，背包为空
         /// </summary>
         private void Start()
         {
             cursorManager = GameObject.FindWithTag("CursorManager").GetComponent<CursorManager>();
+            //amountText.color = originColor;
             isSelected = false;
             if (itemDetails == null)
             {
@@ -61,7 +67,9 @@ namespace MFarm.Inventory
         /// </summary>
         /// <param name="item"></param>
         /// <param name="amount"></param>
-        public void UpdateSlot(ItemDetails item, int amount)
+        /// <param name="showAllAmount">是否需要显示总数量，不需要allAmount填"0"</param>
+        /// <param name="allAmount">物品的总数量</param>
+        public void UpdateSlot(ItemDetails item, int amount , bool showAllAmount , int allAmount)
         {
             //不显示为负数的奖励，因为这是要减去背包内的所需物品
             if (slotType == SlotType.Reward && amount < 0)
@@ -72,11 +80,35 @@ namespace MFarm.Inventory
                 amountText.gameObject.SetActive(false);
                 return;
             }
+            
             itemDetails = item;
-            //slotImage.SetNativeSize();
             slotImage.sprite = item.itemIcon;
+            //设置item在玩家背包中的图片显示比例
+            if(slotType != SlotType.Ingredient && slotType != SlotType.Shop)
+            {
+                if (item.scale == SpriteScale.Normal)
+                {
+                    slotImage.rectTransform.sizeDelta = new Vector2(24f, 24f);
+                }
+                if (item.scale == SpriteScale.Middle)
+                {
+                    slotImage.SetNativeSize();
+                    float newWidth = slotImage.rectTransform.rect.width / 3f;
+                    float newHight = slotImage.rectTransform.rect.height / 3f;
+                    slotImage.rectTransform.sizeDelta = new Vector2(newWidth, newHight);
+                }
+            }
+           
             itemAmount = amount;
-            amountText.text = amount.ToString();
+            //显示总数量和不显示总数量
+            if (showAllAmount)
+            {
+                amountText.text = amount.ToString() + "/" + allAmount.ToString();
+            }
+            else
+            {
+                amountText.text = amount.ToString();
+            }
             button.interactable = true;
             slotImage.enabled = true;
            if(slotType == SlotType.Shop)
@@ -105,13 +137,31 @@ namespace MFarm.Inventory
             button.interactable = false;
         }
         /// <summary>
+        /// 设置数量Text变红
+        /// </summary>
+        public void SetRedAmountText()
+        {
+            originColor = amountText.color;
+            amountText.color = Color.gray;
+        }
+        /// <summary>
+        /// 恢复原来的字体颜色
+        /// </summary>
+        public void RecoverOriginTextColor()
+        {
+            originColor = amountText.color;
+            amountText.color = originColor;
+        }
+        /// <summary>
         /// 点击Slot时
         /// </summary>
         /// <param name="eventData"></param>
         public void OnPointerClick(PointerEventData eventData)
-        {   
-            //如果物品不存在，不让点选
-            if (itemDetails == null) return;
+        {
+            EventHandler.CallSlotUISelectIndexEvent(slotIndex);
+            //如果物品不存在或者玩家背包无法打开时不让点选
+            if (itemDetails == null || !InventoryUI.Instance.canOpenBag || slotType == SlotType.Ingredient || slotType == SlotType.Reward) return;
+           
             isSelected = !isSelected;
             
             inventoryUI.UpdateSlotHighlight(slotIndex);
@@ -137,27 +187,31 @@ namespace MFarm.Inventory
                 }
                 return;
             }
-            //在商店打开时右键点击Slot
-            if (eventData.button == PointerEventData.InputButton.Right && InventoryManager.Instance.isSellState )
+            //右键点击Slot
+            if (eventData.button == PointerEventData.InputButton.Right)
             {
-                //右键点击的是背包格
-                if(Location == InventoryLocation.Player)
+                //在商店打开时
+                if (InventoryManager.Instance.isSellState)
                 {
-                    if (inventoryUI.GetEmptySellBoxIndex(itemDetails.itemID,InventoryManager.Instance.sellBoxBag.itemList,Location) >= 0)
+                    //右键点击的是背包格
+                    if (Location == InventoryLocation.Player)
                     {
-                        InventoryManager.Instance.SwapItem(Location, slotIndex, InventoryLocation.SellBox, inventoryUI.GetEmptySellBoxIndex(itemDetails.itemID, InventoryManager.Instance.sellBoxBag.itemList, Location), false, itemAmount);
+                        if (inventoryUI.GetEmptySellBoxIndex(itemDetails.itemID, InventoryManager.Instance.sellBoxBag.itemList, Location) >= 0)
+                        {
+                            InventoryManager.Instance.SwapItem(Location, slotIndex, InventoryLocation.SellBox, inventoryUI.GetEmptySellBoxIndex(itemDetails.itemID, InventoryManager.Instance.sellBoxBag.itemList, Location), false, itemAmount);
+                        }
+                        return;
                     }
-                    return;
-                }
-                //右键点击的是出售箱格子
-                if(Location == InventoryLocation.SellBox)
-                {
-                  
-                    if (inventoryUI.GetEmptySellBoxIndex(itemDetails.itemID, InventoryManager.Instance.playerBag.itemList, Location) >= 0)
+                    //右键点击的是出售箱格子
+                    if (Location == InventoryLocation.SellBox)
                     {
-                        InventoryManager.Instance.SwapItem(Location, slotIndex, InventoryLocation.Player, inventoryUI.GetEmptySellBoxIndex(itemDetails.itemID, InventoryManager.Instance.playerBag.itemList, Location), false, itemAmount);
+
+                        if (inventoryUI.GetEmptySellBoxIndex(itemDetails.itemID, InventoryManager.Instance.playerBag.itemList, Location) >= 0)
+                        {
+                            InventoryManager.Instance.SwapItem(Location, slotIndex, InventoryLocation.Player, inventoryUI.GetEmptySellBoxIndex(itemDetails.itemID, InventoryManager.Instance.playerBag.itemList, Location), false, itemAmount);
+                        }
+                        return;
                     }
-                    return;
                 }
             }
         }
@@ -167,9 +221,10 @@ namespace MFarm.Inventory
         /// <param name="eventData"></param>
         public void OnBeginDrag(PointerEventData eventData)
         {
-           
+
+            EventHandler.CallControlPlayerBagOpen(false);
             //空格子不可以拖拽和任务栏的奖励物品也不可以拖拽
-            if (itemDetails != null &&itemDetails.itemID != 0 && slotType != SlotType.Reward && slotType != SlotType.Shop )
+            if (itemDetails != null &&itemDetails.itemID != 0 && slotType != SlotType.Reward && slotType != SlotType.Shop && slotType != SlotType.Ingredient)
             {
                 if (Input.GetKey(KeyCode.LeftControl) && slotType == SlotType.Bag && itemAmount > 1) 
                 {
@@ -194,10 +249,20 @@ namespace MFarm.Inventory
                 inventoryUI.dragItem.sprite = slotImage.sprite;
                 inventoryUI.dragItemAmount.text = itemAmount.ToString();
                 //自带的方法，使拖出来的dragItem图片尺寸为你提前设置好的尺寸
-                //inventoryUI.dragItem.SetNativeSize();
-                inventoryUI.dragItem.transform.localScale = new Vector3(3, 3, 0);
+                if (itemDetails.scale == SpriteScale.Normal)
+                {
+                    inventoryUI.dragItem.rectTransform.sizeDelta = new Vector2(32f, 32f);
+                }
+                if (itemDetails.scale == SpriteScale.Middle)
+                {
+                    inventoryUI.dragItem.SetNativeSize();
+                    float newWidth = inventoryUI.dragItem.rectTransform.rect.width / 2f;
+                    float newHight = inventoryUI.dragItem.rectTransform.rect.height / 2f;
+                    inventoryUI.dragItem.rectTransform.sizeDelta = new Vector2(newWidth, newHight);
+                }
                 isSelected = true;
                 inventoryUI.UpdateSlotHighlight(slotIndex);
+               
             }
           
         }
@@ -221,6 +286,7 @@ namespace MFarm.Inventory
             cursorManager.cursorImage.enabled = true;
             inventoryUI.dragItem.enabled = false;
             inventoryUI.dragItemAmount.enabled = false;
+            EventHandler.CallControlPlayerBagOpen(true);
             if (itemDetails != null)
             {
                
@@ -241,7 +307,7 @@ namespace MFarm.Inventory
                     //从背包格拖出
                     if (slotType == SlotType.Bag)
                     {
-                        
+                       
                         //拖到背包格
                         if (targetSlot.slotType == slotType)
                         {
@@ -309,6 +375,19 @@ namespace MFarm.Inventory
                             EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, InventoryManager.Instance.playerBag.itemList, 0);
                             return;
                         }
+                        //拖到鱼饵
+                        if(targetSlot.slotType == SlotType.Bait)
+                        {
+                            if (itemDetails.isBait)
+                            {
+                                InventoryManager.Instance.Swapitem(slotIndex, targetIndex, itemAmount, currentAmount);
+                                return;
+                            }
+                            else
+                            {
+                                return;
+                            }
+                        }
                         inventoryUI.UpdatePlayerDefenseNum();
                         return;
                     }
@@ -329,7 +408,7 @@ namespace MFarm.Inventory
                         
                     }
                     //从头装备栏拖出
-                    else if (slotType == SlotType.Equipment_Head)
+                    if (slotType == SlotType.Equipment_Head)
                     {
                         
                         //不可以从头部位置拖拽到身体位置，反之亦然
@@ -344,11 +423,12 @@ namespace MFarm.Inventory
                             InventoryManager.Instance.Swapitem(slotIndex, targetIndex,1,0);
                         }
                         inventoryUI.UpdatePlayerDefenseNum();
+                        return;
                     }
                     //从身体装备拖出
-                    else if (slotType == SlotType.Equipment_Body)
+                    if (slotType == SlotType.Equipment_Body)
                     {
-                        
+
                         //不可以从身体位置拖拽到头部位置，反之亦然
                         if (targetSlot.slotType == SlotType.Equipment_Head)
                         {
@@ -358,14 +438,45 @@ namespace MFarm.Inventory
                         if (targetSlot.slotType == SlotType.Bag)
                         {
                             inventoryUI.ResetEquipImage(slotType);
-                            InventoryManager.Instance.Swapitem(slotIndex, targetIndex ,1,0);
+                            InventoryManager.Instance.Swapitem(slotIndex, targetIndex, 1, 0);
                         }
                         inventoryUI.UpdatePlayerDefenseNum();
+                        return;
+                    }
+                    //从鱼饵格中拖出
+                    if (slotType == SlotType.Bait)
+                    {
+                        //只可以拖到玩家背包
+                        if(targetSlot.slotType == SlotType.Bag)
+                        {
+                            if (targetSlot.itemDetails != null)
+                            {
+                                if (!targetSlot.itemDetails.isBait)
+                                {
+                                    return;
+                                }
+                                else
+                                {
+                                    InventoryManager.Instance.Swapitem(slotIndex, targetIndex, itemAmount, currentAmount);
+                                }
+                                return;
+                            }
+                            //对方格子为空
+                            else
+                            {
+                                InventoryManager.Instance.Swapitem(slotIndex, targetIndex, itemAmount, currentAmount);
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            return;
+                        }
                     }
                     //跨背包交换物品数据
-                    else if (slotType != SlotType.Shop && targetSlot.slotType != SlotType.Shop && slotType != targetSlot.slotType)
+                    if (slotType != SlotType.Shop && targetSlot.slotType != SlotType.Shop && slotType != targetSlot.slotType)
                     {
- 
+                        
                         InventoryManager.Instance.SwapItem(Location, slotIndex, targetSlot.Location, targetSlot.slotIndex,false, 0);
                     }
 
@@ -384,6 +495,7 @@ namespace MFarm.Inventory
                     }
                 }
             }
+           
         }
     }
 }

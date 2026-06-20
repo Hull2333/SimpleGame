@@ -141,7 +141,7 @@ public class QuestUI : Singleton<QuestUI> //调用在InventoryUI上
     {
         var itemDetails = InventoryManager.Instance.GetItemDetails(ID);
         var item = Instantiate(rewardSlotUI, rewardTransform);
-        item.UpdateSlot(itemDetails, amount);
+        item.UpdateSlot(itemDetails, amount,false,0);
         item.GetComponent<Button>().interactable = false;
     }
     /// <summary>

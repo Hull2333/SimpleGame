@@ -74,7 +74,7 @@ public class NPCMovement : MonoBehaviour,ISaveable   //调用在NPC01对象上，所有NP
     private DialogueController dialogueController;
     public NPCEvent currentNPCEvent;
     //事件进度
-    private int NPCEventStep;
+    public int NPCEventStep;
     //开始移动到下一个事件点
     public bool timeToMoveNextPos;
     public CinemachineVirtualCamera cameraFollow;
@@ -148,9 +148,10 @@ public class NPCMovement : MonoBehaviour,ISaveable   //调用在NPC01对象上，所有NP
         if (sceneLoaded)
         {
             Movement();
-            if (timeToMoveNextPos)
+            if (timeToMoveNextPos && currentNPCEvent.dialogueData.Length > 0)
             {
-                ContinueNPCEvent();
+                
+                NPCMoveToNextPos();
             }
         }
     }
@@ -235,16 +236,33 @@ public class NPCMovement : MonoBehaviour,ISaveable   //调用在NPC01对象上，所有NP
         sceneLoaded = false;
         npcMove = false;
         //在游戏随时结束时，停止npc此时正在移动的协程
-        if(npcMoveRoutine!= null)
+        if (npcMoveRoutine!= null)
         {
             StopCoroutine(npcMoveRoutine);
         }
     }
     private void OnPromoteNPCEvent()
     {
-        NPCEventStep ++;
-        timeToMoveNextPos = true;
-        anim.SetBool("ActionExit", true);
+        if(currentNPCEvent.dialogueData.Length > 0)
+        {
+            NPCEventStep++;
+            //TODO:结束事件
+            if (NPCEventStep >= currentNPCEvent.dialogueData.Length)
+            {
+                transform.transform.position = originNPCPos;
+                cameraFollow.Follow = playerTransform;
+                currentNPCEvent.isHappened = true;
+                EventHandler.CallEndNPCEvent();
+                currentNPCEvent = null;
+                anim.SetBool("ActionExit", true);
+                timeToMoveNextPos = false;
+            }
+            else
+            {
+                timeToMoveNextPos = true;
+                anim.SetBool("ActionExit", true);
+            }
+        }
     }
     /// <summary>
     /// 根据NPC所在场景判断是否可见
@@ -525,12 +543,10 @@ public class NPCMovement : MonoBehaviour,ISaveable   //调用在NPC01对象上，所有NP
     public void StartNPCEvent()
     {
         EventHandler.CallStartNPCEvent();
-        if(NPCEventStep <= 0)
+        if(NPCEventStep == 0)
         {
-            //cameraFollow.Follow = transform;
             //对焦NPC
             cameraFollow.Follow = GameObject.Find(currentNPCEvent.npcName).transform;
-            
             anim.SetBool("ActionExit", false);
             //播放这段对话的动作
             anim.Play(currentNPCEvent.animClip[NPCEventStep].name);
@@ -544,20 +560,11 @@ public class NPCMovement : MonoBehaviour,ISaveable   //调用在NPC01对象上，所有NP
     }
   
     /// <summary>
-    /// 继续事件进度
+    /// NPC移动到下一个事件位置
     /// </summary>
-    public void ContinueNPCEvent()
+    public void NPCMoveToNextPos()
     {
-        //TODO:结束事件
-        if(NPCEventStep >= currentNPCEvent.dialogueData.Length)
-        {
-            transform.transform.position = originNPCPos;
-            cameraFollow.Follow = playerTransform;
-            currentNPCEvent.isHappened = true;
-            timeToMoveNextPos = false;
-            EventHandler.CallEndNPCEvent();
-            return;
-        }
+        
         var newPos = Vector2.MoveTowards(transform.position, currentNPCEvent.nextPos[NPCEventStep], currentNPCEvent.normalSpeed * Time.fixedDeltaTime);
         dir = ((Vector3)currentNPCEvent.nextPos[NPCEventStep] - transform.position).normalized;
         anim.SetFloat("DirX", dir.x);

@@ -11,10 +11,10 @@ public class DialogueOptionUI : MonoBehaviour //调用预制体OptionButton
     private DialoguePieces currentPiece;
     //下一条对话
     private string nextPieceID;
-    private bool takeQuest;
-    private bool takeBag;
     private InventoryBag_SO bag_SO;
+    private BuildingBagData_SO buildingBag;
     private int friendlinessValue;
+    private DialogueOptionType optionType;
     private void Awake()
     {
         thisButton = GetComponent<Button>();
@@ -30,9 +30,9 @@ public class DialogueOptionUI : MonoBehaviour //调用预制体OptionButton
         currentPiece = piece;
         optionText.text = option.text;
         nextPieceID = option.targetID;
-        takeQuest = option.takeQuest;
-        takeBag = option.takeBag;
+        optionType = option.optionType;
         bag_SO = option.bag_SO;
+        buildingBag = option.buildingBag;
         friendlinessValue = option.friendlinessValue;
     }
     /// <summary>
@@ -46,34 +46,30 @@ public class DialogueOptionUI : MonoBehaviour //调用预制体OptionButton
             {
                 questData = Instantiate(currentPiece.quest)
             };
-            if (takeQuest)
+            //添加到任务列表
+            //是否已经有相同任务
+            if (QuestManager.Instance.HaveQuest(newTask.questData))
             {
-                //添加到任务列表
-                //是否已经有相同任务
-                if (QuestManager.Instance.HaveQuest(newTask.questData))
+                //判断是否完成给予奖励
+                if (QuestManager.Instance.GetTask(newTask.questData).IsComplete)
                 {
-                    //判断是否完成给予奖励
-                    if (QuestManager.Instance.GetTask(newTask.questData).IsComplete)
+                    newTask.questData.GiveRewards();
+                    if (newTask.questData.questType == QuestType.Plot)
                     {
-                        newTask.questData.GiveRewards();
-                        if(newTask.questData.questType == QuestType.Plot)
+                        //将任务状态改为IsFinish
+                        QuestManager.Instance.GetTask(newTask.questData).IsFinshed = true;
+                    }
+                    else
+                    {
+                        //如果接受任务列表中任务类型是公告栏，就移除接受任务列表不需要改变状态
+                        for (int i = 0; i < QuestManager.Instance.tasks.Count; i++)
                         {
-                            //将任务状态改为IsFinish
-                            QuestManager.Instance.GetTask(newTask.questData).IsFinshed = true;
-                        }
-                        else
-                        {
-                            //如果接受任务列表中任务类型是公告栏，就移除接受任务列表不需要改变状态
-                            for (int i = 0; i < QuestManager.Instance.tasks.Count; i++)
+                            if (newTask.questData.questName == QuestManager.Instance.tasks[i].questData.questName)
                             {
-                                if (newTask.questData.questName == QuestManager.Instance.tasks[i].questData.questName)
-                                {
-                                    QuestManager.Instance.tasks.Remove(QuestManager.Instance.tasks[i]);
-                                }
+                                QuestManager.Instance.tasks.Remove(QuestManager.Instance.tasks[i]);
                             }
-
                         }
-                       
+
                     }
                 }
                 else
@@ -86,19 +82,25 @@ public class DialogueOptionUI : MonoBehaviour //调用预制体OptionButton
                         InventoryManager.Instance.CheckQuestItemInBag(requireItem);
                     }
                 }
-
             }
+
         }
-       
         //有对话选项触发NPC背包
-        if (takeBag)
+        if (optionType == DialogueOptionType.ItemShop)
         {
             EventHandler.CallBaseBagOpenEvent(SlotType.Shop, bag_SO);
             DialogueUI.Instance.QuitDialogueUI();
             EventHandler.CallUpdateGameStateEvent(GameState.Pause);
             return;
         }
-       
+        //有对话选项触发Build背包
+        if (optionType == DialogueOptionType.BuildShop)
+        {
+            EventHandler.CallOpenBuildShopEvent(buildingBag);
+            DialogueUI.Instance.QuitDialogueUI();
+            EventHandler.CallUpdateGameStateEvent(GameState.Pause);
+            return;
+        }
         //点击此选项后没有对话那就结束对话
         if (nextPieceID == null || nextPieceID == "0")
         {

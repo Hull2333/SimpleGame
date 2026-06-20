@@ -78,6 +78,7 @@ public class PoolManager : MonoBehaviour    //调用在PoolManager对象上
             ParticalEffectType.CropEffect01 => poolEffectList[12],
             ParticalEffectType.FeatherEffect01 => poolEffectList[13],
             ParticalEffectType.FeatherEffect02 => poolEffectList[14],
+            ParticalEffectType.HoeEffect02 => poolEffectList[15],
             _ => null,
         };
         //在对象池中获取、释放对象

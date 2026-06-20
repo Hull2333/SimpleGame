@@ -11,10 +11,11 @@ namespace MFarm.Transition
         //设置新游戏开始时玩家所在场景
         public string startSceneName = string.Empty;
         //加载场景的Loading界面
-        private CanvasGroup fadeCanvasGroup;
+        public CanvasGroup fadeCanvasGroup;
         private bool isFade;
 
         public string GUID => GetComponent<DataGUID>().guid;
+
 
         protected override void Awake()
         {
@@ -43,12 +44,12 @@ namespace MFarm.Transition
             saveable.RegisterSaveable();
             fadeCanvasGroup = FindObjectOfType<CanvasGroup>();
         }
-        private void OnTransitionEvent(string sceneToGo, Vector3 positionToGo)
+        private void OnTransitionEvent(string sceneToGo, Vector3 positionToGo,bool fade)
         {
             //避免人物快速的切换场景
             if (!isFade)
             {
-                StartCoroutine(Transition(sceneToGo, positionToGo));
+                StartCoroutine(Transition(sceneToGo, positionToGo, fade));
             }
             
         }
@@ -69,22 +70,40 @@ namespace MFarm.Transition
         /// <param name="sceneName">切换的新场景</param>
         /// <param name="targetPosition">传送点</param>
         /// <returns></returns>
-        private IEnumerator Transition(string sceneName, Vector3 targetPosition)
+        private IEnumerator Transition(string sceneName, Vector3 targetPosition,bool isFade)
         {
-            //加载场景之前所需要做的事情
-            EventHandler.CallBeforeSceneUnloadEvent();
-            //Loading界面的出现
-            yield return Fade(1);
-            //获取当前场景并卸载
-            yield return SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene());
-            //加载新场景
-            yield return LoadSceneSetActive(sceneName);
-            //加载新场景后人物的位置
-            EventHandler.CallMoveToPosition(targetPosition);
-            //加载新场景之后所需要做的事情
-            EventHandler.CallAfterSceneLoadedEvent();
-            //Loading界面的消失
-            yield return Fade(0);
+            //需要Loading
+            if (isFade)
+            {
+                //加载场景之前所需要做的事情
+                EventHandler.CallBeforeSceneUnloadEvent();
+                //Loading界面的出现
+                yield return Fade(1);
+                //获取当前场景并卸载
+                yield return SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene());
+                //加载新场景
+                yield return LoadSceneSetActive(sceneName);
+                //加载新场景后人物的位置
+                EventHandler.CallMoveToPosition(targetPosition);
+                //加载新场景之后所需要做的事情
+                EventHandler.CallAfterSceneLoadedEvent();
+                //Loading界面的消失
+                yield return Fade(0);
+            }
+            //不需要Loading
+            else
+            {
+                //加载场景之前所需要做的事情
+                EventHandler.CallBeforeSceneUnloadEvent();
+                //获取当前场景并卸载
+                yield return SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene());
+                //加载新场景
+                yield return LoadSceneSetActive(sceneName);
+                //加载新场景后人物的位置
+                EventHandler.CallMoveToPosition(targetPosition);
+                //加载新场景之后所需要做的事情
+                EventHandler.CallAfterSceneLoadedEvent();
+            }
         }
         /// <summary>
         /// 加载场景并激活，仅仅只有激活功能没有切换场景的功能

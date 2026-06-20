@@ -7,14 +7,16 @@ using MFarm.Map;
 using MFarm.CropPlant;
 using MFarm.Inventory;
 using Unity.VisualScripting;
+using System;
+using Cinemachine;
+using UnityEngine.SceneManagement;
+using System.Collections;
 
 
 public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
 {
     public Image cursorImage;
     private RectTransform cursorCanvas;
-    //建造图标跟随
-    private Image buildImage;
     //其他图标跟随
     private Image otherCursorImage;
     //用于鼠标检测的变量
@@ -24,6 +26,8 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
     private Vector3Int mouseGridPos;
     private Vector3Int playerGridPos;
     public bool cursorEnable;
+    //可以执行鼠标点击后方法
+    private bool canExcuteMouse;
     //鼠标当前选择的物品
     public ItemDetails currentItem;
     public TileDetails currentTile;
@@ -49,8 +53,36 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
     public bool canCheck;
     //可以拍打
     public bool canPat;
+    //可烹饪
+    private bool canCooked;
     //是否可以检测鼠标的世界坐标
     public bool canDetectionMouseWorldPos;
+    //鼠标长按的时间
+    public float holdPressDuration;
+    private GameState gameState;
+    [Header("建筑和家具")]
+    //建造模式摄像机位置
+    public Transform buildModeCameraPos;
+    public CinemachineVirtualCamera camera;
+    //鼠标触碰摄像机边缘阈值
+    private float cameraEdgeThreshold = 10f;
+    //当前为建造模式
+    public bool buildMode;
+    //每个场景中放置建筑和家具的位置
+    private Transform furnitureParent;
+    private Transform buildingParent;
+    //当前选择的家具和建筑Details
+    public BluPrintData_SO bluPrintData;
+    public BluPrintDetails currentBluPrintDetails;
+    public BuildingDetails currentBuildingDetails;
+    [HideInInspector] public GameObject bluPrintPrefab;
+    //当前和上一帧的建筑占用Tile
+    private List<TileDetails> bluPrintTileList = new List<TileDetails>();
+    private List<TileDetails> lastBluPrintTileList = new List<TileDetails>();
+    private Bounds lastBounds;
+    //记录玩家当前场景和位置
+    private string currentScene;
+    private Vector3 currentPlayerPos;
     private void OnEnable()
     {
         EventHandler.ItemSelectEvent += OnItemSelectEvent;
@@ -58,6 +90,9 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         EventHandler.AfterSceneLoadedEvent += OnAfterSceneLoadedEvent;
         EventHandler.ItemUselessEvent += OnItemUselessEvent;
         EventHandler.RestoreNormalCursorImageEvent += OnRestoreNormalCursorImageEvent;
+        EventHandler.CheckCookedUIEvent += OnCheckCookedUIEvent;
+        EventHandler.UpdateGameStateEvent += OnUpdateGameStateEvent;
+        EventHandler.BuildindModeEvent += OnBuildindModeEvent;
     }
 
 
@@ -68,6 +103,9 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         EventHandler.AfterSceneLoadedEvent -= OnAfterSceneLoadedEvent;
         EventHandler.ItemUselessEvent -= OnItemUselessEvent;
         EventHandler.RestoreNormalCursorImageEvent -= OnRestoreNormalCursorImageEvent;
+        EventHandler.CheckCookedUIEvent -= OnCheckCookedUIEvent;
+        EventHandler.UpdateGameStateEvent -= OnUpdateGameStateEvent;
+        EventHandler.BuildindModeEvent -= OnBuildindModeEvent;
     }
 
    
@@ -81,9 +119,6 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         cursorCanvas = GameObject.FindGameObjectWithTag("CursorCanvas").GetComponent<RectTransform>();
         cursorImage = cursorCanvas.GetChild(0).GetComponent<Image>();
         cursorAnim = cursorCanvas.GetChild(0).GetComponent<Animator>();
-        //拿到建造光标
-        buildImage = cursorCanvas.GetChild(2).GetComponent<Image>();
-        buildImage.gameObject.SetActive(false);
         //拿到其他光标
         otherCursorImage = cursorCanvas.GetChild(3).GetComponent<Image>();
         //currentSprite = normal;
@@ -98,6 +133,15 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
 
     private void Update()
     {
+        switch (gameState)
+        {
+            case GameState.Gameplay:
+                cursorEnable = true;
+                break;
+            case GameState.Pause:
+                cursorEnable = false;
+                break;
+        }
         //根据摄像机的位置来获取鼠标的世界坐标
         if (canDetectionMouseWorldPos)
         {
@@ -106,6 +150,7 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         if (currentGrid != null)
         {
             //再根据获取的世界坐标转化为地图坐标
+            mouseGridPos = currentGrid.WorldToCell(mouseWorldPos);
             mouseGridPos = currentGrid.WorldToCell(mouseWorldPos);
             playerGridPos = currentGrid.WorldToCell(playerTransform.position);
         }
@@ -118,7 +163,7 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         cursorImage.transform.position = Input.mousePosition;
         otherCursorImage.rectTransform.position = Input.mousePosition;
         //当鼠标移动到任何UI的范围时，图片都变为normal
-        if (!InteractWithUI() && cursorEnable )
+        if (!InteractWithUI() && cursorEnable)
         {
             CheckCursorValid();
             CheckPlayerInput();
@@ -128,7 +173,6 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
             
             cursorImage.gameObject.SetActive(true);
             //关闭建造图片、动态鼠标图片
-            buildImage.gameObject.SetActive(false);
             otherCursorImage.gameObject.SetActive(false);
         }
         if(currentItem == null || currentItem.itemID == 0)
@@ -146,75 +190,47 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         {
             cursorAnim.SetBool("Clicked", false);
         }
+        //建造模式下
+        if (buildMode)
+        {
+            if (bluPrintPrefab != null)
+            {
+                
+                bluPrintPrefab.transform.position = mouseGridPos;
+                Bounds currentBounds = bluPrintPrefab.GetComponent<BoxCollider2D>().bounds;
+                if (currentBounds != lastBounds)
+                {
+                    UpdateBluPrintCellList(currentBounds, lastBounds);
+                    lastBounds = currentBounds;
+                }
+                GridMapManager.Instance.DisplayBluPrintAvaliableGround(bluPrintTileList, lastBluPrintTileList);
+                MoveBuildModeCameraPos();
+                if (Input.GetMouseButtonDown(0) && !InteractWithUI() && canExcuteMouse)
+                {
+                    EventHandler.CallInstantiateBuildingOnMapEvent(currentBuildingDetails, mouseGridPos, buildingParent);
+                }
+            }
+            
+        }
         EmptyHandHatvestCrop();
 
     }
-    /// <summary>
-    /// 鼠标点击物品时执行的操作
-    /// </summary>
-    public void CheckPlayerInput()
-    {
-        //当所有UI都未开启时才可以使用道具
-        if (isUIOpened == false) 
-        {
-            if (currentItem.itemType == ItemType.FishingRod)
-            {
-                //长按鼠标左键
-                if (Input.GetMouseButton(0) && fishingEventDisable == false)
-                {
-                    canDetectionMouseWorldPos = false;
-                    EventHandler.CallMouseHoldEvent(mouseWorldPos, currentItem);
-                }
-                //松开鼠标长按
-                if (Input.GetMouseButtonUp(0) && fishingEventDisable == false)
-                {
-                    canDetectionMouseWorldPos = true;
-                    EventHandler.CallMouseUpEvent();
-                }
-            }
-            if(currentItem.itemType == ItemType.Sword)
-            {
-                //点击左键攻击
-                if (Input.GetMouseButtonDown(0))
-                {
-                    EventHandler.CallMouseClickedEvent(mouseWorldPos, currentItem);
-                }
-                //点击右键防御
-                if(Input.GetMouseButtonDown(1) && !playerController.isKnocking)
-                {
-                    StartCoroutine(playerController.PlayerDefence(mouseWorldPos));
-                }
-                //按下F处决
-                if (Input.GetKeyDown(KeyCode.F) && CheckRoundEnemy())
-                {
-                    StartCoroutine(playerController.PlayerExecution());
-                }
-            }
-            else
-            {
-                //点击左键
-                if (Input.GetMouseButtonDown(0))
-                {
-                    EventHandler.CallMouseClickedEvent(mouseWorldPos, currentItem);
-                }
-                //点击右键吃东西
-                if (Input.GetMouseButtonDown(1))
-                {
-                    if (currentItem.canEat == true)
-                    {
-                        //吃东西
-                        EventHandler.CallUseItemRecoverEvent(currentItem, playerController);
-                    }
-                }
-            }
-        }
-    }
+   
     /// <summary>
     /// 获取当前地图的瓦片位置
     /// </summary>
     private void OnAfterSceneLoadedEvent()
     {
        currentGrid = FindObjectOfType<Grid>();
+       furnitureParent = FindObjectOfType<FurnitureParent>().transform;
+       buildingParent = FindObjectOfType<BuildingParent>().transform;
+        if (buildMode)
+        {
+            bluPrintPrefab = Instantiate(currentBuildingDetails.buildPrefab, buildingParent);
+            bluPrintPrefab.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.75f);
+            bluPrintPrefab.GetComponent<BuildingItem>().SwitchCollider2D(false);
+            EventHandler.CallGetCurrentBuildingDetails(currentBuildingDetails, buildingParent, bluPrintTileList);
+        }
     }
     private void OnBeforeSceneUnloadEvent()
     {
@@ -227,42 +243,7 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         cursorAnim.runtimeAnimatorController = cursorAnimList[0].cursorController;
         canCheck = false;
     }
-    /// <summary>
-    /// 设置鼠标图片
-    /// </summary>
-    /// <param name="sprite"></param>
-    public void SetCursorImage(Sprite sprite)
-    {
-        cursorImage.sprite = sprite;
-        cursorImage.color = new Color(1, 1, 1, 1);
-    }
-    #region 设置鼠标样式
-    /// <summary>
-    /// 设置鼠标可用状态
-    /// </summary>
-    //private void SetCursorValid()
-    //{
-    //    cursorImage.color = new Color(1, 1, 1, 1);
-    //    buildImage.color = new Color(1, 1, 1, 0.5f);
-    //}
-    /// <summary>
-    /// 设置鼠标不可用状态
-    /// </summary>
-    //private void SetCursorInvalid()
-    //{
-    //    cursorImage.color = new Color(1,0,0,0.4f);
-    //    buildImage.color = new Color(1, 0, 0, 0.5f);
-    //}
-    /// <summary>
-    /// 设置鼠标可用但颜色变为不可以
-    /// </summary>
-    //private void SetCursorIncompleteInvalid()
-    //{
-    //    cursorImage.color = new Color(1, 0, 0, 0.4f);
-    //    buildImage.color = new Color(1, 0, 0, 0.5f);
-    //}
    
-    #endregion
     /// <summary>
     /// 设置鼠标随物品类型而变化
     /// </summary>
@@ -270,7 +251,11 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
     /// <param name="isSelected"></param>
     private void OnItemSelectEvent(ItemDetails itemDetails,bool isSelected)
     {
-        
+        canExcuteMouse = isSelected;
+        if (bluPrintPrefab != null)
+        {
+            Destroy(bluPrintPrefab);
+        }
         if (!isSelected)
         {
             //当没有选择物品时，动画为Normal
@@ -278,7 +263,6 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
             //currentSprite = normal;
             cursorEnable = false;
             currentItem = null;
-            buildImage.gameObject.SetActive(false);
         }
         //物品被选中才更改鼠标图标
         else
@@ -308,13 +292,14 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
                     cursorAnim.runtimeAnimatorController = cursorAnimList[i].cursorController;
                 }
             }
-            //当选择家具图纸物品时，显示建造家具图片
+            //当选择家具物品时，预生成家具
             if(itemDetails.itemType == ItemType.Furniture)
             {
-                buildImage.gameObject.SetActive(true);
-                buildImage.sprite = itemDetails.itemOnWorldSprite;
-                //强制设置家具图片为默认大小
-                buildImage.SetNativeSize();
+                currentBluPrintDetails = bluPrintData.GetBluPrintDetails(currentItem.itemID);
+                bluPrintPrefab = Instantiate(currentBluPrintDetails.buildPrefab, furnitureParent);
+                bluPrintPrefab.GetComponent<Furniture>().SetCollider(false);
+                bluPrintPrefab.GetComponent<SpriteRenderer>().color = new Color(1,1,1,0.75f);
+                EventHandler.CallGetCurrentBluPrintPrefab(currentBluPrintDetails, furnitureParent , bluPrintTileList);
             }
         }
         
@@ -328,7 +313,53 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
     {
         isUIOpened = isbool;
     }
- 
+    private void OnCheckCookedUIEvent(bool cooked)
+    {
+        canCooked = cooked;
+    }
+    private void OnUpdateGameStateEvent(GameState state)
+    {
+        gameState = state;
+    }
+    private void OnBuildindModeEvent(BuildingDetails building , bool isBuilding)
+    {
+        if (isBuilding)
+        {
+            currentScene = SceneManager.GetActiveScene().name;
+            currentPlayerPos = playerTransform.position;
+            //切换场景到农场
+            EventHandler.CallTransitionEvent("Farm", currentPlayerPos,false);
+            buildModeCameraPos.position = new Vector2(35f, -25f);
+            //设置摄像头的跟随和显示比例，生成预生成建筑在地图加载后的事件中
+            camera.Follow = buildModeCameraPos;
+            camera.m_Lens.OrthographicSize = 20;
+            currentBuildingDetails = bluPrintData.GetBuildingDetails(building.ID);
+            buildMode = isBuilding;
+
+        }
+        else
+        {
+            EventHandler.CallTransitionEvent(currentScene, currentPlayerPos, false);
+            if (bluPrintPrefab != null)
+            {
+                Destroy(bluPrintPrefab);
+            }
+            camera.Follow = playerTransform;
+            camera.m_Lens.OrthographicSize = 7;
+            currentBuildingDetails = null;
+            buildMode = isBuilding;
+
+        }
+    }
+    /// <summary>
+    /// 设置鼠标图片
+    /// </summary>
+    /// <param name="sprite"></param>
+    public void SetCursorImage(Sprite sprite)
+    {
+        cursorImage.sprite = sprite;
+        cursorImage.color = new Color(1, 1, 1, 1);
+    }
     /// <summary>
     /// 鼠标移动到对应物体切换成不一样的鼠标图片
     /// </summary>
@@ -340,15 +371,29 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
             checkCollider = Physics2D.OverlapPoint(mouseWorldPos, checkLayer);
             if (checkCollider != null)
             {
-                if (checkCollider.CompareTag("NPC") || checkCollider.CompareTag("BulletinBoard"))
+                //NPC或者可调查事物
+                if (checkCollider.CompareTag("NPC") || checkCollider.CompareTag("Investigable"))
                 {
                     cursorAnim.runtimeAnimatorController = cursorAnimList[1].cursorController;
                     canCheck = true;
+                    return;
                 }
-                if (checkCollider.CompareTag("Door"))
+                //可互动事物
+                if (checkCollider.CompareTag("Interactive"))
                 {
                     cursorAnim.runtimeAnimatorController = cursorAnimList[4].cursorController;
                     canPat = true;
+                    return;
+                }
+                //可烹饪事物
+                if (checkCollider.CompareTag("Cooked"))
+                {
+                    cursorAnim.runtimeAnimatorController = cursorAnimList[5].cursorController;
+                    if (canCooked && Input.GetMouseButtonDown(0))
+                    {
+                        EventHandler.CallCookedMenuSetupEvent();
+                    }
+                    return;
                 }
             }
             else
@@ -357,6 +402,13 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
                 canCheck = false;
                 canPat = false;
             }
+
+        }
+        else
+        {
+            cursorAnim.runtimeAnimatorController = cursorAnimList[0].cursorController;
+            canCheck = false;
+            canPat = false;
         }
         
 
@@ -385,13 +437,137 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
        
     }
     /// <summary>
+    /// 鼠标点击物品时执行的操作
+    /// </summary>
+    public void CheckPlayerInput()
+    {
+        if (currentItem == null)
+        {
+            return;
+        }
+        //当所有UI都未开启时才可以使用道具
+        if (isUIOpened == false)
+        {
+            if (currentItem.itemType == ItemType.Sword)
+            {
+                //点击左键攻击
+                if (Input.GetMouseButtonDown(0))
+                {
+                    EventHandler.CallMouseClickedEvent(mouseWorldPos, currentItem);
+                }
+                //点击右键防御
+                if (Input.GetMouseButtonDown(1) && !playerController.isKnocking)
+                {
+                    StartCoroutine(playerController.PlayerDefence(mouseWorldPos));
+                }
+                //按下F处决
+                if (Input.GetKeyDown(KeyCode.F) && CheckRoundEnemy())
+                {
+                    StartCoroutine(playerController.PlayerExecution());
+                }
+            }
+            if (currentItem.itemType == ItemType.FishingRod)
+            {
+                //长按鼠标左键
+                if (Input.GetMouseButton(0) && fishingEventDisable == false)
+                {
+                    EventHandler.CallControlPlayerBagOpen(false);
+                    holdPressDuration += Time.deltaTime;
+                    if (holdPressDuration >= 0.2f)
+                    {
+                        canDetectionMouseWorldPos = false;
+                        EventHandler.CallMouseHoldEvent(mouseWorldPos, currentItem);
+                    }
+
+                }
+                //松开鼠标长按
+                if (Input.GetMouseButtonUp(0) && fishingEventDisable == false)
+                {
+                    if (holdPressDuration >= 0.2f)
+                    {
+                        holdPressDuration = 0;
+                        canDetectionMouseWorldPos = true;
+                        EventHandler.CallMouseUpEvent();
+                    }
+                    else
+                    {
+                        EventHandler.CallControlPlayerBagOpen(true);
+                        holdPressDuration = 0;
+                    }
+
+                }
+            }
+            else
+            {
+                if (canExcuteMouse)
+                {
+                    //点击左键
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        EventHandler.CallMouseClickedEvent(mouseWorldPos, currentItem);
+                    }
+                    //点击右键吃东西
+                    if (Input.GetMouseButtonDown(1))
+                    {
+                        if (currentItem.canEat == true)
+                        {
+                            EventHandler.CallPlayEatAnimEvent(currentItem.itemID);
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+    private void UpdateBluPrintCellList(Bounds bounds , Bounds lastBounds)
+    {
+        bluPrintTileList.Clear();
+        lastBluPrintTileList.Clear();
+        Vector3Int minCell = currentGrid.WorldToCell(bounds.min);
+        Vector3Int maxCell = currentGrid.WorldToCell(bounds.max);
+        Vector3Int minLastCell = currentGrid.WorldToCell(lastBounds.min);
+        Vector3Int maxLastCell = currentGrid.WorldToCell(lastBounds.max);
+        for (int x = minCell.x; x <= maxCell.x; x++)
+        {
+            for (int y = minCell.y; y <= maxCell.y; y++)
+            {
+                TileDetails newBluPrintTile = GridMapManager.Instance.GetTileDetailsOnMousePosition(new Vector3Int(x, y, 0));
+                if (newBluPrintTile != null)
+                {
+                    bluPrintTileList.Add(newBluPrintTile);
+                }
+                //检查该家具或建筑是否可以放置在这里
+                foreach (var tile in bluPrintTileList)
+                {
+                    canExcuteMouse = true;
+                    if (!tile.canPlaceFurniture || tile.havePlace == 1)
+                    {
+                        canExcuteMouse = false;
+                        break;
+                    }
+                }
+
+            }
+        }
+        for (int x = minLastCell.x; x <= maxLastCell.x; x++)
+        {
+            for (int y = minLastCell.y; y <= maxLastCell.y; y++)
+            {
+                TileDetails LastBluPrintTile = GridMapManager.Instance.GetTileDetailsOnMousePosition(new Vector3Int(x, y, 0));
+                if (LastBluPrintTile != null)
+                {
+                    lastBluPrintTileList.Add(LastBluPrintTile);
+                }
+
+            }
+        }
+    }
+    /// <summary>
     /// 检查鼠标是否可用
     /// </summary>
     private void CheckCursorValid()
     {
         
-        //建造图片跟随鼠标移动
-        buildImage.rectTransform.position = Input.mousePosition;
         //判断是否鼠标丢弃的位置超过该物品的使用范围
         //if(currentItem != null && currentItem.canDropped)
         //{
@@ -402,10 +578,17 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         //    }
         //}
         currentTile = GridMapManager.Instance.GetTileDetailsOnMousePosition(mouseGridPos);
-        //if(currentItem != null)
-        //{
-        //    SetCursorValid();
-        //}
+        //预生成家具跟随鼠标的Grid坐标
+        if (bluPrintPrefab != null)
+        {
+            bluPrintPrefab.transform.position = mouseGridPos;
+            Bounds currentBounds = bluPrintPrefab.GetComponent<BoxCollider2D>().bounds;
+            if (currentBounds != lastBounds)
+            {
+                UpdateBluPrintCellList(currentBounds, lastBounds);
+                lastBounds = currentBounds;
+            }
+        }
         //根据选择的物品类型来决定鼠标是否可用
         if (currentTile != null && currentItem != null)
         {
@@ -424,13 +607,6 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
                 case ItemType.Commodity:
                     //GridMapManager.Instance.QuitDigAvailableGround();
                     //当前选择的瓦片是可丢瓦片且选择的物品是可以丢弃的
-                    if (currentTile.canDropItem && currentItem.canDropped)
-                    {
-                        //SetCursorValid();
-                    }
-                    break;
-                case ItemType.cooked:
-                    //GridMapManager.Instance.QuitDigAvailableGround();
                     if (currentTile.canDropItem && currentItem.canDropped)
                     {
                         //SetCursorValid();
@@ -470,15 +646,8 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
                     break;
                 //图纸
                 case ItemType.Furniture:
+                    GridMapManager.Instance.DisplayBluPrintAvaliableGround(bluPrintTileList, lastBluPrintTileList);
                     //GridMapManager.Instance.QuitDigAvailableGround();
-                    buildImage.gameObject.SetActive(true);
-                    //拿到当前选择的家具蓝图
-                    var bluePrintDetails = InventoryManager.Instance.bluPrintData.GetBluPrintDetails(currentItem.itemID);
-
-                    if (currentTile.canPlaceFurniture && InventoryManager.Instance.CheckStock(currentItem.itemID) && !HaveFurnitrueInRadius(bluePrintDetails))
-                    {
-                        //SetCursorValid();
-                    }
                     break;
                 case ItemType.FishingRod:
                     //GridMapManager.Instance.QuitDigAvailableGround();
@@ -513,29 +682,12 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         //}
     }
     /// <summary>
-    /// 检查建造范围内是否有其他家具
-    /// </summary>
-    /// <param name="bluePrintDetails"></param>
-    /// <returns></returns>
-    private bool HaveFurnitrueInRadius(BluPrintDetails bluePrintDetails)
-    {
-        var buildItem = bluePrintDetails.buildPrefab;
-        Vector2 point = mouseWorldPos;
-        var size = buildItem.GetComponent<BoxCollider2D>().size;
-        //起点，范围，角度,OverlapBox也会检测Trigger的coll，想要忽略被OverlapBox检测，把layer改为Ignore Raycast
-        var otherColl = Physics2D.OverlapBox(point, size, 0);
-        if(otherColl != null)
-        {
-            return otherColl.GetComponent<Furniture>();
-        }
-        return false;
-    }
-    /// <summary>
     /// 是否与UI互动
     /// </summary>
     /// <returns></returns>
     private bool InteractWithUI()
     {
+       
         if (canDetectionMouseWorldPos)
         {
             if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
@@ -567,5 +719,36 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         }
         return false;
     }
-   
+   /// <summary>
+   /// 建造模式下触碰摄像机边缘移动摄像机
+   /// </summary>
+    private void MoveBuildModeCameraPos()
+    {
+        Vector3 mousePos = Input.mousePosition;
+        float screenWidth = Screen.width;
+        float screenHeight = Screen.height;
+        // 检测鼠标是否在屏幕边缘
+        bool isLeftEdge = mousePos.x <= cameraEdgeThreshold;
+        bool isRightEdge = mousePos.x >= screenWidth - cameraEdgeThreshold;
+        bool isBottomEdge = mousePos.y <= cameraEdgeThreshold;
+        bool isTopEdge = mousePos.y >= screenHeight - cameraEdgeThreshold;
+        if (isLeftEdge)
+        {
+            buildModeCameraPos.Translate(Vector3.left * 20f * Time.deltaTime);
+        }
+        if (isRightEdge)
+        {
+            buildModeCameraPos.Translate(Vector3.right * 20f * Time.deltaTime);
+        }
+        if (isBottomEdge)
+        {
+            buildModeCameraPos.Translate(Vector3.down * 20f * Time.deltaTime);
+        }
+        if (isTopEdge)
+        {
+            buildModeCameraPos.Translate(Vector3.up * 20f * Time.deltaTime);
+        }
+
+
+    }
 }

@@ -4,12 +4,16 @@ using MFarm.Save;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Unity.PlasticSCM.Editor.WebApi;
 using Unity.VisualScripting;
 using Unity.VisualScripting.Antlr3.Runtime.Collections;
+using UnityEditor.U2D.Aseprite;
 using UnityEngine;
+using UnityEngine.ProBuilder.Shapes;
 using UnityEngine.SceneManagement;
 using UnityEngine.Tilemaps;
 using UnityEngine.WSA;
+using Sprite = UnityEngine.Sprite;
 namespace MFarm.Map
 {
     //Singleton单例模式，就算切换场景也不会改变里面的脚本
@@ -35,11 +39,14 @@ namespace MFarm.Map
         private Grid currentGrid;
         private Season currentSeason;
         [Header("可收割场景")]
-        //杂草预制体
-        public GameObject[] weedsPrefabs;
-        //杂草预制体序号
-        private int weedsNumber;
+        //当前场景
+        private MapData_SO currentSceneMap;
+        //杂草预制体和杂草图片
+        public GameObject weedPrefab;
+        public Sprite[] weedSprites;
         private TileDetails aroundWeedsTileDetail,aroundBigRockTileDetail,aroundTreeTileDetail;
+        public GameObject bigWeedPrefab;
+        public Sprite[] bigWeedSprites;
         //石矿预制体
         public GameObject[] rocksPrefabs;
         //石矿预制体序号
@@ -53,9 +60,20 @@ namespace MFarm.Map
         public LayerMask knockableLayer,axeableLayer;
         //可收获物碰撞体
         public Collider2D ableCollider;
+        //可劈砍预制体
+        public GameObject[] chopItemPrefabs;
         public string GUID => GetComponent<DataGUID>().guid;
-
         public bool canGetPlayerPos;
+        [Header("出现传送点")]
+        //传送点
+        public GameObject teleportPos;
+        //传送点出现需要的点数
+        private int needPoint = 2;
+        [Header("家具和建筑")]
+        private BluPrintDetails bluPrintDetails;
+        private BuildingDetails buildingDetails;
+        private Transform bluPrintParent;
+        private List<TileDetails> bluPrintTileList = new List<TileDetails>();
         public void Start()
         {
             ISaveable saveable = this;
@@ -67,7 +85,6 @@ namespace MFarm.Map
                 firstLoadDict.Add(mapData.sceneName, true);
                 InitTileDetailsDict(mapData);
             }
-            
         }
 
         private void OnEnable()
@@ -76,6 +93,10 @@ namespace MFarm.Map
             EventHandler.AfterSceneLoadedEvent += OnAfterSceneLoadedEvent;
             EventHandler.GameDayEvent += OnGameDayEvent;
             EventHandler.RefreshCurrentMap += OnRefreshCurrentMap;
+            EventHandler.NextTeleportAppearEvent += OnNextTeleportAppearEvent;
+            EventHandler.GetCurrentBluPrintDetails += OnGetCurrentBluPrintDetails;
+            EventHandler.GetCurrentBuildingDetails += OnGetCurrentBuildingDetails;
+            EventHandler.InstantiateBuildingOnMapEvent += OnInstantiateBuildingOnMapEvent;
         }
         private void OnDisable()
         {
@@ -83,7 +104,14 @@ namespace MFarm.Map
             EventHandler.AfterSceneLoadedEvent -= OnAfterSceneLoadedEvent;
             EventHandler.GameDayEvent -= OnGameDayEvent;
             EventHandler.RefreshCurrentMap -= OnRefreshCurrentMap;
+            EventHandler.NextTeleportAppearEvent -= OnNextTeleportAppearEvent;
+            EventHandler.GetCurrentBluPrintDetails -= OnGetCurrentBluPrintDetails;
+            EventHandler.GetCurrentBuildingDetails -= OnGetCurrentBuildingDetails;
+            EventHandler.InstantiateBuildingOnMapEvent += OnInstantiateBuildingOnMapEvent;
         }
+
+     
+
         private void OnAfterSceneLoadedEvent()
         {
             currentGrid = FindObjectOfType<Grid>();
@@ -144,186 +172,235 @@ namespace MFarm.Map
                     break;
             }
         }
+        private void OnNextTeleportAppearEvent()
+        {
+            needPoint--;
+            if(needPoint <= 0)
+            {
+                TileProperty appearTilePos;
+                TileDetails appearTile;
+                //随机循环传送点的位置，直到随机循环出合适的位置就生成传送点
+                do
+                {
+                    appearTilePos = currentSceneMap.tilePropertyes[Random.Range(0, currentSceneMap.tilePropertyes.Count)];
+                    string key = appearTilePos.tileCoordinate.x + "X" + appearTilePos.tileCoordinate.y + "Y" + SceneManager.GetActiveScene().name;
+                    appearTile = GetTileDetails(key);
+                }
+                while (appearTile.haveBigRock != -1 || appearTile.haveBigWeeds != -1 || appearTile.haveRock != -1 || appearTile.haveChop != -1);
+               Instantiate(teleportPos, new Vector2(appearTile.gridX + 0.5f, appearTile.gridY + 0.5f), Quaternion.identity);
+            }
+        }
+        private void OnGetCurrentBluPrintDetails(BluPrintDetails bluPrint,Transform parent,List<TileDetails> list)
+        {
+            bluPrintDetails = bluPrint;
+            bluPrintParent = parent;
+            bluPrintTileList = list;
+        }
+        private void OnGetCurrentBuildingDetails(BuildingDetails building, Transform parent, List<TileDetails> list)
+        {
+            buildingDetails = building;
+            bluPrintParent = parent;
+            bluPrintTileList = list;
+        }
+        private void OnInstantiateBuildingOnMapEvent(BuildingDetails building,Vector3 pos,Transform parent)
+        {
+            foreach (var tile in bluPrintTileList)
+            {
+                tile.havePlace = 1;
+            }
+        }
         /// <summary>
         /// 每天随机生成地图上的可收割事物
         /// </summary>
         public void RandomGenerateInterView()
         {
-            
-            foreach (var tile in tileDetailsDict)
+            foreach (var mapData in mapDataList)
             {
-                //周围杂草列表
-                List<TileDetails> aroundWeedsDetailsList = new List<TileDetails>();
-                if (tile.Value.canWeeds)
+                if (mapData.sceneName == SceneManager.GetActiveScene().name)
                 {
-                    
-                    //获取可生成杂草TileDetail
-                    var weedsTileDetail = GetTileDetailsOnMousePosition(new Vector3Int(tile.Value.gridX, tile.Value.gridY));
-                    if (weedsTileDetail != null)
+                    currentSceneMap = mapData;
+                }
+            }
+            foreach (var sceneTile in currentSceneMap.tilePropertyes)
+            {
+                string key = sceneTile.tileCoordinate.x + "X" + sceneTile.tileCoordinate.y + "Y" + SceneManager.GetActiveScene().name;
+                var currentTile = GetTileDetails(key);
+                if (currentTile != null)
+                {
+                    //周围杂草列表
+                    List<TileDetails> aroundWeedsDetailsList = new List<TileDetails>();
+                    //已经挖过或者放置东西的瓦片不可以生成可收割事物
+                    if (currentTile.daysSinceDug == -1 && currentTile.havePlace == -1)
                     {
-                        //遍历可生成杂草Tile的周围8个Tile的位置
-                        for (int x = weedsTileDetail.gridX - 1; x <= weedsTileDetail.gridX + 1; x++)
+                        if (currentTile.canWeeds)
                         {
-                            for (int y = weedsTileDetail.gridY - 1; y <= weedsTileDetail.gridY + 1; y++)
-                            {
-                                //忽略自身的Tile
-                                if (x == weedsTileDetail.gridX && y == weedsTileDetail.gridY)
-                                {
-                                    continue;
-                                }
-                                //获取周围可种植杂草TileDetail
-                                aroundWeedsTileDetail = GetTileDetailsOnMousePosition(new Vector3Int(x, y));
-                                if (aroundWeedsTileDetail != null)
-                                {
-                                    aroundWeedsDetailsList.Add(aroundWeedsTileDetail);
-                                }
 
-                            }
-                        }
-                        if (aroundWeedsDetailsList != null)
-                        {
-                            //当前位置未生成杂草
-                            if (tile.Value.haveWeeds == -1)
+                            //获取可生成杂草TileDetail
+                            var weedsTileDetail = GetTileDetailsOnMousePosition(new Vector3Int(currentTile.gridX, currentTile.gridY));
+                            if (weedsTileDetail != null)
                             {
-                                //获取可生成杂草地块的地图位置
-                                Vector3 weedsPos = new Vector2(weedsTileDetail.gridX, weedsTileDetail.gridY);
-                                int generateWeedsOdds = Random.Range(0, 101);
-                                //随机生成杂草预制体
-                                weedsNumber = Random.Range(0, 6);
-                                //当周围没有杂草生成
-                                if (IsAroundHaveWeeds(aroundWeedsDetailsList) == -1)
+                                //遍历可生成杂草Tile的周围8个Tile的位置
+                                for (int x = weedsTileDetail.gridX - 1; x <= weedsTileDetail.gridX + 1; x++)
                                 {
-                                    //20%的概率生成杂草
-                                    if (generateWeedsOdds <= 20)
+                                    for (int y = weedsTileDetail.gridY - 1; y <= weedsTileDetail.gridY + 1; y++)
                                     {
-                                        Instantiate(weedsPrefabs[weedsNumber], new Vector2(Random.Range(weedsPos.x - 0.5f, weedsPos.x + 0.5f), Random.Range(weedsPos.y - 0.5f, weedsPos.y + 0.5f)), Quaternion.identity);
-                                        //已生成杂草
-                                        tile.Value.predictHaveWeeds++;
+                                        //忽略自身的Tile
+                                        if (x == weedsTileDetail.gridX && y == weedsTileDetail.gridY)
+                                        {
+                                            continue;
+                                        }
+                                        //获取周围可种植杂草TileDetail
+                                        aroundWeedsTileDetail = GetTileDetailsOnMousePosition(new Vector3Int(x, y));
+                                        if (aroundWeedsTileDetail != null)
+                                        {
+                                            aroundWeedsDetailsList.Add(aroundWeedsTileDetail);
+                                        }
+
                                     }
                                 }
-                                //当周围有杂草生成
-                                else if (IsAroundHaveWeeds(aroundWeedsDetailsList) == 1)
+                                if (aroundWeedsDetailsList != null)
                                 {
-                                    //50%的概率生成杂草
-                                    if (generateWeedsOdds <= 50)
+                                    //当前位置未生成杂草
+                                    if (currentTile.haveWeeds == -1)
                                     {
-                                        Instantiate(weedsPrefabs[weedsNumber], new Vector2(Random.Range(weedsPos.x - 0.5f, weedsPos.x + 0.5f), Random.Range(weedsPos.y - 0.5f, weedsPos.y + 0.5f)), Quaternion.identity);
-                                        //已生成杂草
-                                        tile.Value.predictHaveWeeds++;
+                                        //获取可生成杂草地块的地图位置
+                                        Vector3 weedsPos = new Vector2(weedsTileDetail.gridX, weedsTileDetail.gridY);
+                                        int generateWeedsOdds = Random.Range(0, 101);
+                                        //当周围没有杂草生成
+                                        if (IsAroundHaveWeeds(aroundWeedsDetailsList) == -1)
+                                        {
+                                            //20%的概率生成杂草
+                                            if (generateWeedsOdds <= 20)
+                                            {
+                                                //随机生成杂草预制体
+                                                var weed = Instantiate(weedPrefab, new Vector2(Random.Range(weedsPos.x - 0.5f, weedsPos.x + 0.5f), Random.Range(weedsPos.y - 0.5f, weedsPos.y + 0.5f)), Quaternion.identity);
+                                                weed.GetComponentInChildren<SpriteRenderer>().sprite = weedSprites[Random.Range(0, weedSprites.Length)];
+                                                //已生成杂草
+                                                currentTile.predictHaveWeeds++;
+                                            }
+                                        }
+                                        //当周围有杂草生成
+                                        else if (IsAroundHaveWeeds(aroundWeedsDetailsList) == 1)
+                                        {
+                                            //50%的概率生成杂草
+                                            if (generateWeedsOdds <= 50)
+                                            {
+                                                //随机生成杂草预制体
+                                                var weed = Instantiate(weedPrefab, new Vector2(Random.Range(weedsPos.x - 0.5f, weedsPos.x + 0.5f), Random.Range(weedsPos.y - 0.5f, weedsPos.y + 0.5f)), Quaternion.identity);
+                                                weed.GetComponentInChildren<SpriteRenderer>().sprite = weedSprites[Random.Range(0, weedSprites.Length)];
+                                                //已生成杂草
+                                                currentTile.predictHaveWeeds++;
+                                            }
+                                        }
+                                    }
+                                    //一个可生成杂草地块上可以长出两棵杂草
+                                    if (currentTile.haveWeeds == 0)
+                                    {
+                                        int generateOdds = Random.Range(0, 101);
+                                        if (generateOdds <= 50)
+                                        {
+                                            var weed = Instantiate(weedPrefab, new Vector2(Random.Range(currentTile.gridX - 0.5f, currentTile.gridX + 0.5f), Random.Range(currentTile.gridY - 0.5f, currentTile.gridY + 0.5f)), Quaternion.identity);
+                                            weed.GetComponentInChildren<SpriteRenderer>().sprite = weedSprites[Random.Range(0, weedSprites.Length)];
+                                            currentTile.predictHaveWeeds++;
+                                        }
                                     }
                                 }
                             }
-                            //一个可生成杂草地块上可以长出两棵杂草
-                            if (tile.Value.haveWeeds == 0)
+                        }
+                        //生成石矿
+                        if (currentTile.canRock && currentTile.haveRock == -1 && currentTile.haveWeeds == -1)
+                        {
+                            // 获取可生成石矿TileDetail
+                            var rocksTileDetail = GetTileDetailsOnMousePosition(new Vector3Int(currentTile.gridX, currentTile.gridY));
+                            if (rocksTileDetail != null)
                             {
-                                int generateOdds = Random.Range(0, 101);
-                                weedsNumber = Random.Range(0, 6);
-                                if (generateOdds <= 50)
+                                //随机生成石矿预制体
+                                rocksNumber = Random.Range(0, 2);
+                                Instantiate(rocksPrefabs[rocksNumber], new Vector2(rocksTileDetail.gridX + 0.5f, rocksTileDetail.gridY + 0.5f), Quaternion.identity);
+                                currentTile.haveRock = 1;
+                                currentTile.havePlace = 1;
+                            }
+
+                        }
+                        //生成大石矿
+                        if (currentTile.canBigRock && currentTile.haveBigRock == -1 && currentTile.haveRock == -1 && currentTile.haveWeeds == -1)
+                        {
+                            Instantiate(bigRockPrefab, new Vector2(currentTile.gridX + 1, currentTile.gridY + 1), Quaternion.identity);
+                            for (int x = currentTile.gridX; x < currentTile.gridX + 1; x++)
+                            {
+                                for (int y = currentTile.gridY; y < currentTile.gridY + 1; y++)
                                 {
-                                    Instantiate(weedsPrefabs[weedsNumber], new Vector2(Random.Range(tile.Value.gridX - 0.5f, tile.Value.gridX + 0.5f), Random.Range(tile.Value.gridY - 0.5f, tile.Value.gridY + 0.5f)), Quaternion.identity);
-                                    tile.Value.predictHaveWeeds++;
+                                    currentTile.haveBigRock = 1;
+                                    currentTile.havePlace = 1;
                                 }
                             }
                         }
-
-
-                    }
-                }
-                    
-                //生成石矿
-                if (tile.Value.canRock && tile.Value.haveRock == -1)
-                {
-                    // 获取可生成石矿TileDetail
-                    var rocksTileDetail = GetTileDetailsOnMousePosition(new Vector3Int(tile.Value.gridX, tile.Value.gridY));
-                    if (rocksTileDetail != null)
-                    {
-                        //随机生成石矿预制体
-                        rocksNumber = Random.Range(0, 2);
-                        Instantiate(rocksPrefabs[rocksNumber], new Vector2(rocksTileDetail.gridX + 0.5f, rocksTileDetail.gridY + 0.5f), Quaternion.identity);
-                        tile.Value.haveRock = 1;
-                    }
-                   
-                }
-                //生成大石矿
-                if(tile.Value.canBigRock && tile.Value.haveBigRock == -1)
-                {
-                    List<TileDetails> aroundBigRockList = new List<TileDetails>();
-                    TileDetails bigRockTile = GetTileDetailsOnMousePosition(new Vector3Int(tile.Value.gridX, tile.Value.gridY));
-                    if (bigRockTile != null)
-                    {
-                        for (int x = bigRockTile.gridX; x <= bigRockTile.gridX + 1; x++)
+                        //生成树
+                        if (currentTile.canTree && currentTile.haveTree == -1 && currentTile.canBigRock && currentTile.haveBigRock == -1 && currentTile.haveRock == -1 && currentTile.haveWeeds == -1)
                         {
-                            for (int y = bigRockTile.gridY; y <= bigRockTile.gridY + 1; y++)
+                            TileDetails treeTileDetail = GetTileDetailsOnMousePosition(new Vector3Int(currentTile.gridX, currentTile.gridY));
+                            if (treeTileDetail != null)
                             {
-                                if (x == bigRockTile.gridX && y == bigRockTile.gridY)
+                                int generateTreesOdds = Random.Range(0, 101);
+                                //已生成树的附近两个Tile范围内不可再生成新的树
+                                if (generateTreesOdds < 2)
                                 {
-                                    continue;
-                                }
-                                aroundBigRockTileDetail = GetTileDetailsOnMousePosition(new Vector3Int(x, y));
-                                if (aroundBigRockTileDetail.canBigRock)
-                                {
-                                    aroundBigRockList.Add(aroundBigRockTileDetail);
+                                    for (int x = treeTileDetail.gridX - 2; x <= treeTileDetail.gridX + 2; x++)
+                                    {
+                                        for (int y = treeTileDetail.gridY - 2; y <= treeTileDetail.gridY + 2; y++)
+                                        {
+
+                                            aroundTreeTileDetail = GetTileDetailsOnMousePosition(new Vector3Int(x, y));
+                                            if (aroundTreeTileDetail != null)
+                                            {
+                                                aroundTreeTileDetail.haveTree = 1;
+                                                aroundTreeTileDetail.havePlace = 1;
+                                            }
+                                        }
+                                    }
+                                    treesNumber = Random.Range(0, 2);
+                                    Instantiate(treePrefab[treesNumber], new Vector2(treeTileDetail.gridX + 0.5f, treeTileDetail.gridY), Quaternion.identity);
                                 }
                                 else
                                 {
                                     continue;
                                 }
+
+                            }
+
+                        }
+                        //生成可劈砍物体
+                        if (currentTile.canChopItem)
+                        {
+                            int odds = Random.Range(0, 10);
+                            if (odds > 7)
+                            {
+                                Instantiate(chopItemPrefabs[Random.Range(0,chopItemPrefabs.Length)], new Vector2(currentTile.gridX + 0.5f, currentTile.gridY), Quaternion.identity);
+                                currentTile.haveChop = 1;
                             }
                         }
-                        if (aroundBigRockList.Count == 3)
+                        //生成大杂草
+                        if (currentTile.canBigWeeds && currentTile.haveBigWeeds == -1)
                         {
-                            Instantiate(bigRockPrefab, new Vector2(bigRockTile.gridX + 1, bigRockTile.gridY + 1), Quaternion.identity);
-                            bigRockTile.haveBigRock = 1;
-                            for (int i = 0; i < aroundBigRockList.Count; i++)
+                            int odds = Random.Range(0, 10);
+                            if (odds > 5)
                             {
-                                aroundBigRockList[i].haveBigRock = 1;
+                                var bigWeed = Instantiate(bigWeedPrefab, new Vector2(currentTile.gridX + 0.5f, currentTile.gridY + 0.5f), Quaternion.identity);
+                                bigWeed.GetComponentInChildren<SpriteRenderer>().sprite = bigWeedSprites[Random.Range(0, bigWeedSprites.Length)];
+                                currentTile.haveBigWeeds = 1;
                             }
                         }
                     }
-                    
                 }
-                //生成树
-                if(tile.Value.canTree && tile.Value.haveTree == -1)
+                foreach (var tile in tileDetailsDict)
                 {
-                    //List<TileDetails> aroundTreeList = new List<TileDetails>();
-                    TileDetails treeTileDetail = GetTileDetailsOnMousePosition(new Vector3Int(tile.Value.gridX, tile.Value.gridY));
-                    if (treeTileDetail != null)
+                    if (tile.Value.predictHaveWeeds == 1)
                     {
-                        int generateTreesOdds = Random.Range(0, 101);
-                        //已生成树的附近两个Tile范围内不可再生成新的树
-                        if (generateTreesOdds < 2)
-                        {
-                            for (int x = treeTileDetail.gridX - 2; x <= treeTileDetail.gridX + 2; x++)
-                            {
-                                for (int y = treeTileDetail.gridY - 2; y <= treeTileDetail.gridY + 2; y++)
-                                {
-
-                                    aroundTreeTileDetail = GetTileDetailsOnMousePosition(new Vector3Int(x, y));
-                                    if (aroundTreeTileDetail != null)
-                                    {
-                                        aroundTreeTileDetail.haveTree = 1;
-                                    }
-                                }
-                            }
-                            treesNumber = Random.Range(0, 2);
-                            Instantiate(treePrefab[treesNumber], new Vector2(treeTileDetail.gridX + 0.5f, treeTileDetail.gridY), Quaternion.identity);
-                        }
-                        else
-                        {
-                            continue;
-                        }
-
+                        tile.Value.haveWeeds = 1;
+                        tile.Value.predictHaveWeeds = -1;
                     }
+                }
 
-                }
-            }
-            foreach (var tile in tileDetailsDict)
-            {
-                if (tile.Value.predictHaveWeeds == 1)
-                {
-                    tile.Value.haveWeeds = 1;
-                    tile.Value.predictHaveWeeds = -1;
-                }
             }
         }
         /// <summary>
@@ -396,6 +473,12 @@ namespace MFarm.Map
                         break;
                     case GridType.Trees:
                         tileDetails.canTree = tileProperty.boolTypeValue;
+                        break;
+                    case GridType.ChopItem:
+                        tileDetails.canChopItem = tileProperty.boolTypeValue;
+                        break;
+                    case GridType.BigWeeds:
+                        tileDetails.canBigWeeds = tileProperty.boolTypeValue;
                         break;
                 }
                 //字典原有地图更新
@@ -514,7 +597,7 @@ namespace MFarm.Map
                     //当丢弃商品类型的物品时，直接在鼠标的世界坐标位置生成一个丢弃商品
                     case ItemType.Commodity:
                         //执行收割方法
-                        //currentCrop.ProcessToolAction(itemDetails, currentTile);
+                        //currentCrop.ProcessToolAction(toolDetails, currentTile);
                         
                         if (currentCrop != null && currentCrop.canHarvest)
                         {
@@ -531,6 +614,7 @@ namespace MFarm.Map
                     case ItemType.HoeTool:
                         if(canSetTile)
                         {
+                            EventHandler.CallParticleEffectEvent(ParticalEffectType.HoeEffect02, new Vector3(mouseGridPos.x+0.5f, mouseGridPos.y + 0.5f, mouseGridPos.z), Vector2.zero);
                             SetDigGround(currentTile);
                             currentTile.daysSinceDug = 0;
                             currentTile.canDig = false;
@@ -541,7 +625,7 @@ namespace MFarm.Map
                             break;
                         }
                         EventHandler.CallPlayerDecreaseStminaEvent(2);
-                        EventHandler.CallParticleEffectEvent(ParticalEffectType.HoeEffect,new Vector3(mouseGridPos.x, mouseGridPos.y+0.5f,mouseGridPos.z), Vector2.zero);
+                        EventHandler.CallParticleEffectEvent(ParticalEffectType.HoeEffect,new Vector3(mouseGridPos.x+0.5f, mouseGridPos.y+0.5f,mouseGridPos.z), Vector2.zero);
                        
                         //音效
                         break;
@@ -585,7 +669,7 @@ namespace MFarm.Map
                             }
 
                         }
-                        //currentCrop?.ProcessToolAction(itemDetails, currentCrop.tileDetails);
+                        //currentCrop?.ProcessToolAction(toolDetails, currentCrop.tileDetails);
                         EventHandler.CallPlayerDecreaseStminaEvent(5);
                         break;
                         
@@ -593,7 +677,11 @@ namespace MFarm.Map
                         //在地图上生成家具 ItemManager
                         //移除当前图纸 InventoryManager
                         //移除资源物品 InventoryManager
-                        EventHandler.CallBuildFurnitureEvent(itemDetails.itemID,mouseWorldPos);
+                        EventHandler.CallBuildFurnitureEvent(bluPrintDetails, mouseGridPos, bluPrintParent);
+                        foreach (var tile in bluPrintTileList)
+                        {
+                            tile.havePlace = 1;
+                        }
                         break;
                 }   
                 UpdateTileDetails(currentTile);
@@ -632,13 +720,13 @@ namespace MFarm.Map
         //    Physics2D.OverlapCircleNonAlloc(playerPos, tool.itemUseRadius, colliders);
         //    if(colliders.Length > 0)
         //    {
-        //        for(int i = 0; i < colliders.Length; i++)
+        //        for(int x = 0; x < colliders.Length; x++)
         //        {
-        //            if (colliders[i] != null)
+        //            if (colliders[x] != null)
         //            {
-        //                if (colliders[i].GetComponent<ReapItem>())
+        //                if (colliders[x].GetComponent<ReapItem>())
         //                {
-        //                    var item = colliders[i].GetComponent<ReapItem>();
+        //                    var item = colliders[x].GetComponent<ReapItem>();
         //                    itemsInRadius.Add(item);
         //                }
         //            }
@@ -661,13 +749,13 @@ namespace MFarm.Map
         //    Physics2D.OverlapCircleNonAlloc(mouseWorldPos, tool.itemUseRadius, collider2Ds);
         //    if(collider2Ds.Length > 0)
         //    {
-        //        for( int i = 0;i < collider2Ds.Length; i++)
+        //        for( int x = 0;x < collider2Ds.Length; x++)
         //        {
-        //            if (collider2Ds[i] != null)
+        //            if (collider2Ds[x] != null)
         //            {
-        //                if (collider2Ds[i].GetComponent<Animator>())
+        //                if (collider2Ds[x].GetComponent<Animator>())
         //                {
-        //                    var grassAnim = collider2Ds[i].GetComponent<Animator>();
+        //                    var grassAnim = collider2Ds[x].GetComponent<Animator>();
         //                    grassBreakAnims.Add(grassAnim);
         //                }
         //            }
@@ -811,7 +899,6 @@ namespace MFarm.Map
                     //Tile在工具使用范围外
                     if (Mathf.Abs(currentTile.gridX - playerGridPos.x) > toolDetails.itemUseRadius || Mathf.Abs(currentTile.gridY - playerGridPos.y) > toolDetails.itemUseRadius)
                     {
-                        
                         canSetTile = false;
                         valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), null);
                     }
@@ -822,7 +909,8 @@ namespace MFarm.Map
                         {
                             case ItemType.HoeTool:
                                 //Tile可以挖掘
-                                if (currentTile.canDig && currentTile.daysSinceDug == -1)
+                                if (currentTile.canDig && currentTile.daysSinceDug == -1 && currentTile.haveWeeds == -1 && currentTile.haveTree == -1 && currentTile.haveBigRock == -1 && currentTile.haveRock == -1)
+
                                 {
                                     canSetTile = true;
                                     valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), availableTilemap);
@@ -873,7 +961,6 @@ namespace MFarm.Map
                                     valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), unAvailableTilemap);
                                 }
                                 break;
-
                         }
                     }
                 }
@@ -883,10 +970,29 @@ namespace MFarm.Map
                     valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), null);
                 }
             }
-
-
         }
-       
+       public void DisplayBluPrintAvaliableGround(List<TileDetails> currentList , List<TileDetails> lastList)
+        {
+
+            if (lastList != currentList)
+            {
+                foreach (var lastTile in lastList)
+                {
+                    valueMap.SetTile(new Vector3Int(lastTile.gridX, lastTile.gridY), null);
+                }
+                foreach (var tile in currentList)
+                {
+                    if (tile.canPlaceFurniture && tile.havePlace == -1)
+                    {
+                        valueMap.SetTile(new Vector3Int(tile.gridX, tile.gridY), availableTilemap);
+                    }
+                    else
+                    {
+                        valueMap.SetTile(new Vector3Int(tile.gridX, tile.gridY), unAvailableTilemap);
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// 关闭可耕种瓦片

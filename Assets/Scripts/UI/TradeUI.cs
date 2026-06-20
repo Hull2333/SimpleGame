@@ -79,7 +79,7 @@ namespace MFarm.Inventory
         private void ClickSubmitButton() 
         {
             //将tradeAmount输入的文本数字转换为Int
-            //var amount = Convert.ToInt32(tradeAmountText.text);
+            //var amount = Convert.ToInt32(tradeAmountText.recipeName);
             InventoryManager.Instance.TradeItem(item, tradeAmount, isSellTrade,startIndex,endIndex, startLocation,endLocation, isToSellBox);
             //交易结束后关闭TradeUI;
             CancelTrade();

@@ -71,12 +71,13 @@ namespace MFarm.Dialogue
                 //右键点击NPC开始对话
                 if (NPCCollider != null)
                 {
+                   
                     if (NPCCollider.name == "NPCTrigger")
                     {
                         if (Input.GetKey(KeyCode.Mouse1) && DialogueUI.Instance.talkWithNPC == false && canTalk && !InventoryManager.Instance.anyBagOpened)
                         {
                             //玩家此时是否拿着物品
-                            if (InventoryManager.Instance.currentSelectedItem.itemID != 0)
+                            if (InventoryManager.Instance.currentSelectedItem != null )
                             {
                                 dialoguaGiver.TalkWithPlayer(InventoryManager.Instance.currentSelectedItem.itemID);
                             }
@@ -108,8 +109,12 @@ namespace MFarm.Dialogue
         /// </summary>
         public void OpenDialogue()
         {
-            DialogueUI.Instance.UpdateDialogueData(currentData);
-            DialogueUI.Instance.UpdateMainDialogue(currentData.dialoguePieces[0]);
+            if (currentData != null)
+            {
+                DialogueUI.Instance.UpdateDialogueData(currentData);
+                DialogueUI.Instance.UpdateMainDialogue(currentData.dialoguePieces[0]);
+            }
+           
         }
     }
 

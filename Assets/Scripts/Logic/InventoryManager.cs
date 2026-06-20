@@ -1,3 +1,4 @@
+using MFarm.Map;
 using MFarm.Save;
 using System;
 using System.Collections;
@@ -22,11 +23,13 @@ namespace MFarm.Inventory
         public BluPrintData_SO bluPrintData;
         [Header("菜谱")]
         public CookedData_SO cookedData;
-        [Header("鱼类")]
-        public FishData_SO fishData;
+        //玩家目前会的食谱
+        public List<int> learnedRecipeList;
         [Header("背包数据")]
         public InventoryBag_SO playerBagTemp;
         public InventoryBag_SO playerBag;
+        //当前被选择的物品序号
+        private int currentSelectBagIndex;
         //当前打开的箱子
         private InventoryBag_SO currentBoxBag;
         public InventoryBag_SO sellBoxBag;
@@ -38,7 +41,7 @@ namespace MFarm.Inventory
         public int boxDataAmount => boxDataDict.Count;
 
         public string GUID => GetComponent<DataGUID>().guid;
-        private AnimatorOverride animatorOverride;
+        //private AnimatorOverride animatorOverride;
         //所有鱼类的列表
         public static List<ItemDetails> fishList = new List<ItemDetails>();
         //不同时间段的淡水鱼和海水鱼的列表
@@ -58,7 +61,7 @@ namespace MFarm.Inventory
             
             ISaveable saveable = this;
             saveable.RegisterSaveable();
-            animatorOverride = GameObject.FindAnyObjectByType<AnimatorOverride>();
+            //animatorOverride = GameObject.FindAnyObjectByType<AnimatorOverride>();
             inventoryUI = GameObject.FindWithTag("InventoryUI").gameObject.GetComponent<InventoryUI>();
             //EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, playerBag.itemList);
 
@@ -70,17 +73,16 @@ namespace MFarm.Inventory
             EventHandler.HarvestAtPlayerPosition += OnHarvestAtPlayerPosition;
             //建造物品后删除背包素材
             EventHandler.BuildFurnitureEvent += OnBuildFurnitureEvent;
-            //菜肴制作后删除背包中的所需食材
-            EventHandler.CookedMakeEvent += OnCookedMakeEvent;
             //箱子打开存放事件
             EventHandler.BaseBagOpenEvent += OnBaseBagOpenEvent;
             //新游戏开始事件
             EventHandler.StartNewGameEvent += OnStartNewGameEvent;
             //使用物品恢复玩家状态
-            EventHandler.UseItemRecoverEvent += OnUseItemRecoverEvent;
             EventHandler.FishListInSpriteDayFreshEvent += OnFishListInSpriteDayFreshEvent;
             EventHandler.RemoveTreeSeedCount += OnRemoveTreeSeedCount;
             EventHandler.ClickHaveItemYesEvent += OnClickHaveItemYesEvent;
+            EventHandler.SlotUISelectIndexEvent += OnSlotUISelectIndexEvent;
+            EventHandler.InstantiateBuildingOnMapEvent += OnInstantiateBuildingOnMapEvent;
         }
 
         private void OnDisable()
@@ -89,23 +91,16 @@ namespace MFarm.Inventory
             EventHandler.HarvestAtPlayerPosition -= OnHarvestAtPlayerPosition;
             //建造物品后删除背包素材
             EventHandler.BuildFurnitureEvent -= OnBuildFurnitureEvent;
-            EventHandler.CookedMakeEvent -= OnCookedMakeEvent;
             EventHandler.BaseBagOpenEvent -= OnBaseBagOpenEvent;
             EventHandler.StartNewGameEvent -= OnStartNewGameEvent;
-            EventHandler.UseItemRecoverEvent += OnUseItemRecoverEvent;
             EventHandler.FishListInSpriteDayFreshEvent -= OnFishListInSpriteDayFreshEvent;
             EventHandler.RemoveTreeSeedCount -= OnRemoveTreeSeedCount;
             EventHandler.ClickHaveItemYesEvent -= OnClickHaveItemYesEvent;
+            EventHandler.SlotUISelectIndexEvent -= OnSlotUISelectIndexEvent;
+            EventHandler.InstantiateBuildingOnMapEvent -= OnInstantiateBuildingOnMapEvent;
         }
 
        
-
-        private void OnUseItemRecoverEvent(ItemDetails details, PlayerController playerController)
-        {
-            animatorOverride.PlayEatAnim();
-            RemoveItem(details.itemID, 1);
-            playerController.PlayerHurted(-details.recoverHealth, -details.recoverStmina,null);
-        }
 
         private void OnBaseBagOpenEvent(SlotType slotType, InventoryBag_SO bag_SO)
         {
@@ -117,25 +112,16 @@ namespace MFarm.Inventory
         /// </summary>
         /// <param name="ID">图纸ID</param>
         /// <param name="mousePos"></param>
-        private void OnBuildFurnitureEvent(int ID, Vector3 mousePos)
+        private void OnBuildFurnitureEvent(BluPrintDetails building, Vector3 mousePos , Transform parent)
         {
-            RemoveItem(ID, 1);
-            BluPrintDetails bluePrint = bluPrintData.GetBluPrintDetails(ID);
-            foreach(var item in bluePrint.resourceItem)
-            {
-                RemoveItem(item.itemID, item.itemAmount);
-            }
+            RemoveItemOfIndex(1);
+            //BuildingDetails building = bluPrintData.GetBuildingDetails(buildingPrefab.GetComponent<Furniture>().itemID);
+            //foreach(var item in building.resourceItem)
+            //{
+            //    RemoveItem(item.itemID, item.itemAmount);
+            //}
         }
 
-        private void OnCookedMakeEvent(int ID)
-        {
-            CookedDetails cookedDetails = cookedData.GetCookedDetails(ID);
-            //删除指定数量的食材
-            foreach(var ingredient in cookedDetails.cookResource)
-            {
-                RemoveItem(ingredient.itemID, ingredient.itemAmount);
-            }
-        }
 
         private void OnHarvestAtPlayerPosition(int ID)
         {
@@ -203,7 +189,6 @@ namespace MFarm.Inventory
                         }
                         
                     }
-                    //Debug.Log(list[i].itemType + " " + list[i].itemName);
                 }
                 if (list[i].itemType == ItemType.Seafish)
                 {
@@ -215,7 +200,6 @@ namespace MFarm.Inventory
                         }
 
                     }
-                    //Debug.Log(list[i].itemType + " " + list[i].itemName);
                 }
                
             }
@@ -240,6 +224,17 @@ namespace MFarm.Inventory
             EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, playerBag.itemList, 0);
             EventHandler.CallBaseBagCloseEvent(SlotType.Shop,null);
         }
+        private void OnSlotUISelectIndexEvent(int index)
+        {
+            currentSelectBagIndex = index;
+        }
+        private void OnInstantiateBuildingOnMapEvent(BuildingDetails details, Vector3 pos, Transform transform)
+        {
+            foreach (var resource in details.resourceItem)
+            {
+                RemoveItem(resource.itemID, resource.itemAmount);
+            }
+        }
         /// <summary>
         /// 通过ID返回物品信息
         /// </summary>
@@ -249,6 +244,25 @@ namespace MFarm.Inventory
         {
             //通过传进来的ID来和itemDetailList中的i.itemID(item.itemID)进行比对搜索,搜索的结果再放回给上面的方法
             return itemDataList_SO.itemDetailsList.Find(i => i.itemID == ID);
+        }
+        /// <summary>
+        /// 根据传进来的序号获取鱼的信息
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="isLaterFish"></param>
+        /// <returns></returns>
+        public ItemDetails GetFishDetails(int index , bool isLaterFish)
+        {
+            ItemDetails fishDetail = null;
+            if (isLaterFish)
+            {
+                fishDetail = laterFishList[index];
+            }
+            else
+            {
+                fishDetail = seaFishList[index];
+            }
+            return fishDetail;
         }
         /// <summary>
         /// 将拾取物品的数据添加到背包
@@ -283,7 +297,7 @@ namespace MFarm.Inventory
         /// 检查背包是否有空位
         /// </summary>
         /// <returns></returns>
-        private bool CheckBagCapacity()
+        public bool CheckBagCapacity()
         {
             for (int i = 0; i < playerBag.itemList.Count; i++)
             {
@@ -301,14 +315,29 @@ namespace MFarm.Inventory
         /// <returns>-1则表示没有该物品，有的话返回对应的序号</returns>
         public int GetItemIndexInBag(int ID , List<InventoryItem> bagList)
         {
-            for (int i = 0; i < bagList.Count; i++)
+            if(bagList == playerBag.itemList)
             {
-                if (bagList[i].itemID == ID)
+                //后四个格子是鱼饵和装备格子，不可以装其他物品
+                for (int i = 0; i < bagList.Count - 4; i++)
                 {
-                    return i;
+                    if (bagList[i].itemID == ID)
+                    {
+                        return i;
+                    }
                 }
+                return -1;
             }
-            return -1;
+            else
+            {
+                for (int i = 0; i < bagList.Count; i++)
+                {
+                    if (bagList[i].itemID == ID)
+                    {
+                        return i;
+                    }
+                }
+                return -1;
+            }
         }
         /// <summary>
         /// 通过物品ID查找指定bagList中的相同物品的index集合
@@ -550,6 +579,7 @@ namespace MFarm.Inventory
                 }
                 else
                 {
+
                     //把拖拽开始的slot设置为新的slot
                     playerBag.itemList[targetIndex] = currentItem;
                     playerBag.itemList[fromIndex] = new InventoryItem();
@@ -858,9 +888,34 @@ namespace MFarm.Inventory
             {
                 var item = new InventoryItem();
                 playerBag.itemList[index] = item;
+                currentSelectedItem = null;
+                GridMapManager.Instance.QuitDigAvailableGround();
             }
             //同时对UI也要刷新数量
             EventHandler.CallUpdateInventoryUI(InventoryLocation.Player,playerBag.itemList,0);
+        }
+        /// <summary>
+        /// 减少当前选择的物品数量
+        /// </summary>
+        /// <param name="removeAmount"></param>
+        public void RemoveItemOfIndex(int removeAmount)
+        {
+            if (playerBag.itemList[currentSelectBagIndex].itemAmount > removeAmount)
+            {
+                //更新当前物品数量
+                var amount = playerBag.itemList[currentSelectBagIndex].itemAmount - removeAmount;
+                var item = new InventoryItem { itemID = playerBag.itemList[currentSelectBagIndex].itemID, itemAmount = amount };
+                playerBag.itemList[currentSelectBagIndex] = item;
+            }
+            else if (playerBag.itemList[currentSelectBagIndex].itemAmount == removeAmount)
+            {
+                var item = new InventoryItem();
+                playerBag.itemList[currentSelectBagIndex] = item;
+                currentSelectedItem = null;
+                GridMapManager.Instance.QuitDigAvailableGround();
+            }
+            //同时对UI也要刷新数量
+            EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, playerBag.itemList, 0);
         }
         /// <summary>
         /// 交易物品

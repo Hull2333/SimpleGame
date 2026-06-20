@@ -30,18 +30,18 @@ public static class EventHandler
     {
         DropItemEvent?.Invoke(ID, pos, itemType);
     }
-    //使用物品恢复的事件
-    public static event Action<ItemDetails,PlayerController> UseItemRecoverEvent;
-    public static void CallUseItemRecoverEvent(ItemDetails itemDetails,PlayerController playerController)
-    {
-        UseItemRecoverEvent?.Invoke(itemDetails, playerController);
-    }
 
     //注册点击slot物品时，头顶出现对应Item的图片
     public static event Action<ItemDetails, bool> ItemSelectEvent;
     public static void CallItemSelectEvent(ItemDetails itemDetails, bool isSelected)
     {
         ItemSelectEvent?.Invoke(itemDetails, isSelected);
+    }
+    public static event Action<int> SlotUISelectIndexEvent;
+    //此时点击选择的物品在背包的序号位置事件
+    public static void CallSlotUISelectIndexEvent(int index)
+    {
+        SlotUISelectIndexEvent?.Invoke(index);
     }
     //每分每时所执行的事件
     public static event Action<int, int, int, Season> GameMinuteEvent;
@@ -63,10 +63,10 @@ public static class EventHandler
         GameDateEvent?.Invoke(hour, day, month, year, season);
     }
     //新场景传送事件
-    public static event Action<string, Vector3> TransitionEvent;
-    public static void CallTransitionEvent(string sceneName, Vector3 pos)
+    public static event Action<string, Vector3,bool> TransitionEvent;
+    public static void CallTransitionEvent(string sceneName, Vector3 pos, bool fade)
     {
-        TransitionEvent?.Invoke(sceneName, pos);
+        TransitionEvent?.Invoke(sceneName, pos, fade);
     }
     //切换场景之前的事件
     public static event Action BeforeSceneUnloadEvent;
@@ -184,17 +184,41 @@ public static class EventHandler
     {
         ClickHaveItemYesEvent?.Invoke(haveItemList);
     }
-    //建造物品生成事件
-    public static event Action<int, Vector3> BuildFurnitureEvent;
-    public static void CallBuildFurnitureEvent(int ID, Vector3 pos)
+    //获取当前的家具信息
+    public static event Action<BluPrintDetails,Transform,List<TileDetails>> GetCurrentBluPrintDetails;
+    public static void CallGetCurrentBluPrintPrefab(BluPrintDetails bluPrintDetails,Transform parent, List<TileDetails> list)
     {
-        BuildFurnitureEvent?.Invoke(ID, pos);
+        GetCurrentBluPrintDetails?.Invoke(bluPrintDetails, parent, list);
     }
-    //菜肴制作事件
-    public static event Action<int> CookedMakeEvent;
-    public static void CallCookedMakeEvent(int ID)
+    //建造物品生成事件
+    public static event Action<BluPrintDetails, Vector3 , Transform> BuildFurnitureEvent;
+    public static void CallBuildFurnitureEvent(BluPrintDetails bluPrintDetails, Vector3 pos,Transform parent)
     {
-        CookedMakeEvent?.Invoke(ID);
+        BuildFurnitureEvent?.Invoke(bluPrintDetails, pos, parent);
+    }
+    //打开建筑商店事件
+    public static event Action<BuildingBagData_SO> OpenBuildShopEvent;
+    public static void CallOpenBuildShopEvent(BuildingBagData_SO buildingBag)
+    {
+        OpenBuildShopEvent?.Invoke(buildingBag);
+    }
+    //建造模式事件
+    public static event Action<BuildingDetails , bool> BuildindModeEvent;
+    public static void CallBuildindModeEvent(BuildingDetails buildingDetails,bool buildMode)
+    {
+        BuildindModeEvent?.Invoke(buildingDetails, buildMode);
+    }
+    //获取当前建筑信息
+    public static event Action<BuildingDetails, Transform, List<TileDetails>> GetCurrentBuildingDetails;
+    public static void CallGetCurrentBuildingDetails(BuildingDetails buildingDetails,Transform parent, List<TileDetails> tiles)
+    {
+        GetCurrentBuildingDetails?.Invoke(buildingDetails, parent, tiles);
+    }
+    //放置建筑事件
+    public static event Action<BuildingDetails, Vector3, Transform> InstantiateBuildingOnMapEvent;
+    public static void CallInstantiateBuildingOnMapEvent(BuildingDetails buildingDetails,Vector3 pos,Transform parent)
+    {
+        InstantiateBuildingOnMapEvent?.Invoke(buildingDetails, pos, parent);
     }
     //切换灯光模式事件
     public static event Action<Season, LightShift, float> LightShiftChangeEvent;
@@ -215,17 +239,29 @@ public static class EventHandler
     {
         PlaySoundEvent?.Invoke(soundName);
     }
-    //扣除疲劳值事件
+    //扣除或增加疲劳值事件
     public static event Action<float> PlayerDecreaseStminaEvent;
     public static void CallPlayerDecreaseStminaEvent(float value)
     {
         PlayerDecreaseStminaEvent?.Invoke(value);
     }
-    //菜谱激活的事件
-    public static event Action<int> CookedMenuSetupEvent;
-    public static void CallCookedMenuSetupEvent(int itemID)
+    //扣除或增加玩家血量
+    public static event Action<float> PlayerDecreaseHealthEvent;
+    public static void CallPlayerDecreaseHealthEvent(float value)
     {
-        CookedMenuSetupEvent?.Invoke(itemID);
+        PlayerDecreaseHealthEvent?.Invoke(value);
+    }
+    //检查并打开烹饪UI的事件
+    public static event Action<bool> CheckCookedUIEvent;
+    public static void CallCheckCookedUIEvent(bool canCooked)
+    {
+        CheckCookedUIEvent?.Invoke(canCooked);
+    }
+    //菜谱激活的事件
+    public static event Action CookedMenuSetupEvent;
+    public static void CallCookedMenuSetupEvent()
+    {
+        CookedMenuSetupEvent?.Invoke();
     }
     //开始新游戏的事件
     public static event Action<int> StartNewGameEvent;
@@ -369,6 +405,23 @@ public static class EventHandler
     {
         UpdateNPCFriendlinessUIPanel?.Invoke(name, value);
     }
-
+    //什么时候能打开玩家背包事件
+    public static event Action<bool> ControlPlayerBagOpen;
+    public static void CallControlPlayerBagOpen(bool canOpen)
+    {
+        ControlPlayerBagOpen?.Invoke(canOpen);
+    }
+    //下一个传送点出现事件
+    public static event Action NextTeleportAppearEvent;
+    public static void CallNextTeleportAppearEvent()
+    {
+        NextTeleportAppearEvent?.Invoke();
+    }
+    //吃东西事件
+    public static event Action<int> PlayEatAnimEvent;
+    public static void CallPlayEatAnimEvent(int itemID)
+    {
+        PlayEatAnimEvent?.Invoke(itemID);
+    }
 
 }

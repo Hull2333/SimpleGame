@@ -22,5 +22,5 @@ public class CookedDetails
     public int ID;
     //ÐèÒªÊ³²Ä
     public InventoryItem[] cookResource = new InventoryItem[3];
-    public GameObject cookPrefab;
+    public Sprite graySprite;
 }

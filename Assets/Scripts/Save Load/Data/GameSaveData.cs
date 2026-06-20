@@ -24,6 +24,10 @@ namespace MFarm.Save
         /// </summary>
         public Dictionary<string, List<SceneFurniture>> sceneFurnitureDict;
         /// <summary>
+        /// 存储所有的建造建筑信息
+        /// </summary>
+        public Dictionary<string, List<SceneBuilding>> sceneBuildingDict;
+        /// <summary>
         /// 存储瓦片信息
         /// </summary>
         public Dictionary<string, TileDetails> tileDetailsDict;

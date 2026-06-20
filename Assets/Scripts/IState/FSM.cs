@@ -3,14 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using MFarm.CropPlant;
-using Unity.Mathematics;
-using static UnityEditor.PlayerSettings;
-using MFarm.Inventory;
-using Unity.VisualScripting;
 /// <summary>
 /// 敌人各种属性
 /// </summary>
-/// 
 [Serializable]
 public class Parameter
 {
@@ -29,8 +24,6 @@ public class Parameter
     [HideInInspector] public CircleCollider2D chaseArae;
     //射线阻挡图层
     public LayerMask obstacleLayer;
-    //射线最长距离
-    public float maxDistance;
     //追击目标
     [HideInInspector] public Transform playerTransform;
      public Transform target;
@@ -129,8 +122,6 @@ public class FSM : MonoBehaviour
         states.Add(EnemyStateType.Fainting, new FaintingState(this));
         //设置初始状态为Idle
         TransitionState(EnemyStateType.Idle);
-
-       
     }
 
     private void Update()
@@ -365,29 +356,6 @@ public class FSM : MonoBehaviour
         
     }
     /// <summary>
-    /// 敌人受击闪烁
-    /// </summary>
-    //public void EnemyHurtedFlash()
-    //{
-    //    StartCoroutine(EnemyFlash());
-    //}
-    /// <summary>
-    /// 敌人闪红两次后恢复
-    /// </summary>
-    /// <returns></returns>
-    //private IEnumerator EnemyFlash()
-    //{
-    //    for (int i = 0; i < 2; i++)
-    //    {
-    //        gameObject.GetComponent<SpriteRenderer>().color = Color.red;
-    //        yield return new WaitForSeconds(parameter.flashTime);
-    //        gameObject.GetComponent<SpriteRenderer>().color = Color.white;
-    //        yield return new WaitForSeconds(parameter.flashTime);
-    //    }
-    //    gameObject.GetComponent<SpriteRenderer>().color = Color.white;
-
-    //}
-    /// <summary>
     /// 敌人被击退
     /// </summary>
     /// <param name="pos"></param>
@@ -395,7 +363,6 @@ public class FSM : MonoBehaviour
     {
         StartCoroutine(KnockbackCoroutine(pos));
     }
-
     private IEnumerator KnockbackCoroutine(Vector3 pos)
     {
         var direction = (transform.position - pos).normalized;

@@ -7,6 +7,8 @@ using UnityEngine;
 
 public class KnockableItem : MonoBehaviour //调用在可收割物体预制体上
 {
+    //矿石编号,用于保存当前场景的矿石
+    public int rockIndex;
     public Animator anim;
     //收割后产生的item
     public int[] produceItemID;
@@ -18,22 +20,25 @@ public class KnockableItem : MonoBehaviour //调用在可收割物体预制体上
     public ParticalEffectType rockEffectType;
     public ParticalEffectType treeEffectType;
     public ParticalEffectType trunkEffectType;
-    private Grid interactionGrid;
+    private Grid KnockableGrid;
     //当前生成地图杂草的地图坐标
-    private Vector3Int interactionGridPos;
+    private Vector3Int KnockableGridPos;
     //互动次数
     public int interactionCount;
     private Transform playerPosition => FindObjectOfType<PlayerController>().transform;
+    [Header("树和劈砍物品摧毁后转换的预制体，劈砍物品需要放图片")]
     //转换后的预制体
     public GameObject convertGameObject;
+    //转换后的图片
+    public Sprite convertSprite;
     //没有动画物体的可销毁选项
     public bool canDestroy;
     public TreeGrowing treeGrowing;
     private void Start()
     {
         //获取与当前生成地图杂草的地图坐标
-        interactionGrid = FindObjectOfType<Grid>();
-        interactionGridPos = interactionGrid.WorldToCell(transform.position);
+        KnockableGrid = FindObjectOfType<Grid>();
+        KnockableGridPos = KnockableGrid.WorldToCell(transform.position);
     }
     /// <summary>
     /// 敲击物体
@@ -69,7 +74,8 @@ public class KnockableItem : MonoBehaviour //调用在可收割物体预制体上
             }
            
             //获取当前生成地图石块地块的TileDetail
-            var rockTileDetails = GridMapManager.Instance.GetTileDetailsOnMousePosition(interactionGridPos);
+            var rockTileDetails = GridMapManager.Instance.GetTileDetailsOnMousePosition(KnockableGridPos);
+            rockTileDetails.haveRock = -1;
             EventHandler.CallInCreaseExploreSkillEvent(5);
             PlayRockDestroyAnim();
         }
@@ -136,6 +142,48 @@ public class KnockableItem : MonoBehaviour //调用在可收割物体预制体上
        
     }
     /// <summary>
+    /// 劈砍物品
+    /// </summary>
+    public void ChopItems()
+    {
+        interactionCount--;
+        SwitchChopItemShake();
+        //粒子特效
+        EventHandler.CallParticleEffectEvent(ParticalEffectType.WoodEffect01, transform.position + Vector3.up * 0.25f, Vector2.zero);
+        //物体已被敲碎
+        if (interactionCount <= 0)
+        {
+            //生成对应的成果和数量
+            for (int i = 0; i < produceItemID.Length; i++)
+            {
+                if (minProduceNum[i] < maxPriduceNum[i])
+                {
+                    randomPriduceNum = Random.Range(minProduceNum[i], maxPriduceNum[i] + 1);
+                }
+                else
+                {
+                    randomPriduceNum = minProduceNum[i];
+                }
+                if (randomPriduceNum <= 0)
+                {
+                    randomPriduceNum = 0;
+                }
+                for (int j = 0; j < randomPriduceNum; j++)
+                {
+                    EventHandler.CallInstantiateItemInScene(produceItemID[i], transform.position);
+                }
+            }
+
+            //获取当前生成地图石块地块的TileDetail
+            var chopTileDetails = GridMapManager.Instance.GetTileDetailsOnMousePosition(KnockableGridPos);
+            chopTileDetails.haveChop = -1;
+            EventHandler.CallInCreaseExploreSkillEvent(5);
+            var chopConvertItem = Instantiate(convertGameObject, transform.position, Quaternion.identity);
+            chopConvertItem.GetComponent<SpriteRenderer>().sprite = convertSprite;
+            PlayChopItemDestoryAnim();
+        }
+    }
+    /// <summary>
     /// 控制石矿抖动
     /// </summary>
     public void SwitchRockShake()
@@ -153,6 +201,20 @@ public class KnockableItem : MonoBehaviour //调用在可收割物体预制体上
             anim.SetTrigger("RockDestroy");
         }
         
+    }
+    public void SwitchChopItemShake()
+    {
+        if (anim != null)
+        {
+            anim.SetTrigger("isShake");
+        }
+    }
+    public void PlayChopItemDestoryAnim()
+    {
+        if (anim != null)
+        {
+            anim.SetTrigger("isDestory");
+        }
     }
     /// <summary>
     /// 调用在石头摧毁动画帧中

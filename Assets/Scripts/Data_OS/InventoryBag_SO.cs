@@ -15,4 +15,21 @@ public class InventoryBag_SO : ScriptableObject
     {
         return itemList.Find(i => i.itemID == ID);
     }
+    /// <summary>
+    /// 获取该物品在玩家背包中的总数量
+    /// </summary>
+    /// <param name="ID"></param>
+    /// <returns></returns>
+    public int GetItemAllAmount(int ID)
+    {
+        int allAmount = 0;
+        for (int i = 0; i < itemList.Count; i++)
+        {
+            if (itemList[i].itemID == ID)
+            {
+                allAmount += itemList[i].itemAmount;
+            }
+        }
+        return allAmount;
+    }
 }

@@ -8,7 +8,7 @@ public class GrassAnimController : MonoBehaviour //调用在可收割环境杂草预制体上
 
     private void Start()
     {
-        anim = GetComponent<Animator>();
+        anim = GetComponentInChildren<Animator>();
     }
     private void OnTriggerEnter2D(Collider2D other)
     {

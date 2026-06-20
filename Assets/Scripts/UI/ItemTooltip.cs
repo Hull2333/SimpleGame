@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using MFarm.Inventory;
+using TMPro;
 public class ItemTooltip : MonoBehaviour    //调用在ItemToolTip对象上
 {
-    [SerializeField] private Text nameText;
-    [SerializeField] private Text typeText;
-    [SerializeField] private Text descriptionText;
+    [SerializeField] private TextMeshProUGUI nameText;
+    [SerializeField] private TextMeshProUGUI typeText;
+    [SerializeField] private TextMeshProUGUI descriptionText;
     [SerializeField] private Text valueText;
     [SerializeField] private GameObject bottomPart;
-    [Header("建造")]
-    public GameObject resourcePanel;
-    [SerializeField] private Image[] resourceItem;
+    //[Header("建造")]
+    //public GameObject resourcePanel;
+    //[SerializeField] private Image[] resourceItem;
     /// <summary>
     /// 设置物品描述的显示内容
     /// </summary>
@@ -67,23 +68,23 @@ public class ItemTooltip : MonoBehaviour    //调用在ItemToolTip对象上
     /// 设置启动图纸资源详情
     /// </summary>
     /// <param name="bluPrintDetails"></param>
-    public void SetupResourcePanel(int ID)
-    {
-        var bluPrintDetails = InventoryManager.Instance.bluPrintData.GetBluPrintDetails(ID);
-        for (int i = 0; i < resourceItem.Length; i++)
-        {
-            if(i < bluPrintDetails.resourceItem.Length)
-            {
-                var item = bluPrintDetails.resourceItem[i];
-                //需要多少种资源显示多少中资源
-                resourceItem[i].gameObject.SetActive(true);
-                resourceItem[i].sprite = InventoryManager.Instance.GetItemDetails(item.itemID).itemIcon;
-                resourceItem[i].transform.GetChild(0).GetComponent<Text>().text = item.itemAmount.ToString(); 
-            }
-            else
-            {
-                resourceItem[i].gameObject.SetActive(false); 
-            }
-        }
-    }
+    //public void SetupResourcePanel(int ID)
+    //{
+    //    var bluPrintDetails = InventoryManager.Instance.bluPrintData.GetBluPrintDetails(ID);
+    //    for (int i = 0; i < resourceItem.Length; i++)
+    //    {
+    //        if(i < bluPrintDetails.resourceItem.Length)
+    //        {
+    //            var item = bluPrintDetails.resourceItem[i];
+    //            //需要多少种资源显示多少中资源
+    //            resourceItem[i].gameObject.SetActive(true);
+    //            resourceItem[i].sprite = InventoryManager.Instance.GetItemDetails(item.itemID).itemIcon;
+    //            resourceItem[i].transform.GetChild(0).GetComponent<Text>().text = item.itemAmount.ToString(); 
+    //        }
+    //        else
+    //        {
+    //            resourceItem[i].gameObject.SetActive(false); 
+    //        }
+    //    }
+    //}
 }

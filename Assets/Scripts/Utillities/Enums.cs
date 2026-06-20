@@ -1,7 +1,7 @@
 public enum ItemType
 {
     //种子，商品，家具
-    Seed,Commodity,Furniture,cooked,Laterfish,Seafish,
+    Seed,Commodity,Furniture,Cooked,Laterfish,Seafish,
     //锄头，斧头，镐头，镰刀，水壶，收割，剑，服装
     HoeTool,AxeTool,BreakTool,ReapTool,WaterTool,Sword,FishingRod,Equipment_Head,Equipment_Body,
     //收割杂草
@@ -28,7 +28,7 @@ public enum FishlifeTime
 /// </summary>
 public enum SlotType 
 {
-    Bag,Box,Shop,Reward,Equipment_Head,Equipment_Body,SellBox,
+    Bag,Box,Shop,Reward,Equipment_Head,Equipment_Body,SellBox,Bait,Ingredient
 }
 /// <summary>
 /// 背包库存的位置
@@ -72,14 +72,15 @@ public enum Season
 /// </summary>
 public enum GridType
 {
-    Diggable,DropItem,PlaceFurniture,NPCObstalacle,Finshing,WeedsGrow,Rocks,BigRocks,Trees,LaterFishing,SeaFishing,
+    Diggable, DropItem, PlaceFurniture, NPCObstalacle, Finshing, WeedsGrow, Rocks, BigRocks, Trees, LaterFishing, SeaFishing, ChopItem,BigWeeds,
 }
 /// <summary>
 /// 粒子特效类型
 /// </summary>
 public enum ParticalEffectType
 {
-    None,LeavesFall01,LeavesFall02,Rock,ReapableScenery,EnemyHit01,Eat01,HoeEffect,WeedFall,WaterEffect01,EarthenEffect,WoodEffect01,CropEffect01,FeatherEffect01, FeatherEffect02
+    None,LeavesFall01,LeavesFall02,Rock,ReapableScenery,EnemyHit01,Eat01,HoeEffect,WeedFall,WaterEffect01,EarthenEffect,WoodEffect01,CropEffect01,FeatherEffect01, FeatherEffect02,
+    HoeEffect02,
     
 }
 /// <summary>
@@ -129,7 +130,7 @@ public enum TaskType
 /// </summary>
 public enum NPCname
 {
-    Freda,DaTuan,Hanies,Liam,
+    Freda,DaTuan,Hanies,Liam,Adolf
 }
 /// <summary>
 /// 任务类型
@@ -143,7 +144,21 @@ public enum QuestType
 /// </summary>
 public enum CursorType 
 {
-    Normal,Check,Fishing,Attack,Pat
+    Normal,Check,Fishing,Attack,Pat,Cook,
+}
+/// <summary>
+/// 物品在背包中的大小比例
+/// </summary>
+public enum SpriteScale
+{
+    Normal,Middle,Lager
+}
+/// <summary>
+/// 对话选项类型
+/// </summary>
+public enum DialogueOptionType
+{
+    None,Quest,ItemShop,BuildShop,
 }
 
 

@@ -16,18 +16,6 @@ namespace MFarm.CropPlant
         private Animator anim;
         private Transform playerPosition => FindObjectOfType<PlayerController>().transform;
         public Animator selfAnim;
-        //作物图片是否反转
-        private int isFlip;
-       
-        private void Start()
-        {
-            isFlip = Random.Range(0, 2);
-            if(isFlip == 1)
-            {
-                transform.GetChild(0).transform.rotation = Quaternion.Euler(new Vector3(0, 180, 0));
-            }
-           
-        }
         /// <summary>
         /// 工具收获场景中物体的方法 
         /// </summary>

@@ -7,13 +7,12 @@ using Unity.VisualScripting;
 public class AnimatorOverride : MonoBehaviour   //调用在Player对象上
 {
 
-    public SpriteRenderer holdItem;
+    public GameObject holdItem;
     [Header("角色各部位动画")]
     public List<AnimatorType> animatorTypes;
     //字典,通过输入关键字string来返回对应的Animator,储存Player对象下的所有Animator
     private Dictionary<string,Animator> animatorNameDict = new Dictionary<string,Animator>();
     public SpriteRenderer[] playerSprite;
-    public GameObject eatAnim;
     private PlayerController playerController;
     //当前装备的装备信息
     public ItemDetails equipHead,equipBody;
@@ -33,6 +32,7 @@ public class AnimatorOverride : MonoBehaviour   //调用在Player对象上
         EventHandler.BeforeSceneUnloadEvent += OnBeforeSceneUnloadEvent;
         EventHandler.EquipSlotEvent += OnEquipSlotEvent;
         EventHandler.DisplayCollectItemSprite += OnDisplayCollectItemSprite;
+        EventHandler.PlayEatAnimEvent += OnPlayEatAnimEvent;
     }
     private void OnDisable()
     {
@@ -40,14 +40,17 @@ public class AnimatorOverride : MonoBehaviour   //调用在Player对象上
         EventHandler.BeforeSceneUnloadEvent -= OnBeforeSceneUnloadEvent;
         EventHandler.EquipSlotEvent -= OnEquipSlotEvent;
         EventHandler.DisplayCollectItemSprite -= OnDisplayCollectItemSprite;
+        EventHandler.PlayEatAnimEvent -= OnPlayEatAnimEvent;
     }
+
+   
 
     /// <summary>
     /// 设置切换场景后，手部动作恢复为默认，且拿着的东西回到背包
     /// </summary>
     private void OnBeforeSceneUnloadEvent()
     {
-        holdItem.enabled = false;
+        holdItem.SetActive(false);
         SwitchAnimator(PartType.None);
     }
 
@@ -61,7 +64,7 @@ public class AnimatorOverride : MonoBehaviour   //调用在Player对象上
         if(itemDetails == null)
         {
             SwitchAnimator(PartType.None);
-            holdItem.enabled = false;
+            holdItem.SetActive(false);
         }
         else
         {
@@ -71,7 +74,7 @@ public class AnimatorOverride : MonoBehaviour   //调用在Player对象上
 
                 ItemType.Seed => PartType.Carry,
                 ItemType.Commodity => PartType.Carry,
-                ItemType.cooked => PartType.Carry,
+                ItemType.Cooked => PartType.Carry,
                 ItemType.HoeTool => PartType.Hoe,
                 ItemType.AxeTool => PartType.Axe,
                 ItemType.BreakTool => PartType.Break,
@@ -91,24 +94,23 @@ public class AnimatorOverride : MonoBehaviour   //调用在Player对象上
             if (isSelected == false)
             {
                 currentType = PartType.None;
-                holdItem.enabled = false;
+                holdItem.SetActive(false);
             }
             else
             {
                 if (currentType == PartType.Carry)
                 {
-                    holdItem.sprite = itemDetails.itemOnWorldSprite;
-                    holdItem.enabled = true;
+                    holdItem.GetComponent<SpriteRenderer>().sprite = itemDetails.itemOnWorldSprite;
+                    holdItem.SetActive(true);
                 }
                 else
                 {
-                    holdItem.enabled = false;
+                    holdItem.SetActive(false);
                 }
 
             }
             SwitchAnimator(currentType);
         }
-        
     }
     private void OnEquipSlotEvent(SlotUI headSlot, SlotUI bodySlot)
     {
@@ -117,9 +119,15 @@ public class AnimatorOverride : MonoBehaviour   //调用在Player对象上
     }
     private void OnDisplayCollectItemSprite(int ID)
     {
-        holdItem.enabled = true;
-        holdItem.sprite = InventoryManager.Instance.GetItemDetails(ID).itemOnWorldSprite;
+        holdItem.SetActive(true);
+        holdItem.GetComponent<SpriteRenderer>().sprite = InventoryManager.Instance.GetItemDetails(ID).itemOnWorldSprite;
         holdItem.gameObject.GetComponent<Animator>().SetTrigger("isCollect");
+    }
+    private void OnPlayEatAnimEvent(int ID)
+    {
+        holdItem.SetActive(true);
+        holdItem.GetComponent<SpriteRenderer>().sprite = InventoryManager.Instance.GetItemDetails(ID).itemOnWorldSprite;
+        holdItem.gameObject.GetComponent<Animator>().SetTrigger("isEat");
     }
     /// <summary>
     /// 根据当前的玩家部位类型来切换对应的玩家动画   
@@ -200,37 +208,8 @@ public class AnimatorOverride : MonoBehaviour   //调用在Player对象上
                    
                 }
                 
-             
             }
         }
 
-    }
-    /// <summary>
-    /// 播放吃东西动画
-    /// </summary>
-    public void PlayEatAnim()
-    {
-        playerController.inputDisable = true;
-        EventHandler.CallParticleEffectEvent(ParticalEffectType.Eat01,new Vector3(transform.position.x  , transform.position.y + 2f), Vector2.up);
-        for (int i = 0; i < playerSprite.Length; i++)
-        {
-            playerSprite[i].enabled = false;
-        }
-        eatAnim.SetActive(true);
-        StartCoroutine(WaitForEatOver());
-    }
-    /// <summary>
-    /// 等待吃东西动画结束后恢复玩家图片
-    /// </summary>
-    /// <returns></returns>
-    private IEnumerator WaitForEatOver()
-    {
-        yield return new WaitForSeconds(0.5f);
-        for (int i = 0; i < playerSprite.Length; i++)
-        {
-            playerSprite[i].enabled = true;
-        }
-        eatAnim.SetActive(false);
-        playerController.inputDisable = false;
     }
 }

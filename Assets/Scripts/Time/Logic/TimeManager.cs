@@ -7,7 +7,7 @@ using Unity.VisualScripting;
 
 public class TimeManager : Singleton<TimeManager>,ISaveable    //调用在TimeManager对象上
 {
-    private int gameSecond, gameMinute,gameHour,gameDay,gameMonth,gameYear;
+    [HideInInspector] public int gameSecond, gameMinute,gameHour,gameDay,gameMonth,gameYear;
     private Season gameSeason=Season.春天;
     //一季有多少月
     private int monthInSeason = 3;

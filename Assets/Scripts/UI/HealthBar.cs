@@ -18,12 +18,17 @@ public class HealthBar : Singleton<HealthBar>  //调用在StateBar对象上
     {
         EventHandler.StartNPCEvent += OnStartNPCEvent;
         EventHandler.EndNPCEvent += OnEndNPCEvent;
+        EventHandler.BuildindModeEvent += OnBuildindModeEvent;
     }
     public void OnDisable()
     {
         EventHandler.StartNPCEvent -= OnStartNPCEvent;
         EventHandler.EndNPCEvent -= OnEndNPCEvent;
+        EventHandler.BuildindModeEvent -= OnBuildindModeEvent;
     }
+
+   
+
     private void Update()
     {
         UpdateHealthBar();
@@ -37,6 +42,11 @@ public class HealthBar : Singleton<HealthBar>  //调用在StateBar对象上
     private void OnEndNPCEvent()
     {
         GetComponent<Canvas>().enabled = true;
+    }
+    private void OnBuildindModeEvent(BuildingDetails details, bool isBuilding)
+    {
+        hpImage.transform.parent.gameObject.SetActive(!isBuilding);
+        stminaImage.transform.parent.gameObject.SetActive(!isBuilding);
     }
     /// <summary>
     /// 更新玩家血条

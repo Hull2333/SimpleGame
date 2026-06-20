@@ -91,7 +91,11 @@ public class PlayerAttack : MonoBehaviour   //调用在Tool对象上
                         }
                         
                     }
-
+                    //用剑破坏物体
+                    if (hitCollider.GetComponent<KnockableItem>() != null)
+                    {
+                        hitCollider.GetComponent<KnockableItem>().ChopItems();
+                    }
                 }
                 break;
             //收割

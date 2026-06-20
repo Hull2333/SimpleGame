@@ -6,6 +6,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.Rendering.DebugUI;
+using static UnityEngine.RuleTile.TilingRuleOutput;
+using Transform = UnityEngine.Transform;
 
 public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
 {
@@ -97,14 +100,10 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     private float currentFishingTime;
     //钓鱼小游戏
     public GameObject fishBg;
-    private int randomLaterFishIndex;
-    private int randomSeaFishIndex;
-    //是否是在淡水钓鱼
-    private bool isLaterFishing;
+    private int randomFishIndex;
     //是否正在钓鱼游戏
     private bool isFishingGame;
-    //完成钓鱼小游戏
-    [HideInInspector] public bool compliteFishGame;
+    public GameObject readyText;
     [Header("鱼与抛物线")]
     private GameObject fish;
     //是否正在收鱼
@@ -155,6 +154,8 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     public float fishInSkyTime;
     //鱼钩抛出时的旋转角度
     public AnimationCurve baitRotationCurve;
+    //生成的鱼
+    public GameObject fishPrefab;
     //鱼的图片
     public GameObject fishItem;
     //生成鱼的信息
@@ -246,7 +247,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
             {
                 PlayerFishing();
             }
-            InitFish(randomLaterFishIndex, randomSeaFishIndex, baitGameObject.transform, transform, InventoryManager.Instance.laterFishList, InventoryManager.Instance.seaFishList);
+            StartFishGame();
         }
         //确认渔获后恢复站立状态
         if (confirmFishGet && Input.GetMouseButton(0))
@@ -259,8 +260,10 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
             inputDisable = false;
             fishMove = false;
             confirmFishGet = false;
-            StartCoroutine(WaitTime());
             cM.fishingEventDisable = false;
+            StartCoroutine(WaitTime());
+            EventHandler.CallControlPlayerBagOpen(true);
+
         }
     }
     private void FixedUpdate()
@@ -275,14 +278,13 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         }
         if (isFishLine)
         {
-            fishLine.enabled = true;
             //随时获取鱼线中点
-            fishlineMidPos = GetMidPoint(baitAppearPos.position, baitGameObject.transform.GetChild(0).transform.position, Settings.fishLinePercent, Settings.fishLineOffsetY);
-            fishLine.positionCount = 50;
+            fishlineMidPos = GetMidPoint(baitAppearPos.position, baitGameObject.transform.position, Settings.fishLinePercent, Settings.fishLineOffsetY);
+            //fishLine.positionCount = 50;
             //绘制鱼线
             for (int i = 0; i < 50; i++)
             {
-                Vector3 point = CalculateBezierPoint(baitAppearPos.position, fishlineMidPos, baitGameObject.transform.GetChild(0).transform.position, (i / 50.0f));
+                Vector3 point = CalculateBezierPoint(baitAppearPos.position, fishlineMidPos, baitGameObject.transform.position, (i / 50.0f));
                 fishLine.SetPosition(i, point);
 
             }
@@ -303,6 +305,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         //结束游戏的事件
         EventHandler.EndGameEvent += OnEndGameEvent;
         EventHandler.PlayerDecreaseStminaEvent += OnPlayerDecreaseStminaEvent;
+        EventHandler.PlayerDecreaseHealthEvent += OnPlayerDecreaseHealthEvent;
         EventHandler.IncreasePlantingSkillEvent += OnIncreasePlantingSkillEvent;
         EventHandler.IncreaseCultivetionSkillEvent += OnIncreaseCultivetionSkillEvent;
         EventHandler.IncreaseFishingSkillEvent += OnIncreaseFishingSkillEvent;
@@ -312,6 +315,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         EventHandler.EquipArmorEvent += OnEquipArmorEven;
         EventHandler.StartNPCEvent += OnStartNPCEvent;
         EventHandler.EndNPCEvent += OnEndNPCEvent;
+        EventHandler.PlayEatAnimEvent += OnPlayEatAnimEvent;
     }
 
    
@@ -328,6 +332,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         EventHandler.StartNewGameEvent -= OnStartNewGameEvent;
         EventHandler.EndGameEvent -= OnEndGameEvent;
         EventHandler.PlayerDecreaseStminaEvent -= OnPlayerDecreaseStminaEvent;
+        EventHandler.PlayerDecreaseHealthEvent -= OnPlayerDecreaseHealthEvent;
         EventHandler.IncreasePlantingSkillEvent -= OnIncreasePlantingSkillEvent;
         EventHandler.IncreaseCultivetionSkillEvent -= OnIncreaseCultivetionSkillEvent;
         EventHandler.IncreaseFishingSkillEvent -= OnIncreaseFishingSkillEvent;
@@ -337,14 +342,15 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         EventHandler.EquipArmorEvent -= OnEquipArmorEven;
         EventHandler.StartNPCEvent -= OnStartNPCEvent;
         EventHandler.EndNPCEvent -= OnEndNPCEvent;
+        EventHandler.PlayEatAnimEvent -= OnPlayEatAnimEvent;
     }
 
-
+    
 
     private void OnMouseClickedEvent(Vector3 mouseWorldPos, ItemDetails itemDetails)
     {
         //TODO:执行动画
-        if (itemDetails.itemType != ItemType.Seed && itemDetails.itemType != ItemType.Commodity && itemDetails.itemType != ItemType.Furniture && itemDetails.itemType != ItemType.FishingRod)
+        if (itemDetails.itemType != ItemType.Seed && itemDetails.itemType != ItemType.Commodity && itemDetails.itemType != ItemType.Furniture && itemDetails.itemType != ItemType.FishingRod && itemDetails.itemType != ItemType.Cooked)
         {
             //判断使用工具时面朝方向
             mouseX = mouseWorldPos.x - transform.position.x;
@@ -376,6 +382,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     {
         //长按时不让移动
         inputDisable = true;
+        
         if (itemDetails.itemType == ItemType.FishingRod)
         {
             //判断使用工具时面朝方向
@@ -422,6 +429,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     }
     private void OnMouseUpEvent()
     {
+        Debug.Log("MouseUp");
         cM.fishingEventDisable = true;
         isMouseDownTimerIncrease = true;
         fishPowerProcessCanvas.SetActive(false);
@@ -459,8 +467,19 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         baitParabolaPointIndex = 0;
         isBait = true;
         mouseDownTimer = 0;
-        //鱼上钩的随机时间
-        fishingRandomTime = UnityEngine.Random.Range(3f, 8f);
+        //根据装备的鱼饵来减少钓鱼等待的时间
+        if (InventoryUI.Instance.baitItemSlot.itemDetails != null)
+        {
+            var decreaseTime = InventoryUI.Instance.baitItemSlot.itemDetails.decreaseFishingTime;
+            //鱼上钩的随机时间
+            fishingRandomTime = UnityEngine.Random.Range(3f - decreaseTime, 8f - decreaseTime);
+        }
+        else
+        {
+            //鱼上钩的随机时间
+            fishingRandomTime = UnityEngine.Random.Range(3f, 8f);
+        }
+       
     }
 
     /// <summary>
@@ -494,7 +513,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
             anim.SetTrigger("isCollect");
         }
     }
-
+    
 
 
     /// <summary>
@@ -630,7 +649,8 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         baitInSkyTime += Time.deltaTime;
         baitGameObject.SetActive(true);
         isFishLine = true;
-
+        fishLine.enabled = true;
+        fishLine.positionCount = 50;
         float currentBaitJourney = (baitSpeed * 10 / 36) * baitInSkyTime;
         if (currentBaitParabolaLength < totalBaitParabolaLength)
         {
@@ -671,14 +691,13 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
             //落点为可钓鱼瓦片
             if (baitTile.canLaterFishing || baitTile.canSeaFishing)
             {
-                RollFishGetID(InventoryManager.Instance.laterFishList, InventoryManager.Instance.seaFishList);
                 if (baitTile.canLaterFishing)
                 {
-                    isLaterFishing = true;
+                    RollFishGetID(InventoryManager.Instance.laterFishList);
                 }
                 else
                 {
-                    isLaterFishing = false;
+                    RollFishGetID(InventoryManager.Instance.seaFishList);
                 }
                 isBait = false;
                 //播放水花粒子效果
@@ -688,8 +707,6 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
                 {
                     anim.SetTrigger("Idle2");
                 }
-                //鱼钩开始播放鱼钩动画
-                baitGameObject.GetComponent<Animator>().SetTrigger("Bait");
                 isFishing = true;
                 exclamationEnable = true;
 
@@ -701,6 +718,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
                 cM.fishingEventDisable = false;
                 isBait = false;
                 fishLine.gameObject.SetActive(false);
+                EventHandler.CallControlPlayerBagOpen(true);
                 //恢复移动和站立动画
                 foreach (var anim in animators)
                 {
@@ -738,9 +756,22 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         if (currentFishingTime > fishingRandomTime)
         {
             currentFishingTime = 0;
-            fishingRandomTime = UnityEngine.Random.Range(3f, 8f);
+            //根据装备的鱼饵来减少钓鱼等待的时间
+            if (InventoryUI.Instance.baitItemSlot.itemDetails != null)
+            {
+                var decreaseTime = InventoryUI.Instance.baitItemSlot.itemDetails.decreaseFishingTime;
+                //鱼上钩的随机时间
+                fishingRandomTime = UnityEngine.Random.Range(3f - decreaseTime, 8f - decreaseTime);
+            }
+            else
+            {
+                //鱼上钩的随机时间
+                fishingRandomTime = UnityEngine.Random.Range(3f, 8f);
+            }
             //显示感叹号
             exclamatonMark.SetActive(true);
+            //播放鱼钩动画
+            baitGameObject.GetComponent<Animator>().SetTrigger("baitShake");
             //播放玩家上钩动画
             foreach (var anim in animators)
             {
@@ -749,88 +780,135 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         }
     }
     /// <summary>
-    /// 随机获取渔获的Index
+    /// 随机获取渔获的信息
     /// </summary>
-    /// <param name="laterFishList"></param>
-    /// <param name="seaFishList"></param>
-    private void RollFishGetID(List<ItemDetails> laterFishList, List<ItemDetails> seaFishList)
+    /// <param name="canFishingList"></param>
+    private void RollFishGetID(List<ItemDetails> canFishingList)
     {
-        randomLaterFishIndex = UnityEngine.Random.Range(0, laterFishList.Count);
-        randomSeaFishIndex = UnityEngine.Random.Range(0, seaFishList.Count);
+        //while(fishDetails.likeBaits)
+        List<ItemDetails> temporaryFishList = new List<ItemDetails>();
+
+        for (int i = 0; i < canFishingList.Count; i++)
+        {
+            //有的鱼没写喜欢的鱼饵，那就装备如何一种鱼饵或者不装备鱼饵都可以钓到
+            if (canFishingList[i].likeBaits.Length == 0)
+            {
+                temporaryFishList.Add(canFishingList[i]);
+            }
+            //有的鱼写了喜欢的鱼饵，那就必须用它其中喜欢的一种鱼饵才可以钓到
+            else
+            {
+                for (int b = 0; b < canFishingList[i].likeBaits.Length; b++)
+                {
+                    if (InventoryUI.Instance.baitItemSlot.itemDetails != null &&canFishingList[i].likeBaits[b] == InventoryUI.Instance.baitItemSlot.itemDetails.itemID)
+                    {
+                        temporaryFishList.Add(canFishingList[i]);
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < temporaryFishList.Count; i++)
+        {
+            Debug.Log(temporaryFishList[i].itemID);
+        }
+        randomFishIndex = UnityEngine.Random.Range(0, temporaryFishList.Count);
+        fishDetails = temporaryFishList[randomFishIndex];
     }
     /// <summary>
-    /// 生成鱼
+    /// 开始钓鱼游戏或是退出钓鱼
     /// </summary>
-    /// <param name="ID">上钩的鱼</param>
-    /// <param name="InitPos">落点生成鱼</param>
-    /// <param name="playerPos">玩家位置</param>
-    private void InitFish(int laterFisnIndex, int seaFishIndex, Transform InitPos, Transform playerPos, List<ItemDetails> laterFishList, List<ItemDetails> seaFishList)
+    private void StartFishGame()
     {
 
-        if (Input.GetMouseButtonDown(0) && !isFishingGame)
+        if (Input.GetKey(KeyCode.Space) && !isFishingGame)
         {
-            //在出现感叹号时点击鼠标左键触发抓鱼
+            //减少当前使用的鱼饵数量
+            if(InventoryUI.Instance.baitItemSlot.itemDetails != null)
+            {
+                InventoryManager.Instance.RemoveItem(InventoryUI.Instance.baitItemSlot.itemDetails.itemID, 1);
+            }
+            //在出现感叹号时按下空格触发抓鱼
             if (canCatchFish)
             {
-                //播放玩家拉鱼动画
-                foreach (var anim in animators)
-                {
-                    anim.SetTrigger("Tool3");
-                }
+                //播放鱼钩动画
+                baitGameObject.GetComponent<Animator>().SetTrigger("bait");
                 isFishingGame = true;
-                //开启钓鱼小游戏
-                fishBg.SetActive(true);
+                EventHandler.CallUpdateGameStateEvent(GameState.Pause);
+                StartCoroutine(WaitForReadyTextPlay());
                 exclamationEnable = false;
             }
-            //若没出现感叹号时点击左键就关闭钓鱼
+            //若没出现感叹号时按下空格就关闭钓鱼
             else
             {
                 ExitFishing();
-
             }
-        }
-        //完成钓鱼小游戏
-        if (compliteFishGame)
-        {
-            fishLine.enabled = false;
-            isFishLine = false;
-            isFishingGame = false;
-            //关闭鱼钩对象
-            baitGameObject.SetActive(false);
-            isFishing = false;
-            //播放玩家接鱼动画
-            foreach (var anim in animators)
-            {
-                anim.SetTrigger("Tool4");
-            }
-            //获取鱼的信息并生成
-            if (isLaterFishing)
-            {
-                FishDetails details = InventoryManager.Instance.fishData.GetFishDetails(laterFishList[laterFisnIndex].itemID);
-                fishDetails = InventoryManager.Instance.GetItemDetails(laterFishList[laterFisnIndex].itemID);
-                var fishGameObject = Instantiate(details.fishPrefab, InitPos.position, Quaternion.identity);
-                fish = fishGameObject;
-            }
-            else
-            {
-                FishDetails details = InventoryManager.Instance.fishData.GetFishDetails(seaFishList[seaFishIndex].itemID);
-                fishDetails = InventoryManager.Instance.GetItemDetails(seaFishList[seaFishIndex].itemID);
-                var fishGameObject = Instantiate(details.fishPrefab, InitPos.position, Quaternion.identity);
-                fish = fishGameObject;
-            }
-            //获取鱼抛物线的中点并将鱼的抛物线点添加到抛物线点列表中
-            Vector3 fishParabolaMidPos = GetMidPoint(baitGameObject.transform.position, new Vector3(transform.position.x, transform.position.y + 2f), Settings.fishParabolaPercent, Settings.fishaParabolaOffsetY);
-            fishParabolaPointList.Clear();
-            AddParabolaPointList(baitGameObject.transform.position, fishParabolaMidPos, new Vector3(transform.position.x, transform.position.y + 2f), fishParabolaPointList);
-            totalFishParabolaLength = GetTotalParabolaLength(fishParabolaPointList);
-            fishInSkyTime = 0;
-            currentFishParabolaLength = 0;
-            fishParabolaPintIndex = 0;
-            fishMove = true;
-            compliteFishGame = false;
         }
     }
+    /// <summary>
+    /// 等待钓鱼准备动画播放完
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator WaitForReadyTextPlay()
+    {
+        readyText.SetActive(true);
+        yield return new WaitForSeconds(1f);
+        readyText.SetActive(false);
+        //播放玩家拉鱼动画
+        foreach (var anim in animators)
+        {
+            anim.SetTrigger("Tool3");
+        }
+        //开启钓鱼小游戏
+        fishBg.SetActive(true);
 
+    }
+    /// <summary>
+    /// 完成钓鱼游戏
+    /// </summary>
+    public void FinishFishGame()
+    {
+        EventHandler.CallUpdateGameStateEvent(GameState.Gameplay);
+        fishLine.enabled = false;
+        isFishLine = false;
+        isFishingGame = false;
+        //关闭鱼钩对象
+        baitGameObject.SetActive(false);
+        isFishing = false;
+        //播放玩家接鱼动画
+        foreach (var anim in animators)
+        {
+            anim.SetTrigger("Tool4");
+        }
+        //生成鱼item
+        fishPrefab.GetComponent<Item>().itemID = fishDetails.itemID;
+        var fishItems = Instantiate(fishPrefab, baitGameObject.transform.position, Quaternion.identity);
+        fishItems.GetComponent<CircleCollider2D>().enabled = false;
+        fish = fishItems;
+        ////获取鱼的信息并生成
+        //if (isLaterFishing)
+        //{
+        //    //fishDetails = InventoryManager.Instance.GetFishDetails(randomFishIndex, true);
+        //    fishPrefab.GetComponent<Item>().itemID = fishDetails.itemID;
+        //    var fishItems = Instantiate(fishPrefab, baitGameObject.transform.position, Quaternion.identity);
+        //    fish = fishItems;
+        //}
+        //else
+        //{
+        //    //fishDetails = InventoryManager.Instance.GetFishDetails(randomSeaFishIndex, true);
+        //    fishPrefab.GetComponent<Item>().itemID = fishDetails.itemID;
+        //    var fishItems = Instantiate(fishPrefab, baitGameObject.transform.position, Quaternion.identity);
+        //    fish = fishItems;
+        //}
+        //获取鱼抛物线的中点并将鱼的抛物线点添加到抛物线点列表中
+        Vector3 fishParabolaMidPos = GetMidPoint(baitGameObject.transform.position, new Vector3(transform.position.x, transform.position.y + 1f), Settings.fishParabolaPercent, Settings.fishaParabolaOffsetY);
+        fishParabolaPointList.Clear();
+        AddParabolaPointList(baitGameObject.transform.position, fishParabolaMidPos, new Vector3(transform.position.x, transform.position.y + 1f), fishParabolaPointList);
+        totalFishParabolaLength = GetTotalParabolaLength(fishParabolaPointList);
+        fishInSkyTime = 0;
+        currentFishParabolaLength = 0;
+        fishParabolaPintIndex = 0;
+        fishMove = true;
+    }
     /// <summary>
     /// 鱼沿着抛物线移动到玩家身上
     /// </summary>
@@ -854,9 +932,9 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
             }
             fish.transform.position = fishPos;
         }
-        else
+        else if (fish != null)
         {
-
+            fish.GetComponent<CircleCollider2D>().enabled = true;
             StartCoroutine(ShowFishGetAnimation());
         }
     }
@@ -867,14 +945,10 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     /// <returns></returns>
     private IEnumerator ShowFishGetAnimation()
     {
-        if (fish != null)
-        {
-            fish.GetComponent<BoxCollider2D>().enabled = true;
-        }
         //播放收鱼动画
         foreach (var anim in animators)
         {
-            anim.SetBool("Tool5", true);
+            anim.SetBool("Tool5",true);
         }
         fishItem.SetActive(true);
         fishItem.GetComponent<SpriteRenderer>().sprite = fishDetails.itemOnWorldSprite;
@@ -891,6 +965,8 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         isFishing = false;
         isFishingGame = false;
         isFishLine = false;
+        currentFishingTime = 0;
+        EventHandler.CallControlPlayerBagOpen(true);
         //恢复移动和站立动画
         foreach (var anim in animators)
         {
@@ -1001,7 +1077,16 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         isNpcEvent = false;
         inputDisable = false;
     }
-
+    private void OnPlayEatAnimEvent(int ID)
+    {
+        EventHandler.CallUpdateGameStateEvent(GameState.Pause);
+        EventHandler.CallControlPlayerBagOpen(false);
+        //播放玩家吃东西动画
+        foreach (var anim in animators)
+        {
+            anim.SetTrigger("isEat");
+        }
+    }
     /// <summary>
     /// 监测玩家的移动输入
     /// </summary>
@@ -1255,6 +1340,22 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         if (currentStmina < 0)
         {
             currentStmina = 0;
+        }
+        if (currentStmina >= maxStmina)
+        {
+            currentStmina = maxStmina;
+        }
+    }
+    private void OnPlayerDecreaseHealthEvent(float value)
+    {
+        currentHealth -= value;
+        if (currentHealth < 0)
+        {
+            currentHealth = 0;
+        }
+        if (currentHealth >= maxHealth)
+        {
+            currentHealth = maxHealth;
         }
     }
     /// <summary>

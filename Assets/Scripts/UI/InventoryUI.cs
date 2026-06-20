@@ -1,17 +1,14 @@
 using DG.Tweening;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEngine.Rendering.DebugUI;
 
 namespace MFarm.Inventory
 {
-    public class InventoryUI : MonoBehaviour    //调用在Inventory对象上
+    public class InventoryUI : Singleton<InventoryUI>    //调用在Inventory对象上
     {
         [Header("物品描述")]
         public ItemTooltip itemTooltip;
@@ -21,34 +18,39 @@ namespace MFarm.Inventory
         [Header("玩家背包UI")]
         [SerializeField] private GameObject bagUI;
         [SerializeField] private GameObject playerEquipUI;
-        //public GameObject[] bagSlotHolders;
-        //public UnityEngine.UI.Button bagSlotHoldNextPage, bagSlotHolderPreviousPage;
-        //当前背包页页数
-        //private int currentBagSlotHolderPage = 0;
-        //public Text currentBagSlotHolderPageText;
+        //当前是否可以打开玩家背包
+        [HideInInspector] public bool canOpenBag = true;
+        public GameObject activeBagBar;
+        public GameObject bagButton;
         private bool bagOpened;
         [Header("通用背包")]
         [SerializeField] private GameObject baseBag;
+        //玩家背包UI中的切换面板按钮
+        public GameObject[] playerBagSupButtons;
         public GameObject shopSlotPrefab;
         public GameObject boxSlotPrefab;
+        //鱼饵SlotUI动画
+        public Animator baitBarAnim;
+        //鱼饵信息
+        public SlotUI baitItemSlot;
         [Header("交易数量选择UI")]
         public GameObject tradeUIPanel;
         public TradeUI tradeUI;
         //还没卖完显示提醒UI
         public GameObject haveItemUIPanel;
-        public UnityEngine.UI.Button yesButton;
-        public UnityEngine.UI.Button noButton;
+        public Button yesButton;
+        public Button noButton;
         public TextMeshProUGUI playerMoneyText;
-        public GameObject playerMoneyUI;
+        public Animator playerMoneyUIAnim;
         public SlotUI[] playerSlots;
         public SlotUI[] sellBoxSlots;
         [Header("NPC商店UI")]
         public GameObject shopSlotHolder;
-        public UnityEngine.UI.Button quitShopButton;
-        public UnityEngine.UI.Button shopButton;
+        public Button quitShopButton;
+        public Button shopButton;
         [Header("NPC出售箱UI")]
         public GameObject sellBoxSlotHolder;
-        public UnityEngine.UI.Button sellBoxButton;
+        public Button sellBoxButton;
         public GameObject sellJoy;
         public GameObject allValue;
         public TextMeshProUGUI allValueText;
@@ -60,12 +62,15 @@ namespace MFarm.Inventory
         //出售箱中残存的物品
         private List<InventoryItem> haveSellBoxItemList = new List<InventoryItem>();
         [Header("金币")]
+        private RectTransform coinRectTran;
         //金币预制体
         public GameObject coinPrefab;
         //金币生成物体的Parent
         public Transform coinParent;
         private List<GameObject> coinList = new List<GameObject>();
         private int coinNum;
+        //金币的终点
+        public Transform coinTargetPos;
         [Header("物品拾取提示")]
         //物品提示UI生成位置
         [SerializeField] private Transform itemGetBg;
@@ -88,6 +93,15 @@ namespace MFarm.Inventory
         public Dictionary<string, Image> equipImageDict = new Dictionary<string, Image>();
         [Header("好感度")]
         public Image[] friendlinessImages;
+        [Header("建造UI")]
+        public SlotUI_Build buildSlotUI;
+        public Transform buildSlotUIParent;
+        public GameObject buildShopPanel;
+        public GameObject buildModePanel;
+        public Button buildModeExitButton;
+        public Button buildingShopExitButton;
+        //提示材料不足
+        public GameObject resourceLock;
         private void OnEnable()
         {
             EventHandler.UpdateInventoryUI += OnUpdateInventoryUI;
@@ -101,6 +115,9 @@ namespace MFarm.Inventory
             EventHandler.ItemSelectEvent += OnItemSelectEvent;
             EventHandler.DoTweenPlayerMoneyChageEvent += OnDoTweenPlayerMoneyChageEvent;
             EventHandler.UpdateNPCFriendlinessUIPanel += OnUpdateNPCFriendlinessUIPanel;
+            EventHandler.ControlPlayerBagOpen += OnControlPlayerBagOpen;
+            EventHandler.BuildindModeEvent += OnBuildindModeEvent;
+            EventHandler.OpenBuildShopEvent += OnOpenBuildShopEvent;
         }
 
         private void OnDisable()
@@ -116,13 +133,12 @@ namespace MFarm.Inventory
             EventHandler.ItemSelectEvent -= OnItemSelectEvent;
             EventHandler.DoTweenPlayerMoneyChageEvent -= OnDoTweenPlayerMoneyChageEvent;
             EventHandler.UpdateNPCFriendlinessUIPanel -= OnUpdateNPCFriendlinessUIPanel;
+            EventHandler.ControlPlayerBagOpen -= OnControlPlayerBagOpen;
+            EventHandler.BuildindModeEvent -= OnBuildindModeEvent;
+            EventHandler.OpenBuildShopEvent -= OnOpenBuildShopEvent;
         }
 
-       
-
-
-
-
+      
 
         /// <summary>
         /// 加载新场景后物品高亮取消
@@ -151,10 +167,12 @@ namespace MFarm.Inventory
                 SlotType.Box => boxSlotPrefab,
                 _ => null,
             };
-            //显示玩家金钱
-            playerMoneyUI.GetComponent<Animator>().Play("moneyUI");
-            //生成背包UI
+            //显示背包UI
             baseBag.SetActive(true);
+            foreach (var button in playerBagSupButtons)
+            {
+                button.SetActive(false);
+            }
             ClickShopSwitchButton();
             InventoryManager.Instance.anyBagOpened = true;
             baseBagSlots = new List<SlotUI>();
@@ -190,9 +208,14 @@ namespace MFarm.Inventory
         {
             InventoryManager.Instance.anyBagOpened = false;
             InventoryManager.Instance.isSellState = false;
+            foreach (var button in playerBagSupButtons)
+            {
+                button.SetActive(true);
+            }
             baseBag.SetActive(false);
-            //不显示玩家金钱
-            playerMoneyUI.GetComponent<Animator>().Play("moneyUIExit");
+            //取消当前选中的物品
+            InventoryManager.Instance.currentSelectedItem = null;
+            EventHandler.CallItemSelectEvent(InventoryManager.Instance.currentSelectedItem, false);
             itemTooltip.gameObject.SetActive(false);
             UpdateSlotHighlight(-1);
             foreach (var slot in baseBagSlots)
@@ -274,7 +297,7 @@ namespace MFarm.Inventory
                 //    itemGetTipList.Add(getItemDetails);
                 //    Instantiate(itemGetTipPrefab, itemGetBg.transform);
                 //    itemGetTipPrefab.transform.GetChild(0).GetComponent<Image>().sprite = getItemDetails.itemIcon;
-                //    itemGetTipPrefab.transform.GetChild(1).GetComponent<Text>().text = "X" + " " + "1";
+                //    itemGetTipPrefab.transform.GetChild(1).GetComponent<Text>().recipeName = "X" + " " + "1";
                 //}
                 ////若拾取的物品正显示在游戏界面上，只修改物品的拾取数量
                 //else
@@ -308,7 +331,7 @@ namespace MFarm.Inventory
                         if (list[i].itemAmount > 0)
                         {
                             var item = InventoryManager.Instance.GetItemDetails(list[i].itemID);
-                            playerSlots[i].UpdateSlot(item, list[i].itemAmount);
+                            playerSlots[i].UpdateSlot(item, list[i].itemAmount,false,0);
                         }
                         else
                         {
@@ -323,7 +346,7 @@ namespace MFarm.Inventory
                         if (list[i].itemAmount > 0)
                         {
                             var item = InventoryManager.Instance.GetItemDetails(list[i].itemID);
-                            baseBagSlots[i].UpdateSlot(item, list[i].itemAmount);
+                            baseBagSlots[i].UpdateSlot(item, list[i].itemAmount,false,0);
                         }
                         else
                         {
@@ -337,7 +360,7 @@ namespace MFarm.Inventory
                         if (list[i].itemAmount > 0)
                         {
                             var item = InventoryManager.Instance.GetItemDetails(list[i].itemID);
-                            sellBoxSlots[i].UpdateSlot(item, list[i].itemAmount);
+                            sellBoxSlots[i].UpdateSlot(item, list[i].itemAmount,false,0);
                         }
                         else
                         {
@@ -410,11 +433,30 @@ namespace MFarm.Inventory
             UpdateSlotHighlight(-1);
             
         }
-        private void OnItemSelectEvent(ItemDetails details, bool arg2)
+        private void OnItemSelectEvent(ItemDetails details, bool isSelected)
         {
             if(details != null)
             {
                 UpdatePlayerAttackNum(details);
+                if (!isSelected)
+                {
+                    baitBarAnim.SetBool("appear", false);
+                }
+                else
+                {
+                    if(details.itemType == ItemType.FishingRod)
+                    {
+                        baitBarAnim.SetBool("appear", true);
+                    }
+                    else
+                    {
+                        baitBarAnim.SetBool("appear", false);
+                    }
+                }
+            }
+            else
+            {
+                baitBarAnim.SetBool("appear", false);
             }
            
         }
@@ -423,14 +465,40 @@ namespace MFarm.Inventory
             
             for (int x = 0; x < friendlinessImages.Length; x++)
             {
-                Debug.Log(friendlinessImages[x].gameObject.name + "  " + name + "  " + value);
                 if (friendlinessImages[x].gameObject.name == name)
                 {
                     friendlinessImages[x].fillAmount = value / 30f;
                 }
             }
         }
-
+        private void OnControlPlayerBagOpen(bool canOpen)
+        {
+            canOpenBag = canOpen;
+        }
+        private void OnBuildindModeEvent(BuildingDetails details, bool isBuilding)
+        {
+            buildModePanel.SetActive(isBuilding);
+            buildShopPanel.SetActive(!isBuilding);
+            playerMoneyUIAnim.gameObject.SetActive(!isBuilding);
+            activeBagBar.SetActive(!isBuilding);
+            bagButton.SetActive(!isBuilding);
+        }
+        private void OnOpenBuildShopEvent(BuildingBagData_SO buildShop)
+        {
+            buildShopPanel.SetActive(true);
+            //清空buildSlotUIParent下的子物体
+            for (int i = 0; i < buildSlotUIParent.childCount; i++)
+            {
+                Destroy(buildSlotUIParent.GetChild(i).gameObject);
+            }
+            //生成对应的可造建筑
+            for (int i = 0; i < buildShop.buildingList.Count; i++)
+            {
+                var buildingSlot = Instantiate(buildSlotUI, buildSlotUIParent);
+                buildingSlot.buildID = buildShop.buildingList[i];
+                buildingSlot.UpdateBuildSlotMessage();
+            }
+        }
         private void Start()
         {
             //给每个背包格子赋值序号
@@ -450,11 +518,13 @@ namespace MFarm.Inventory
             quitShopButton.onClick.AddListener(ClickQuitShopButton);
             yesButton.onClick.AddListener(ClickYesButton);
             noButton.onClick.AddListener(ClickNoButton);
+            buildModeExitButton.onClick.AddListener(ExitBuildMode);
+            buildingShopExitButton.onClick.AddListener(QuitBuildingShopUI);
         }
-
+      
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.B))
+            if (Input.GetKeyDown(KeyCode.B) )
             {
                 OpenBagUI();
             }
@@ -465,46 +535,48 @@ namespace MFarm.Inventory
         /// </summary>
         public void OpenBagUI()
         {
-            //实现Bag Button可以反复点按
-            bagOpened = !bagOpened;
-            InventoryManager.Instance.anyBagOpened = bagOpened;
-            
-            if (bagOpened)
+            if (canOpenBag)
             {
-                playerMoneyUI.GetComponent<Animator>().Play("moneyUI");
-                //Time.timeScale = 0f;
-                EventHandler.CallUpdateGameStateEvent(GameState.Pause);
-                //每一次背包打开都是默认显示背包栏
-                playerPanels[0].SetActive(true);
-                //SwitchBagSlotHolderPageButton();
-            }
-            else
-            {
-                playerMoneyUI.GetComponent<Animator>().Play("moneyUIExit");
-                //除了ActionBar的物品外，其他被选择后要进行取消举手动作，把当前的物品设置为null
-                for (int i = 0; i < playerSlots.Length - 9; i++)
+                //实现Bag Button可以反复点按
+                bagOpened = !bagOpened;
+                InventoryManager.Instance.anyBagOpened = bagOpened;
+
+                if (bagOpened)
                 {
-                    if (playerSlots[i].isSelected)
+                    //Time.timeScale = 0f;
+                    EventHandler.CallUpdateGameStateEvent(GameState.Pause);
+                    //每一次背包打开都是默认显示背包栏
+                    playerPanels[0].SetActive(true);
+                    //SwitchBagSlotHolderPageButton();
+                }
+                else
+                {
+                    //除了ActionBar的物品外，其他被选择后要进行取消举手动作，把当前的物品设置为null
+                    for (int i = 0; i < playerSlots.Length - 9; i++)
                     {
-                        UpdateSlotHighlight(-1);
-                        InventoryManager.Instance.currentSelectedItem = null;
-                        //每次关闭背包UI时，重新检测一下Player动画并取消举起动画
-                        EventHandler.CallItemSelectEvent(InventoryManager.Instance.currentSelectedItem, false);
+                        if (playerSlots[i].isSelected)
+                        {
+                            UpdateSlotHighlight(-1);
+                            InventoryManager.Instance.currentSelectedItem = null;
+                            //每次关闭背包UI时，重新检测一下Player动画并取消举起动画
+                            EventHandler.CallItemSelectEvent(InventoryManager.Instance.currentSelectedItem, false);
+                        }
                     }
+                    foreach (var panel in playerPanels)
+                    {
+                        panel.gameObject.SetActive(false);
+                    }
+                    EventHandler.CallEquipSlotEvent(equipHeadSlot, equipBodySlot);
+                    //Time.timeScale = 1f;
+                    EventHandler.CallUpdateGameStateEvent(GameState.Gameplay);
+                    //关闭背包UI同时也关闭道具介绍UI
+                    itemTooltip.gameObject.SetActive(false);
                 }
-                foreach (var panel in playerPanels)
-                {
-                    panel.gameObject.SetActive(false);
-                }
-                EventHandler.CallEquipSlotEvent(equipHeadSlot, equipBodySlot);
-                //Time.timeScale = 1f;
-                EventHandler.CallUpdateGameStateEvent(GameState.Gameplay);
-                //关闭背包UI同时也关闭道具介绍UI
-                itemTooltip.gameObject.SetActive(false);
+                playerEquipUI.SetActive(bagOpened);
+                EventHandler.CallItemUselessEvent(bagOpened);
+                EventHandler.CallRestoreNormalCursorImageEvent();
             }
-            playerEquipUI.SetActive(bagOpened);
-            EventHandler.CallItemUselessEvent(bagOpened);
-            EventHandler.CallRestoreNormalCursorImageEvent();
+           
         }
 
         /// <summary>
@@ -569,7 +641,6 @@ namespace MFarm.Inventory
             {
                 panel.gameObject.SetActive(false);
             }
-            playerMoneyUI.GetComponent<Animator>().Play("moneyUIExit");
             playerEquipUI.SetActive(bagOpened);
             InventoryManager.Instance.anyBagOpened = false;
             EventHandler.CallItemUselessEvent(false);
@@ -590,7 +661,7 @@ namespace MFarm.Inventory
         //    bagSlotHolders[currentBagSlotHolderPage].SetActive(false);
         //    bagSlotHolders[currentBagSlotHolderPage + 1].SetActive(true);
         //    currentBagSlotHolderPage ++;
-        //    currentBagSlotHolderPageText.text = (currentBagSlotHolderPage + 1).ToString();
+        //    currentBagSlotHolderPageText.recipeName = (currentBagSlotHolderPage + 1).ToString();
         //    SwitchBagSlotHolderPageButton();
         //}
         ///// <summary>
@@ -601,7 +672,7 @@ namespace MFarm.Inventory
         //    bagSlotHolders[currentBagSlotHolderPage].SetActive(false);
         //    bagSlotHolders[currentBagSlotHolderPage - 1].SetActive(true);
         //    currentBagSlotHolderPage --;
-        //    currentBagSlotHolderPageText.text = (currentBagSlotHolderPage + 1).ToString();
+        //    currentBagSlotHolderPageText.recipeName = (currentBagSlotHolderPage + 1).ToString();
         //    SwitchBagSlotHolderPageButton();
         //}
         ///// <summary>
@@ -737,9 +808,8 @@ namespace MFarm.Inventory
                 allValueText.text = "0";
                 sellTip.SetActive(false);
                 GenerateCoins();
-                MakeTween();
             }
-            //playerMoneyText.text = InventoryManager.Instance.playerMoney.ToString();
+            //playerMoneyText.recipeName = InventoryManager.Instance.playerMoney.ToString();
            
         }
         /// <summary>
@@ -768,11 +838,13 @@ namespace MFarm.Inventory
         /// </summary>
         public void ClickSellSwitchButton()
         {
+           
             InventoryManager.Instance.isSellState = true;
             shopSlotHolder.SetActive(false);
             sellBoxSlotHolder.SetActive(true);
             sellJoy.SetActive(true);
             allValue.SetActive(true);
+            
         }
         /// <summary>
         /// 点击商店关闭按钮
@@ -877,7 +949,7 @@ namespace MFarm.Inventory
            
             for (int i = 0; i < coinNum; i++)
             {
-                Vector3 originPos = new Vector3(UnityEngine.Random.Range(-50, 50), (UnityEngine.Random.Range(-40, 40)));
+                Vector3 originPos = new Vector3(UnityEngine.Random.Range(coinRectTran.anchoredPosition.x - 50f, coinRectTran.anchoredPosition.x + 50f), UnityEngine.Random.Range(coinRectTran.anchoredPosition.y - 50f, coinRectTran.anchoredPosition.y + 50f));
                 coinList[i].GetComponent<CoinTween>().PlayTween(delay, originPos);
                 delay += 0.1f;
             }
@@ -916,20 +988,41 @@ namespace MFarm.Inventory
             }
             for (int i = 0; i < num; i++)
             {
-                GameObject coin = Instantiate(coinPrefab, Vector3.zero, Quaternion.identity, coinParent);
-                //金币开始生成的位置
-                //coin.transform.localPosition = new Vector3(UnityEngine.Random.Range(-50, 50), (UnityEngine.Random.Range(-40, 40)));\
-                coin.transform.localPosition = Vector3.zero;
-                if(i == 0)
+                GameObject coin = Instantiate(coinPrefab, allValueText.transform.position, Quaternion.identity, coinParent);
+                if(coinRectTran == null)
+                {
+                    coinRectTran = coin.GetComponent<RectTransform>();
+                    coinRectTran.anchoredPosition = coinParent.InverseTransformPoint(allValueText.transform.position);
+                }
+                coin.GetComponent<CoinTween>().targetPos = coinParent.InverseTransformPoint(coinTargetPos.position);
+                if (i == 0)
                 {
                     coin.GetComponent<CoinTween>().isfirst = true;
                 }
                 coinList.Add(coin);
             }
             coinNum = num;
+            MakeTween();
         }
-        
-
+        /// <summary>
+        /// 退出建造模式
+        /// </summary>
+        private void ExitBuildMode()
+        {
+            EventHandler.CallBuildindModeEvent(null, false);
+        }
+        private void QuitBuildingShopUI()
+        {
+            buildShopPanel.SetActive(false);
+            EventHandler.CallUpdateGameStateEvent(GameState.Gameplay);
+        }
+        /// <summary>
+        /// 显示材料不足提示
+        /// </summary>
+        public void ShowResouceLackText()
+        {
+            Instantiate(resourceLock, Input.mousePosition, Quaternion.identity, coinParent);
+        }
     }
 }
 

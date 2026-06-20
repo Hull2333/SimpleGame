@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class CoinTween : MonoBehaviour //调用在Coin预制体上
 {
     private Image image;
+    public Image imageChild;
     public Vector2 targetPos;
     //是否是第一个生成的金币
     public bool isfirst = false;
@@ -31,6 +32,7 @@ public class CoinTween : MonoBehaviour //调用在Coin预制体上
                 //金币开始缩小到0
                 transform.DOScale(0, 0.3f).SetEase(Ease.InBack).OnComplete(() =>
                 {
+                    InventoryUI.Instance.playerMoneyUIAnim.Play("MoneyUIShake");
                     //最后摧毁该物体
                     Destroy(gameObject);
                     //在第一个金币到达时，金钱增加
@@ -48,6 +50,17 @@ public class CoinTween : MonoBehaviour //调用在Coin预制体上
            
         //});
 
+    }
+    /// <summary>
+    /// 先慢慢显性再移动到目标点
+    /// </summary>
+    /// <param name="delay"></param>
+    public void PlayTweenOfAlpha(float delay)
+    {
+        imageChild.DOFade(1f, 0.3f).SetEase(Ease.InQuad).SetDelay(delay).OnComplete(() =>
+        {
+            image.rectTransform.DOAnchorPos(targetPos, 0.4f).SetEase(Ease.OutQuad);
+        });
     }
 
 }

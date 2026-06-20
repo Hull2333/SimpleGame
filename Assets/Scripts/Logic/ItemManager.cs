@@ -1,8 +1,10 @@
 using MFarm.Save;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static UnityEditor.Progress;
 namespace MFarm.Inventory
 {
     public class ItemManager : MonoBehaviour,ISaveable    //调用在ItemManager对象上
@@ -10,16 +12,29 @@ namespace MFarm.Inventory
 
         public Item itemPerfab;
         public Item bounceItemPerfab;
+        public KnockableItem knockableItemPerfab1;
+        public KnockableItem knockableItemPerfab2;
+        public KnockableItem knockableItemPerfab3;
+        public KnockableItem knockableItemPerfab4;
+        public ReapableItem weedItemPerfab;
+        public ReapableItem bigWeedItemPerfab;
         private Transform itemParent;
+        public Transform buildingParent;
         private Transform playerTransform => FindObjectOfType<PlayerController>().transform;
 
         public string GUID => GetComponent<DataGUID>().guid;
-
+        public MineSceneDataList_SO mineData;
         //用字典来存储每个场景中的所有Item
         private Dictionary<string,List<SceneItem>> sceneItemDict = new Dictionary<string,List<SceneItem>>();
         //用字典来存储每个场景中的所有Furniture
         private Dictionary<string,List<SceneFurniture>> sceneFurnitureDict = new Dictionary<string, List<SceneFurniture>>();
-
+        //用字典来存储每个场景的所有的Building
+        private Dictionary<string, List<SceneBuilding>> sceneBuildingDict = new Dictionary<string, List<SceneBuilding>>();
+        //用字典来存储每个场景的knockItem
+        public Dictionary<string, List<SceneKnockItem>> sceneKnockItemDict = new Dictionary<string, List<SceneKnockItem>>();
+        //用字典来存储每个场景的杂草和大杂草
+        public Dictionary<string, List<SceneReapableItem>> sceneWeedItemDict = new Dictionary<string, List<SceneReapableItem>>();
+        public Dictionary<string, List<SceneReapableItem>> sceneBigWeedItemDict = new Dictionary<string, List<SceneReapableItem>>();
         private void OnEnable()
         {
             EventHandler.InstantiateItemInScene += OnInstantiateItemInScene;
@@ -28,10 +43,9 @@ namespace MFarm.Inventory
             EventHandler.AfterSceneLoadedEvent += OnAfterSceneLoadeEvent;
             //建造物品生成事件
             EventHandler.BuildFurnitureEvent += OnBuildFurnitureEvent;
-            //菜肴制作后将菜肴生成在人物脚下拾取
-            EventHandler.CookedMakeEvent += OnCookedMakeEvent;
             //新游戏开始需要重置的数据
             EventHandler.StartNewGameEvent += OnStartNewGameEvent;
+            EventHandler.InstantiateBuildingOnMapEvent += OnInstantiateBuildingOnMapEvent;
         }
 
         private void OnDisable()
@@ -41,42 +55,54 @@ namespace MFarm.Inventory
             EventHandler.DropItemEvent -= OnDropItemEvent;
             EventHandler.AfterSceneLoadedEvent -= OnAfterSceneLoadeEvent;
             EventHandler.BuildFurnitureEvent -= OnBuildFurnitureEvent;
-            EventHandler.CookedMakeEvent -= OnCookedMakeEvent;
             EventHandler.StartNewGameEvent -= OnStartNewGameEvent;
+            EventHandler.InstantiateBuildingOnMapEvent -= OnInstantiateBuildingOnMapEvent;
         }
+
+       
+
         private void Start()
         {
             ISaveable saveable = this;
             saveable.RegisterSaveable();
         }
-        private void OnBuildFurnitureEvent(int ID, Vector3 mousePos)
+        private void OnBuildFurnitureEvent(BluPrintDetails bluPrintDetails, Vector3 bluPrintPos ,Transform parent)
         {
-            BluPrintDetails bluePrint = InventoryManager.Instance.bluPrintData.GetBluPrintDetails(ID);
-            //生成建造物品在鼠标位置上
-            var buildItem = Instantiate(bluePrint.buildPrefab, mousePos, Quaternion.identity, itemParent);
+            var bluPrintGameObject = Instantiate(bluPrintDetails.buildPrefab, bluPrintPos, Quaternion.identity, parent);
+            bluPrintGameObject.GetComponent<Furniture>().SetCollider(true);
+            bluPrintGameObject.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1f);
             //存储游戏中箱子数据
-            if(buildItem.GetComponent<Box>())
+            if (bluPrintGameObject.GetComponent<Box>())
             {
-                buildItem.GetComponent<Box>().index = InventoryManager.Instance.boxDataAmount;
-                buildItem.GetComponent<Box>().InitBox(buildItem.GetComponent<Box>().index);
+                bluPrintGameObject.GetComponent<Box>().index = InventoryManager.Instance.boxDataAmount;
+                bluPrintGameObject.GetComponent<Box>().InitBox(bluPrintGameObject.GetComponent<Box>().index);
             }
-        }
-        private void OnCookedMakeEvent(int ID)
-        {
-            CookedDetails cookedDetails = InventoryManager.Instance.cookedData.GetCookedDetails(ID);
-            var cookedItem = Instantiate(cookedDetails.cookPrefab, new Vector3(playerTransform.position.x,playerTransform.position.y + 1f), Quaternion.identity, itemParent);
         }
 
         private void OnBeforeSceneUnloadEvent()
         {
-           GetAllSceneItems();
-           GetAllSceneFurniture();
+            if (ExcludeMineScene(SceneManager.GetActiveScene().name))
+            {
+                GetAllSceneItems();
+                GetAllSceneFurniture();
+                GetAllSceneBuilding();
+                GetAllSceneKnockItem();
+                GetAllSceneReapableItem();
+            }
+           
         }
         private void OnAfterSceneLoadeEvent()
         {
             itemParent = GameObject.FindWithTag("ItemParent").transform;
-            RecreateAllItem();
-            RebuilFurniture();
+            buildingParent = FindAnyObjectByType<BuildingParent>().transform;
+            if (ExcludeMineScene(SceneManager.GetActiveScene().name))
+            {
+                RecreateAllItem();
+                RebuilFurniture();
+                ReBuildBuilding();
+                RecreateKnockItem();
+                RecreateReapableItem();
+            }
         }
         /// <summary>
         /// 在鼠标拖拽结束的地面位置生成Item
@@ -89,7 +115,7 @@ namespace MFarm.Inventory
             var item = Instantiate(bounceItemPerfab, pos, Quaternion.identity, itemParent);
             item.itemID = ID;
             //使物品生成有个下落的动画
-            //item.GetComponent<ItemBounce>().InitBounceItem(pos, Vector3.up);
+            //building.GetComponent<ItemBounce>().InitBounceItem(pos, Vector3.up);
         }
 
         private void OnDropItemEvent(int ID, Vector3 mousePos,ItemType itemType)
@@ -107,13 +133,35 @@ namespace MFarm.Inventory
             item.GetComponent<ItemBounce>().InitBounceItem(mousePos,dir);
         }
 
-
         private void OnStartNewGameEvent(int obj)
         {
             sceneItemDict.Clear();
             sceneFurnitureDict.Clear();
+            sceneBuildingDict.Clear();
         }
-
+        private void OnInstantiateBuildingOnMapEvent(BuildingDetails building, Vector3 pos, Transform transform)
+        {
+            var buildingInMap = Instantiate(building.buildPrefab, pos, Quaternion.identity, transform);
+            buildingInMap.GetComponent<BuildingItem>().Building(true);
+            buildingInMap.GetComponent<BuildingItem>().SwitchCollider2D(true);
+            buildingInMap.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1f);
+        }
+        /// <summary>
+        /// 排除矿洞场景
+        /// </summary>
+        /// <param name="sceneName">当前场景名称</param>
+        /// <returns>true为非矿洞场景，false为矿洞场景</returns>
+        private bool ExcludeMineScene(string sceneName)
+        {
+            foreach(var scene in mineData.mineSceneList)
+            {
+                if(scene.sceneName == sceneName)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
         /// <summary>
         /// 获取场景的物品信息
         /// </summary>
@@ -140,6 +188,7 @@ namespace MFarm.Inventory
             {
                 sceneItemDict.Add(SceneManager.GetActiveScene().name, currentSceneItems);
             }
+            
         }
         /// <summary>
         /// 获取场景中所有家具信息
@@ -171,6 +220,98 @@ namespace MFarm.Inventory
             else
             {
                 sceneFurnitureDict.Add(SceneManager.GetActiveScene().name, currentSceneFurniture);
+            }
+        }
+        /// <summary>
+        /// 获取场景中的所有的建造建筑
+        /// </summary>
+        private void GetAllSceneBuilding()
+        {
+            List<SceneBuilding> currentSceneBuinding = new List<SceneBuilding>();
+            foreach (var building in FindObjectsOfType<BuildingItem>())
+            {
+                SceneBuilding sceneBuinding = new SceneBuilding
+                {
+                    buildID = building.buildID,
+                    buildDay = building.currentBuildingDay,
+                    position = new SerializableVector3(building.transform.position)
+                };
+                currentSceneBuinding.Add(sceneBuinding);
+            }
+            //当前场景在字典中，则把当前场景的物品数据更新到字典中
+            if (sceneBuildingDict.ContainsKey(SceneManager.GetActiveScene().name))
+            {
+                sceneBuildingDict[SceneManager.GetActiveScene().name] = currentSceneBuinding;
+            }
+            //如果时新场景，就把新场景的物品数据添加到字典中
+            else
+            {
+                sceneBuildingDict.Add(SceneManager.GetActiveScene().name, currentSceneBuinding);
+            }
+        }
+        /// <summary>
+        /// 获取所有场景中的KnockItem
+        /// </summary>
+        private void GetAllSceneKnockItem()
+        {
+            //存储当前场景的物品
+            List<SceneKnockItem> currentSceneKnockItems = new List<SceneKnockItem>();
+            foreach (var knockItem in FindObjectsOfType<KnockableItem>())
+            {
+                SceneKnockItem sceneItem = new SceneKnockItem()
+                {
+                    position = new SerializableVector3(knockItem.transform.position),
+                    itemIndex = knockItem.rockIndex
+                };
+                currentSceneKnockItems.Add(sceneItem);
+            }
+            //当前场景在字典中，则把当前场景的物品数据更新到字典中
+            if (sceneItemDict.ContainsKey(SceneManager.GetActiveScene().name))
+            {
+                sceneKnockItemDict[SceneManager.GetActiveScene().name] = currentSceneKnockItems;
+            }
+            //如果时新场景，就把新场景的物品数据添加到字典中
+            else
+            {
+                sceneKnockItemDict.Add(SceneManager.GetActiveScene().name, currentSceneKnockItems);
+            }
+        }
+        /// <summary>
+        /// 获取所有场景中的ReapableItem
+        /// </summary>
+        private void GetAllSceneReapableItem()
+        {
+            //存储当前场景杂草
+            List<SceneReapableItem> currentSceneWeedItems = new List<SceneReapableItem>();
+            //存储当前场景大杂草
+            List<SceneReapableItem> currentSceneBigWeedItems = new List<SceneReapableItem>();
+            foreach (var reapableItem in FindObjectsOfType<ReapableItem>())
+            {
+                SceneReapableItem sceneItem = new SceneReapableItem()
+                {
+                    position = new SerializableVector3(reapableItem.transform.position),
+                    sprite = reapableItem.GetComponentInChildren<SpriteRenderer>().sprite
+                };
+                if (reapableItem.isWeeds)
+                {
+                    currentSceneWeedItems.Add(sceneItem);
+                }
+                if (reapableItem.isBigWeeds)
+                {
+                    currentSceneBigWeedItems.Add(sceneItem);
+                }
+            }
+            //当前场景在字典中，则把当前场景的物品数据更新到字典中
+            if (sceneItemDict.ContainsKey(SceneManager.GetActiveScene().name))
+            {
+                sceneWeedItemDict[SceneManager.GetActiveScene().name] = currentSceneWeedItems;
+                sceneBigWeedItemDict[SceneManager.GetActiveScene().name] = currentSceneBigWeedItems;
+            }
+            //如果时新场景，就把新场景的物品数据添加到字典中
+            else
+            {
+                sceneWeedItemDict.Add(SceneManager.GetActiveScene().name, currentSceneWeedItems);
+                sceneBigWeedItemDict.Add(SceneManager.GetActiveScene().name, currentSceneBigWeedItems);
             }
         }
         /// <summary>
@@ -220,15 +361,113 @@ namespace MFarm.Inventory
                 }
             }
         }
+        /// <summary>
+        /// 重建当前场景建造建筑
+        /// </summary>
+        private void ReBuildBuilding()
+        {
+            List<SceneBuilding> currentSceneBuilding = new List<SceneBuilding>();
+            if (sceneBuildingDict.TryGetValue(SceneManager.GetActiveScene().name, out currentSceneBuilding))
+            {
+                if (currentSceneBuilding != null)
+                {
+                    foreach (SceneBuilding sceneBuilding in currentSceneBuilding)
+                    {
+                        BuildingDetails buildingDetails = InventoryManager.Instance.bluPrintData.GetBuildingDetails(sceneBuilding.buildID);
+                        var buildItem = Instantiate(buildingDetails.buildPrefab, sceneBuilding.position.ToVector3(), Quaternion.identity, buildingParent);
+                        buildItem.GetComponent<BuildingItem>().currentBuildingDay = sceneBuilding.buildDay;
+                        buildItem.GetComponent<BuildingItem>().Building(true);
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// 重新加载生成KnockItem
+        /// </summary>
+        private void RecreateKnockItem()
+        {
+            
+            List<SceneKnockItem> currentSceneItems = new List<SceneKnockItem>();
+            if (sceneKnockItemDict.TryGetValue(SceneManager.GetActiveScene().name, out currentSceneItems))
+            {
+                if (currentSceneItems != null)
+                {
+                    //删除当前场景的所有物品数据
+                    foreach (var item in FindObjectsOfType<KnockableItem>())
+                    {
+                        Destroy(item.gameObject);
+                    }
+                    //重新生成当前场景的所有物品数据
+                    foreach (var item in currentSceneItems)
+                    {
+                        switch (item.itemIndex)
+                        {
+                            case 1:
+                                Instantiate(knockableItemPerfab1, item.position.ToVector3(), Quaternion.identity);
+                                break;
+                            case 2:
+                                Instantiate(knockableItemPerfab2, item.position.ToVector3(), Quaternion.identity);
+                                break;
+                            case 3:
+                                Instantiate(knockableItemPerfab3, item.position.ToVector3(), Quaternion.identity);
+                                break;
+                            case 4:
+                                Instantiate(knockableItemPerfab4, item.position.ToVector3(), Quaternion.identity);
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// 重新加载生成ReapableItem
+        /// </summary>
+        private void RecreateReapableItem()
+        {
 
+            List<SceneReapableItem> currentWeedsItems = new List<SceneReapableItem>();
+            List<SceneReapableItem> currentBigWeedsItems = new List<SceneReapableItem>();
+            if (sceneWeedItemDict.TryGetValue(SceneManager.GetActiveScene().name, out currentWeedsItems))
+            {
+                if (currentWeedsItems != null)
+                {
+                    //删除当前场景的所有物品数据
+                    foreach (var item in FindObjectsOfType<ReapableItem>())
+                    {
+                        Destroy(item.gameObject);
+                    }
+                    //重新生成当前场景的所有物品数据
+                    foreach (var item in currentWeedsItems)
+                    {
+                        var weedItem = Instantiate(weedItemPerfab, item.position.ToVector3(), Quaternion.identity);
+                        weedItem.GetComponentInChildren<SpriteRenderer>().sprite = item.sprite;
+                    }
+                }
+            }
+            if (sceneBigWeedItemDict.TryGetValue(SceneManager.GetActiveScene().name, out currentBigWeedsItems))
+            {
+                if (currentBigWeedsItems != null)
+                {
+                    //重新生成当前场景的所有物品数据
+                    foreach (var item in currentBigWeedsItems)
+                    {
+                        var bigWeedItem = Instantiate(bigWeedItemPerfab, item.position.ToVector3(), Quaternion.identity);
+                        bigWeedItem.GetComponentInChildren<SpriteRenderer>().sprite = item.sprite;
+                    }
+                }
+            }
+        }
         public GameSaveData GenerateSaveData()
         {
             GetAllSceneFurniture();
+            GetAllSceneBuilding();
             GetAllSceneItems();
+            GetAllSceneKnockItem();
+            GetAllSceneReapableItem();
             GameSaveData saveData = new GameSaveData();
             saveData.sceneItemDict = this.sceneItemDict;
             saveData.sceneFurnitureDict = this.sceneFurnitureDict;
-
+            saveData.sceneBuildingDict = this.sceneBuildingDict;
             return saveData;
 
 
@@ -238,9 +477,12 @@ namespace MFarm.Inventory
         {
             this.sceneFurnitureDict = saveData.sceneFurnitureDict;
             this.sceneItemDict = saveData.sceneItemDict;
-
+            this.sceneBuildingDict = saveData.sceneBuildingDict;
             RecreateAllItem();
             RebuilFurniture();
+            ReBuildBuilding();
+            RecreateKnockItem();
+            RecreateReapableItem();
         }
     }
 

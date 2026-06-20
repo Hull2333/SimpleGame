@@ -36,7 +36,7 @@ public class Settings //不需要调用在任何物体上
     public static TimeSpan morningTime = new TimeSpan(5, 0, 0);
     public static TimeSpan nightTime = new TimeSpan(19, 0, 0);
     //主角初始坐标
-    public static Vector3 playerStartPos = new Vector3(3.5f,-7f,0);
+    public static Vector3 playerStartPos = new Vector3(10f,-10f,0);
     //初始金额
     public const int playerStartMoney = 10000;
     //捉鱼进度

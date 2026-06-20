@@ -7,6 +7,7 @@ using UnityEditor.Scripting;
 
 public class TimeUI : MonoBehaviour //调用在GameTime对象上
 {
+    public GameObject timeUIBg;
     public Image seasonImage;
     public Text dayText;
     public Text yearText;
@@ -20,6 +21,7 @@ public class TimeUI : MonoBehaviour //调用在GameTime对象上
         EventHandler.GameDateEvent += OnGameDateEvent;
         EventHandler.StartNPCEvent += OnStartNPCEvent;
         EventHandler.EndNPCEvent += OnEndNPCEvent;
+        EventHandler.BuildindModeEvent += OnBuildindModeEvent;
     }
 
     private void OnDisable()
@@ -28,7 +30,11 @@ public class TimeUI : MonoBehaviour //调用在GameTime对象上
         EventHandler.GameDateEvent -= OnGameDateEvent;
         EventHandler.StartNPCEvent -= OnStartNPCEvent;
         EventHandler.EndNPCEvent -= OnEndNPCEvent;
+        EventHandler.BuildindModeEvent -= OnBuildindModeEvent;
     }
+
+  
+
     /// <summary>
     /// 小时分钟UI显示
     /// </summary>
@@ -62,5 +68,9 @@ public class TimeUI : MonoBehaviour //调用在GameTime对象上
     private void OnEndNPCEvent()
     {
         transform.GetComponentInParent<Canvas>().enabled = true;
+    }
+    private void OnBuildindModeEvent(BuildingDetails details, bool isBuild)
+    {
+        timeUIBg.SetActive(!isBuild);
     }
 }

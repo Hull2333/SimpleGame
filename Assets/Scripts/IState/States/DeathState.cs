@@ -11,6 +11,7 @@ public class DeathState : IState
     }
     public void OnEnter()
     {
+        EventHandler.CallNextTeleportAppearEvent();
         parameter.animator.Play("Death");
         parameter.collider2D.enabled = false;
     }
