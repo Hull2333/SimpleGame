@@ -5,7 +5,7 @@ using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
-
+using static AnimalData_SO;
 namespace MFarm.Inventory
 {
     public class InventoryUI : Singleton<InventoryUI>    //调用在Inventory对象上
@@ -102,6 +102,23 @@ namespace MFarm.Inventory
         public Button buildingShopExitButton;
         //提示材料不足
         public GameObject resourceLock;
+        [Header("动物商店")]
+        public GameObject animalShopUI;
+        public Transform animalSlotParent;
+        public AnimalSlotUI animalShopSlotUI;
+        public Button quitAnimalShopButton;
+        //询问购买动物数量UI
+        public GameObject animalAskUI;
+        public Image askImage;
+        public TextMeshProUGUI askAmountText;
+        public Button increaseAmountButton;
+        public Button decreaseAmountButton;
+        public Button quitAskUIButton;
+        //确定数量按钮
+        public Button commitAmountButton;
+        //当前选择的数量
+        private int currentAskAmount;
+        
         private void OnEnable()
         {
             EventHandler.UpdateInventoryUI += OnUpdateInventoryUI;
@@ -118,6 +135,7 @@ namespace MFarm.Inventory
             EventHandler.ControlPlayerBagOpen += OnControlPlayerBagOpen;
             EventHandler.BuildindModeEvent += OnBuildindModeEvent;
             EventHandler.OpenBuildShopEvent += OnOpenBuildShopEvent;
+            EventHandler.OpenAnimalShopEvent += OnOpenAnimalShopEvent;
         }
 
         private void OnDisable()
@@ -136,9 +154,12 @@ namespace MFarm.Inventory
             EventHandler.ControlPlayerBagOpen -= OnControlPlayerBagOpen;
             EventHandler.BuildindModeEvent -= OnBuildindModeEvent;
             EventHandler.OpenBuildShopEvent -= OnOpenBuildShopEvent;
+            EventHandler.OpenAnimalShopEvent -= OnOpenAnimalShopEvent;
         }
 
-      
+     
+
+
 
         /// <summary>
         /// 加载新场景后物品高亮取消
@@ -475,13 +496,30 @@ namespace MFarm.Inventory
         {
             canOpenBag = canOpen;
         }
-        private void OnBuildindModeEvent(BuildingDetails details, bool isBuilding)
+        private void OnBuildindModeEvent(BuildingDetails build,AnimalDetails animal, bool isBuilding)
         {
             buildModePanel.SetActive(isBuilding);
-            buildShopPanel.SetActive(!isBuilding);
+            if (isBuilding == false)
+            {
+                buildShopPanel.SetActive(!false);
+                animalShopUI.SetActive(!false);
+                return;
+            }
+            if (build != null)
+            {
+                buildShopPanel.SetActive(!isBuilding);
+                return;
+            }
+            if(animal != null)
+            {
+                animalShopUI.SetActive(!isBuilding);
+                return;
+            }
+           
             playerMoneyUIAnim.gameObject.SetActive(!isBuilding);
             activeBagBar.SetActive(!isBuilding);
             bagButton.SetActive(!isBuilding);
+            animalShopUI.SetActive(!isBuilding);
         }
         private void OnOpenBuildShopEvent(BuildingBagData_SO buildShop)
         {
@@ -499,6 +537,19 @@ namespace MFarm.Inventory
                 buildingSlot.UpdateBuildSlotMessage();
             }
         }
+        private void OnOpenAnimalShopEvent(AnimalBagData_SO animalBag)
+        {
+            animalShopUI.SetActive(true);
+            for (int i = 0; i < animalSlotParent.childCount; i++)
+            {
+                Destroy(animalSlotParent.GetChild(i).gameObject);
+            }
+            for (int i = 0; i < animalBag.animalList.Count; i++)
+            {
+                var animalSlot = Instantiate(animalShopSlotUI, animalSlotParent);
+                animalSlot.UpdateAnimalSlotUI(animalBag.animalList[i]);
+            }
+        }
         private void Start()
         {
             //给每个背包格子赋值序号
@@ -513,13 +564,20 @@ namespace MFarm.Inventory
             {
                 equipImageDict.Add(image.name, image);
             }
-            shopButton.onClick.AddListener(ClickShopSwitchButton);
+           shopButton.onClick.AddListener(ClickShopSwitchButton);
             sellBoxButton.onClick.AddListener(ClickSellSwitchButton);
             quitShopButton.onClick.AddListener(ClickQuitShopButton);
             yesButton.onClick.AddListener(ClickYesButton);
             noButton.onClick.AddListener(ClickNoButton);
             buildModeExitButton.onClick.AddListener(ExitBuildMode);
             buildingShopExitButton.onClick.AddListener(QuitBuildingShopUI);
+            increaseAmountButton.onClick.AddListener(ClickAnimalIncreaseButton);
+            decreaseAmountButton.onClick.AddListener(ClickAnimalDecreaseButton);
+            quitAskUIButton.onClick.AddListener(QuitAnimalAskUI);
+            quitAnimalShopButton.onClick.AddListener(QuitAnimalShopUI);
+            commitAmountButton.onClick.AddListener(ClickAnimalCommitAmountButton);
+            coinParent.GetComponentInParent<Canvas>().worldCamera = Camera.main;
+            coinParent.GetComponentInParent<Canvas>().sortingLayerName = "ValueTile";
         }
       
         private void Update()
@@ -1009,7 +1067,7 @@ namespace MFarm.Inventory
         /// </summary>
         private void ExitBuildMode()
         {
-            EventHandler.CallBuildindModeEvent(null, false);
+            EventHandler.CallBuildindModeEvent(null,null, false);
         }
         private void QuitBuildingShopUI()
         {
@@ -1022,6 +1080,56 @@ namespace MFarm.Inventory
         public void ShowResouceLackText()
         {
             Instantiate(resourceLock, Input.mousePosition, Quaternion.identity, coinParent);
+        }
+        /// <summary>
+        /// 打开动物询问数量UI
+        /// </summary>
+        public void OpenAnimalAskUI(Sprite sprite)
+        {
+            animalAskUI.SetActive(true);
+            askImage.sprite = sprite;
+            currentAskAmount = 1;
+            askAmountText.text = currentAskAmount.ToString();
+
+        }
+        /// <summary>
+        /// 关闭动物询问数量UI
+        /// </summary>
+        public void QuitAnimalAskUI()
+        {
+            animalAskUI.SetActive(false);
+        }
+        /// <summary>
+        /// 点击增加动物数量按钮
+        /// </summary>
+        public void ClickAnimalIncreaseButton()
+        {
+            currentAskAmount++;
+            askAmountText.text = currentAskAmount.ToString();
+        }
+        /// <summary>
+        /// 点击减少动物数量按钮
+        /// </summary>
+        public void ClickAnimalDecreaseButton()
+        {
+            if(currentAskAmount >= 2)
+            {
+                currentAskAmount--;
+                askAmountText.text = currentAskAmount.ToString();
+            }
+        }
+        public void ClickAnimalCommitAmountButton()
+        {
+            EventHandler.CallInstantiateAnimalInScene(currentAskAmount);
+            animalAskUI.SetActive(false);
+        }
+        /// <summary>
+        /// 关闭动物商店
+        /// </summary>
+        public void QuitAnimalShopUI()
+        {
+            animalShopUI.SetActive(false);
+            EventHandler.CallUpdateGameStateEvent(GameState.Gameplay);
         }
     }
 }

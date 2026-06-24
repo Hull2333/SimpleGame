@@ -62,7 +62,7 @@ public class SlotUI_Build : MonoBehaviour //调用在Slot_Building上
     {
         if (canBuilding)
         {
-            EventHandler.CallBuildindModeEvent(buildingDetails, true);
+            EventHandler.CallBuildindModeEvent(buildingDetails,null, true);
         }
         else
         {

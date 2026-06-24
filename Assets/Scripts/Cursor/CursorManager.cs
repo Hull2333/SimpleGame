@@ -10,8 +10,9 @@ using Unity.VisualScripting;
 using System;
 using Cinemachine;
 using UnityEngine.SceneManagement;
+using static AnimalData_SO;
+using UnityEditor.Build.Pipeline.Utilities;
 using System.Collections;
-
 
 public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
 {
@@ -83,6 +84,17 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
     //记录玩家当前场景和位置
     private string currentScene;
     private Vector3 currentPlayerPos;
+    [Header("动物商店相关")]
+    //动物选择建筑模式
+    private bool animalSelectMode;
+    private AnimalDetails currentAnimalDetails;
+    private Transform animalParent;
+    //当前的建筑活动范围
+    [SerializeField] private Collider2D currentBuildingArea;
+    //当前的活动区域
+    [SerializeField] private int areaCode;
+    //当前的激活场景协程
+    private IEnumerator currentTranstion;
     private void OnEnable()
     {
         EventHandler.ItemSelectEvent += OnItemSelectEvent;
@@ -93,6 +105,7 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         EventHandler.CheckCookedUIEvent += OnCheckCookedUIEvent;
         EventHandler.UpdateGameStateEvent += OnUpdateGameStateEvent;
         EventHandler.BuildindModeEvent += OnBuildindModeEvent;
+        EventHandler.InstantiateAnimalInScene += OnInstantiateAnimalInScene;
     }
 
 
@@ -106,9 +119,10 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         EventHandler.CheckCookedUIEvent -= OnCheckCookedUIEvent;
         EventHandler.UpdateGameStateEvent -= OnUpdateGameStateEvent;
         EventHandler.BuildindModeEvent -= OnBuildindModeEvent;
+        EventHandler.InstantiateAnimalInScene -= OnInstantiateAnimalInScene;
     }
 
-   
+  
 
     private void Start()
     {
@@ -185,6 +199,19 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         if (Input.GetMouseButton(0))
         {
             cursorAnim.SetBool("Clicked",true);
+            if (animalSelectMode && !InteractWithUI())
+            {
+                if (CheckBuildingAcceptAnimalSize(currentAnimalDetails.animSize))
+                {
+                   
+                    InventoryUI.Instance.OpenAnimalAskUI(currentAnimalDetails.animalSprite);
+                    Debug.Log("这个位置可以");
+                }
+                else
+                {
+                    Debug.Log("没法放在这个位置");
+                }
+            }
         }
         if (Input.GetMouseButtonUp(0))
         {
@@ -224,6 +251,7 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
        currentGrid = FindObjectOfType<Grid>();
        furnitureParent = FindObjectOfType<FurnitureParent>().transform;
        buildingParent = FindObjectOfType<BuildingParent>().transform;
+        animalParent = FindObjectOfType<AnimalParent>().transform;
         if (buildMode)
         {
             bluPrintPrefab = Instantiate(currentBuildingDetails.buildPrefab, buildingParent);
@@ -321,34 +349,62 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
     {
         gameState = state;
     }
-    private void OnBuildindModeEvent(BuildingDetails building , bool isBuilding)
+    private void OnBuildindModeEvent(BuildingDetails building ,AnimalDetails animal, bool isBuilding)
     {
         if (isBuilding)
         {
             currentScene = SceneManager.GetActiveScene().name;
             currentPlayerPos = playerTransform.position;
             //切换场景到农场
-            EventHandler.CallTransitionEvent("Farm", currentPlayerPos,false);
+            EventHandler.CallTransitionEvent("Farm", currentPlayerPos);
             buildModeCameraPos.position = new Vector2(35f, -25f);
             //设置摄像头的跟随和显示比例，生成预生成建筑在地图加载后的事件中
             camera.Follow = buildModeCameraPos;
             camera.m_Lens.OrthographicSize = 20;
-            currentBuildingDetails = bluPrintData.GetBuildingDetails(building.ID);
-            buildMode = isBuilding;
-
+            //建造模式
+            if (building != null)
+            {
+                currentBuildingDetails = bluPrintData.GetBuildingDetails(building.ID);
+                buildMode = true;
+            }
+            //动物选择建筑模式
+            else
+            {
+                currentAnimalDetails = animal;
+                animalSelectMode = true;
+                buildMode = false;
+                StartCoroutine(ShowBuindingIcon());
+               
+            }
         }
         else
         {
-            EventHandler.CallTransitionEvent(currentScene, currentPlayerPos, false);
             if (bluPrintPrefab != null)
             {
                 Destroy(bluPrintPrefab);
             }
+            EventHandler.CallTransitionEvent(currentScene, currentPlayerPos);
             camera.Follow = playerTransform;
             camera.m_Lens.OrthographicSize = 7;
             currentBuildingDetails = null;
-            buildMode = isBuilding;
-
+            buildMode = false;
+            animalSelectMode = false;
+        }
+    }
+    private IEnumerator ShowBuindingIcon()
+    {
+        yield return new WaitForSeconds(1f);
+        EventHandler.CallDisplayBuildingArrowIcon(currentAnimalDetails.animSize, true);
+    }
+    private void OnInstantiateAnimalInScene(int amount)
+    {
+        for (int i = 0; i < amount; i++)
+        {
+            var animalInScene = Instantiate(currentAnimalDetails.animalPrefab, animalParent);
+            animalInScene.GetComponent<AnimalController>().animalDetails = currentAnimalDetails;
+            animalInScene.GetComponent<AnimalController>().animCodeID = areaCode;
+            animalInScene.GetComponent<AnimalController>().activityArae = currentBuildingArea;
+            animalInScene.GetComponent<AnimalController>().SetStartState(true);
         }
     }
     /// <summary>
@@ -410,8 +466,27 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
             canCheck = false;
             canPat = false;
         }
-        
-
+    }
+    /// <summary>
+    /// 检查点击的建筑是否是合适的动物尺寸
+    /// </summary>
+    /// <param name="size"></param>
+    /// <returns></returns>
+    public bool CheckBuildingAcceptAnimalSize(AnimalSizeType size)
+    {
+       
+        checkCollider = Physics2D.OverlapPoint(mouseWorldPos, checkLayer);
+        if(checkCollider != null && checkCollider.GetComponent<BuildingItem>())
+        {
+            Debug.Log(checkCollider.GetComponent<BuildingItem>().acceptSize);
+            if (checkCollider.GetComponent<BuildingItem>().acceptSize == size)
+            {
+                currentBuildingArea = checkCollider.GetComponent<BuildingItem>().animalArea;
+                areaCode = checkCollider.GetComponent<BuildingItem>().buildCodeID;
+                return true;
+            }
+        }
+        return false;
     }
     /// <summary>
     /// 空手收获农作物
@@ -748,7 +823,6 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         {
             buildModeCameraPos.Translate(Vector3.up * 20f * Time.deltaTime);
         }
-
-
     }
+
 }

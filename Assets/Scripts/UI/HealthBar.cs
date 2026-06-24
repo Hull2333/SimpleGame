@@ -2,13 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
+using static AnimalData_SO;
 public class HealthBar : Singleton<HealthBar>  //调用在StateBar对象上
 {
     
     public Image hpImage;
     public Image bufferHpImage;
     public Image stminaImage;
+    private Canvas stateCanvas => GetComponent<Canvas>();
     private PlayerController playerController => FindObjectOfType<PlayerController>();
     //血量缓冲时间
     private float bufferTime = 0.5f;
@@ -27,7 +28,11 @@ public class HealthBar : Singleton<HealthBar>  //调用在StateBar对象上
         EventHandler.BuildindModeEvent -= OnBuildindModeEvent;
     }
 
-   
+    private void Awake()
+    {
+        stateCanvas.worldCamera = FindAnyObjectByType<Camera>();
+        stateCanvas.sortingLayerName = "Collision";
+    }
 
     private void Update()
     {
@@ -36,14 +41,14 @@ public class HealthBar : Singleton<HealthBar>  //调用在StateBar对象上
     }
     private void OnStartNPCEvent()
     {
-        GetComponent<Canvas>().enabled = false;
+        stateCanvas.enabled = false;
     }
 
     private void OnEndNPCEvent()
     {
-        GetComponent<Canvas>().enabled = true;
+        stateCanvas.enabled = true;
     }
-    private void OnBuildindModeEvent(BuildingDetails details, bool isBuilding)
+    private void OnBuildindModeEvent(BuildingDetails details,AnimalDetails animal, bool isBuilding)
     {
         hpImage.transform.parent.gameObject.SetActive(!isBuilding);
         stminaImage.transform.parent.gameObject.SetActive(!isBuilding);

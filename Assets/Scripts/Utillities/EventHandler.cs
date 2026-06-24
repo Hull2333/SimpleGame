@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 using MFarm.Inventory;
 using MFarm.Dialogue;
-
+using static AnimalData_SO;
 public static class EventHandler
 {
     //注册事件，当触发该事件UpdateInventoryUI时，会同时调用InventoryLocation和List<InventoryItem>
@@ -63,10 +63,16 @@ public static class EventHandler
         GameDateEvent?.Invoke(hour, day, month, year, season);
     }
     //新场景传送事件
-    public static event Action<string, Vector3,bool> TransitionEvent;
-    public static void CallTransitionEvent(string sceneName, Vector3 pos, bool fade)
+    public static event Action<string, Vector3> TransitionEvent;
+    public static void CallTransitionEvent(string sceneName, Vector3 pos)
     {
-        TransitionEvent?.Invoke(sceneName, pos, fade);
+        TransitionEvent?.Invoke(sceneName, pos);
+    }
+    //建造建筑场景传送事件
+    public static event Action<Vector3,string,int,bool> TranstionBuildSceneEvent;
+    public static void CallTranstionBuildSceneEvent(Vector3 pos, string sceneName,int buildCode,bool isCome)
+    {
+        TranstionBuildSceneEvent?.Invoke(pos, sceneName, buildCode,isCome);
     }
     //切换场景之前的事件
     public static event Action BeforeSceneUnloadEvent;
@@ -203,10 +209,10 @@ public static class EventHandler
         OpenBuildShopEvent?.Invoke(buildingBag);
     }
     //建造模式事件
-    public static event Action<BuildingDetails , bool> BuildindModeEvent;
-    public static void CallBuildindModeEvent(BuildingDetails buildingDetails,bool buildMode)
+    public static event Action<BuildingDetails ,AnimalDetails, bool> BuildindModeEvent;
+    public static void CallBuildindModeEvent(BuildingDetails buildingDetails, AnimalDetails animal,bool buildMode)
     {
-        BuildindModeEvent?.Invoke(buildingDetails, buildMode);
+        BuildindModeEvent?.Invoke(buildingDetails, animal,buildMode);
     }
     //获取当前建筑信息
     public static event Action<BuildingDetails, Transform, List<TileDetails>> GetCurrentBuildingDetails;
@@ -219,6 +225,24 @@ public static class EventHandler
     public static void CallInstantiateBuildingOnMapEvent(BuildingDetails buildingDetails,Vector3 pos,Transform parent)
     {
         InstantiateBuildingOnMapEvent?.Invoke(buildingDetails, pos, parent);
+    }
+    //打开动物商店事件
+    public static event Action<AnimalBagData_SO> OpenAnimalShopEvent;
+    public static void CallOpenAnimalShopEvent(AnimalBagData_SO animalShop)
+    {
+        OpenAnimalShopEvent?.Invoke(animalShop);
+    }
+   //生成动物在场景中
+    public static event Action<int> InstantiateAnimalInScene;
+    public static void CallInstantiateAnimalInScene(int amount)
+    {
+        InstantiateAnimalInScene?.Invoke(amount);
+    }
+    //显示或关闭建筑箭头图片
+    public static event Action<AnimalSizeType,bool> DisplayBuildingArrowIcon;
+    public static void CallDisplayBuildingArrowIcon(AnimalSizeType buildingSize, bool isShow)
+    {
+        DisplayBuildingArrowIcon?.Invoke(buildingSize, isShow);
     }
     //切换灯光模式事件
     public static event Action<Season, LightShift, float> LightShiftChangeEvent;
@@ -423,5 +447,10 @@ public static class EventHandler
     {
         PlayEatAnimEvent?.Invoke(itemID);
     }
-
+    //购买动物事件
+    public static event Action<AnimalDetails,int> BuyAnimalEvent;
+    public static void CallBuyAnimalEvent(AnimalDetails animal,int amount)
+    {
+        BuyAnimalEvent?.Invoke(animal, amount);
+    }
 }

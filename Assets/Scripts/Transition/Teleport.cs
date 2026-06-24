@@ -12,6 +12,10 @@ namespace MFarm.Transition
         [Header("随机传送相关，开启后可以不填上面的场景和位置")]
         public MineSceneDataList_SO mineData;
         public bool isRandomTeleport;
+        [Header("建筑场景相关，开启了isBuildScene,如果isCome不选，要添sceneToGo,positionToGO,isCome选了就什么都不填")]
+        public bool isBuildScene;
+        public bool isCome;
+        [HideInInspector] public int code;
         private void OnTriggerEnter2D(Collider2D other)
         {
             if (other.CompareTag("Player"))
@@ -20,7 +24,15 @@ namespace MFarm.Transition
                 {
                     GetNextMineScene();
                 }
-                EventHandler.CallTransitionEvent(sceneToGo, positionToGo,true);
+                if (isBuildScene)
+                {
+                    EventHandler.CallTranstionBuildSceneEvent(positionToGo, sceneToGo, code, isCome);
+                }
+                else
+                {
+                    EventHandler.CallTransitionEvent(sceneToGo, positionToGo);
+                }
+               
             }
         }
         /// <summary>

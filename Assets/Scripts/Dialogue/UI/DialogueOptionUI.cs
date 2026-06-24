@@ -13,6 +13,7 @@ public class DialogueOptionUI : MonoBehaviour //调用预制体OptionButton
     private string nextPieceID;
     private InventoryBag_SO bag_SO;
     private BuildingBagData_SO buildingBag;
+    private AnimalBagData_SO animalBag;
     private int friendlinessValue;
     private DialogueOptionType optionType;
     private void Awake()
@@ -34,6 +35,7 @@ public class DialogueOptionUI : MonoBehaviour //调用预制体OptionButton
         bag_SO = option.bag_SO;
         buildingBag = option.buildingBag;
         friendlinessValue = option.friendlinessValue;
+        animalBag = option.animalBag;
     }
     /// <summary>
     /// 当optionButton点击时
@@ -97,6 +99,14 @@ public class DialogueOptionUI : MonoBehaviour //调用预制体OptionButton
         if (optionType == DialogueOptionType.BuildShop)
         {
             EventHandler.CallOpenBuildShopEvent(buildingBag);
+            DialogueUI.Instance.QuitDialogueUI();
+            EventHandler.CallUpdateGameStateEvent(GameState.Pause);
+            return;
+        }
+        //有对话选项触发Animal背包
+        if(optionType == DialogueOptionType.AnimalShop)
+        {
+            EventHandler.CallOpenAnimalShopEvent(animalBag);
             DialogueUI.Instance.QuitDialogueUI();
             EventHandler.CallUpdateGameStateEvent(GameState.Pause);
             return;

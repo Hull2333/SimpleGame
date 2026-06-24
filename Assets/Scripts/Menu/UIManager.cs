@@ -48,6 +48,8 @@ namespace MFarm.Inventory
         private void Start()
         {
             menuCanvas = GameObject.FindWithTag("MenuCanvas");
+            GetComponent<Canvas>().worldCamera = FindAnyObjectByType<Camera>();
+            GetComponent<Canvas>().sortingLayerName = "Collision";
             Instantiate(menuPrefab, menuCanvas.transform);
         }
         private void OnAfterSceneLoadedEvent()

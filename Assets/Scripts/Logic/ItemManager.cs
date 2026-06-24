@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static AnimalData_SO;
 using static UnityEditor.Progress;
 namespace MFarm.Inventory
 {
@@ -20,6 +21,7 @@ namespace MFarm.Inventory
         public ReapableItem bigWeedItemPerfab;
         private Transform itemParent;
         public Transform buildingParent;
+        public Transform animalParent;
         private Transform playerTransform => FindObjectOfType<PlayerController>().transform;
 
         public string GUID => GetComponent<DataGUID>().guid;
@@ -35,6 +37,13 @@ namespace MFarm.Inventory
         //用字典来存储每个场景的杂草和大杂草
         public Dictionary<string, List<SceneReapableItem>> sceneWeedItemDict = new Dictionary<string, List<SceneReapableItem>>();
         public Dictionary<string, List<SceneReapableItem>> sceneBigWeedItemDict = new Dictionary<string, List<SceneReapableItem>>();
+        //用字典来存储每个场景的动物
+        public Dictionary<string, List<SceneAnimal>> sceneAnimalDict = new Dictionary<string, List<SceneAnimal>>();
+        [Header("动物相关")]
+        public List<AnimalItem> currentBuyAnimalList = new List<AnimalItem>();
+        private HashSet<int> buildCodeIDs = new HashSet<int>();
+        //场景中动物的活动范围
+        public List<BuildColliderArea> buildAreaList = new List<BuildColliderArea>();
         private void OnEnable()
         {
             EventHandler.InstantiateItemInScene += OnInstantiateItemInScene;
@@ -46,6 +55,7 @@ namespace MFarm.Inventory
             //新游戏开始需要重置的数据
             EventHandler.StartNewGameEvent += OnStartNewGameEvent;
             EventHandler.InstantiateBuildingOnMapEvent += OnInstantiateBuildingOnMapEvent;
+            EventHandler.BuyAnimalEvent += OnBuyAnimalEvent;
         }
 
         private void OnDisable()
@@ -57,9 +67,10 @@ namespace MFarm.Inventory
             EventHandler.BuildFurnitureEvent -= OnBuildFurnitureEvent;
             EventHandler.StartNewGameEvent -= OnStartNewGameEvent;
             EventHandler.InstantiateBuildingOnMapEvent -= OnInstantiateBuildingOnMapEvent;
+            EventHandler.BuyAnimalEvent -= OnBuyAnimalEvent;
         }
 
-       
+      
 
         private void Start()
         {
@@ -86,6 +97,7 @@ namespace MFarm.Inventory
                 GetAllSceneItems();
                 GetAllSceneFurniture();
                 GetAllSceneBuilding();
+                GetAllSceneAnimal();
                 GetAllSceneKnockItem();
                 GetAllSceneReapableItem();
             }
@@ -95,11 +107,13 @@ namespace MFarm.Inventory
         {
             itemParent = GameObject.FindWithTag("ItemParent").transform;
             buildingParent = FindAnyObjectByType<BuildingParent>().transform;
+            animalParent = FindAnyObjectByType<AnimalParent>().transform;
             if (ExcludeMineScene(SceneManager.GetActiveScene().name))
             {
                 RecreateAllItem();
                 RebuilFurniture();
                 ReBuildBuilding();
+                RecreateAnimal();
                 RecreateKnockItem();
                 RecreateReapableItem();
             }
@@ -143,8 +157,23 @@ namespace MFarm.Inventory
         {
             var buildingInMap = Instantiate(building.buildPrefab, pos, Quaternion.identity, transform);
             buildingInMap.GetComponent<BuildingItem>().Building(true);
+            //生成不重复的建筑物识别码
+            int buildCode;
+            do
+            {
+                buildCode = Random.Range(0, 256);
+            }
+            while (buildCodeIDs.Contains(buildCode));
+            buildCodeIDs.Add(buildCode);
+            buildingInMap.GetComponent<BuildingItem>().buildCodeID = buildCode;
             buildingInMap.GetComponent<BuildingItem>().SwitchCollider2D(true);
+            buildingInMap.GetComponent<BuildingItem>().isSet = true;
             buildingInMap.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1f);
+        }
+        private void OnBuyAnimalEvent(AnimalDetails animalDetails, int amount)
+        {
+            AnimalItem currentanimal = new AnimalItem { animal = animalDetails, count = amount };
+            currentBuyAnimalList.Add(currentanimal);
         }
         /// <summary>
         /// 排除矿洞场景
@@ -230,13 +259,19 @@ namespace MFarm.Inventory
             List<SceneBuilding> currentSceneBuinding = new List<SceneBuilding>();
             foreach (var building in FindObjectsOfType<BuildingItem>())
             {
-                SceneBuilding sceneBuinding = new SceneBuilding
+                if (building.isSet)
                 {
-                    buildID = building.buildID,
-                    buildDay = building.currentBuildingDay,
-                    position = new SerializableVector3(building.transform.position)
-                };
-                currentSceneBuinding.Add(sceneBuinding);
+                    SceneBuilding sceneBuinding = new SceneBuilding
+                    {
+                        buildID = building.buildID,
+                        buildCodeID = building.buildCodeID,
+                        buildDay = building.currentBuildingDay,
+                        position = new SerializableVector3(building.transform.position),
+                        acceptAnimalSize = building.acceptSize,
+                        isDone = building.isDone
+                    };
+                    currentSceneBuinding.Add(sceneBuinding);
+                }
             }
             //当前场景在字典中，则把当前场景的物品数据更新到字典中
             if (sceneBuildingDict.ContainsKey(SceneManager.GetActiveScene().name))
@@ -315,6 +350,30 @@ namespace MFarm.Inventory
             }
         }
         /// <summary>
+        /// 获取所有场景中的动物
+        /// </summary>
+        private void GetAllSceneAnimal()
+        {
+            List<SceneAnimal> currentSceneAnimalList = new List<SceneAnimal>();
+            foreach (var animal in FindObjectsOfType<AnimalController>())
+            {
+                SceneAnimal sceneAnimal = new SceneAnimal { animalDetails = animal.animalDetails, 
+                    animalCode = animal.animCodeID, 
+                    growthDay = animal.currentGrowthDay 
+                };
+                currentSceneAnimalList.Add(sceneAnimal);
+            }
+            if (sceneAnimalDict.ContainsKey(SceneManager.GetActiveScene().name))
+            {
+                sceneAnimalDict[SceneManager.GetActiveScene().name] = currentSceneAnimalList;
+            }
+            else
+            {
+                sceneAnimalDict.Add(SceneManager.GetActiveScene().name, currentSceneAnimalList);
+            }
+        }
+        
+        /// <summary>
         /// 刷新创建当前场景的物品
         /// </summary>
         private void RecreateAllItem()
@@ -366,6 +425,7 @@ namespace MFarm.Inventory
         /// </summary>
         private void ReBuildBuilding()
         {
+            buildAreaList.Clear();
             List<SceneBuilding> currentSceneBuilding = new List<SceneBuilding>();
             if (sceneBuildingDict.TryGetValue(SceneManager.GetActiveScene().name, out currentSceneBuilding))
             {
@@ -376,7 +436,16 @@ namespace MFarm.Inventory
                         BuildingDetails buildingDetails = InventoryManager.Instance.bluPrintData.GetBuildingDetails(sceneBuilding.buildID);
                         var buildItem = Instantiate(buildingDetails.buildPrefab, sceneBuilding.position.ToVector3(), Quaternion.identity, buildingParent);
                         buildItem.GetComponent<BuildingItem>().currentBuildingDay = sceneBuilding.buildDay;
+                        buildItem.GetComponent<BuildingItem>().buildCodeID = sceneBuilding.buildCodeID;
                         buildItem.GetComponent<BuildingItem>().Building(true);
+                        buildItem.GetComponent<BuildingItem>().isSet = true;
+                        //获取各个建筑的动物活动范围
+                        BuildColliderArea currentArea = new BuildColliderArea
+                        {
+                            code = sceneBuilding.buildCodeID,
+                            area = buildItem.GetComponent<BuildingItem>().animalArea
+                        };
+                        buildAreaList.Add(currentArea);
                     }
                 }
             }
@@ -457,10 +526,74 @@ namespace MFarm.Inventory
                 }
             }
         }
+        /// <summary>
+        /// 重新加载动物到场景中
+        /// </summary>
+        private void RecreateAnimal()
+        {
+            List<SceneAnimal> currentSceneAnimal = new List<SceneAnimal>();
+            if (sceneAnimalDict.TryGetValue(SceneManager.GetActiveScene().name, out currentSceneAnimal))
+            {
+                foreach (var animal in currentSceneAnimal)
+                {
+                    var animalInScene = Instantiate(animal.animalDetails.animalPrefab, animalParent);
+                    animalInScene.GetComponent<AnimalController>().animalDetails = animal.animalDetails;
+                    animalInScene.GetComponent<AnimalController>().currentGrowthDay = animal.growthDay;
+                    animalInScene.GetComponent<AnimalController>().animCodeID = animal.animalCode;
+                    animalInScene.GetComponent<AnimalController>().activityArae = GetBuildArea(animal.animalCode);
+                    Debug.Log(GetBuildArea(animal.animalCode).name);
+                    animalInScene.GetComponent<AnimalController>().SetStartState(false);
+                }
+            }
+        }
+        /// <summary>
+        /// 检查玩家是否有合适养殖的建筑
+        /// </summary>
+        /// <param name="sortSize"></param>
+        /// <returns></returns>
+        public bool HaveBuildingCanBreeding(AnimalSizeType sortSize)
+        {
+            List<SceneBuilding> currentFarmBuilding = new List<SceneBuilding>();
+            if (sceneBuildingDict.TryGetValue("Farm", out currentFarmBuilding))
+            {
+                if (currentFarmBuilding != null)
+                {
+                    foreach (var farmBuilding in currentFarmBuilding)
+                    {
+                        //有该尺寸类型的养殖建筑且已经完工
+                        if (farmBuilding.acceptAnimalSize == sortSize && farmBuilding.isDone)
+                        {
+                            return true;
+                        }
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return false;
+        }
+        /// <summary>
+        /// 获取建筑的活动范围
+        /// </summary>
+        /// <param name="animalCode"></param>
+        private Collider2D GetBuildArea(int animalCode)
+        {
+            foreach (var collder in buildAreaList)
+            {
+                if(animalCode == collder.code)
+                {
+                    return collder.area;
+                }
+            }
+            return null;
+        }
         public GameSaveData GenerateSaveData()
         {
             GetAllSceneFurniture();
             GetAllSceneBuilding();
+            GetAllSceneAnimal();
             GetAllSceneItems();
             GetAllSceneKnockItem();
             GetAllSceneReapableItem();
@@ -469,8 +602,6 @@ namespace MFarm.Inventory
             saveData.sceneFurnitureDict = this.sceneFurnitureDict;
             saveData.sceneBuildingDict = this.sceneBuildingDict;
             return saveData;
-
-
         }
 
         public void RestoreData(GameSaveData saveData)
@@ -481,6 +612,7 @@ namespace MFarm.Inventory
             RecreateAllItem();
             RebuilFurniture();
             ReBuildBuilding();
+            RecreateAnimal();
             RecreateKnockItem();
             RecreateReapableItem();
         }

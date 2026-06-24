@@ -130,7 +130,7 @@ public enum TaskType
 /// </summary>
 public enum NPCname
 {
-    Freda,DaTuan,Hanies,Liam,Adolf
+    Freda,DaTuan,Hanies,Liam,Adolf,Rose
 }
 /// <summary>
 /// 任务类型
@@ -158,7 +158,14 @@ public enum SpriteScale
 /// </summary>
 public enum DialogueOptionType
 {
-    None,Quest,ItemShop,BuildShop,
+    None,Quest,ItemShop,BuildShop,AnimalShop
+}
+/// <summary>
+/// 动物大小
+/// </summary>
+public enum AnimalSizeType
+{
+    Small,Middle,Large,
 }
 
 

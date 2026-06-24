@@ -1,9 +1,11 @@
+using JetBrains.Annotations;
 using MFarm.Map;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
+using static AnimalData_SO;
 //实例化下列的数据，才可以在ItemDataList_OS对象上出现list物品数据
 [System.Serializable]
 public class ItemDetails
@@ -121,8 +123,31 @@ public class SceneBuilding
     public int buildID;
     //建造时间
     public int buildDay;
+    //建筑识别码
+    public int buildCodeID;
+    //是否完工
+    public bool isDone;
+    //可接受的动物尺寸
+    public AnimalSizeType acceptAnimalSize;
     public SerializableVector3 position;
 }
+//场景中的动物
+[System.Serializable]
+public class SceneAnimal 
+{
+    //成长的天数
+    public int growthDay;
+    public AnimalDetails animalDetails;
+    public int animalCode;
+}
+//场景中的动物的活动范围
+[System.Serializable]
+public class BuildColliderArea 
+{
+    public int code;
+    public Collider2D area;
+}
+
 
 [System.Serializable]
 public class SceneKnockItem 
@@ -266,5 +291,18 @@ public class MineScene
     public string sceneName;
     public Vector2 GoToPos;
 }
+[System.Serializable]
+public class AnimalItem 
+{
+    public AnimalDetails animal;
+    public int count;
+}
+[System.Serializable]
+public class SceneRootObect
+{
+    public int buildCode;
+    public GameObject[] objects;
+}
+
 
 

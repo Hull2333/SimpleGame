@@ -200,6 +200,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     }
     void Update()
     {
+        Debug.Log(inputDisable);
         if (inputDisable == false)
         {
             PlayerInput();

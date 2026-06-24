@@ -14,4 +14,5 @@ public class DialogueOption
     public DialogueOptionType optionType;
     public InventoryBag_SO bag_SO;
     public BuildingBagData_SO buildingBag;
+    public AnimalBagData_SO animalBag;
 }

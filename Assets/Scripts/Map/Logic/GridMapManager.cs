@@ -7,6 +7,8 @@ using System.Runtime.CompilerServices;
 using Unity.PlasticSCM.Editor.WebApi;
 using Unity.VisualScripting;
 using Unity.VisualScripting.Antlr3.Runtime.Collections;
+using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEditor.U2D.Aseprite;
 using UnityEngine;
 using UnityEngine.ProBuilder.Shapes;

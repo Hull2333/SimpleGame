@@ -4,9 +4,11 @@ using UnityEngine;
 using DG.Tweening;
 using UnityEngine.UI;
 using UnityEditor.Scripting;
+using static AnimalData_SO;
 
 public class TimeUI : MonoBehaviour //调用在GameTime对象上
 {
+    public Canvas timeCanvas;
     public GameObject timeUIBg;
     public Image seasonImage;
     public Text dayText;
@@ -33,7 +35,11 @@ public class TimeUI : MonoBehaviour //调用在GameTime对象上
         EventHandler.BuildindModeEvent -= OnBuildindModeEvent;
     }
 
-  
+    private void Awake()
+    {
+        timeCanvas.worldCamera = FindAnyObjectByType<Camera>();
+        timeCanvas.sortingLayerName = "Collision";
+    }
 
     /// <summary>
     /// 小时分钟UI显示
@@ -69,7 +75,7 @@ public class TimeUI : MonoBehaviour //调用在GameTime对象上
     {
         transform.GetComponentInParent<Canvas>().enabled = true;
     }
-    private void OnBuildindModeEvent(BuildingDetails details, bool isBuild)
+    private void OnBuildindModeEvent(BuildingDetails details,AnimalDetails animal, bool isBuild)
     {
         timeUIBg.SetActive(!isBuild);
     }
