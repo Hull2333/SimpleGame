@@ -19,7 +19,7 @@ using Sprite = UnityEngine.Sprite;
 namespace MFarm.Map
 {
     //Singleton单例模式，就算切换场景也不会改变里面的脚本
-    public class GridMapManager : Singleton<GridMapManager>,ISaveable//调用在GridMapManager对象上
+    public class GridMapManager : Singleton<GridMapManager>, ISaveable//调用在GridMapManager对象上
     {
         private Transform playerTransform => FindObjectOfType<PlayerController>().transform;
         [Header("种地瓦片切换信息")]
@@ -35,9 +35,9 @@ namespace MFarm.Map
         [Header("地图信息")]
         public List<MapData_SO> mapDataList;
         //根据地图名+Tile坐标作为关键字加入到字典中
-        public Dictionary<string,TileDetails> tileDetailsDict = new Dictionary<string,TileDetails>();
+        public Dictionary<string, TileDetails> tileDetailsDict = new Dictionary<string, TileDetails>();
         //string场景名称，bool是否为第一次加载
-        public Dictionary<string,bool> firstLoadDict = new Dictionary<string,bool>();
+        public Dictionary<string, bool> firstLoadDict = new Dictionary<string, bool>();
         private Grid currentGrid;
         private Season currentSeason;
         [Header("可收割场景")]
@@ -46,7 +46,7 @@ namespace MFarm.Map
         //杂草预制体和杂草图片
         public GameObject weedPrefab;
         public Sprite[] weedSprites;
-        private TileDetails aroundWeedsTileDetail,aroundBigRockTileDetail,aroundTreeTileDetail;
+        private TileDetails aroundWeedsTileDetail, aroundBigRockTileDetail, aroundTreeTileDetail;
         public GameObject bigWeedPrefab;
         public Sprite[] bigWeedSprites;
         //石矿预制体
@@ -59,7 +59,7 @@ namespace MFarm.Map
         //大石矿预制体
         public GameObject bigRockPrefab;
         //可敲击、可砍伐图层
-        public LayerMask knockableLayer,axeableLayer;
+        public LayerMask knockableLayer, axeableLayer;
         //可收获物碰撞体
         public Collider2D ableCollider;
         //可劈砍预制体
@@ -80,7 +80,7 @@ namespace MFarm.Map
         {
             ISaveable saveable = this;
             saveable.RegisterSaveable();
-           
+
             foreach (var mapData in mapDataList)
             {
                 //游戏一开始，所有场景都是第一次加载
@@ -112,22 +112,22 @@ namespace MFarm.Map
             EventHandler.InstantiateBuildingOnMapEvent += OnInstantiateBuildingOnMapEvent;
         }
 
-     
+
 
         private void OnAfterSceneLoadedEvent()
         {
             currentGrid = FindObjectOfType<Grid>();
-            digTilemap =GameObject.FindGameObjectWithTag("Dig").GetComponent<Tilemap>();
+            digTilemap = GameObject.FindGameObjectWithTag("Dig").GetComponent<Tilemap>();
             waterTilemap = GameObject.FindGameObjectWithTag("Water").GetComponent<Tilemap>();
             valueMap = GameObject.FindGameObjectWithTag("ValueTile").GetComponent<Tilemap>();
             canGetPlayerPos = true;
-            if (firstLoadDict[SceneManager.GetActiveScene().name])
+            if (firstLoadDict.TryGetValue(SceneManager.GetActiveScene().name, out bool isFirstLoad) && isFirstLoad)
             {
                 //预先生成Crop,再把第一次加载改为false
                 EventHandler.CallGenerateCropEvent();
                 firstLoadDict[SceneManager.GetActiveScene().name] = false;
             }
-           
+
             OnRefreshCurrentMap();
         }
         /// <summary>
@@ -137,9 +137,9 @@ namespace MFarm.Map
         /// <param name="season"></param>
         private void OnGameDayEvent(int day, Season season)
         {
-     
+
             currentSeason = season;
-            foreach(var tile in tileDetailsDict)
+            foreach (var tile in tileDetailsDict)
             {
                 //如果已经种了种子且浇水那么种子的成长天数增加
                 if (tile.Value.seedItemID != -1 && tile.Value.daysSinceWatered > -1)
@@ -156,18 +156,18 @@ namespace MFarm.Map
                     tile.Value.daysSinceDug++;
                 }
                 //挖过的坑超过两天且每种东西就消除
-                if(tile.Value.daysSinceDug > 2 && tile.Value.seedItemID == -1)
+                if (tile.Value.daysSinceDug > 2 && tile.Value.seedItemID == -1)
                 {
                     tile.Value.daysSinceDug = -1;
                     tile.Value.canDig = true;
                     tile.Value.growthDays = -1;
                 }
-               
+
             }
             RandomGenerateInterView();
             OnRefreshCurrentMap();
             //每日更新鱼类获取列表
-            switch(currentSeason)
+            switch (currentSeason)
             {
                 case Season.春天:
                     EventHandler.CallFishListInSpriteDayFreshEvent(InventoryManager.fishList);
@@ -177,7 +177,7 @@ namespace MFarm.Map
         private void OnNextTeleportAppearEvent()
         {
             needPoint--;
-            if(needPoint <= 0)
+            if (needPoint <= 0)
             {
                 TileProperty appearTilePos;
                 TileDetails appearTile;
@@ -189,10 +189,10 @@ namespace MFarm.Map
                     appearTile = GetTileDetails(key);
                 }
                 while (appearTile.haveBigRock != -1 || appearTile.haveBigWeeds != -1 || appearTile.haveRock != -1 || appearTile.haveChop != -1);
-               Instantiate(teleportPos, new Vector2(appearTile.gridX + 0.5f, appearTile.gridY + 0.5f), Quaternion.identity);
+                Instantiate(teleportPos, new Vector2(appearTile.gridX + 0.5f, appearTile.gridY + 0.5f), Quaternion.identity);
             }
         }
-        private void OnGetCurrentBluPrintDetails(BluPrintDetails bluPrint,Transform parent,List<TileDetails> list)
+        private void OnGetCurrentBluPrintDetails(BluPrintDetails bluPrint, Transform parent, List<TileDetails> list)
         {
             bluPrintDetails = bluPrint;
             bluPrintParent = parent;
@@ -204,7 +204,7 @@ namespace MFarm.Map
             bluPrintParent = parent;
             bluPrintTileList = list;
         }
-        private void OnInstantiateBuildingOnMapEvent(BuildingDetails building,Vector3 pos,Transform parent)
+        private void OnInstantiateBuildingOnMapEvent(BuildingDetails building, Vector3 pos, Transform parent)
         {
             foreach (var tile in bluPrintTileList)
             {
@@ -377,7 +377,7 @@ namespace MFarm.Map
                             int odds = Random.Range(0, 10);
                             if (odds > 7)
                             {
-                                Instantiate(chopItemPrefabs[Random.Range(0,chopItemPrefabs.Length)], new Vector2(currentTile.gridX + 0.5f, currentTile.gridY), Quaternion.identity);
+                                Instantiate(chopItemPrefabs[Random.Range(0, chopItemPrefabs.Length)], new Vector2(currentTile.gridX + 0.5f, currentTile.gridY), Quaternion.identity);
                                 currentTile.haveChop = 1;
                             }
                         }
@@ -412,10 +412,10 @@ namespace MFarm.Map
         /// <returns></returns>
         private int IsAroundHaveWeeds(List<TileDetails> tileDetailsList)
         {
-           
-           foreach(var tileDetails in tileDetailsList)
+
+            foreach (var tileDetails in tileDetailsList)
             {
-                if(tileDetails.haveWeeds >= 0)
+                if (tileDetails.haveWeeds >= 0)
                 {
                     return 1;
                 }
@@ -428,7 +428,7 @@ namespace MFarm.Map
         /// <param name="mapData"></param>
         private void InitTileDetailsDict(MapData_SO mapData)
         {
-            foreach(TileProperty tileProperty in mapData.tilePropertyes)
+            foreach (TileProperty tileProperty in mapData.tilePropertyes)
             {
                 //生成字典中的每个地图块的X,Y坐标
                 TileDetails tileDetails = new TileDetails
@@ -437,9 +437,9 @@ namespace MFarm.Map
                     gridY = tileProperty.tileCoordinate.y
                 };
                 //设置字典的关键字格式
-                string key = tileDetails.gridX + "X"+ tileDetails.gridY + "Y" +mapData.sceneName;
+                string key = tileDetails.gridX + "X" + tileDetails.gridY + "Y" + mapData.sceneName;
                 //添加更新的瓦片到字典中
-                if(GetTileDetails(key) != null )
+                if (GetTileDetails(key) != null)
                 {
                     tileDetails = GetTileDetails(key);
                 }
@@ -484,7 +484,7 @@ namespace MFarm.Map
                         break;
                 }
                 //字典原有地图更新
-                if(GetTileDetails(key) != null)
+                if (GetTileDetails(key) != null)
                 {
                     tileDetailsDict[key] = tileDetails;
                 }
@@ -530,7 +530,7 @@ namespace MFarm.Map
             //获取鼠标的地图坐标
             var mouseGridPos = currentGrid.WorldToCell(mouseWorldPos);
             var currentTile = GetTileDetailsOnMousePosition(mouseGridPos);
-            if(currentTile != null)
+            if (currentTile != null)
             {
                 Crop currentCrop = GetCropObject(mouseWorldPos);
                 //WORKFOLLOW:物品使用的实际功能,不在需要判断物品是否具备丢弃或其他功能，因为只要执行到这里，都是符合对应的功能的
@@ -563,9 +563,9 @@ namespace MFarm.Map
                             }
 
                         }
-                        
+
                         break;
-                        //种下树种
+                    //种下树种
                     case ItemType.TreeSeed:
                         if (canSetTile)
                         {
@@ -600,7 +600,7 @@ namespace MFarm.Map
                     case ItemType.Commodity:
                         //执行收割方法
                         //currentCrop.ProcessToolAction(toolDetails, currentTile);
-                        
+
                         if (currentCrop != null && currentCrop.canHarvest)
                         {
                             //播放玩家收获动画
@@ -612,11 +612,11 @@ namespace MFarm.Map
                             EventHandler.CallDropItemEvent(itemDetails.itemID, mouseWorldPos, itemDetails.itemType);
                         }
                         break;
-                        //挖过的瓦片开始计时挖的天数，不可再挖，不可扔东西
+                    //挖过的瓦片开始计时挖的天数，不可再挖，不可扔东西
                     case ItemType.HoeTool:
-                        if(canSetTile)
+                        if (canSetTile)
                         {
-                            EventHandler.CallParticleEffectEvent(ParticalEffectType.HoeEffect02, new Vector3(mouseGridPos.x+0.5f, mouseGridPos.y + 0.5f, mouseGridPos.z), Vector2.zero);
+                            EventHandler.CallParticleEffectEvent(ParticalEffectType.HoeEffect02, new Vector3(mouseGridPos.x + 0.5f, mouseGridPos.y + 0.5f, mouseGridPos.z), Vector2.zero);
                             SetDigGround(currentTile);
                             currentTile.daysSinceDug = 0;
                             currentTile.canDig = false;
@@ -627,8 +627,8 @@ namespace MFarm.Map
                             break;
                         }
                         EventHandler.CallPlayerDecreaseStminaEvent(2);
-                        EventHandler.CallParticleEffectEvent(ParticalEffectType.HoeEffect,new Vector3(mouseGridPos.x+0.5f, mouseGridPos.y+0.5f,mouseGridPos.z), Vector2.zero);
-                       
+                        EventHandler.CallParticleEffectEvent(ParticalEffectType.HoeEffect, new Vector3(mouseGridPos.x + 0.5f, mouseGridPos.y + 0.5f, mouseGridPos.z), Vector2.zero);
+
                         //音效
                         break;
                     case ItemType.WaterTool:
@@ -638,7 +638,7 @@ namespace MFarm.Map
                             currentTile.daysSinceWatered = 0;
                         }
                         EventHandler.CallPlayerDecreaseStminaEvent(1);
-                       
+
                         //音效
                         break;
                     case ItemType.BreakTool:
@@ -652,7 +652,7 @@ namespace MFarm.Map
                             else
                             {
                                 //播放锄到地上的粒子特效
-                                EventHandler.CallParticleEffectEvent(ParticalEffectType.EarthenEffect, new Vector2(mouseGridPos.x + 0.5f,mouseGridPos.y + 0.5f), Vector2.zero);
+                                EventHandler.CallParticleEffectEvent(ParticalEffectType.EarthenEffect, new Vector2(mouseGridPos.x + 0.5f, mouseGridPos.y + 0.5f), Vector2.zero);
                             }
 
                         }
@@ -674,8 +674,8 @@ namespace MFarm.Map
                         //currentCrop?.ProcessToolAction(toolDetails, currentCrop.tileDetails);
                         EventHandler.CallPlayerDecreaseStminaEvent(5);
                         break;
-                        
-                     case ItemType.Furniture:
+
+                    case ItemType.Furniture:
                         //在地图上生成家具 ItemManager
                         //移除当前图纸 InventoryManager
                         //移除资源物品 InventoryManager
@@ -685,7 +685,7 @@ namespace MFarm.Map
                             tile.havePlace = 1;
                         }
                         break;
-                }   
+                }
                 UpdateTileDetails(currentTile);
             }
         }
@@ -700,7 +700,7 @@ namespace MFarm.Map
             Collider2D[] colliders = Physics2D.OverlapPointAll(mouseWorldPos);
             Crop currentCrop = null;
             //并且获取碰撞体中的Crop脚本
-            for(int i =0; i < colliders.Length; i++)
+            for (int i = 0; i < colliders.Length; i++)
             {
                 if (colliders[i].GetComponent<Crop>())
                 {
@@ -772,7 +772,7 @@ namespace MFarm.Map
         private void SetDigGround(TileDetails tile)
         {
             Vector3Int pos = new Vector3Int(tile.gridX, tile.gridY, 0);
-            if(digTilemap!=null)
+            if (digTilemap != null)
             {
                 //再pos位置显示Rule Tile digTile
                 digTilemap.SetTile(pos, digTile);
@@ -790,8 +790,8 @@ namespace MFarm.Map
                 waterTilemap.SetTile(pos, waterTile);
             }
         }
-       
-       
+
+
         /// <summary>
         /// 存储瓦片挖坑的数据
         /// </summary>
@@ -800,7 +800,7 @@ namespace MFarm.Map
         {
             //获取挖过坑的瓦片关键字
             string key = tileDetails.gridX + "X" + tileDetails.gridY + "Y" + SceneManager.GetActiveScene().name;
-            if(tileDetailsDict.ContainsKey(key))
+            if (tileDetailsDict.ContainsKey(key))
             {
                 tileDetailsDict[key] = tileDetails;
             }
@@ -814,7 +814,7 @@ namespace MFarm.Map
         /// </summary>
         private void OnRefreshCurrentMap()
         {
-            if(digTilemap != null)
+            if (digTilemap != null)
             {
                 digTilemap.ClearAllTiles();
             }
@@ -823,7 +823,7 @@ namespace MFarm.Map
                 waterTilemap.ClearAllTiles();
             }
             //遍历场景中所有的带Crop脚本的物体并删除
-            foreach(var crop in FindObjectsOfType<Crop>())
+            foreach (var crop in FindObjectsOfType<Crop>())
             {
                 Destroy(crop.gameObject);
             }
@@ -835,23 +835,23 @@ namespace MFarm.Map
         /// <param name="sceneName"></param>
         private void DisplayMap(string sceneName)
         {
-            foreach(var tile in tileDetailsDict)
+            foreach (var tile in tileDetailsDict)
             {
                 var key = tile.Key;
                 var tileDetails = tile.Value;
                 if (key.Contains(sceneName))
                 {
-                    if(tileDetails.daysSinceDug > -1)
+                    if (tileDetails.daysSinceDug > -1)
                     {
                         SetDigGround(tileDetails);
                     }
-                    if(tileDetails.daysSinceWatered > -1)
+                    if (tileDetails.daysSinceWatered > -1)
                     {
                         SetWaterGround(tileDetails);
                     }
-                    if(tileDetails.seedItemID > -1)
+                    if (tileDetails.seedItemID > -1)
                     {
-                        EventHandler.CallPlantSeedEvent(tileDetails.seedItemID,tileDetails);
+                        EventHandler.CallPlantSeedEvent(tileDetails.seedItemID, tileDetails);
                     }
                 }
             }
@@ -863,14 +863,14 @@ namespace MFarm.Map
         /// <param name="gridDimensions">网格范围</param>
         /// <param name="gridOrigin">地图左下角原点</param>
         /// <returns>是否有当前场景的信息</returns>
-        public bool GetGridDimensions(string sceneName,out Vector2Int gridDimensions,out Vector2Int gridOrigin)
+        public bool GetGridDimensions(string sceneName, out Vector2Int gridDimensions, out Vector2Int gridOrigin)
         {
             //初始化赋值
             gridDimensions = Vector2Int.zero;
             gridOrigin = Vector2Int.zero;
-            foreach(var mapData in mapDataList)
+            foreach (var mapData in mapDataList)
             {
-                if(mapData.sceneName == sceneName)
+                if (mapData.sceneName == sceneName)
                 {
                     gridDimensions.x = mapData.gridWidth;
                     gridDimensions.y = mapData.gridHeight;
@@ -879,7 +879,7 @@ namespace MFarm.Map
                     gridOrigin.y = mapData.originY;
 
                     return true;
-                } 
+                }
             }
             return false;
         }
@@ -889,7 +889,7 @@ namespace MFarm.Map
         /// <param name="mouseGridPos"></param>
         public void DisplayerAvailableGround(ItemDetails toolDetails, TileDetails currentTile)
         {
-            
+
             var playerGridPos = currentGrid.WorldToCell(playerTransform.position);
             valueMap.gameObject.GetComponent<TilemapRenderer>().enabled = true;
             foreach (var tile in tileDetailsDict)
@@ -897,7 +897,7 @@ namespace MFarm.Map
                 //鼠标此时选中的Tile
                 if (tile.Value.gridX == currentTile.gridX && tile.Value.gridY == currentTile.gridY)
                 {
-     
+
                     //Tile在工具使用范围外
                     if (Mathf.Abs(currentTile.gridX - playerGridPos.x) > toolDetails.itemUseRadius || Mathf.Abs(currentTile.gridY - playerGridPos.y) > toolDetails.itemUseRadius)
                     {
@@ -907,7 +907,7 @@ namespace MFarm.Map
                     //Tile在工具使用范围内
                     else
                     {
-                        switch (toolDetails.itemType) 
+                        switch (toolDetails.itemType)
                         {
                             case ItemType.HoeTool:
                                 //Tile可以挖掘
@@ -951,7 +951,7 @@ namespace MFarm.Map
                                 }
                                 break;
                             case ItemType.Seed:
-                               
+
                                 if (currentTile.daysSinceDug > -1 && currentTile.seedItemID == -1)
                                 {
                                     canSetTile = true;
@@ -973,7 +973,7 @@ namespace MFarm.Map
                 }
             }
         }
-       public void DisplayBluPrintAvaliableGround(List<TileDetails> currentList , List<TileDetails> lastList)
+        public void DisplayBluPrintAvaliableGround(List<TileDetails> currentList, List<TileDetails> lastList)
         {
 
             if (lastList != currentList)

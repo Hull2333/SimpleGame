@@ -132,21 +132,24 @@ namespace MFarm.Transition
             //加载场景之前所需要做的事情
             EventHandler.CallBeforeSceneUnloadEvent();
             yield return PlayFadeTranstion();
-            yield return SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene());
             //进场景
             if (isCome)
             {
+                yield return SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene());
                 yield return StartCoroutine(CreateScene(sceneName, code));
             }
             //出场景
             else
             {
                 yield return StartCoroutine(GetAndSaveBuildSceneObject());
+                yield return SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene());
                 //加载新场景
                 yield return LoadSceneSetActive(sceneName);
             }
             //加载新场景后人物的位置
             EventHandler.CallMoveToPosition(targetPosition);
+            //加载新场景之后所需要做的事情
+            EventHandler.CallAfterSceneLoadedEvent();
             yield return PlayOpenTranstion();
         }
         /// <summary>
@@ -185,6 +188,11 @@ namespace MFarm.Transition
             currentBuildCode = code;
             //场景但不激活新场景
             Scene newScene = SceneManager.CreateScene(currentSceneName);
+            if (sceneRootObjects == null || sceneRootObjects.Length == 0 || sceneRootObjects[0] == null)
+            {
+                //buildSceneList中保存的引用已失效，回退到模板场景物体
+                sceneRootObjects = templateScene.GetRootGameObjects();
+            }
             foreach (var obj in sceneRootObjects)
             {
                 // 克隆物体（包括所有子物体）
@@ -193,7 +201,8 @@ namespace MFarm.Transition
                 SceneManager.MoveGameObjectToScene(clonedObj, newScene);
             }
             // 7. 卸载模板场景
-            yield return SceneManager.UnloadSceneAsync(currentSceneName);
+            yield return SceneManager.UnloadSceneAsync(templateSceneName);
+            yield return SceneManager.SetActiveScene(newScene);
         }
         /// <summary>
         /// 获取当前建筑场景并保存
