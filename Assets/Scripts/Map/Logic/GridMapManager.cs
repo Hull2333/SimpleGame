@@ -121,7 +121,7 @@ namespace MFarm.Map
             waterTilemap = GameObject.FindGameObjectWithTag("Water").GetComponent<Tilemap>();
             valueMap = GameObject.FindGameObjectWithTag("ValueTile").GetComponent<Tilemap>();
             canGetPlayerPos = true;
-            if (firstLoadDict.TryGetValue(SceneManager.GetActiveScene().name, out bool isFirstLoad) && isFirstLoad)
+            if (firstLoadDict[SceneManager.GetActiveScene().name])
             {
                 //预先生成Crop,再把第一次加载改为false
                 EventHandler.CallGenerateCropEvent();

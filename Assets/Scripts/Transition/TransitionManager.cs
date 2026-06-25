@@ -24,11 +24,6 @@ namespace MFarm.Transition
         public int smoothValue;
         private Tween currentTween;
         public string GUID => GetComponent<DataGUID>().guid;
-        [Header("建筑场景相关")]
-        //新场景计数
-        private int currentBuildingCount;
-        public string currentSceneName;
-        public int currentBuildCode;
         //建筑场景物品列表
         private List<SceneRootObect> buildSceneList = new List<SceneRootObect>();
 
@@ -41,7 +36,6 @@ namespace MFarm.Transition
         private void OnEnable()
         {
             EventHandler.TransitionEvent += OnTransitionEvent;
-            EventHandler.TranstionBuildSceneEvent += OnTranstionBuildSceneEvent;
             //新游戏开始时需要重置的shuju
             EventHandler.StartNewGameEvent += OnStartNewGameEvent;
             //游戏结束时的事件
@@ -52,7 +46,6 @@ namespace MFarm.Transition
         private void OnDisable() 
         {
             EventHandler.TransitionEvent -= OnTransitionEvent;
-            EventHandler.TranstionBuildSceneEvent -= OnTranstionBuildSceneEvent;
             EventHandler.StartNewGameEvent -= OnStartNewGameEvent;
             EventHandler.EndGameEvent -= OnEndGameEvent;
            
@@ -80,14 +73,6 @@ namespace MFarm.Transition
                 StartCoroutine(Transition(sceneToGo, positionToGo));
             }
 
-        }
-        private void OnTranstionBuildSceneEvent(Vector3 vector,string tempSceneName,int code,bool isCome)
-        {
-            if (!isFade)
-            {
-                StartCoroutine(TranstionBuildingScene(vector, tempSceneName, code, isCome));
-            }
-           
         }
         private void OnStartNewGameEvent(int obj)
         {
@@ -126,103 +111,6 @@ namespace MFarm.Transition
             //yield return Fade(0);
             yield return PlayOpenTranstion();
             //yield return currentTween;
-        }
-        private IEnumerator TranstionBuildingScene(Vector3 targetPosition,string sceneName,int code, bool isCome)
-        {
-            //加载场景之前所需要做的事情
-            EventHandler.CallBeforeSceneUnloadEvent();
-            yield return PlayFadeTranstion();
-            //进场景
-            if (isCome)
-            {
-                yield return SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene());
-                yield return StartCoroutine(CreateScene(sceneName, code));
-            }
-            //出场景
-            else
-            {
-                yield return StartCoroutine(GetAndSaveBuildSceneObject());
-                yield return SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene());
-                //加载新场景
-                yield return LoadSceneSetActive(sceneName);
-            }
-            //加载新场景后人物的位置
-            EventHandler.CallMoveToPosition(targetPosition);
-            //加载新场景之后所需要做的事情
-            EventHandler.CallAfterSceneLoadedEvent();
-            yield return PlayOpenTranstion();
-        }
-        /// <summary>
-        /// 创建建筑场景
-        /// </summary>
-        /// <param name="templateSceneName"></param>
-        /// <returns></returns>
-        private IEnumerator CreateScene(string templateSceneName,int code)
-        {
-            currentBuildingCount++;
-            currentSceneName = $"{templateSceneName}{currentBuildingCount}";
-            Debug.Log(templateSceneName);
-            //加载模板场景
-            AsyncOperation loadTemplateScene = SceneManager.LoadSceneAsync(templateSceneName, LoadSceneMode.Additive);
-            while (!loadTemplateScene.isDone)
-            {
-                yield return null;
-            }
-            //获取模板场景
-            Scene templateScene = SceneManager.GetSceneByName(templateSceneName);
-            if (!templateScene.isLoaded)
-            {
-                Debug.LogError($"模板场景 {templateSceneName} 加载失败");
-                yield break;
-            }
-            GameObject[] sceneRootObjects;
-            //获取模板场景中的所有根(父)物体
-            sceneRootObjects = templateScene.GetRootGameObjects();
-            foreach (var scene in buildSceneList)
-            {
-                if (scene.buildCode == code)
-                {
-                    sceneRootObjects = scene.objects;
-                }
-            }
-            currentBuildCode = code;
-            //场景但不激活新场景
-            Scene newScene = SceneManager.CreateScene(currentSceneName);
-            if (sceneRootObjects == null || sceneRootObjects.Length == 0 || sceneRootObjects[0] == null)
-            {
-                //buildSceneList中保存的引用已失效，回退到模板场景物体
-                sceneRootObjects = templateScene.GetRootGameObjects();
-            }
-            foreach (var obj in sceneRootObjects)
-            {
-                // 克隆物体（包括所有子物体）
-                GameObject clonedObj = Instantiate(obj, obj.transform.position, obj.transform.rotation);
-                // 移动到新场景
-                SceneManager.MoveGameObjectToScene(clonedObj, newScene);
-            }
-            // 7. 卸载模板场景
-            yield return SceneManager.UnloadSceneAsync(templateSceneName);
-            yield return SceneManager.SetActiveScene(newScene);
-        }
-        /// <summary>
-        /// 获取当前建筑场景并保存
-        /// </summary>
-        /// <returns></returns>
-        private IEnumerator GetAndSaveBuildSceneObject()
-        {
-            //获取当前场景的根物体并添加到列表中
-            GameObject[] currentSceneRootObjects = SceneManager.GetActiveScene().GetRootGameObjects();
-            var currentSceneOjects = new SceneRootObect { objects = currentSceneRootObjects, buildCode = currentBuildCode };
-            var exitSceneObjects = buildSceneList.Find(s => s.buildCode == currentSceneOjects.buildCode);
-            if (exitSceneObjects != null)
-            {
-                exitSceneObjects.objects = currentSceneOjects.objects;
-            }
-            else
-            {
-                buildSceneList.Add(currentSceneOjects);
-            }
-            yield return null;
         }
         /// <summary>
         /// 加载场景并激活，仅仅只有激活功能没有切换场景的功能

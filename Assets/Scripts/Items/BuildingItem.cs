@@ -41,9 +41,6 @@ public class BuildingItem : MonoBehaviour //调用在可建造建筑预制体上
     //建筑箭头图片
     public GameObject arrowIcon;
     [Header("新建场景相关")]
-    public string tempSceneName;
-    [HideInInspector] public string buildsceneName;
-    public Vector3 positionToGo;
     public Teleport entrance;
     private void OnEnable()
     {
@@ -116,9 +113,6 @@ public class BuildingItem : MonoBehaviour //调用在可建造建筑预制体上
         {
             isDone = true;
             entrance.gameObject.SetActive(true);
-            entrance.code = buildCodeID;
-            entrance.sceneToGo = tempSceneName;
-            entrance.positionToGo = positionToGo;
         }
     }
 
