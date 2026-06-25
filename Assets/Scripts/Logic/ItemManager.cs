@@ -22,6 +22,7 @@ namespace MFarm.Inventory
         private Transform itemParent;
         public Transform buildingParent;
         public Transform animalParent;
+        private Transform furnitureParent;
         private Transform playerTransform => FindObjectOfType<PlayerController>().transform;
 
         public string GUID => GetComponent<DataGUID>().guid;
@@ -108,6 +109,7 @@ namespace MFarm.Inventory
             itemParent = GameObject.FindWithTag("ItemParent").transform;
             buildingParent = FindAnyObjectByType<BuildingParent>().transform;
             animalParent = FindAnyObjectByType<AnimalParent>().transform;
+            furnitureParent = FindAnyObjectByType<FurnitureParent>().transform;
             if (ExcludeMineScene(SceneManager.GetActiveScene().name))
             {
                 RecreateAllItem();
@@ -410,7 +412,7 @@ namespace MFarm.Inventory
                     foreach(SceneFurniture sceneFurniture in currentSceneFurniture)
                     {
                         BluPrintDetails bluePrint = InventoryManager.Instance.bluPrintData.GetBluPrintDetails(sceneFurniture.itemID); 
-                        var buildItem = Instantiate(bluePrint.buildPrefab,sceneFurniture.position.ToVector3(),Quaternion.identity,itemParent);
+                        var buildItem = Instantiate(bluePrint.buildPrefab,sceneFurniture.position.ToVector3(),Quaternion.identity, furnitureParent);
                         //重新赋值箱子编号
                         if (buildItem.GetComponent<Box>())
                         {

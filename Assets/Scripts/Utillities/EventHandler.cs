@@ -68,12 +68,6 @@ public static class EventHandler
     {
         TransitionEvent?.Invoke(sceneName, pos);
     }
-    //建造建筑场景传送事件
-    public static event Action<Vector3,string,int,bool> TranstionBuildSceneEvent;
-    public static void CallTranstionBuildSceneEvent(Vector3 pos, string sceneName,int buildCode,bool isCome)
-    {
-        TranstionBuildSceneEvent?.Invoke(pos, sceneName, buildCode,isCome);
-    }
     //切换场景之前的事件
     public static event Action BeforeSceneUnloadEvent;
     public static void CallBeforeSceneUnloadEvent()

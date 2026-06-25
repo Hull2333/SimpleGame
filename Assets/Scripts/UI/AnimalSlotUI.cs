@@ -48,8 +48,4 @@ public class AnimalSlotUI : MonoBehaviour //调用在AnimalShopSlot预制体上
         EventHandler.CallBuildindModeEvent(null,currentAnimalDetails, true);
     }
 
-    public void BuyAnimal()
-    {
-        //EventHandler.CallBuyAnimalEvent()
-    }
 }
