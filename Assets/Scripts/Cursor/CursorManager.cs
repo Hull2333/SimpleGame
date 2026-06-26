@@ -501,16 +501,26 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
                 if (Input.GetMouseButtonDown(0))
                 {
                     Crop clickCrop = GridMapManager.Instance.GetCropObject(mouseWorldPos);
+                    ItemClick clickItem = GridMapManager.Instance.GetItemObject(mouseWorldPos);
+                    Debug.Log(clickItem);
                     if (clickCrop != null && clickCrop.canHarvest)
                     {
                         //播放玩家收获动画
                         EventHandler.CallDisplayCollectItemSprite(clickCrop.cropDetails.producedItemID[0]);
                         clickCrop.ProcessCropAction();
+                        return;
+                    }
+                    if(clickItem != null)
+                    {
+                        //播放玩家收获动画
+                        EventHandler.CallDisplayCollectItemSprite(clickItem.itemID);
+                        clickItem.AddItemToBag();
                     }
                 }
             }
         }
        
+        
     }
     /// <summary>
     /// 鼠标点击物品时执行的操作

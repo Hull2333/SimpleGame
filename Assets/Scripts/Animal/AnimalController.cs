@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using static AnimalData_SO;
 using UnityEngine;
+using System.Data.SqlTypes;
 
 public class AnimalController : MonoBehaviour //调用在每个动物预制体上
 {
@@ -23,6 +24,10 @@ public class AnimalController : MonoBehaviour //调用在每个动物预制体上
     //当前的成长天数
     public int currentGrowthDay;
     public AnimalDetails animalDetails;
+    [Header("动物生产相关")]
+    public int produceItemID;
+    //已成年
+    private bool isAdult;
     private void OnEnable()
     {
         EventHandler.GameDayEvent += OnGameDayEvent;
@@ -40,11 +45,18 @@ public class AnimalController : MonoBehaviour //调用在每个动物预制体上
             //已成年
             if(currentGrowthDay == animalDetails.growthDay)
             {
+                isAdult = true;
                 transform.GetChild(0).gameObject.SetActive(false);
                 transform.GetChild(1).gameObject.SetActive(true);
                 anim = transform.GetChild(1).GetComponent<Animator>();
             }
         }
+        if (isAdult)
+        {
+            //每天开始生产物品
+            EventHandler.CallInstantiateAniamlProduceItemEvent(animCodeID,produceItemID);
+        }
+
     }
 
     public void FixedUpdate()

@@ -297,6 +297,16 @@ public class AnimalItem
     public AnimalDetails animal;
     public int count;
 }
+//建造建筑中动物的生产物品
+[System.Serializable]
+public class buildProduceItem 
+{
+    public int buildCode;
+    public int itemID;
+}
+
+
+
 
 
 

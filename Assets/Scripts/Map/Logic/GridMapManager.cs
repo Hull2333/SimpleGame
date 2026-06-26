@@ -502,9 +502,11 @@ namespace MFarm.Map
         /// <returns></returns>
         public TileDetails GetTileDetails(string key)
         {
+           
             if (tileDetailsDict.ContainsKey(key))
             {
                 return tileDetailsDict[key];
+
             }
             return null;
         }
@@ -699,6 +701,7 @@ namespace MFarm.Map
             //获取鼠标点击位置的周围的所有碰撞体
             Collider2D[] colliders = Physics2D.OverlapPointAll(mouseWorldPos);
             Crop currentCrop = null;
+            
             //并且获取碰撞体中的Crop脚本
             for(int i =0; i < colliders.Length; i++)
             {
@@ -706,8 +709,56 @@ namespace MFarm.Map
                 {
                     currentCrop = colliders[i].GetComponent<Crop>();
                 }
+                
             }
             return currentCrop;
+        }
+        /// <summary>
+        /// 通过物理方法判断鼠标点击位置的物品，用于收获
+        /// </summary>
+        /// <param name="mouseWorldPos"></param>
+        /// <returns></returns>
+        public ItemClick GetItemObject(Vector3 mouseWorldPos)
+        {
+            Collider2D[] colliders = Physics2D.OverlapPointAll(mouseWorldPos);
+            ItemClick currentItem = null;
+            for (int i = 0; i < colliders.Length; i++)
+            {
+                if (colliders[i].GetComponent<ItemClick>())
+                {
+                    currentItem = colliders[i].GetComponent<ItemClick>();
+                }
+            }
+            return currentItem;
+        }
+        /// <summary>
+        /// 随机获取一个可放家具的空闲瓦片，并标记为已占用
+        /// </summary>
+        /// <returns>被选中的瓦片，如果没有空闲瓦片则返回null</returns>
+        public TileDetails GetRandomPlaceFurnitureTile(MapData_SO mapData)
+        {
+            List<TileDetails> availableTiles = new List<TileDetails>();
+            foreach (TileProperty tileProperty in mapData.tilePropertyes)
+            {
+                if (tileProperty.gridType == GridType.PlaceFurniture && tileProperty.boolTypeValue)
+                {
+                    string key = tileProperty.tileCoordinate.x + "X"
+                               + tileProperty.tileCoordinate.y + "Y"
+                               + mapData.sceneName;
+                    TileDetails tile = GetTileDetails(key);
+                    if (tile != null && tile.canPlaceFurniture && tile.havePlace == -1)
+                    {
+                        availableTiles.Add(tile);
+                    }
+                }
+            }
+            if (availableTiles.Count == 0)
+            {
+                return null;
+            }
+            TileDetails selected = availableTiles[Random.Range(0, availableTiles.Count)];
+            selected.havePlace = 1;
+            return selected;
         }
         /// <summary>
         /// 鼠标选择范围内是否有可收割的场景

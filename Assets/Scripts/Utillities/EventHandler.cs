@@ -447,10 +447,10 @@ public static class EventHandler
     {
         PlayEatAnimEvent?.Invoke(itemID);
     }
-    //购买动物事件
-    public static event Action<AnimalDetails,int> BuyAnimalEvent;
-    public static void CallBuyAnimalEvent(AnimalDetails animal,int amount)
+    //动物生产的事件
+    public static event Action<int, int> InstantiateAniamlProduceItemEvent;
+    public static void CallInstantiateAniamlProduceItemEvent(int code,int itemID)
     {
-        BuyAnimalEvent?.Invoke(animal, amount);
+        InstantiateAniamlProduceItemEvent?.Invoke(code, itemID);
     }
 }

@@ -53,6 +53,8 @@ namespace MFarm.Inventory
         public bool isSellState;
         //物品对半分
         public bool isHalfAmount;
+        //此时是否可以点击SlotUI
+        private bool canClickSlot;
         /// <summary>
         /// 在每次游戏开始时就执行一次玩家背包数据更新
         /// </summary>
@@ -83,6 +85,7 @@ namespace MFarm.Inventory
             EventHandler.ClickHaveItemYesEvent += OnClickHaveItemYesEvent;
             EventHandler.SlotUISelectIndexEvent += OnSlotUISelectIndexEvent;
             EventHandler.InstantiateBuildingOnMapEvent += OnInstantiateBuildingOnMapEvent;
+            EventHandler.ControlPlayerBagOpen += OnControlPlayerBagOpen;
         }
 
         private void OnDisable()
@@ -98,6 +101,7 @@ namespace MFarm.Inventory
             EventHandler.ClickHaveItemYesEvent -= OnClickHaveItemYesEvent;
             EventHandler.SlotUISelectIndexEvent -= OnSlotUISelectIndexEvent;
             EventHandler.InstantiateBuildingOnMapEvent -= OnInstantiateBuildingOnMapEvent;
+            EventHandler.ControlPlayerBagOpen -= OnControlPlayerBagOpen;
         }
 
        
@@ -226,7 +230,10 @@ namespace MFarm.Inventory
         }
         private void OnSlotUISelectIndexEvent(int index)
         {
-            currentSelectBagIndex = index;
+            if (canClickSlot)
+            {
+                currentSelectBagIndex = index;
+            }
         }
         private void OnInstantiateBuildingOnMapEvent(BuildingDetails details, Vector3 pos, Transform transform)
         {
@@ -234,6 +241,10 @@ namespace MFarm.Inventory
             {
                 RemoveItem(resource.itemID, resource.itemAmount);
             }
+        }
+        private void OnControlPlayerBagOpen(bool canClickSlotUI)
+        {
+            canClickSlot = canClickSlotUI;
         }
         /// <summary>
         /// 通过ID返回物品信息
@@ -503,7 +514,6 @@ namespace MFarm.Inventory
                     if (isHalfAmount)
                     {
                         isHalfAmount = false;
-                        return;
                     }
                     else
                     {

@@ -1,7 +1,10 @@
+using MFarm.Map;
 using MFarm.Save;
 using MFarm.Transition;
+using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -22,8 +25,8 @@ namespace MFarm.Inventory
         public ReapableItem weedItemPerfab;
         public ReapableItem bigWeedItemPerfab;
         private Transform itemParent;
-        public Transform buildingParent;
-        public Transform animalParent;
+        private Transform buildingParent;
+        private Transform animalParent;
         private Transform furnitureParent;
         private Transform playerTransform => FindObjectOfType<PlayerController>().transform;
 
@@ -47,8 +50,14 @@ namespace MFarm.Inventory
         public int currentBuildCode;
         private Teleport teleport;
         private Vector3 buildSceneTeleportToGo;
+        [Header("动物产生相关")]
+        //用队列来存储每个建筑物场景的生产道具
+        public List<buildProduceItem> buildProduceItemList = new List<buildProduceItem>();
+        //同字典来存储每个建筑场景中的生产道具
+        public Dictionary<int, List<SceneItem>> buildItemClickDict = new Dictionary<int, List<SceneItem>>();
+        public ItemClick itemClickPrefab;
+        public MapData_SO ChickenCoopMap;
         [Header("动物相关")]
-        public List<AnimalItem> currentBuyAnimalList = new List<AnimalItem>();
         private HashSet<int> buildCodeIDs = new HashSet<int>();
         //场景中动物的活动范围
         public List<BuildColliderArea> buildAreaList = new List<BuildColliderArea>();
@@ -63,8 +72,8 @@ namespace MFarm.Inventory
             //新游戏开始需要重置的数据
             EventHandler.StartNewGameEvent += OnStartNewGameEvent;
             EventHandler.InstantiateBuildingOnMapEvent += OnInstantiateBuildingOnMapEvent;
-            EventHandler.BuyAnimalEvent += OnBuyAnimalEvent;
             EventHandler.GetCurrentBuildCode += OnGetCurrentBuildCode;
+            EventHandler.InstantiateAniamlProduceItemEvent += OnInstantiateAniamlProduceItemEvent;
         }
 
         private void OnDisable()
@@ -76,11 +85,11 @@ namespace MFarm.Inventory
             EventHandler.BuildFurnitureEvent -= OnBuildFurnitureEvent;
             EventHandler.StartNewGameEvent -= OnStartNewGameEvent;
             EventHandler.InstantiateBuildingOnMapEvent -= OnInstantiateBuildingOnMapEvent;
-            EventHandler.BuyAnimalEvent -= OnBuyAnimalEvent;
             EventHandler.GetCurrentBuildCode -= OnGetCurrentBuildCode;
+            EventHandler.InstantiateAniamlProduceItemEvent += OnInstantiateAniamlProduceItemEvent;
         }
 
-     
+       
 
         private void Start()
         {
@@ -107,7 +116,7 @@ namespace MFarm.Inventory
                 if (SceneManager.GetActiveScene().name == "ChickenCoop")
                 {
                     GetAllBuildFurniture();
-                   
+                    SaveBuildSceneItemClick();
                 }
                 else
                 {
@@ -134,6 +143,29 @@ namespace MFarm.Inventory
                     RecreateBuildFurniture();
                     teleport = FindAnyObjectByType<Teleport>();
                     teleport.positionToGo = buildSceneTeleportToGo ;
+                    //暂存等待删除的生产物品
+                    List<buildProduceItem> toRemoveItem = new List<buildProduceItem>();
+                    //加载鸡舍场景时也生产对应的动物产品
+                    foreach (buildProduceItem item in buildProduceItemList)
+                    {
+                        if(item.buildCode == currentBuildCode)
+                        {
+                            var producePos = GridMapManager.Instance.GetRandomPlaceFurnitureTile(ChickenCoopMap);
+                            if (producePos != null)
+                            {
+                                var produceItem = Instantiate(itemClickPrefab, new Vector3(producePos.gridX + 0.5f, producePos.gridY + 0.5f, 0), Quaternion.identity, itemParent);
+                                produceItem.itemID = item.itemID;
+                                produceItem.SetItemSprite();
+                            }
+                            //生成在场景后就移出列表，避免重复生成
+                            toRemoveItem.Add(item);
+                        }
+                    }
+                    foreach (var item in toRemoveItem)
+                    {
+                        buildProduceItemList.Remove(item);
+                    }
+                    RecreateBuildSceneItemClick();
                 }
                 else
                 {
@@ -199,15 +231,15 @@ namespace MFarm.Inventory
             buildingInMap.GetComponent<BuildingItem>().isSet = true;
             buildingInMap.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1f);
         }
-        private void OnBuyAnimalEvent(AnimalDetails animalDetails, int amount)
-        {
-            AnimalItem currentanimal = new AnimalItem { animal = animalDetails, count = amount };
-            currentBuyAnimalList.Add(currentanimal);
-        }
         private void OnGetCurrentBuildCode(int code , Vector3 toGoPos)
         {
             currentBuildCode = code;
+            Debug.Log(toGoPos);
             buildSceneTeleportToGo = toGoPos;
+        }
+        private void OnInstantiateAniamlProduceItemEvent(int code, int itemID)
+        {
+            buildProduceItemList.Add(new buildProduceItem { buildCode = code, itemID = itemID });
         }
         /// <summary>
         /// 排除矿洞场景
@@ -439,6 +471,25 @@ namespace MFarm.Inventory
 
         }
         /// <summary>
+        /// 获取当前建筑场景的生产物品
+        /// </summary>
+        private void SaveBuildSceneItemClick()
+        {
+            List<SceneItem> currentItems = new List<SceneItem>();
+            foreach (var item in FindObjectsOfType<ItemClick>())
+            {
+                currentItems.Add(new SceneItem
+                {
+                    itemID = item.itemID,
+                    position = new SerializableVector3(item.transform.position)
+                });
+            }
+            if (buildItemClickDict.ContainsKey(currentBuildCode))
+                buildItemClickDict[currentBuildCode] = currentItems;
+            else
+                buildItemClickDict.Add(currentBuildCode, currentItems);
+        }
+        /// <summary>
         /// 刷新创建当前场景的物品
         /// </summary>
         private void RecreateAllItem()
@@ -635,6 +686,26 @@ namespace MFarm.Inventory
             }
 
         }
+        /// <summary>
+        /// 重新加载建筑场景中的生产物品
+        /// </summary>
+        private void RecreateBuildSceneItemClick()
+        {
+            if (buildItemClickDict.TryGetValue(currentBuildCode, out List<SceneItem> savedItems))
+            {
+                foreach (var item in savedItems)
+                {
+                    var produceItem = Instantiate(itemClickPrefab, item.position.ToVector3(), Quaternion.identity, itemParent);
+                    produceItem.itemID = item.itemID;
+                    produceItem.SetItemSprite();
+                    string key = (item.position.x - 0.5f) + "X" + (item.position.y - 0.5f) + "Y" + SceneManager.GetActiveScene().name;
+                    var tile = GridMapManager.Instance.GetTileDetails(key);
+                    if (tile != null)
+                        tile.havePlace = 1;
+                }
+            }
+        }
+
         /// <summary>
         /// 检查玩家是否有合适养殖的建筑
         /// </summary>
