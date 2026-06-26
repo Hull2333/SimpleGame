@@ -76,7 +76,7 @@ public class BuildingItem : MonoBehaviour //调用在可建造建筑预制体上
     }
     private void Awake()
     {
-        animalArea = transform.GetChild(1).GetComponent<Collider2D>();
+        animalArea = transform.GetChild(2).GetComponent<Collider2D>();
     }
     public void SwitchCollider2D(bool active)
     {
@@ -113,6 +113,7 @@ public class BuildingItem : MonoBehaviour //调用在可建造建筑预制体上
         {
             isDone = true;
             entrance.gameObject.SetActive(true);
+            entrance.buildCode = buildCodeID;
         }
     }
 

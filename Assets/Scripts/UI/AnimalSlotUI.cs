@@ -45,7 +45,7 @@ public class AnimalSlotUI : MonoBehaviour //调用在AnimalShopSlot预制体上
     /// </summary>
     private void SelectAnimalBuilding()
     {
-        EventHandler.CallBuildindModeEvent(null,currentAnimalDetails, true);
+        EventHandler.CallBuildindModeEvent(null,currentAnimalDetails,true);
     }
 
 }

@@ -12,6 +12,7 @@ namespace MFarm.Transition
         [Header("随机传送相关，开启后可以不填上面的场景和位置")]
         public MineSceneDataList_SO mineData;
         public bool isRandomTeleport;
+        public int buildCode;
         private void OnTriggerEnter2D(Collider2D other)
         {
             if (other.CompareTag("Player"))
@@ -19,6 +20,10 @@ namespace MFarm.Transition
                 if (isRandomTeleport)
                 {
                     GetNextMineScene();
+                }
+                if(buildCode != 0)
+                {
+                    EventHandler.CallGetCurrentBuildCode(buildCode,transform.position);
                 }
                 EventHandler.CallTransitionEvent(sceneToGo, positionToGo);
 

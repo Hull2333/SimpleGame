@@ -68,6 +68,12 @@ public static class EventHandler
     {
         TransitionEvent?.Invoke(sceneName, pos);
     }
+    //获取当前建筑场景的code
+    public static event Action<int, Vector3> GetCurrentBuildCode;
+    public static void CallGetCurrentBuildCode(int code, Vector3 pos)
+    {
+        GetCurrentBuildCode?.Invoke(code, pos);
+    }
     //切换场景之前的事件
     public static event Action BeforeSceneUnloadEvent;
     public static void CallBeforeSceneUnloadEvent()
@@ -204,9 +210,9 @@ public static class EventHandler
     }
     //建造模式事件
     public static event Action<BuildingDetails ,AnimalDetails, bool> BuildindModeEvent;
-    public static void CallBuildindModeEvent(BuildingDetails buildingDetails, AnimalDetails animal,bool buildMode)
+    public static void CallBuildindModeEvent(BuildingDetails buildingDetails, AnimalDetails animal,bool startMode)
     {
-        BuildindModeEvent?.Invoke(buildingDetails, animal,buildMode);
+        BuildindModeEvent?.Invoke(buildingDetails, animal, startMode);
     }
     //获取当前建筑信息
     public static event Action<BuildingDetails, Transform, List<TileDetails>> GetCurrentBuildingDetails;

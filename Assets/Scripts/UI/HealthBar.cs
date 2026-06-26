@@ -48,10 +48,10 @@ public class HealthBar : Singleton<HealthBar>  //调用在StateBar对象上
     {
         stateCanvas.enabled = true;
     }
-    private void OnBuildindModeEvent(BuildingDetails details,AnimalDetails animal, bool isBuilding)
+    private void OnBuildindModeEvent(BuildingDetails details,AnimalDetails animal, bool startMode)
     {
-        hpImage.transform.parent.gameObject.SetActive(!isBuilding);
-        stminaImage.transform.parent.gameObject.SetActive(!isBuilding);
+        hpImage.transform.parent.gameObject.SetActive(!startMode);
+        stminaImage.transform.parent.gameObject.SetActive(!startMode);
     }
     /// <summary>
     /// 更新玩家血条

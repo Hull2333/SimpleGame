@@ -349,9 +349,9 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
     {
         gameState = state;
     }
-    private void OnBuildindModeEvent(BuildingDetails building ,AnimalDetails animal, bool isBuilding)
+    private void OnBuildindModeEvent(BuildingDetails building ,AnimalDetails animal, bool startMode)
     {
-        if (isBuilding)
+        if (startMode)
         {
             currentScene = SceneManager.GetActiveScene().name;
             currentPlayerPos = playerTransform.position;
@@ -366,15 +366,16 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
             {
                 currentBuildingDetails = bluPrintData.GetBuildingDetails(building.ID);
                 buildMode = true;
+                return;
             }
             //动物选择建筑模式
-            else
+            if (animal != null)
             {
                 currentAnimalDetails = animal;
                 animalSelectMode = true;
                 buildMode = false;
                 StartCoroutine(ShowBuindingIcon());
-               
+                return;
             }
         }
         else

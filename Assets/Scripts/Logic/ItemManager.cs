@@ -1,10 +1,12 @@
 using MFarm.Save;
+using MFarm.Transition;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using static AnimalData_SO;
+using static UnityEditor.PlayerSettings;
 using static UnityEditor.Progress;
 namespace MFarm.Inventory
 {
@@ -40,6 +42,11 @@ namespace MFarm.Inventory
         public Dictionary<string, List<SceneReapableItem>> sceneBigWeedItemDict = new Dictionary<string, List<SceneReapableItem>>();
         //用字典来存储每个场景的动物
         public Dictionary<string, List<SceneAnimal>> sceneAnimalDict = new Dictionary<string, List<SceneAnimal>>();
+        //用字典来存储每个建筑场景的家具
+        public Dictionary<int, List<SceneFurniture>> buildFurnitureDict = new Dictionary<int, List<SceneFurniture>>();
+        public int currentBuildCode;
+        private Teleport teleport;
+        private Vector3 buildSceneTeleportToGo;
         [Header("动物相关")]
         public List<AnimalItem> currentBuyAnimalList = new List<AnimalItem>();
         private HashSet<int> buildCodeIDs = new HashSet<int>();
@@ -57,6 +64,7 @@ namespace MFarm.Inventory
             EventHandler.StartNewGameEvent += OnStartNewGameEvent;
             EventHandler.InstantiateBuildingOnMapEvent += OnInstantiateBuildingOnMapEvent;
             EventHandler.BuyAnimalEvent += OnBuyAnimalEvent;
+            EventHandler.GetCurrentBuildCode += OnGetCurrentBuildCode;
         }
 
         private void OnDisable()
@@ -69,9 +77,10 @@ namespace MFarm.Inventory
             EventHandler.StartNewGameEvent -= OnStartNewGameEvent;
             EventHandler.InstantiateBuildingOnMapEvent -= OnInstantiateBuildingOnMapEvent;
             EventHandler.BuyAnimalEvent -= OnBuyAnimalEvent;
+            EventHandler.GetCurrentBuildCode -= OnGetCurrentBuildCode;
         }
 
-      
+     
 
         private void Start()
         {
@@ -95,12 +104,20 @@ namespace MFarm.Inventory
         {
             if (ExcludeMineScene(SceneManager.GetActiveScene().name))
             {
-                GetAllSceneItems();
-                GetAllSceneFurniture();
-                GetAllSceneBuilding();
-                GetAllSceneAnimal();
-                GetAllSceneKnockItem();
-                GetAllSceneReapableItem();
+                if (SceneManager.GetActiveScene().name == "ChickenCoop")
+                {
+                    GetAllBuildFurniture();
+                   
+                }
+                else
+                {
+                    GetAllSceneItems();
+                    GetAllSceneFurniture();
+                    GetAllSceneBuilding();
+                    GetAllSceneAnimal();
+                    GetAllSceneKnockItem();
+                    GetAllSceneReapableItem();
+                }
             }
            
         }
@@ -112,12 +129,22 @@ namespace MFarm.Inventory
             furnitureParent = FindAnyObjectByType<FurnitureParent>().transform;
             if (ExcludeMineScene(SceneManager.GetActiveScene().name))
             {
-                RecreateAllItem();
-                RebuilFurniture();
-                ReBuildBuilding();
-                RecreateAnimal();
-                RecreateKnockItem();
-                RecreateReapableItem();
+                if(SceneManager.GetActiveScene().name == "ChickenCoop")
+                {
+                    RecreateBuildFurniture();
+                    teleport = FindAnyObjectByType<Teleport>();
+                    teleport.positionToGo = buildSceneTeleportToGo ;
+                }
+                else
+                {
+                    RecreateAllItem();
+                    RebuilFurniture();
+                    ReBuildBuilding();
+                    RecreateAnimal();
+                    RecreateKnockItem();
+                    RecreateReapableItem();
+                }
+               
             }
         }
         /// <summary>
@@ -176,6 +203,11 @@ namespace MFarm.Inventory
         {
             AnimalItem currentanimal = new AnimalItem { animal = animalDetails, count = amount };
             currentBuyAnimalList.Add(currentanimal);
+        }
+        private void OnGetCurrentBuildCode(int code , Vector3 toGoPos)
+        {
+            currentBuildCode = code;
+            buildSceneTeleportToGo = toGoPos;
         }
         /// <summary>
         /// 排除矿洞场景
@@ -374,7 +406,38 @@ namespace MFarm.Inventory
                 sceneAnimalDict.Add(SceneManager.GetActiveScene().name, currentSceneAnimalList);
             }
         }
-        
+        /// <summary>
+        /// 获取当前建筑场景中的家具
+        /// </summary>
+        private void GetAllBuildFurniture()
+        {
+            List<SceneFurniture> currentBuildFurnitureList = new List<SceneFurniture>();
+            foreach (var item in FindObjectsOfType<Furniture>())
+            {
+                SceneFurniture sceneFurniture = new SceneFurniture()
+                {
+                    itemID = item.itemID,
+                    position = new SerializableVector3(item.transform.position)
+                };
+                //如果场景中有箱子，地图刷新前保存箱子的编号数据
+                if (item.GetComponent<Box>())
+                {
+                    sceneFurniture.boxIndex = item.GetComponent<Box>().index;
+                }
+                currentBuildFurnitureList.Add(sceneFurniture);
+            }
+            //当前场景在字典中，则把当前场景的物品数据更新到字典中
+            if (buildFurnitureDict.ContainsKey(currentBuildCode))
+            {
+                buildFurnitureDict[currentBuildCode] = currentBuildFurnitureList;
+            }
+            //如果时新场景，就把新场景的物品数据添加到字典中
+            else
+            {
+                buildFurnitureDict.Add(currentBuildCode, currentBuildFurnitureList);
+            }
+
+        }
         /// <summary>
         /// 刷新创建当前场景的物品
         /// </summary>
@@ -543,10 +606,34 @@ namespace MFarm.Inventory
                     animalInScene.GetComponent<AnimalController>().currentGrowthDay = animal.growthDay;
                     animalInScene.GetComponent<AnimalController>().animCodeID = animal.animalCode;
                     animalInScene.GetComponent<AnimalController>().activityArae = GetBuildArea(animal.animalCode);
-                    Debug.Log(GetBuildArea(animal.animalCode).name);
                     animalInScene.GetComponent<AnimalController>().SetStartState(false);
                 }
             }
+        }
+        /// <summary>
+        /// 重新加载该建筑场景的家具
+        /// </summary>
+        private void RecreateBuildFurniture()
+        {
+            List<SceneFurniture> currentBuildFurniture = new List<SceneFurniture>();
+            if (buildFurnitureDict.TryGetValue(currentBuildCode, out currentBuildFurniture))
+            {
+                if(currentBuildFurniture != null)
+                {
+                    foreach (var furniture in currentBuildFurniture)
+                    {
+                        BluPrintDetails bluePrint = InventoryManager.Instance.bluPrintData.GetBluPrintDetails(furniture.itemID);
+                        var buildItem = Instantiate(bluePrint.buildPrefab, furniture.position.ToVector3(), Quaternion.identity, furnitureParent);
+                        //重新赋值箱子编号
+                        if (buildItem.GetComponent<Box>())
+                        {
+                            buildItem.GetComponent<Box>().InitBox(furniture.boxIndex);
+                        }
+                    }
+                }
+                
+            }
+
         }
         /// <summary>
         /// 检查玩家是否有合适养殖的建筑

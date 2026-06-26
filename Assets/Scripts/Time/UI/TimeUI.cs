@@ -75,8 +75,8 @@ public class TimeUI : MonoBehaviour //调用在GameTime对象上
     {
         transform.GetComponentInParent<Canvas>().enabled = true;
     }
-    private void OnBuildindModeEvent(BuildingDetails details,AnimalDetails animal, bool isBuild)
+    private void OnBuildindModeEvent(BuildingDetails details,AnimalDetails animal, bool startMode)
     {
-        timeUIBg.SetActive(!isBuild);
+        timeUIBg.SetActive(!startMode);
     }
 }

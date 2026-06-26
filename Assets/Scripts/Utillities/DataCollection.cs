@@ -297,12 +297,6 @@ public class AnimalItem
     public AnimalDetails animal;
     public int count;
 }
-[System.Serializable]
-public class SceneRootObect
-{
-    public int buildCode;
-    public GameObject[] objects;
-}
 
 
 

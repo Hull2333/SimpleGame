@@ -99,6 +99,7 @@ namespace MFarm.Inventory
         public GameObject buildShopPanel;
         public GameObject buildModePanel;
         public Button buildModeExitButton;
+        public Button animalModeExitButton;
         public Button buildingShopExitButton;
         //提示材料不足
         public GameObject resourceLock;
@@ -496,30 +497,33 @@ namespace MFarm.Inventory
         {
             canOpenBag = canOpen;
         }
-        private void OnBuildindModeEvent(BuildingDetails build,AnimalDetails animal, bool isBuilding)
+        private void OnBuildindModeEvent(BuildingDetails build,AnimalDetails animal, bool startMode)
         {
-            buildModePanel.SetActive(isBuilding);
-            if (isBuilding == false)
+            if(startMode == true)
             {
-                buildShopPanel.SetActive(!false);
-                animalShopUI.SetActive(!false);
-                return;
+                buildModePanel.SetActive(true);
+                buildShopPanel.SetActive(false);
+                animalShopUI.SetActive(false);
+                if (build != null)
+                {
+                    buildModeExitButton.gameObject.SetActive(true);
+                    animalModeExitButton.gameObject.SetActive(false);
+                    return;
+                }
+                if (animal != null)
+                {
+                    buildModeExitButton.gameObject.SetActive(false);
+                    animalModeExitButton.gameObject.SetActive(true);
+                    return;
+                }
             }
-            if (build != null)
+            else
             {
-                buildShopPanel.SetActive(!isBuilding);
-                return;
+                buildModePanel.SetActive(false);
             }
-            if(animal != null)
-            {
-                animalShopUI.SetActive(!isBuilding);
-                return;
-            }
-           
-            playerMoneyUIAnim.gameObject.SetActive(!isBuilding);
-            activeBagBar.SetActive(!isBuilding);
-            bagButton.SetActive(!isBuilding);
-            animalShopUI.SetActive(!isBuilding);
+            playerMoneyUIAnim.gameObject.SetActive(!startMode);
+            activeBagBar.SetActive(!startMode);
+            bagButton.SetActive(!startMode);
         }
         private void OnOpenBuildShopEvent(BuildingBagData_SO buildShop)
         {
@@ -570,6 +574,7 @@ namespace MFarm.Inventory
             yesButton.onClick.AddListener(ClickYesButton);
             noButton.onClick.AddListener(ClickNoButton);
             buildModeExitButton.onClick.AddListener(ExitBuildMode);
+            animalModeExitButton.onClick.AddListener(ExitAnimalMode);
             buildingShopExitButton.onClick.AddListener(QuitBuildingShopUI);
             increaseAmountButton.onClick.AddListener(ClickAnimalIncreaseButton);
             decreaseAmountButton.onClick.AddListener(ClickAnimalDecreaseButton);
@@ -1067,13 +1072,20 @@ namespace MFarm.Inventory
         /// </summary>
         private void ExitBuildMode()
         {
-            EventHandler.CallBuildindModeEvent(null,null, false);
+            EventHandler.CallBuildindModeEvent(null,null,false);
+            buildShopPanel.SetActive(true);
+        }
+        private void ExitAnimalMode()
+        {
+            EventHandler.CallBuildindModeEvent(null, null, false);
+            animalShopUI.SetActive(true);
         }
         private void QuitBuildingShopUI()
         {
             buildShopPanel.SetActive(false);
             EventHandler.CallUpdateGameStateEvent(GameState.Gameplay);
         }
+       
         /// <summary>
         /// 显示材料不足提示
         /// </summary>
