@@ -1,49 +1,66 @@
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
-using static AnimalData_SO;
+using MFarm.Transition;
 using UnityEngine;
-using System.Data.SqlTypes;
+using UnityEngine.SceneManagement;
+using static AnimalData_SO;
 
-public class AnimalController : MonoBehaviour //µ÷ÓÃÔÚÃ¿¸ö¶¯ÎïÔ¤ÖÆÌåÉÏ
+public class AnimalController : MonoBehaviour //è°ƒç”¨åœ¨æ¯ä¸ªåŠ¨ç‰©é¢„åˆ¶ä½“ä¸Š
 {
     private Animator anim;
-    //¶¯ÎïÊ¶±ğÂë
+    //åŠ¨ç‰©è¯†åˆ«ç 
     public int animCodeID;
-    //ÒÆ¶¯·½Ïò
+    //ç§»åŠ¨æ–¹å‘
     private Vector2 dir;
-    //Ö´ĞĞÏÂÒ»²½µÄÍ£ÁôÊ±¼ä
+    //æ‰§è¡Œä¸‹ä¸€æ­¥çš„åœç•™æ—¶é—´
     private float idleTime;
-    //Ç¿ÖÆÖ´ĞĞÏÂÒ»²½µÄÈßÓàÊ±¼ä
+    //å¼ºåˆ¶æ‰§è¡Œä¸‹ä¸€æ­¥çš„å†—ä½™æ—¶é—´
     private float nextStepTime = 8f;
-    //»î¶¯·¶Î§
+    //æ´»åŠ¨èŒƒå›´
     public Collider2D activityArae;
     private float moveSpeed = 1f;
     private bool isMoving;
     private Vector2 nextPos;
-    //µ±Ç°µÄ³É³¤ÌìÊı
+    //å½“å‰çš„æˆé•¿å¤©æ•°
     public int currentGrowthDay;
     public AnimalDetails animalDetails;
-    [Header("¶¯ÎïÉú²úÏà¹Ø")]
+    [Header("åŠ¨ç‰©ç”Ÿäº§ç›¸å…³")]
     public int produceItemID;
-    //ÒÑ³ÉÄê
+    //å·²æˆå¹´
     private bool isAdult;
+    private Rigidbody2D rb;
+    [Header("å›èˆè®¾ç½®")]
+    [Tooltip("å‰å¾€å‡ºå£éšæœºæ¦‚ç‡ï¼ˆ0-1ï¼‰")]
+    private float goHomeChance = 0.5f;
+    private bool isGoingHome;
+    public Vector2 homePosition;
+    private bool isAfter18;
+    private bool isAfrer8;
+    private bool hasDecidedNextPos;
+    //åœ¨å®¤å¤–
+    public bool isOutSide;
+    private void Awake()
+    {
+        rb = GetComponent<Rigidbody2D>();
+    }
     private void OnEnable()
     {
         EventHandler.GameDayEvent += OnGameDayEvent;
+        EventHandler.GameMinuteEvent += OnGameMinuteEvent;
     }
     private void OnDisable()
     {
         EventHandler.GameDayEvent -= OnGameDayEvent;
+        EventHandler.GameMinuteEvent -= OnGameMinuteEvent;
     }
+
+
 
     private void OnGameDayEvent(int arg1, Season season)
     {
-        if(currentGrowthDay <= animalDetails.growthDay)
+        if (currentGrowthDay <= animalDetails.growthDay)
         {
             currentGrowthDay++;
-            //ÒÑ³ÉÄê
-            if(currentGrowthDay == animalDetails.growthDay)
+            //å·²æˆå¹´
+            if (currentGrowthDay == animalDetails.growthDay)
             {
                 isAdult = true;
                 transform.GetChild(0).gameObject.SetActive(false);
@@ -53,21 +70,40 @@ public class AnimalController : MonoBehaviour //µ÷ÓÃÔÚÃ¿¸ö¶¯ÎïÔ¤ÖÆÌåÉÏ
         }
         if (isAdult)
         {
-            //Ã¿Ìì¿ªÊ¼Éú²úÎïÆ·
-            EventHandler.CallInstantiateAniamlProduceItemEvent(animCodeID,produceItemID);
+            //æ¯å¤©å¼€å§‹ç”Ÿäº§ç‰©å“
+            EventHandler.CallInstantiateAniamlProduceItemEvent(animCodeID, produceItemID);
         }
 
     }
-
+    private void OnGameMinuteEvent(int minute, int hour, int day, Season season)
+    {
+        if (isOutSide)
+        {
+            //æ—¶é—´æ¥åˆ°18:00
+            isAfter18 = hour >= 18;
+            //è·å–è‡ªå·±å»ºç­‘çš„å‡ºå£
+            homePosition = activityArae.transform.parent.GetChild(0).transform.position;
+        }
+        if (!isOutSide)
+        {
+            //æ—¶é—´æ¥åˆ°8:00
+            isAfrer8 = hour >= 8 && hour < 12;
+            homePosition = FindAnyObjectByType<Teleport>().transform.position;
+        }
+    }
     public void FixedUpdate()
     {
         if (!isMoving)
         {
             anim.SetBool("walking", isMoving);
             anim.SetFloat("X", dir.x);
-            nextPos = GetRandomPosInArea();
+            if (!hasDecidedNextPos)
+            {
+                nextPos = GetRandomPosInArea();
+                hasDecidedNextPos = true;
+            }
             idleTime -= Time.fixedDeltaTime;
-            if(idleTime <= 0f)
+            if (idleTime <= 0f)
             {
                 isMoving = true;
             }
@@ -76,15 +112,24 @@ public class AnimalController : MonoBehaviour //µ÷ÓÃÔÚÃ¿¸ö¶¯ÎïÔ¤ÖÆÌåÉÏ
         {
             MoveToNextPos();
         }
-       
     }
     /// <summary>
-    /// ÔÚ»î¶¯·¶Î§ÄÚËæ»ú»ñÈ¡ÏÂÒ»Ä¿±êµã
+    /// åœ¨æ´»åŠ¨èŒƒå›´å†…éšæœºè·å–ä¸‹ä¸€ç›®æ ‡ç‚¹
     /// </summary>
     /// <returns></returns>
     public Vector2 GetRandomPosInArea()
     {
-        // »ñÈ¡ Collider ±ß½ç
+        //18:00åæœ‰ä¸€å®šæ¦‚ç‡å›èˆï¼Œç¬¬å››æ¬¡å¿…é¡»å›èˆ
+        if (isAfter18 || isAfrer8)
+        {
+            if (ShouldGoHome())
+            {
+                isGoingHome = true;
+                return homePosition;
+            }
+            
+        }
+        // è·å– Collider è¾¹ç•Œ
         Bounds bounds = activityArae.bounds;
         float randomX = Random.Range(bounds.min.x, bounds.max.x);
         float randomY = Random.Range(bounds.min.y, bounds.max.y);
@@ -92,21 +137,55 @@ public class AnimalController : MonoBehaviour //µ÷ÓÃÔÚÃ¿¸ö¶¯ÎïÔ¤ÖÆÌåÉÏ
         return randomPoint;
     }
     /// <summary>
-    /// ³¯ÏÂÒ»µãÒÆ¶¯
+    /// æœä¸‹ä¸€ç‚¹ç§»åŠ¨
     /// </summary>
     public void MoveToNextPos()
     {
         dir = (nextPos - (Vector2)transform.position).normalized;
         anim.SetBool("walking", isMoving);
         anim.SetFloat("X", dir.x);
-        // ÏòÄ¿±êÎ»ÖÃÒÆ¶¯
-        transform.position = Vector2.MoveTowards(
+        // å‘ç›®æ ‡ä½ç½®ç§»åŠ¨
+        rb.MovePosition(Vector2.MoveTowards(
             transform.position,
             nextPos,
             moveSpeed * Time.fixedDeltaTime
-        );
-        if (Vector2.Distance(transform.position, nextPos) <= 0.1f)
+        ));
+        if (Vector2.Distance(transform.position, nextPos) <= 0.3f)
         {
+            //åˆ°è¾¾é¸¡èˆå‡ºå£
+            if (isGoingHome)
+            {
+                isMoving = false;
+                isAfter18 = false;
+                isAfrer8 = false;
+                isGoingHome = false;
+                //ä»å®¤å¤–å›åˆ°å®¤å†…
+                if (isOutSide)
+                {
+                    isOutSide = false;
+                    SceneAnimal animal = new SceneAnimal
+                    {
+                        animalDetails = animalDetails,
+                        animalCode = animCodeID,
+                        growthDay = currentGrowthDay,
+                        isOutSide = isOutSide
+                    };
+                    EventHandler.CallAnimalArrivedAtHomeEvent(animCodeID, animal);
+                    Destroy(gameObject);
+                    return;
+                   
+                }
+                //ä»å®¤å†…å›åˆ°å®¤å¤–
+                else
+                {
+                    isOutSide = true;
+                    EventHandler.CallAnimalExitCoopEvent(animCodeID,
+                    new SceneAnimal { animalDetails = animalDetails, animalCode = animCodeID, growthDay = currentGrowthDay, isOutSide = true });
+                    Destroy(gameObject);
+                    // é”€æ¯åä¸å†æ‰§è¡Œåç»­é€»è¾‘
+                    return;
+                }
+            }
             int actionIndex = Random.Range(1, 4);
             switch (actionIndex)
             {
@@ -121,30 +200,50 @@ public class AnimalController : MonoBehaviour //µ÷ÓÃÔÚÃ¿¸ö¶¯ÎïÔ¤ÖÆÌåÉÏ
             }
             idleTime = Random.Range(2.5f, 4f);
             isMoving = false;
+            hasDecidedNextPos = false;
         }
     }
     /// <summary>
-    /// ÉèÖÃ³õÊ¼×´Ì¬
+    /// è®¾ç½®åˆå§‹çŠ¶æ€
     /// </summary>
     public void SetStartState(bool isBuy)
     {
-        //ÊÇ¸Õ¸Õ¹ºÂò
+        //æ˜¯åˆšåˆšè´­ä¹°
         if (isBuy)
         {
             currentGrowthDay = 0;
         }
+        SetAnimalSprite();
         transform.position = GetRandomPosInArea();
-        if(currentGrowthDay < animalDetails.growthDay)
+    }
+    /// <summary>
+    /// è®¾ç½®æ­¤æ—¶åŠ¨ç‰©çš„å›¾ç‰‡
+    /// </summary>
+    private void SetAnimalSprite()
+    {
+        if (currentGrowthDay < animalDetails.growthDay)
         {
+            isAdult = false;
             transform.GetChild(0).gameObject.SetActive(true);
-            anim = transform.GetChild(0).GetComponent<Animator>();
             transform.GetChild(1).gameObject.SetActive(false);
+            anim = transform.GetChild(0).GetComponent<Animator>();
         }
         else
         {
+            isAdult = true;
             transform.GetChild(0).gameObject.SetActive(false);
-            anim = transform.GetChild(1).GetComponent<Animator>();
             transform.GetChild(1).gameObject.SetActive(true);
+            anim = transform.GetChild(1).GetComponent<Animator>();
         }
     }
+    /// <summary>
+    /// åˆ¤æ–­æ˜¯å¦éœ€è¦å›èˆ
+    /// </summary>
+    /// <returns></returns>
+    private bool ShouldGoHome()
+    {
+        // éšæœºåˆ¤å®š
+        return Random.value < goHomeChance;
+    }
+
 }

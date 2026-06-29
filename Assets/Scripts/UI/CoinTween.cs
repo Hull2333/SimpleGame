@@ -14,13 +14,13 @@ public class CoinTween : MonoBehaviour //调用在Coin预制体上
     {
         image = GetComponent<Image>();
     }
-    
+
     /// <summary>
     /// 金币开始滑行
     /// </summary>
     /// <param name="delay">延迟</param>
     /// <param name="originPos">初始位置</param>
-    public void PlayTween(float delay , Vector3 originPos)
+    public void PlayTween(float delay, Vector3 originPos)
     {
         //OnComplete(() =>{});指待前面的方法完成开始接下来的方法
         //开始移动到originPos
@@ -40,14 +40,14 @@ public class CoinTween : MonoBehaviour //调用在Coin预制体上
                     {
                         InventoryManager.Instance.IncreasePlayerMoney(InventoryManager.Instance.ModifySellBoxValue());
                     }
-                   
+
                 });
             });
         });
         //金币放大到1
         //transform.DOScale(1, 0.5f).SetEase(Ease.OutBack).OnComplete(() =>
         //{
-           
+
         //});
 
     }

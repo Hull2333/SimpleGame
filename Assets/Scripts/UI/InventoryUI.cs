@@ -11,6 +11,7 @@ namespace MFarm.Inventory
     public class InventoryUI : Singleton<InventoryUI>    //调用在Inventory对象上
     {
         [Header("物品描述")]
+        public Canvas tweenCanvas;
         public ItemTooltip itemTooltip;
         [Header("拖拽图片")]
         public Image dragItem;

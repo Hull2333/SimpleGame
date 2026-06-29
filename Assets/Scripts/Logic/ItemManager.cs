@@ -1,19 +1,13 @@
 using MFarm.Map;
 using MFarm.Save;
 using MFarm.Transition;
-using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using static AnimalData_SO;
-using static UnityEditor.PlayerSettings;
-using static UnityEditor.Progress;
 namespace MFarm.Inventory
 {
-    public class ItemManager : MonoBehaviour,ISaveable    //µ÷ÓÃÔÚItemManager¶ÔÏóÉÏ
+    public class ItemManager : MonoBehaviour, ISaveable    //è°ƒç”¨åœ¨ItemManagerå¯¹è±¡ä¸Š
     {
 
         public Item itemPerfab;
@@ -29,52 +23,60 @@ namespace MFarm.Inventory
         private Transform animalParent;
         private Transform furnitureParent;
         private Transform playerTransform => FindObjectOfType<PlayerController>().transform;
-
+        //æ‰€æœ‰å»ºé€ åœºæ™¯çš„åå­—
+        public string[] coopSceneNames;
         public string GUID => GetComponent<DataGUID>().guid;
         public MineSceneDataList_SO mineData;
-        //ÓÃ×ÖµäÀ´´æ´¢Ã¿¸ö³¡¾°ÖĞµÄËùÓĞItem
-        private Dictionary<string,List<SceneItem>> sceneItemDict = new Dictionary<string,List<SceneItem>>();
-        //ÓÃ×ÖµäÀ´´æ´¢Ã¿¸ö³¡¾°ÖĞµÄËùÓĞFurniture
-        private Dictionary<string,List<SceneFurniture>> sceneFurnitureDict = new Dictionary<string, List<SceneFurniture>>();
-        //ÓÃ×ÖµäÀ´´æ´¢Ã¿¸ö³¡¾°µÄËùÓĞµÄBuilding
+        //ç”¨å­—å…¸çš„æ–¹å¼å­˜å‚¨æ¯ä¸ªåœºæ™¯çš„ç‰©å“ä¿¡æ¯ï¼Œkeyä¸ºåœºæ™¯åï¼Œvalueä¸ºè¯¥åœºæ™¯çš„ç‰©å“åˆ—è¡¨
+        private Dictionary<string, List<SceneItem>> sceneItemDict = new Dictionary<string, List<SceneItem>>();
+        //ç”¨å­—å…¸çš„æ–¹å¼å­˜å‚¨æ¯ä¸ªåœºæ™¯çš„å®¶å…·ä¿¡æ¯ï¼Œkeyä¸ºåœºæ™¯åï¼Œvalueä¸ºè¯¥åœºæ™¯çš„å®¶å…·åˆ—è¡¨
+        private Dictionary<string, List<SceneFurniture>> sceneFurnitureDict = new Dictionary<string, List<SceneFurniture>>();
+        //ç”¨å­—å…¸çš„æ–¹å¼å­˜å‚¨æ¯ä¸ªåœºæ™¯çš„å»ºç­‘ä¿¡æ¯ï¼Œkeyä¸ºåœºæ™¯åï¼Œvalueä¸ºè¯¥åœºæ™¯çš„å»ºç­‘åˆ—è¡¨
         private Dictionary<string, List<SceneBuilding>> sceneBuildingDict = new Dictionary<string, List<SceneBuilding>>();
-        //ÓÃ×ÖµäÀ´´æ´¢Ã¿¸ö³¡¾°µÄknockItem
+        //ç”¨å­—å…¸çš„æ–¹å¼å­˜å‚¨æ¯ä¸ªåœºæ™¯çš„å¯æ•²å‡»ç‰©å“ä¿¡æ¯ï¼Œkeyä¸ºåœºæ™¯åï¼Œvalueä¸ºè¯¥åœºæ™¯çš„å¯æ•²å‡»ç‰©å“åˆ—è¡¨
         public Dictionary<string, List<SceneKnockItem>> sceneKnockItemDict = new Dictionary<string, List<SceneKnockItem>>();
-        //ÓÃ×ÖµäÀ´´æ´¢Ã¿¸ö³¡¾°µÄÔÓ²İºÍ´óÔÓ²İ
+        //ç”¨å­—å…¸çš„æ–¹å¼å­˜å‚¨æ¯ä¸ªåœºæ™¯çš„å¯æ”¶å‰²ç‰©å“ä¿¡æ¯ï¼Œkeyä¸ºåœºæ™¯åï¼Œvalueä¸ºè¯¥åœºæ™¯çš„å¯æ”¶å‰²ç‰©å“åˆ—è¡¨
         public Dictionary<string, List<SceneReapableItem>> sceneWeedItemDict = new Dictionary<string, List<SceneReapableItem>>();
         public Dictionary<string, List<SceneReapableItem>> sceneBigWeedItemDict = new Dictionary<string, List<SceneReapableItem>>();
-        //ÓÃ×ÖµäÀ´´æ´¢Ã¿¸ö³¡¾°µÄ¶¯Îï
+        //ç”¨å­—å…¸çš„æ–¹å¼å­˜å‚¨æ¯ä¸ªåœºæ™¯çš„åŠ¨ç‰©ä¿¡æ¯ï¼Œkeyä¸ºåœºæ™¯åï¼Œvalueä¸ºè¯¥åœºæ™¯çš„åŠ¨ç‰©åˆ—è¡¨
         public Dictionary<string, List<SceneAnimal>> sceneAnimalDict = new Dictionary<string, List<SceneAnimal>>();
-        //ÓÃ×ÖµäÀ´´æ´¢Ã¿¸ö½¨Öş³¡¾°µÄ¼Ò¾ß
+        //ç”¨å­—å…¸çš„æ–¹å¼å­˜å‚¨æ¯ä¸ªå»ºé€ åœºæ™¯çš„å®¶å…·ä¿¡æ¯ï¼Œkeyä¸ºå»ºé€ åœºæ™¯çš„buildCodeï¼Œvalueä¸ºè¯¥å»ºé€ åœºæ™¯çš„å®¶å…·åˆ—è¡¨
         public Dictionary<int, List<SceneFurniture>> buildFurnitureDict = new Dictionary<int, List<SceneFurniture>>();
         public int currentBuildCode;
         private Teleport teleport;
         private Vector3 buildSceneTeleportToGo;
-        [Header("¶¯Îï²úÉúÏà¹Ø")]
-        //ÓÃ¶ÓÁĞÀ´´æ´¢Ã¿¸ö½¨ÖşÎï³¡¾°µÄÉú²úµÀ¾ß
+        [Header("åŠ¨ç‰©ç”Ÿæˆç›¸å…³")]
+        //åŠ¨ç‰©ç”Ÿäº§çš„ç‰©å“åˆ—è¡¨ï¼Œå­˜å‚¨æ¯ä¸ªå»ºé€ åœºæ™¯çš„åŠ¨ç‰©ç”Ÿäº§çš„ç‰©å“ä¿¡æ¯
         public List<buildProduceItem> buildProduceItemList = new List<buildProduceItem>();
-        //Í¬×ÖµäÀ´´æ´¢Ã¿¸ö½¨Öş³¡¾°ÖĞµÄÉú²úµÀ¾ß
+        //ç”¨å­—å…¸çš„æ–¹å¼å­˜å‚¨å»ºé€ å»ºç­‘åœºæ™¯çš„ç‰©å“ç‚¹å‡»ä¿¡æ¯ï¼Œkeyä¸ºå»ºé€ åœºæ™¯çš„buildCodeï¼Œvalueä¸ºè¯¥å»ºé€ åœºæ™¯çš„ç‰©å“ç‚¹å‡»åˆ—è¡¨
         public Dictionary<int, List<SceneItem>> buildItemClickDict = new Dictionary<int, List<SceneItem>>();
         public ItemClick itemClickPrefab;
         public MapData_SO ChickenCoopMap;
-        [Header("¶¯ÎïÏà¹Ø")]
+        [Header("å»ºé€ å»ºç­‘ç›¸å…³")]
         private HashSet<int> buildCodeIDs = new HashSet<int>();
-        //³¡¾°ÖĞ¶¯ÎïµÄ»î¶¯·¶Î§
+        //è®°å½•æ¯ä¸€ä¸ªåŠ¨ç‰©è¿›å…¥å»ºé€ å»ºç­‘çš„æ•°é‡ï¼Œkeyä¸ºå»ºé€ å»ºç­‘çš„buildCodeï¼Œvalueä¸ºè¯¥å»ºé€ å»ºç­‘çš„åŠ¨ç‰©åˆ—è¡¨
+        public Dictionary<int, List<SceneAnimal>> buildAnimalCountDict = new Dictionary<int, List<SceneAnimal>>();
+        //å»ºé€ å»ºç­‘çš„æ´»åŠ¨èŒƒå›´
         public List<BuildColliderArea> buildAreaList = new List<BuildColliderArea>();
+        //ä»Šå¤©æ˜¯å¦å·²ç»ç”Ÿæˆè¿‡å®¤å¤–åŠ¨ç‰©çš„æ ‡å¿—ä½ï¼Œé˜²æ­¢åœ¨åŒä¸€å¤©å†…é‡å¤ç”Ÿæˆ
+        private bool hasSpawnedOutdoorToday;  
         private void OnEnable()
         {
             EventHandler.InstantiateItemInScene += OnInstantiateItemInScene;
             EventHandler.BeforeSceneUnloadEvent += OnBeforeSceneUnloadEvent;
             EventHandler.DropItemEvent += OnDropItemEvent;
             EventHandler.AfterSceneLoadedEvent += OnAfterSceneLoadeEvent;
-            //½¨ÔìÎïÆ·Éú³ÉÊÂ¼ş
             EventHandler.BuildFurnitureEvent += OnBuildFurnitureEvent;
-            //ĞÂÓÎÏ·¿ªÊ¼ĞèÒªÖØÖÃµÄÊı¾İ
             EventHandler.StartNewGameEvent += OnStartNewGameEvent;
             EventHandler.InstantiateBuildingOnMapEvent += OnInstantiateBuildingOnMapEvent;
             EventHandler.GetCurrentBuildCode += OnGetCurrentBuildCode;
             EventHandler.InstantiateAniamlProduceItemEvent += OnInstantiateAniamlProduceItemEvent;
+            EventHandler.AnimalArrivedAtHomeEvent += OnAnimalArrivedAtHomeEvent;
+            EventHandler.AnimalExitCoopEvent += OnAnimalExitCoopEvent;
+            EventHandler.GameMinuteEvent += OnGameMinuteEvent;
         }
+
+
 
         private void OnDisable()
         {
@@ -87,6 +89,9 @@ namespace MFarm.Inventory
             EventHandler.InstantiateBuildingOnMapEvent -= OnInstantiateBuildingOnMapEvent;
             EventHandler.GetCurrentBuildCode -= OnGetCurrentBuildCode;
             EventHandler.InstantiateAniamlProduceItemEvent += OnInstantiateAniamlProduceItemEvent;
+            EventHandler.AnimalArrivedAtHomeEvent -= OnAnimalArrivedAtHomeEvent;
+            EventHandler.AnimalExitCoopEvent -= OnAnimalExitCoopEvent;
+            EventHandler.GameMinuteEvent -= OnGameMinuteEvent;
         }
 
        
@@ -96,12 +101,12 @@ namespace MFarm.Inventory
             ISaveable saveable = this;
             saveable.RegisterSaveable();
         }
-        private void OnBuildFurnitureEvent(BluPrintDetails bluPrintDetails, Vector3 bluPrintPos ,Transform parent)
+        private void OnBuildFurnitureEvent(BluPrintDetails bluPrintDetails, Vector3 bluPrintPos, Transform parent)
         {
             var bluPrintGameObject = Instantiate(bluPrintDetails.buildPrefab, bluPrintPos, Quaternion.identity, parent);
             bluPrintGameObject.GetComponent<Furniture>().SetCollider(true);
             bluPrintGameObject.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1f);
-            //´æ´¢ÓÎÏ·ÖĞÏä×ÓÊı¾İ
+            //è®°å½•ç®±å­çš„ç´¢å¼•å€¼ï¼Œæ–¹ä¾¿å­˜å‚¨å’Œè¯»å–ç®±å­æ•°æ®
             if (bluPrintGameObject.GetComponent<Box>())
             {
                 bluPrintGameObject.GetComponent<Box>().index = InventoryManager.Instance.boxDataAmount;
@@ -113,7 +118,7 @@ namespace MFarm.Inventory
         {
             if (ExcludeMineScene(SceneManager.GetActiveScene().name))
             {
-                if (SceneManager.GetActiveScene().name == "ChickenCoop")
+                if (IsCurrentSceneOfCoop())
                 {
                     GetAllBuildFurniture();
                     SaveBuildSceneItemClick();
@@ -128,7 +133,7 @@ namespace MFarm.Inventory
                     GetAllSceneReapableItem();
                 }
             }
-           
+
         }
         private void OnAfterSceneLoadeEvent()
         {
@@ -138,17 +143,17 @@ namespace MFarm.Inventory
             furnitureParent = FindAnyObjectByType<FurnitureParent>().transform;
             if (ExcludeMineScene(SceneManager.GetActiveScene().name))
             {
-                if(SceneManager.GetActiveScene().name == "ChickenCoop")
+                if (IsCurrentSceneOfCoop())
                 {
                     RecreateBuildFurniture();
                     teleport = FindAnyObjectByType<Teleport>();
-                    teleport.positionToGo = buildSceneTeleportToGo ;
-                    //Ôİ´æµÈ´ıÉ¾³ıµÄÉú²úÎïÆ·
+                    teleport.positionToGo = buildSceneTeleportToGo;
+                    //ä¸´æ—¶å­˜å‚¨éœ€è¦ç§»é™¤çš„ç‰©å“åˆ—è¡¨ï¼Œé¿å…åœ¨éå†æ—¶ä¿®æ”¹åŸåˆ—è¡¨å¯¼è‡´å¼‚å¸¸
                     List<buildProduceItem> toRemoveItem = new List<buildProduceItem>();
-                    //¼ÓÔØ¼¦Éá³¡¾°Ê±Ò²Éú²ú¶ÔÓ¦µÄ¶¯Îï²úÆ·
+                    //éå†å»ºé€ å»ºç­‘çš„ç”Ÿäº§ç‰©å“åˆ—è¡¨ï¼Œæ‰¾åˆ°å½“å‰å»ºé€ å»ºç­‘å¯¹åº”çš„ç”Ÿäº§ç‰©å“ï¼Œå¹¶åœ¨éšæœºä½ç½®ç”Ÿæˆç‰©å“
                     foreach (buildProduceItem item in buildProduceItemList)
                     {
-                        if(item.buildCode == currentBuildCode)
+                        if (item.buildCode == currentBuildCode)
                         {
                             var producePos = GridMapManager.Instance.GetRandomPlaceFurnitureTile(ChickenCoopMap);
                             if (producePos != null)
@@ -157,7 +162,7 @@ namespace MFarm.Inventory
                                 produceItem.itemID = item.itemID;
                                 produceItem.SetItemSprite();
                             }
-                            //Éú³ÉÔÚ³¡¾°ºó¾ÍÒÆ³öÁĞ±í£¬±ÜÃâÖØ¸´Éú³É
+                            //åˆ é™¤å½“å‰å»ºé€ å»ºç­‘å¯¹åº”çš„ç”Ÿäº§ç‰©å“ï¼Œé¿å…é‡å¤ç”Ÿæˆ
                             toRemoveItem.Add(item);
                         }
                     }
@@ -166,6 +171,7 @@ namespace MFarm.Inventory
                         buildProduceItemList.Remove(item);
                     }
                     RecreateBuildSceneItemClick();
+                    RecreateBuildSceneAnimal();
                 }
                 else
                 {
@@ -176,11 +182,11 @@ namespace MFarm.Inventory
                     RecreateKnockItem();
                     RecreateReapableItem();
                 }
-               
+
             }
         }
         /// <summary>
-        /// ÔÚÊó±êÍÏ×§½áÊøµÄµØÃæÎ»ÖÃÉú³ÉItem
+        /// é‡æ–°ç”Ÿæˆåœºæ™¯ä¸­çš„ç‰©å“ï¼Œä¸»è¦ç”¨äºåœºæ™¯åˆ‡æ¢åæ¢å¤ç‰©å“çŠ¶æ€
         /// </summary>
         /// <param name="ID"></param>
         /// <param name="pos"></param>
@@ -189,23 +195,20 @@ namespace MFarm.Inventory
             EventHandler.CallItemFirstPos(pos);
             var item = Instantiate(bounceItemPerfab, pos, Quaternion.identity, itemParent);
             item.itemID = ID;
-            //Ê¹ÎïÆ·Éú³ÉÓĞ¸öÏÂÂäµÄ¶¯»­
-            //building.GetComponent<ItemBounce>().InitBounceItem(pos, Vector3.up);
         }
 
-        private void OnDropItemEvent(int ID, Vector3 mousePos,ItemType itemType)
+        private void OnDropItemEvent(int ID, Vector3 mousePos, ItemType itemType)
         {
-            //Èç¹û¶ªÆúµÄÎïÆ·Ê±ÖÖ×Ó£¬Ôò²»Ö´ĞĞºóÃæµÄ·½·¨
+            //ç§å­ç±»å‹çš„ç‰©å“ä¸éœ€è¦ç”Ÿæˆå¼¹è·³ç‰©å“ï¼Œç›´æ¥è¿”å›
             if (itemType == ItemType.Seed)
             {
                 return;
             }
-            //TODO:ÈÓ¶«Î÷µÄĞ§¹û
+            //TODO:ï¿½Ó¶ï¿½ï¿½ï¿½ï¿½ï¿½Ğ§ï¿½ï¿½
             var item = Instantiate(bounceItemPerfab, playerTransform.position, Quaternion.identity, itemParent);
             item.itemID = ID;
-            //normalizedÏòÁ¿»¯
             var dir = (mousePos - playerTransform.position).normalized;
-            item.GetComponent<ItemBounce>().InitBounceItem(mousePos,dir);
+            item.GetComponent<ItemBounce>().InitBounceItem(mousePos, dir);
         }
 
         private void OnStartNewGameEvent(int obj)
@@ -218,7 +221,7 @@ namespace MFarm.Inventory
         {
             var buildingInMap = Instantiate(building.buildPrefab, pos, Quaternion.identity, transform);
             buildingInMap.GetComponent<BuildingItem>().Building(true);
-            //Éú³É²»ÖØ¸´µÄ½¨ÖşÎïÊ¶±ğÂë
+            //ç”Ÿæˆå”¯ä¸€çš„å»ºç­‘ç‰©æ ‡è¯†ID
             int buildCode;
             do
             {
@@ -231,7 +234,7 @@ namespace MFarm.Inventory
             buildingInMap.GetComponent<BuildingItem>().isSet = true;
             buildingInMap.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1f);
         }
-        private void OnGetCurrentBuildCode(int code , Vector3 toGoPos)
+        private void OnGetCurrentBuildCode(int code, Vector3 toGoPos)
         {
             currentBuildCode = code;
             Debug.Log(toGoPos);
@@ -241,16 +244,58 @@ namespace MFarm.Inventory
         {
             buildProduceItemList.Add(new buildProduceItem { buildCode = code, itemID = itemID });
         }
+        private void OnAnimalArrivedAtHomeEvent(int buildCode, SceneAnimal animal)
+        {
+            if (!buildAnimalCountDict.ContainsKey(buildCode))
+                buildAnimalCountDict[buildCode] = new List<SceneAnimal>();
+            buildAnimalCountDict[buildCode].Add(animal);
+        }
+        private void OnAnimalExitCoopEvent(int buildCode, SceneAnimal animal)
+        {
+            // éå†å»ºç­‘ä¸­çš„åŠ¨ç‰©
+            if (buildAnimalCountDict.ContainsKey(buildCode))
+            {
+                var list = buildAnimalCountDict[buildCode];
+                for (int i = 0; i < list.Count; i++)
+                {
+                    if (list[i].animalCode == animal.animalCode && list[i].growthDay == animal.growthDay)
+                    {
+                        list.RemoveAt(i);
+                        break; 
+                    }
+                }
+            }
+            // æ¥åˆ°Farmåœºæ™¯çš„åŠ¨ç‰©æ·»åŠ åˆ°Farmåœºæ™¯çš„åŠ¨ç‰©å­—å…¸ä¸­
+            if (!sceneAnimalDict.ContainsKey("Farm"))
+                sceneAnimalDict["Farm"] = new List<SceneAnimal>();
+            sceneAnimalDict["Farm"].Add(animal);
+        }
+        private void OnGameMinuteEvent(int minute, int hour, int day, Season season)
+        {
+            // å½“å‰åœºæ™¯ä¸æ˜¯Farmå°±ä¸æ‰§è¡Œè¯¥æ–¹æ³•
+            if (SceneManager.GetActiveScene().name != "Farm") return;
+            // 8:00åˆšåˆšåˆ°åŠ¨ç‰©å¼€å§‹ä»å»ºç­‘ä¸­èµ°å‡º
+            if (hour == 8 && minute == 0 && !hasSpawnedOutdoorToday)
+            {
+                hasSpawnedOutdoorToday = true;
+                SpawnOutdoorAnimals();
+            }
+            // 12:00åé‡ç½®hasSpawnedOutdoorToday
+            if (hour >= 12)
+            {
+                hasSpawnedOutdoorToday = false;
+            }
+        }
         /// <summary>
-        /// ÅÅ³ı¿ó¶´³¡¾°
+        /// æ’é™¤çŸ¿æ´åœºæ™¯
         /// </summary>
-        /// <param name="sceneName">µ±Ç°³¡¾°Ãû³Æ</param>
-        /// <returns>trueÎª·Ç¿ó¶´³¡¾°£¬falseÎª¿ó¶´³¡¾°</returns>
+        /// <param name="sceneName">çŸ¿æ´åœºæ™¯å</param>
+        /// <returns></returns>
         private bool ExcludeMineScene(string sceneName)
         {
-            foreach(var scene in mineData.mineSceneList)
+            foreach (var scene in mineData.mineSceneList)
             {
-                if(scene.sceneName == sceneName)
+                if (scene.sceneName == sceneName)
                 {
                     return false;
                 }
@@ -258,13 +303,13 @@ namespace MFarm.Inventory
             return true;
         }
         /// <summary>
-        /// »ñÈ¡³¡¾°µÄÎïÆ·ĞÅÏ¢
+        /// è·å–æ‰€æœ‰åœºæ™¯çš„ç‰©å“ä¿¡æ¯
         /// </summary>
         private void GetAllSceneItems()
         {
-            //´æ´¢µ±Ç°³¡¾°µÄÎïÆ·
-            List<SceneItem> currentSceneItems = new List<SceneItem>();  
-            foreach(var item in FindObjectsOfType<Item>())
+            //å½“å‰åœºæ™¯çš„æ‰€æœ‰ç‰©å“ä¿¡æ¯
+            List<SceneItem> currentSceneItems = new List<SceneItem>();
+            foreach (var item in FindObjectsOfType<Item>())
             {
                 SceneItem sceneItem = new SceneItem()
                 {
@@ -273,24 +318,23 @@ namespace MFarm.Inventory
                 };
                 currentSceneItems.Add(sceneItem);
             }
-            //µ±Ç°³¡¾°ÔÚ×ÖµäÖĞ£¬Ôò°Ñµ±Ç°³¡¾°µÄÎïÆ·Êı¾İ¸üĞÂµ½×ÖµäÖĞ
+            //æœ‰å½“å‰åœºæ™¯çš„keyå°±æ›´æ–°å½“å‰åœºæ™¯çš„ç‰©å“ä¿¡æ¯ï¼Œæ²¡æœ‰å°±æ·»åŠ æ–°çš„key-valueå¯¹
             if (sceneItemDict.ContainsKey(SceneManager.GetActiveScene().name))
             {
                 sceneItemDict[SceneManager.GetActiveScene().name] = currentSceneItems;
             }
-            //Èç¹ûÊ±ĞÂ³¡¾°£¬¾Í°ÑĞÂ³¡¾°µÄÎïÆ·Êı¾İÌí¼Óµ½×ÖµäÖĞ
             else
             {
                 sceneItemDict.Add(SceneManager.GetActiveScene().name, currentSceneItems);
             }
-            
+
         }
         /// <summary>
-        /// »ñÈ¡³¡¾°ÖĞËùÓĞ¼Ò¾ßĞÅÏ¢
+        /// è·å–æ‰€æœ‰åœºæ™¯çš„å®¶å…·ä¿¡æ¯
         /// </summary>
         private void GetAllSceneFurniture()
         {
-            //´æ´¢µ±Ç°³¡¾°µÄÎïÆ·
+            //ï¿½æ´¢ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ·
             List<SceneFurniture> currentSceneFurniture = new List<SceneFurniture>();
             foreach (var item in FindObjectsOfType<Furniture>())
             {
@@ -299,26 +343,24 @@ namespace MFarm.Inventory
                     itemID = item.itemID,
                     position = new SerializableVector3(item.transform.position)
                 };
-                //Èç¹û³¡¾°ÖĞÓĞÏä×Ó£¬µØÍ¼Ë¢ĞÂÇ°±£´æÏä×ÓµÄ±àºÅÊı¾İ
+                //è¯¥å®¶å…·æ˜¯ç®±å­çš„è¯ï¼Œè®°å½•ç®±å­çš„ç´¢å¼•å€¼ï¼Œæ–¹ä¾¿å­˜å‚¨å’Œè¯»å–ç®±å­æ•°æ®
                 if (item.GetComponent<Box>())
                 {
                     sceneFurniture.boxIndex = item.GetComponent<Box>().index;
                 }
                 currentSceneFurniture.Add(sceneFurniture);
             }
-            //µ±Ç°³¡¾°ÔÚ×ÖµäÖĞ£¬Ôò°Ñµ±Ç°³¡¾°µÄÎïÆ·Êı¾İ¸üĞÂµ½×ÖµäÖĞ
             if (sceneFurnitureDict.ContainsKey(SceneManager.GetActiveScene().name))
             {
                 sceneFurnitureDict[SceneManager.GetActiveScene().name] = currentSceneFurniture;
             }
-            //Èç¹ûÊ±ĞÂ³¡¾°£¬¾Í°ÑĞÂ³¡¾°µÄÎïÆ·Êı¾İÌí¼Óµ½×ÖµäÖĞ
             else
             {
                 sceneFurnitureDict.Add(SceneManager.GetActiveScene().name, currentSceneFurniture);
             }
         }
         /// <summary>
-        /// »ñÈ¡³¡¾°ÖĞµÄËùÓĞµÄ½¨Ôì½¨Öş
+        /// è·å–æ‰€æœ‰åœºæ™¯çš„å»ºç­‘ä¿¡æ¯
         /// </summary>
         private void GetAllSceneBuilding()
         {
@@ -339,23 +381,20 @@ namespace MFarm.Inventory
                     currentSceneBuinding.Add(sceneBuinding);
                 }
             }
-            //µ±Ç°³¡¾°ÔÚ×ÖµäÖĞ£¬Ôò°Ñµ±Ç°³¡¾°µÄÎïÆ·Êı¾İ¸üĞÂµ½×ÖµäÖĞ
             if (sceneBuildingDict.ContainsKey(SceneManager.GetActiveScene().name))
             {
                 sceneBuildingDict[SceneManager.GetActiveScene().name] = currentSceneBuinding;
             }
-            //Èç¹ûÊ±ĞÂ³¡¾°£¬¾Í°ÑĞÂ³¡¾°µÄÎïÆ·Êı¾İÌí¼Óµ½×ÖµäÖĞ
             else
             {
                 sceneBuildingDict.Add(SceneManager.GetActiveScene().name, currentSceneBuinding);
             }
         }
         /// <summary>
-        /// »ñÈ¡ËùÓĞ³¡¾°ÖĞµÄKnockItem
+        /// è·å–æ‰€æœ‰åœºæ™¯çš„å¯æ•²å‡»ç‰©å“ä¿¡æ¯
         /// </summary>
         private void GetAllSceneKnockItem()
         {
-            //´æ´¢µ±Ç°³¡¾°µÄÎïÆ·
             List<SceneKnockItem> currentSceneKnockItems = new List<SceneKnockItem>();
             foreach (var knockItem in FindObjectsOfType<KnockableItem>())
             {
@@ -366,25 +405,21 @@ namespace MFarm.Inventory
                 };
                 currentSceneKnockItems.Add(sceneItem);
             }
-            //µ±Ç°³¡¾°ÔÚ×ÖµäÖĞ£¬Ôò°Ñµ±Ç°³¡¾°µÄÎïÆ·Êı¾İ¸üĞÂµ½×ÖµäÖĞ
             if (sceneItemDict.ContainsKey(SceneManager.GetActiveScene().name))
             {
                 sceneKnockItemDict[SceneManager.GetActiveScene().name] = currentSceneKnockItems;
             }
-            //Èç¹ûÊ±ĞÂ³¡¾°£¬¾Í°ÑĞÂ³¡¾°µÄÎïÆ·Êı¾İÌí¼Óµ½×ÖµäÖĞ
             else
             {
                 sceneKnockItemDict.Add(SceneManager.GetActiveScene().name, currentSceneKnockItems);
             }
         }
         /// <summary>
-        /// »ñÈ¡ËùÓĞ³¡¾°ÖĞµÄReapableItem
+        /// è·å–æ‰€æœ‰åœºæ™¯çš„å¯æ”¶å‰²ç‰©å“ä¿¡æ¯
         /// </summary>
         private void GetAllSceneReapableItem()
         {
-            //´æ´¢µ±Ç°³¡¾°ÔÓ²İ
             List<SceneReapableItem> currentSceneWeedItems = new List<SceneReapableItem>();
-            //´æ´¢µ±Ç°³¡¾°´óÔÓ²İ
             List<SceneReapableItem> currentSceneBigWeedItems = new List<SceneReapableItem>();
             foreach (var reapableItem in FindObjectsOfType<ReapableItem>())
             {
@@ -402,13 +437,11 @@ namespace MFarm.Inventory
                     currentSceneBigWeedItems.Add(sceneItem);
                 }
             }
-            //µ±Ç°³¡¾°ÔÚ×ÖµäÖĞ£¬Ôò°Ñµ±Ç°³¡¾°µÄÎïÆ·Êı¾İ¸üĞÂµ½×ÖµäÖĞ
             if (sceneItemDict.ContainsKey(SceneManager.GetActiveScene().name))
             {
                 sceneWeedItemDict[SceneManager.GetActiveScene().name] = currentSceneWeedItems;
                 sceneBigWeedItemDict[SceneManager.GetActiveScene().name] = currentSceneBigWeedItems;
             }
-            //Èç¹ûÊ±ĞÂ³¡¾°£¬¾Í°ÑĞÂ³¡¾°µÄÎïÆ·Êı¾İÌí¼Óµ½×ÖµäÖĞ
             else
             {
                 sceneWeedItemDict.Add(SceneManager.GetActiveScene().name, currentSceneWeedItems);
@@ -416,16 +449,19 @@ namespace MFarm.Inventory
             }
         }
         /// <summary>
-        /// »ñÈ¡ËùÓĞ³¡¾°ÖĞµÄ¶¯Îï
+        /// è·å–æ‰€æœ‰åœºæ™¯çš„åŠ¨ç‰©ä¿¡æ¯
         /// </summary>
         private void GetAllSceneAnimal()
         {
             List<SceneAnimal> currentSceneAnimalList = new List<SceneAnimal>();
             foreach (var animal in FindObjectsOfType<AnimalController>())
             {
-                SceneAnimal sceneAnimal = new SceneAnimal { animalDetails = animal.animalDetails, 
-                    animalCode = animal.animCodeID, 
-                    growthDay = animal.currentGrowthDay 
+                SceneAnimal sceneAnimal = new SceneAnimal
+                {
+                    animalDetails = animal.animalDetails,
+                    animalCode = animal.animCodeID,
+                    growthDay = animal.currentGrowthDay,
+                    isOutSide = animal.isOutSide
                 };
                 currentSceneAnimalList.Add(sceneAnimal);
             }
@@ -439,7 +475,7 @@ namespace MFarm.Inventory
             }
         }
         /// <summary>
-        /// »ñÈ¡µ±Ç°½¨Öş³¡¾°ÖĞµÄ¼Ò¾ß
+        /// è·å–å½“å‰å»ºé€ åœºæ™¯çš„æ‰€æœ‰å®¶å…·ä¿¡æ¯
         /// </summary>
         private void GetAllBuildFurniture()
         {
@@ -451,19 +487,16 @@ namespace MFarm.Inventory
                     itemID = item.itemID,
                     position = new SerializableVector3(item.transform.position)
                 };
-                //Èç¹û³¡¾°ÖĞÓĞÏä×Ó£¬µØÍ¼Ë¢ĞÂÇ°±£´æÏä×ÓµÄ±àºÅÊı¾İ
                 if (item.GetComponent<Box>())
                 {
                     sceneFurniture.boxIndex = item.GetComponent<Box>().index;
                 }
                 currentBuildFurnitureList.Add(sceneFurniture);
             }
-            //µ±Ç°³¡¾°ÔÚ×ÖµäÖĞ£¬Ôò°Ñµ±Ç°³¡¾°µÄÎïÆ·Êı¾İ¸üĞÂµ½×ÖµäÖĞ
             if (buildFurnitureDict.ContainsKey(currentBuildCode))
             {
                 buildFurnitureDict[currentBuildCode] = currentBuildFurnitureList;
             }
-            //Èç¹ûÊ±ĞÂ³¡¾°£¬¾Í°ÑĞÂ³¡¾°µÄÎïÆ·Êı¾İÌí¼Óµ½×ÖµäÖĞ
             else
             {
                 buildFurnitureDict.Add(currentBuildCode, currentBuildFurnitureList);
@@ -471,7 +504,7 @@ namespace MFarm.Inventory
 
         }
         /// <summary>
-        /// »ñÈ¡µ±Ç°½¨Öş³¡¾°µÄÉú²úÎïÆ·
+        /// ä¿å­˜å½“å‰å»ºé€ åœºæ™¯çš„å¯ç‚¹å‡»ç‰©å“ä¿¡æ¯
         /// </summary>
         private void SaveBuildSceneItemClick()
         {
@@ -490,22 +523,22 @@ namespace MFarm.Inventory
                 buildItemClickDict.Add(currentBuildCode, currentItems);
         }
         /// <summary>
-        /// Ë¢ĞÂ´´½¨µ±Ç°³¡¾°µÄÎïÆ·
+        /// é‡æ–°åŠ è½½å½“å‰åœºæ™¯çš„æ‰€æœ‰ç‰©å“ï¼Œä¸»è¦ç”¨äºåœºæ™¯åˆ‡æ¢åæ¢å¤ç‰©å“çŠ¶æ€
         /// </summary>
         private void RecreateAllItem()
         {
             List<SceneItem> currentSceneItems = new List<SceneItem>();
-            if(sceneItemDict.TryGetValue(SceneManager.GetActiveScene().name,out currentSceneItems))
+            if (sceneItemDict.TryGetValue(SceneManager.GetActiveScene().name, out currentSceneItems))
             {
                 if (currentSceneItems != null)
                 {
-                    //É¾³ıµ±Ç°³¡¾°µÄËùÓĞÎïÆ·Êı¾İ
-                    foreach(var item in FindObjectsOfType<Item>())
+                    //å…ˆåˆå§‹åŒ–å½“å‰åœºæ™¯çš„æ‰€æœ‰ç‰©å“ï¼Œé¿å…é‡å¤ç”Ÿæˆ
+                    foreach (var item in FindObjectsOfType<Item>())
                     {
                         Destroy(item.gameObject);
                     }
-                    //ÖØĞÂÉú³Éµ±Ç°³¡¾°µÄËùÓĞÎïÆ·Êı¾İ
-                    foreach(var item in currentSceneItems)
+                    //å¼€å§‹é‡æ–°ç”Ÿæˆå½“å‰åœºæ™¯çš„æ‰€æœ‰ç‰©å“
+                    foreach (var item in currentSceneItems)
                     {
                         Item newItem = Instantiate(itemPerfab, item.position.ToVector3(), Quaternion.identity, itemParent);
                         newItem.Init(item.itemID);
@@ -514,20 +547,20 @@ namespace MFarm.Inventory
             }
         }
         /// <summary>
-        /// ÖØ½¨µ±Ç°³¡¾°¼Ò¾ß
+        /// é‡æ–°åŠ è½½å½“å‰åœºæ™¯çš„æ‰€æœ‰å®¶å…·ï¼Œä¸»è¦ç”¨äºåœºæ™¯åˆ‡æ¢åæ¢å¤å®¶å…·çŠ¶æ€
         /// </summary>
         private void RebuilFurniture()
         {
             List<SceneFurniture> currentSceneFurniture = new List<SceneFurniture>();
-            if (sceneFurnitureDict.TryGetValue(SceneManager.GetActiveScene().name,out currentSceneFurniture))
+            if (sceneFurnitureDict.TryGetValue(SceneManager.GetActiveScene().name, out currentSceneFurniture))
             {
-                if(currentSceneFurniture != null)
+                if (currentSceneFurniture != null)
                 {
-                    foreach(SceneFurniture sceneFurniture in currentSceneFurniture)
+                    foreach (SceneFurniture sceneFurniture in currentSceneFurniture)
                     {
-                        BluPrintDetails bluePrint = InventoryManager.Instance.bluPrintData.GetBluPrintDetails(sceneFurniture.itemID); 
-                        var buildItem = Instantiate(bluePrint.buildPrefab,sceneFurniture.position.ToVector3(),Quaternion.identity, furnitureParent);
-                        //ÖØĞÂ¸³ÖµÏä×Ó±àºÅ
+                        BluPrintDetails bluePrint = InventoryManager.Instance.bluPrintData.GetBluPrintDetails(sceneFurniture.itemID);
+                        var buildItem = Instantiate(bluePrint.buildPrefab, sceneFurniture.position.ToVector3(), Quaternion.identity, furnitureParent);
+                        //é‡æ–°ç”Ÿæˆç®±å­
                         if (buildItem.GetComponent<Box>())
                         {
                             buildItem.GetComponent<Box>().InitBox(sceneFurniture.boxIndex);
@@ -537,7 +570,7 @@ namespace MFarm.Inventory
             }
         }
         /// <summary>
-        /// ÖØ½¨µ±Ç°³¡¾°½¨Ôì½¨Öş
+        /// é‡æ–°åŠ è½½å½“å‰åœºæ™¯çš„æ‰€æœ‰å»ºç­‘ï¼Œä¸»è¦ç”¨äºåœºæ™¯åˆ‡æ¢åæ¢å¤å»ºç­‘çŠ¶æ€
         /// </summary>
         private void ReBuildBuilding()
         {
@@ -555,7 +588,7 @@ namespace MFarm.Inventory
                         buildItem.GetComponent<BuildingItem>().buildCodeID = sceneBuilding.buildCodeID;
                         buildItem.GetComponent<BuildingItem>().Building(true);
                         buildItem.GetComponent<BuildingItem>().isSet = true;
-                        //»ñÈ¡¸÷¸ö½¨ÖşµÄ¶¯Îï»î¶¯·¶Î§
+                        //å¹¶å°†å»ºç­‘çš„æ´»åŠ¨èŒƒå›´æ·»åŠ åˆ°buildAreaListä¸­
                         BuildColliderArea currentArea = new BuildColliderArea
                         {
                             code = sceneBuilding.buildCodeID,
@@ -567,22 +600,22 @@ namespace MFarm.Inventory
             }
         }
         /// <summary>
-        /// ÖØĞÂ¼ÓÔØÉú³ÉKnockItem
+        /// é‡æ–°åŠ è½½å½“å‰åœºæ™¯çš„æ‰€æœ‰å¯æ•²å‡»ç‰©å“ï¼Œä¸»è¦ç”¨äºåœºæ™¯åˆ‡æ¢åæ¢å¤å¯æ•²å‡»ç‰©å“çŠ¶æ€
         /// </summary>
         private void RecreateKnockItem()
         {
-            
+
             List<SceneKnockItem> currentSceneItems = new List<SceneKnockItem>();
             if (sceneKnockItemDict.TryGetValue(SceneManager.GetActiveScene().name, out currentSceneItems))
             {
                 if (currentSceneItems != null)
                 {
-                    //É¾³ıµ±Ç°³¡¾°µÄËùÓĞÎïÆ·Êı¾İ
+                    //å…ˆåˆå§‹åŒ–å½“å‰åœºæ™¯çš„æ‰€æœ‰å¯æ•²å‡»ç‰©å“ï¼Œé¿å…é‡å¤ç”Ÿæˆ
                     foreach (var item in FindObjectsOfType<KnockableItem>())
                     {
                         Destroy(item.gameObject);
                     }
-                    //ÖØĞÂÉú³Éµ±Ç°³¡¾°µÄËùÓĞÎïÆ·Êı¾İ
+                    //æ ¹æ®å¯æ•²å‡»ç‰©å“çš„ç´¢å¼•å€¼ï¼Œé‡æ–°ç”Ÿæˆå½“å‰åœºæ™¯çš„æ‰€æœ‰å¯æ•²å‡»ç‰©å“
                     foreach (var item in currentSceneItems)
                     {
                         switch (item.itemIndex)
@@ -605,7 +638,7 @@ namespace MFarm.Inventory
             }
         }
         /// <summary>
-        /// ÖØĞÂ¼ÓÔØÉú³ÉReapableItem
+        /// é‡æ–°åŠ è½½å½“å‰åœºæ™¯çš„æ‰€æœ‰å¯æ”¶å‰²ç‰©å“ï¼Œä¸»è¦ç”¨äºåœºæ™¯åˆ‡æ¢åæ¢å¤å¯æ”¶å‰²ç‰©å“çŠ¶æ€
         /// </summary>
         private void RecreateReapableItem()
         {
@@ -616,12 +649,12 @@ namespace MFarm.Inventory
             {
                 if (currentWeedsItems != null)
                 {
-                    //É¾³ıµ±Ç°³¡¾°µÄËùÓĞÎïÆ·Êı¾İ
+                    //å…ˆåˆå§‹åŒ–å½“å‰åœºæ™¯çš„æ‰€æœ‰å¯æ”¶å‰²ç‰©å“ï¼Œé¿å…é‡å¤ç”Ÿæˆ
                     foreach (var item in FindObjectsOfType<ReapableItem>())
                     {
                         Destroy(item.gameObject);
                     }
-                    //ÖØĞÂÉú³Éµ±Ç°³¡¾°µÄËùÓĞÎïÆ·Êı¾İ
+                    //ç”Ÿæˆå½“å‰åœºæ™¯çš„æ‰€æœ‰å¯æ”¶å‰²ç‰©å“
                     foreach (var item in currentWeedsItems)
                     {
                         var weedItem = Instantiate(weedItemPerfab, item.position.ToVector3(), Quaternion.identity);
@@ -633,7 +666,6 @@ namespace MFarm.Inventory
             {
                 if (currentBigWeedsItems != null)
                 {
-                    //ÖØĞÂÉú³Éµ±Ç°³¡¾°µÄËùÓĞÎïÆ·Êı¾İ
                     foreach (var item in currentBigWeedsItems)
                     {
                         var bigWeedItem = Instantiate(bigWeedItemPerfab, item.position.ToVector3(), Quaternion.identity);
@@ -643,7 +675,7 @@ namespace MFarm.Inventory
             }
         }
         /// <summary>
-        /// ÖØĞÂ¼ÓÔØ¶¯Îïµ½³¡¾°ÖĞ
+        /// é‡æ–°åŠ è½½å½“å‰åœºæ™¯çš„æ‰€æœ‰åŠ¨ç‰©ï¼Œä¸»è¦ç”¨äºåœºæ™¯åˆ‡æ¢åæ¢å¤åŠ¨ç‰©çŠ¶æ€
         /// </summary>
         private void RecreateAnimal()
         {
@@ -657,37 +689,37 @@ namespace MFarm.Inventory
                     animalInScene.GetComponent<AnimalController>().currentGrowthDay = animal.growthDay;
                     animalInScene.GetComponent<AnimalController>().animCodeID = animal.animalCode;
                     animalInScene.GetComponent<AnimalController>().activityArae = GetBuildArea(animal.animalCode);
+                    animalInScene.GetComponent<AnimalController>().isOutSide = animal.isOutSide;
                     animalInScene.GetComponent<AnimalController>().SetStartState(false);
                 }
             }
         }
         /// <summary>
-        /// ÖØĞÂ¼ÓÔØ¸Ã½¨Öş³¡¾°µÄ¼Ò¾ß
+        /// é‡æ–°åŠ è½½å½“å‰å»ºé€ åœºæ™¯çš„æ‰€æœ‰å®¶å…·ï¼Œä¸»è¦ç”¨äºåœºæ™¯åˆ‡æ¢åæ¢å¤å®¶å…·çŠ¶æ€
         /// </summary>
         private void RecreateBuildFurniture()
         {
             List<SceneFurniture> currentBuildFurniture = new List<SceneFurniture>();
             if (buildFurnitureDict.TryGetValue(currentBuildCode, out currentBuildFurniture))
             {
-                if(currentBuildFurniture != null)
+                if (currentBuildFurniture != null)
                 {
                     foreach (var furniture in currentBuildFurniture)
                     {
                         BluPrintDetails bluePrint = InventoryManager.Instance.bluPrintData.GetBluPrintDetails(furniture.itemID);
                         var buildItem = Instantiate(bluePrint.buildPrefab, furniture.position.ToVector3(), Quaternion.identity, furnitureParent);
-                        //ÖØĞÂ¸³ÖµÏä×Ó±àºÅ
                         if (buildItem.GetComponent<Box>())
                         {
                             buildItem.GetComponent<Box>().InitBox(furniture.boxIndex);
                         }
                     }
                 }
-                
+
             }
 
         }
         /// <summary>
-        /// ÖØĞÂ¼ÓÔØ½¨Öş³¡¾°ÖĞµÄÉú²úÎïÆ·
+        /// é‡æ–°åŠ è½½å½“å‰å»ºé€ åœºæ™¯çš„æ‰€æœ‰å¯ç‚¹å‡»ç‰©å“ï¼Œä¸»è¦ç”¨äºåœºæ™¯åˆ‡æ¢åæ¢å¤å¯ç‚¹å‡»ç‰©å“çŠ¶æ€
         /// </summary>
         private void RecreateBuildSceneItemClick()
         {
@@ -705,9 +737,37 @@ namespace MFarm.Inventory
                 }
             }
         }
-
         /// <summary>
-        /// ¼ì²éÍæ¼ÒÊÇ·ñÓĞºÏÊÊÑøÖ³µÄ½¨Öş
+        /// é‡æ–°åŠ è½½å½“å‰å»ºé€ åœºæ™¯çš„æ‰€æœ‰åŠ¨ç‰©ï¼Œä¸»è¦ç”¨äºåœºæ™¯åˆ‡æ¢åæ¢å¤åŠ¨ç‰©çŠ¶æ€
+        /// </summary>
+        private void RecreateBuildSceneAnimal()
+        {
+            if (buildAnimalCountDict.TryGetValue(currentBuildCode, out List<SceneAnimal> animals))
+            {
+                foreach (SceneAnimal animal in animals)
+                {
+                    //TODO:Ä¿Ç°Ö»ï¿½Ü¸ï¿½ï¿½İ¼ï¿½ï¿½ï¿½Ä£ï¿½å³¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½Î»ï¿½Ã£ï¿½Ö®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ì½¨ï¿½ï¿½ï¿½Ä³ï¿½ï¿½ï¿½
+                    TileDetails pos = GridMapManager.Instance.GetRandomPlaceFurnitureTile(ChickenCoopMap);
+                    Collider2D area = FindAnyObjectByType<AnimalArea>().GetComponent<Collider2D>();
+                    if (pos != null)
+                    {
+                        GameObject obj = Instantiate(animal.animalDetails.animalPrefab,
+                            new Vector3(pos.gridX + 0.5f, pos.gridY + 0.5f, 0),
+                            Quaternion.identity, animalParent);
+                        AnimalController controller = obj.GetComponent<AnimalController>();
+                        controller.animalDetails = animal.animalDetails;
+                        controller.currentGrowthDay = animal.growthDay;
+                        controller.animCodeID = animal.animalCode;
+                        controller.activityArae = area;
+                        controller.isOutSide = animal.isOutSide;
+                        Debug.Log(controller.currentGrowthDay);
+                        controller.SetStartState(false);
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// æ ¹æ®åŠ¨ç‰©çš„å¤§å°ç±»å‹åˆ¤æ–­å½“å‰åœºæ™¯æ˜¯å¦æœ‰å¯ä»¥è¿›è¡Œç¹æ®–çš„å»ºç­‘
         /// </summary>
         /// <param name="sortSize"></param>
         /// <returns></returns>
@@ -720,7 +780,6 @@ namespace MFarm.Inventory
                 {
                     foreach (var farmBuilding in currentFarmBuilding)
                     {
-                        //ÓĞ¸Ã³ß´çÀàĞÍµÄÑøÖ³½¨ÖşÇÒÒÑ¾­Íê¹¤
                         if (farmBuilding.acceptAnimalSize == sortSize && farmBuilding.isDone)
                         {
                             return true;
@@ -735,19 +794,116 @@ namespace MFarm.Inventory
             return false;
         }
         /// <summary>
-        /// »ñÈ¡½¨ÖşµÄ»î¶¯·¶Î§
+        /// å½“å‰åœºæ™¯æ˜¯å¦æ˜¯å»ºé€ å»ºç­‘çš„åœºæ™¯
+        /// </summary>
+        /// <returns></returns>
+        private bool IsCurrentSceneOfCoop()
+        {
+            foreach (var coopScene in coopSceneNames)
+            {
+                if (coopScene == SceneManager.GetActiveScene().name)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        /// <summary>
+        /// æ ¹æ®åŠ¨ç‰©çš„codeè·å–å»ºé€ å»ºç­‘çš„æ´»åŠ¨èŒƒå›´
         /// </summary>
         /// <param name="animalCode"></param>
         private Collider2D GetBuildArea(int animalCode)
         {
             foreach (var collder in buildAreaList)
             {
-                if(animalCode == collder.code)
+                if (animalCode == collder.code)
                 {
                     return collder.area;
                 }
             }
             return null;
+        }
+        /// <summary>
+        /// æ ¹æ®å»ºé€ å»ºç­‘çš„buildCodeè·å–å»ºé€ å»ºç­‘
+        /// </summary>
+        /// <param name="buildCode"></param>
+        /// <returns></returns>
+        private BuildingItem FindBuildingByCode(int buildCode)
+        {
+            foreach (var building in FindObjectsOfType<BuildingItem>())
+            {
+                if (building.buildCodeID == buildCode)
+                    return building;
+            }
+            return null;
+        }
+        /// <summary>
+        /// ç”Ÿæˆå®¤å¤–åŠ¨ç‰©ï¼Œä¸»è¦ç”¨äºæ¯å¤©æ—©ä¸Š8ç‚¹ç”ŸæˆåŠ¨ç‰©ä»å»ºç­‘ä¸­èµ°å‡º
+        /// </summary>
+        private void SpawnOutdoorAnimals()
+        {
+            List<AnimalSpawnInfo> spawnList = new List<AnimalSpawnInfo>();
+            // æ”¶é›†æ‰€æœ‰å¾…ç”Ÿæˆçš„åŠ¨ç‰©
+            List<int> buildCodesToProcess = new List<int>(buildAnimalCountDict.Keys);
+            foreach (int buildCode in buildCodesToProcess)
+            {
+                if (!buildAnimalCountDict.ContainsKey(buildCode)) continue;
+                List<SceneAnimal> animals = buildAnimalCountDict[buildCode];
+                BuildingItem building = FindBuildingByCode(buildCode);
+                if (building == null || !building.isDone) continue;
+                Collider2D activityArea = GetBuildArea(buildCode);
+                if (activityArea == null) continue;
+                // æ”¶é›†è¿˜åœ¨èˆå†…çš„åŠ¨ç‰©
+                List<SceneAnimal> animalsToSpawn = new List<SceneAnimal>();
+                foreach (SceneAnimal animal in animals)
+                {
+                    if (!animal.isOutSide)
+                        animalsToSpawn.Add(animal);
+                }
+                foreach (SceneAnimal animal in animalsToSpawn)
+                {
+                    spawnList.Add(new AnimalSpawnInfo
+                    {
+                        buildCode = buildCode,
+                        animal = animal,
+                        building = building,
+                        area = activityArea
+                    });
+                    animals.Remove(animal);
+                }
+                if (animals.Count == 0)
+                    buildAnimalCountDict.Remove(buildCode);
+            }
+            if (spawnList.Count > 0)
+                StartCoroutine(SpawnAnimalsCoroutine(spawnList));
+        }
+        /// <summary>
+        /// å¼€å§‹ç”Ÿæˆèµ°å‡ºå»ºç­‘çš„åŠ¨ç‰©ï¼Œç”Ÿæˆé—´éš”ä¸º2ç§’
+        /// </summary>
+        /// <param name="spawnList"></param>
+        /// <returns></returns>
+        private IEnumerator SpawnAnimalsCoroutine(List<AnimalSpawnInfo> spawnList)
+        {
+            for (int i = 0; i < spawnList.Count; i++)
+            {
+                AnimalSpawnInfo info = spawnList[i];
+                GameObject obj = Instantiate(
+                    info.animal.animalDetails.animalPrefab,
+                    info.building.entrance.transform.position,
+                    Quaternion.identity,
+                    animalParent
+                );
+                AnimalController controller = obj.GetComponent<AnimalController>();
+                controller.animalDetails = info.animal.animalDetails;
+                controller.currentGrowthDay = info.animal.growthDay;
+                controller.animCodeID = info.animal.animalCode;
+                controller.activityArae = info.area;
+                controller.isOutSide = true;
+                controller.SetStartState(false);
+                controller.transform.position = info.building.entrance.transform.position;
+                if (i < spawnList.Count - 1)
+                    yield return new WaitForSeconds(2f);
+            }
         }
         public GameSaveData GenerateSaveData()
         {
@@ -778,5 +934,5 @@ namespace MFarm.Inventory
         }
     }
 
-    
+
 }

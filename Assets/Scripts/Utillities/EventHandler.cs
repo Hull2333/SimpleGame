@@ -453,4 +453,16 @@ public static class EventHandler
     {
         InstantiateAniamlProduceItemEvent?.Invoke(code, itemID);
     }
+    //动物在回到家之后的事件
+    public static event Action<int,SceneAnimal> AnimalArrivedAtHomeEvent;
+    public static void CallAnimalArrivedAtHomeEvent(int buildCode, SceneAnimal animal)
+    {
+        AnimalArrivedAtHomeEvent?.Invoke(buildCode, animal);
+    }
+    //动物离开家之后的事件
+    public static event Action<int, SceneAnimal> AnimalExitCoopEvent;
+    public static void CallAnimalExitCoopEvent(int buildCode, SceneAnimal animal)
+    {
+        AnimalExitCoopEvent?.Invoke(buildCode, animal);
+    }
 }

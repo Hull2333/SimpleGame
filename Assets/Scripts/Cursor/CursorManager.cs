@@ -405,6 +405,7 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
             animalInScene.GetComponent<AnimalController>().animalDetails = currentAnimalDetails;
             animalInScene.GetComponent<AnimalController>().animCodeID = areaCode;
             animalInScene.GetComponent<AnimalController>().activityArae = currentBuildingArea;
+            animalInScene.GetComponent<AnimalController>().isOutSide = true;
             animalInScene.GetComponent<AnimalController>().SetStartState(true);
         }
     }
@@ -479,7 +480,6 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         checkCollider = Physics2D.OverlapPoint(mouseWorldPos, checkLayer);
         if(checkCollider != null && checkCollider.GetComponent<BuildingItem>())
         {
-            Debug.Log(checkCollider.GetComponent<BuildingItem>().acceptSize);
             if (checkCollider.GetComponent<BuildingItem>().acceptSize == size)
             {
                 currentBuildingArea = checkCollider.GetComponent<BuildingItem>().animalArea;

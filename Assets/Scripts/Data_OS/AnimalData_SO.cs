@@ -26,6 +26,8 @@ public class AnimalData_SO : ScriptableObject
         public int animalPrice;
         public int animalValue;
         public int animalBabyValue;
+        //住的场景名字
+        public string coopName;
         public GameObject animalPrefab;
     }
 }

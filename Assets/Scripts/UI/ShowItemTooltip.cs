@@ -1,13 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Net.Http.Headers;
 using UnityEngine;
 using UnityEngine.EventSystems;
 namespace MFarm.Inventory
 {
     [RequireComponent(typeof(SlotUI))]
     //IPointerEnterHandler,IPointerExitHandler 鼠标滑进和滑出的接口方法
-    public class ShowItemTooltip : MonoBehaviour,IPointerEnterHandler, IPointerExitHandler,IPointerMoveHandler   //调用在预制体Slot_Bag上
+    public class ShowItemTooltip : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerMoveHandler   //调用在预制体Slot_Bag上
     {
         private SlotUI slotUI;
         private float mouseToScreenDistant;
@@ -17,7 +14,7 @@ namespace MFarm.Inventory
         /// <param name="eventData"></param>
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if(slotUI.itemDetails != null)
+            if (slotUI.itemDetails != null)
             {
                 InventoryUI.Instance.itemTooltip.gameObject.SetActive(true);
                 InventoryUI.Instance.itemTooltip.SetupTooltip(slotUI.itemDetails, slotUI.slotType);
@@ -52,19 +49,20 @@ namespace MFarm.Inventory
         /// <param name="eventData"></param>
         public void OnPointerMove(PointerEventData eventData)
         {
-            mouseToScreenDistant = Screen.height - Input.mousePosition.y;
-            if(mouseToScreenDistant >= 700f)
+            float distanceToTop = Screen.height - Input.mousePosition.y;
+            RectTransform tooltipRect = InventoryUI.Instance.itemTooltip.GetComponent<RectTransform>();
+            Vector3 worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            //物品介绍显示在鼠标左下方
+            if (distanceToTop <= 300f)
             {
-                //设置物品描述的锚点以及显示跟随鼠标在左上角
-                InventoryUI.Instance.itemTooltip.GetComponent<RectTransform>().pivot = new Vector2(0f, 0f);
-                InventoryUI.Instance.itemTooltip.transform.position = Input.mousePosition;
+                tooltipRect.pivot = new Vector2(1.1f, 1.1f);
             }
+            //物品介绍显示在鼠标右上方
             else
             {
-                //设置物品描述的锚点以及显示跟随鼠标在左下角
-                InventoryUI.Instance.itemTooltip.GetComponent<RectTransform>().pivot = new Vector2(-0.4f, 1.3f);
-                InventoryUI.Instance.itemTooltip.transform.position = Input.mousePosition;
+                tooltipRect.pivot = new Vector2(-0.1f, -0.1f);
             }
+            tooltipRect.position = worldPos;
         }
 
         private void Awake()

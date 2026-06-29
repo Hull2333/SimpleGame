@@ -42,7 +42,7 @@ public class ItemDetails
     public EquipType equipType;
     [Header("是否缩放，不缩放就选normal")]
     public SpriteScale scale;
-    [Range(0,1)]
+    [Range(0, 1)]
     public float sellPercentage;
 }
 [System.Serializable]
@@ -77,7 +77,7 @@ public class CursorAnimator
 /// <summary>
 /// 存储Item在场景中的坐标
 /// </summary>
-[System.Serializable] 
+[System.Serializable]
 public class SerializableVector3
 {
     public float x, y, z;
@@ -118,7 +118,7 @@ public class SceneFurniture
 }
 //场景中的建造建筑
 [System.Serializable]
-public class SceneBuilding 
+public class SceneBuilding
 {
     public int buildID;
     //建造时间
@@ -133,24 +133,34 @@ public class SceneBuilding
 }
 //场景中的动物
 [System.Serializable]
-public class SceneAnimal 
+public class SceneAnimal
 {
     //成长的天数
     public int growthDay;
     public AnimalDetails animalDetails;
     public int animalCode;
+    //是否在室外
+    public bool isOutSide;
 }
 //场景中的动物的活动范围
 [System.Serializable]
-public class BuildColliderArea 
+public class BuildColliderArea
 {
     public int code;
     public Collider2D area;
 }
-
+//待生成的动物
+[System.Serializable]
+public class AnimalSpawnInfo
+{
+    public int buildCode;
+    public SceneAnimal animal;
+    public BuildingItem building;
+    public Collider2D area;
+}
 
 [System.Serializable]
-public class SceneKnockItem 
+public class SceneKnockItem
 {
     public SerializableVector3 position;
     public int itemIndex;
@@ -168,7 +178,7 @@ public class TileProperty
     public Vector2Int tileCoordinate;
     public GridType gridType;
     public bool boolTypeValue;
-    
+
 }
 
 [System.Serializable]
@@ -224,7 +234,7 @@ public class NPCPosition
     public Vector3 position;
 }
 [System.Serializable]
-public class EquipImage 
+public class EquipImage
 {
     //显示玩家身上的装备图片
     public int itemID;
@@ -279,27 +289,27 @@ public class NPCEvent
     public AnimationClip[] animClip;
 }
 [System.Serializable]
-public class NPCFriendLiness 
+public class NPCFriendLiness
 {
     //NPC名字和对应的好感度
     public string NPCname;
     public float friendlinessValue;
 }
 [System.Serializable]
-public class MineScene 
+public class MineScene
 {
     public string sceneName;
     public Vector2 GoToPos;
 }
 [System.Serializable]
-public class AnimalItem 
+public class AnimalItem
 {
     public AnimalDetails animal;
     public int count;
 }
 //建造建筑中动物的生产物品
 [System.Serializable]
-public class buildProduceItem 
+public class buildProduceItem
 {
     public int buildCode;
     public int itemID;
