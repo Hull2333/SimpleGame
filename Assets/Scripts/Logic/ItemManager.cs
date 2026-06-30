@@ -46,12 +46,18 @@ namespace MFarm.Inventory
         private Teleport teleport;
         private Vector3 buildSceneTeleportToGo;
         [Header("动物生成相关")]
+        //获取Farm场景中的所有建造建筑的字典，key为建造建筑的buildCode，value为该建造建筑的BuildingItem对象
+        private Dictionary<int, BuildingItem> buildingDict = new Dictionary<int, BuildingItem>();
         //动物生产的物品列表，存储每个建造场景的动物生产的物品信息
         public List<buildProduceItem> buildProduceItemList = new List<buildProduceItem>();
         //用字典的方式存储建造建筑场景的物品点击信息，key为建造场景的buildCode，value为该建造场景的物品点击列表
         public Dictionary<int, List<SceneItem>> buildItemClickDict = new Dictionary<int, List<SceneItem>>();
         public ItemClick itemClickPrefab;
         public MapData_SO ChickenCoopMap;
+        //当前动物走出建筑的协程
+        private IEnumerator currentSpawnCoroutine;
+        //等待走出建筑的动物列表
+        private List<AnimalSpawnInfo> pendingSpawnList = new List<AnimalSpawnInfo>();
         [Header("建造建筑相关")]
         private HashSet<int> buildCodeIDs = new HashSet<int>();
         //记录每一个动物进入建造建筑的数量，key为建造建筑的buildCode，value为该建造建筑的动物列表
@@ -131,7 +137,27 @@ namespace MFarm.Inventory
                     GetAllSceneAnimal();
                     GetAllSceneKnockItem();
                     GetAllSceneReapableItem();
+                    //停止协程，未生成的动物加入场景字典，在动物正在出建筑的过程中停止协程，直接将未生成的动物加入场景字典，之后回到Farm场景时一次性生成这些动物
+                    if (currentSpawnCoroutine != null)
+                    {
+                        StopCoroutine(currentSpawnCoroutine);
+                        currentSpawnCoroutine = null;
+                    }
+                    if (pendingSpawnList.Count > 0)
+                    {
+                        string sceneName = SceneManager.GetActiveScene().name;
+                        if (!sceneAnimalDict.ContainsKey(sceneName))
+                            sceneAnimalDict[sceneName] = new List<SceneAnimal>();
+                        foreach (var info in pendingSpawnList)
+                        {
+                            //标记为户外
+                            info.animal.isOutSide = true;
+                            sceneAnimalDict[sceneName].Add(info.animal);
+                        }
+                        pendingSpawnList.Clear();
+                    }
                 }
+
             }
 
         }
@@ -141,6 +167,7 @@ namespace MFarm.Inventory
             buildingParent = FindAnyObjectByType<BuildingParent>().transform;
             animalParent = FindAnyObjectByType<AnimalParent>().transform;
             furnitureParent = FindAnyObjectByType<FurnitureParent>().transform;
+           
             if (ExcludeMineScene(SceneManager.GetActiveScene().name))
             {
                 if (IsCurrentSceneOfCoop())
@@ -175,12 +202,14 @@ namespace MFarm.Inventory
                 }
                 else
                 {
+                    
                     RecreateAllItem();
                     RebuilFurniture();
                     ReBuildBuilding();
                     RecreateAnimal();
                     RecreateKnockItem();
                     RecreateReapableItem();
+                    CacheBuildingsInScene();
                 }
 
             }
@@ -689,7 +718,7 @@ namespace MFarm.Inventory
                     animalInScene.GetComponent<AnimalController>().currentGrowthDay = animal.growthDay;
                     animalInScene.GetComponent<AnimalController>().animCodeID = animal.animalCode;
                     animalInScene.GetComponent<AnimalController>().activityArae = GetBuildArea(animal.animalCode);
-                    animalInScene.GetComponent<AnimalController>().isOutSide = animal.isOutSide;
+                    animalInScene.GetComponent<AnimalController>().isOutSide = true;
                     animalInScene.GetComponent<AnimalController>().SetStartState(false);
                 }
             }
@@ -830,12 +859,8 @@ namespace MFarm.Inventory
         /// <returns></returns>
         private BuildingItem FindBuildingByCode(int buildCode)
         {
-            foreach (var building in FindObjectsOfType<BuildingItem>())
-            {
-                if (building.buildCodeID == buildCode)
-                    return building;
-            }
-            return null;
+            buildingDict.TryGetValue(buildCode, out BuildingItem building);
+            return building;
         }
         /// <summary>
         /// 生成室外动物，主要用于每天早上8点生成动物从建筑中走出
@@ -875,7 +900,13 @@ namespace MFarm.Inventory
                     buildAnimalCountDict.Remove(buildCode);
             }
             if (spawnList.Count > 0)
-                StartCoroutine(SpawnAnimalsCoroutine(spawnList));
+            {
+                pendingSpawnList = spawnList;
+                // 传入新List副本给协程，避免遍历时修改同一个List
+                currentSpawnCoroutine = SpawnAnimalsCoroutine(new List<AnimalSpawnInfo>(spawnList));
+                StartCoroutine(currentSpawnCoroutine);
+            }
+               
         }
         /// <summary>
         /// 开始生成走出建筑的动物，生成间隔为2秒
@@ -901,8 +932,27 @@ namespace MFarm.Inventory
                 controller.isOutSide = true;
                 controller.SetStartState(false);
                 controller.transform.position = info.building.entrance.transform.position;
+                // 从pendingSpawnList中移除已生成的，注意这是另一个List
+                pendingSpawnList.Remove(info);
                 if (i < spawnList.Count - 1)
                     yield return new WaitForSeconds(2f);
+            }
+            currentSpawnCoroutine = null;
+            // 全部生成完，清空
+            pendingSpawnList.Clear();  
+        }
+        /// <summary>
+        /// 场景加载时构建建造建筑缓存以减少开销
+        /// </summary>
+        private void CacheBuildingsInScene()
+        {
+            buildingDict.Clear();
+            foreach (var building in FindObjectsOfType<BuildingItem>())
+            {
+                if (building.isDone && !buildingDict.ContainsKey(building.buildCodeID))
+                {
+                    buildingDict.Add(building.buildCodeID, building);
+                }
             }
         }
         public GameSaveData GenerateSaveData()
