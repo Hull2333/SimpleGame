@@ -143,19 +143,19 @@ namespace MFarm.Inventory
                         StopCoroutine(currentSpawnCoroutine);
                         currentSpawnCoroutine = null;
                     }
-                    if (pendingSpawnList.Count > 0)
-                    {
-                        string sceneName = SceneManager.GetActiveScene().name;
-                        if (!sceneAnimalDict.ContainsKey(sceneName))
-                            sceneAnimalDict[sceneName] = new List<SceneAnimal>();
-                        foreach (var info in pendingSpawnList)
-                        {
-                            //标记为户外
-                            info.animal.isOutSide = true;
-                            sceneAnimalDict[sceneName].Add(info.animal);
-                        }
-                        pendingSpawnList.Clear();
-                    }
+                    //if (pendingSpawnList.Count > 0)
+                    //{
+                    //    string sceneName = SceneManager.GetActiveScene().name;
+                    //    if (!sceneAnimalDict.ContainsKey(sceneName))
+                    //        sceneAnimalDict[sceneName] = new List<SceneAnimal>();
+                    //    foreach (var info in pendingSpawnList)
+                    //    {
+                    //        //标记为户外
+                    //        info.animal.isOutSide = true;
+                    //        sceneAnimalDict[sceneName].Add(info.animal);
+                    //    }
+                    //    pendingSpawnList.Clear();
+                    //}
                 }
 
             }
@@ -198,6 +198,17 @@ namespace MFarm.Inventory
                         buildProduceItemList.Remove(item);
                     }
                     RecreateBuildSceneItemClick();
+                    //玩家进入建造建筑把还会走出的动物放回buildAnimalCountDict，以保证玩家进入建造建筑场景动物数量正常显示
+                    if (pendingSpawnList.Count > 0)
+                    {
+                        foreach (var info in pendingSpawnList)
+                        {
+                            if (!buildAnimalCountDict.ContainsKey(info.buildCode))
+                                buildAnimalCountDict[info.buildCode] = new List<SceneAnimal>();
+                            buildAnimalCountDict[info.buildCode].Add(info.animal);
+                        }
+                        pendingSpawnList.Clear();
+                    }
                     RecreateBuildSceneAnimal();
                 }
                 else
@@ -210,6 +221,18 @@ namespace MFarm.Inventory
                     RecreateKnockItem();
                     RecreateReapableItem();
                     CacheBuildingsInScene();
+                    // 进其他场景（不包括建造建筑场景）加到场景字典的动物列表中，避免在动物正在出建筑的过程中停止协程，直接将未生成的动物加入场景字典，之后回到Farm场景时一次性生成这些动物
+                    if (pendingSpawnList.Count > 0)
+                    {
+                        if (!sceneAnimalDict.ContainsKey("Farm"))
+                            sceneAnimalDict["Farm"] = new List<SceneAnimal>();
+                        foreach (var info in pendingSpawnList)
+                        {
+                            info.animal.isOutSide = true;
+                            sceneAnimalDict["Farm"].Add(info.animal);
+                        }
+                        pendingSpawnList.Clear();
+                    }
                 }
 
             }
