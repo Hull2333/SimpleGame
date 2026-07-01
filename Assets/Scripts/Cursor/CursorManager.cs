@@ -212,6 +212,14 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
                     Debug.Log("没法放在这个位置");
                 }
             }
+            //触摸动物
+            if(canPat && !InteractWithUI())
+            {
+                if(checkCollider.GetComponent<AnimalController>() != null)
+                {
+                    checkCollider.GetComponent<AnimalController>().AddAnimalFriendliness(0.5f,playerTransform.position);
+                }
+            }
         }
         if (Input.GetMouseButtonUp(0))
         {
@@ -264,6 +272,11 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
     {
         cursorEnable = false;
         GridMapManager.Instance.canGetPlayerPos = false;
+        //取消当前选择的物品和恢复鼠标图片为Normal
+        InventoryManager.Instance.currentSelectedItem = null;
+        cursorAnim.runtimeAnimatorController = cursorAnimList[0].cursorController;
+        canCheck = false;
+        canPat = false;
     }
 
     private void OnRestoreNormalCursorImageEvent()
@@ -410,15 +423,6 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         }
     }
     /// <summary>
-    /// 设置鼠标图片
-    /// </summary>
-    /// <param name="sprite"></param>
-    public void SetCursorImage(Sprite sprite)
-    {
-        cursorImage.sprite = sprite;
-        cursorImage.color = new Color(1, 1, 1, 1);
-    }
-    /// <summary>
     /// 鼠标移动到对应物体切换成不一样的鼠标图片
     /// </summary>
     private void SwitchCursorImage()
@@ -437,7 +441,7 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
                     return;
                 }
                 //可互动事物
-                if (checkCollider.CompareTag("Interactive"))
+                if (checkCollider.CompareTag("Interactive") || checkCollider.CompareTag("Animal"))
                 {
                     cursorAnim.runtimeAnimatorController = cursorAnimList[4].cursorController;
                     canPat = true;
@@ -502,7 +506,6 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
                 {
                     Crop clickCrop = GridMapManager.Instance.GetCropObject(mouseWorldPos);
                     ItemClick clickItem = GridMapManager.Instance.GetItemObject(mouseWorldPos);
-                    Debug.Log(clickItem);
                     if (clickCrop != null && clickCrop.canHarvest)
                     {
                         //播放玩家收获动画

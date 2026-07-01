@@ -137,6 +137,8 @@ public class SceneAnimal
 {
     //成长的天数
     public int growthDay;
+    public float friendliness;
+    public bool isTouch;
     public AnimalDetails animalDetails;
     public int animalCode;
     //是否在室外

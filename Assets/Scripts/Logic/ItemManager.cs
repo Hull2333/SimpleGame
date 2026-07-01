@@ -511,6 +511,8 @@ namespace MFarm.Inventory
                 SceneAnimal sceneAnimal = new SceneAnimal
                 {
                     animalDetails = animal.animalDetails,
+                    friendliness = animal.animalFriendliness,
+                    isTouch = animal.isTouch,
                     animalCode = animal.animCodeID,
                     growthDay = animal.currentGrowthDay,
                     isOutSide = animal.isOutSide
@@ -739,6 +741,8 @@ namespace MFarm.Inventory
                     var animalInScene = Instantiate(animal.animalDetails.animalPrefab, animalParent);
                     animalInScene.GetComponent<AnimalController>().animalDetails = animal.animalDetails;
                     animalInScene.GetComponent<AnimalController>().currentGrowthDay = animal.growthDay;
+                    animalInScene.GetComponent<AnimalController>().animalFriendliness = animal.friendliness;
+                    animalInScene.GetComponent<AnimalController>().isTouch = animal.isTouch;
                     animalInScene.GetComponent<AnimalController>().animCodeID = animal.animalCode;
                     animalInScene.GetComponent<AnimalController>().activityArae = GetBuildArea(animal.animalCode);
                     animalInScene.GetComponent<AnimalController>().isOutSide = true;
@@ -809,6 +813,8 @@ namespace MFarm.Inventory
                         AnimalController controller = obj.GetComponent<AnimalController>();
                         controller.animalDetails = animal.animalDetails;
                         controller.currentGrowthDay = animal.growthDay;
+                        controller.animalFriendliness = animal.friendliness;
+                        controller.isTouch = animal.isTouch;
                         controller.animCodeID = animal.animalCode;
                         controller.activityArae = area;
                         controller.isOutSide = animal.isOutSide;

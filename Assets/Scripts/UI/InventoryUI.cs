@@ -1092,7 +1092,8 @@ namespace MFarm.Inventory
         /// </summary>
         public void ShowResouceLackText()
         {
-            Instantiate(resourceLock, Input.mousePosition, Quaternion.identity, coinParent);
+            Vector3 pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Instantiate(resourceLock, pos, Quaternion.identity, coinParent);
         }
         /// <summary>
         /// 打开动物询问数量UI
