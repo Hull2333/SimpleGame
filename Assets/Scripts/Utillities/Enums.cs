@@ -2,12 +2,9 @@ public enum ItemType
 {
     //种子，商品，家具
     Seed,Commodity,Furniture,Cooked,Laterfish,Seafish,
-    //锄头，斧头，镐头，镰刀，水壶，收割，剑，服装
-    HoeTool,AxeTool,BreakTool,ReapTool,WaterTool,Sword,FishingRod,Equipment_Head,Equipment_Body,
-    //收割杂草
-    ReapableScenery,
-    //敌人
-    Enemy,TreeSeed
+    //锄头，斧头，镐头，镰刀，水壶，收割，剑，服装、桶
+    HoeTool,AxeTool,BreakTool,ReapTool,WaterTool,Sword,FishingRod,Equipment_Head,Equipment_Body,Bucket,
+    TreeSeed
 
 }
 public enum FishLevel

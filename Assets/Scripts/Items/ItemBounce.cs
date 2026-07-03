@@ -22,7 +22,13 @@ namespace MFarm.Inventory
         //随机方向点
         private Vector2 randomPos;
         private Rigidbody2D rigidbody2D => transform.GetComponent<Rigidbody2D>();
-        
+        // ========== 新增：二次弹跳参数 ==========
+        private int secondaryBounceCount = 2;
+        private float secondaryDecay = 0.4f;       // 力度衰减系数
+        private float secondaryInterval = 0.18f;   // 弹跳间隔
+        private bool isSecondaryBouncing = false;
+        private bool hasLanded = false;
+
         private void Start()
         {
             //spriteTrans = transform.GetChild(0);
@@ -33,11 +39,12 @@ namespace MFarm.Inventory
         {
 
             inSkyTime -= Time.deltaTime;
-            if(inSkyTime <= 0)
+            if(inSkyTime <= 0 && !hasLanded)
             {
-                rigidbody2D.gravityScale = 0;
-                rigidbody2D.velocity = Vector2.zero;
                 coll.enabled = true;
+                hasLanded = true;
+                //不再立刻停止速度，改为启动弹跳协程
+                StartCoroutine(SecondaryBounce());
             }
 
         }
@@ -76,10 +83,35 @@ namespace MFarm.Inventory
         {
             inSkyTime = 0.5f;
             randomPos = new Vector2(originalPos.x + Random.Range(-0.3f, 0.3f), originalPos.y + Random.Range(0.1f, 1f));
-            Vector2 randomDir = (randomPos - originalPos).normalized;
+            direction = (randomPos - originalPos).normalized;
             //施加方向和随机的力
-            rigidbody2D.AddForce(randomDir * Random.Range(minForce, maxForce), ForceMode2D.Impulse);
+            rigidbody2D.AddForce(direction * Random.Range(minForce, maxForce), ForceMode2D.Impulse);
 
+        }
+        /// <summary>
+        /// 二次弹跳协程，施加衰减的随机力
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerator SecondaryBounce()
+        {
+            isSecondaryBouncing = true;
+            for (int i = 0; i < secondaryBounceCount; i++)
+            {
+                yield return new WaitForSeconds(secondaryInterval);
+                // 衰减力度
+                float decay = Mathf.Pow(secondaryDecay, i + 1);
+                float currentMin = minForce * decay;
+                float currentMax = maxForce * decay;
+                // 停止当前速度，施加新力
+                rigidbody2D.velocity = Vector2.zero;
+                rigidbody2D.AddForce(direction * Random.Range(currentMin, currentMax), ForceMode2D.Impulse);
+                yield return new WaitForSeconds(0.09f - 0.03f * i);
+                rigidbody2D.velocity = Vector2.zero;
+            }
+            // 弹跳结束，最终停止
+            rigidbody2D.velocity = Vector2.zero;
+            rigidbody2D.gravityScale = 0;
+            isSecondaryBouncing = false;
         }
     }
 

@@ -191,10 +191,8 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         }
         if(currentItem == null || currentItem.itemID == 0)
         {
-            
             SwitchCursorImage();
         }
-       
         //点击鼠标左键执行鼠标Clicked动画 
         if (Input.GetMouseButton(0))
         {
@@ -585,6 +583,15 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
                     }
 
                 }
+               
+            }
+            //挤奶
+            if (currentItem.itemType == ItemType.Bucket)
+            {
+                if (Input.GetMouseButtonUp(0))
+                {
+                    checkCollider.GetComponent<AnimalController>().ProduceItemOnTransform(playerTransform.position);
+                }
             }
             else
             {
@@ -739,36 +746,18 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
                     //GridMapManager.Instance.QuitDigAvailableGround();
                     break;
                 case ItemType.FishingRod:
-                    //GridMapManager.Instance.QuitDigAvailableGround();
-                    if (currentTile.canLaterFishing || currentTile.canSeaFishing)
+                    break;
+                case ItemType.Bucket:
+                    checkCollider = Physics2D.OverlapPoint(mouseWorldPos, checkLayer);
+                    if (checkCollider.GetComponent<AnimalController>().isAdult)
                     {
-                       // SetCursorValid();
+                        cursorAnim.runtimeAnimatorController = cursorAnimList[4].cursorController;
+                       
                     }
-                    else
-                    {
-                        //SetCursorIncompleteInvalid();
-                    }
-                    break;   
+                    break;
+
             }
-            //采集时鼠标可用
-            //if (currentCrop != null)
-            //{
-            //    if (currentTile.growthDays >= currentCrop.totalGrowthDays)
-            //    {
-            //        SetCursorValid();
-                    
-            //    }
-            //    else
-            //    {
-            //        SetCursorInvalid();
-            //    }
-            //}
         }
-        //当该瓦片上什么信息都没有时，直接调用鼠标不可用
-        //if(currentTile == null)
-        //{
-        //    SetCursorInvalid();
-        //}
     }
     /// <summary>
     /// 是否与UI互动

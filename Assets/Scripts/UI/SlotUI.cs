@@ -18,6 +18,7 @@ namespace MFarm.Inventory
         //商店Slot需要的名字和单价
         [SerializeField] private TextMeshProUGUI itemName;
         [SerializeField] private TextMeshProUGUI itemPrice;
+        [SerializeField] private GameObject slider;
         //把声明直接赋值的一种方法
         public InventoryUI inventoryUI => GetComponentInParent<InventoryUI>();
         [Header("格子类型")]

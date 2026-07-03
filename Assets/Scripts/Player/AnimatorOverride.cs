@@ -87,6 +87,7 @@ public class AnimatorOverride : MonoBehaviour   //调用在Player对象上
                 ItemType.Seafish => PartType.Carry,
                 ItemType.Equipment_Body => PartType.Carry,
                 ItemType.Equipment_Head => PartType.Carry,
+                ItemType.Bucket => PartType.Carry,
                 _ => PartType.None
 
             };

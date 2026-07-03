@@ -64,11 +64,11 @@ namespace MFarm.Inventory
                 //人物经过杂草时晃动
                 //gameObject.AddComponent<ItemInterActive>();  
             //}
-            if(itemDetails.itemType == ItemType.Enemy)
-            {
-                gameObject.AddComponent<ReapItem>();
-                gameObject.GetComponent<ReapItem>().InitCropData(itemDetails.itemID);
-            }
+            //if(itemDetails.itemType == ItemType.Enemy)
+            //{
+            //    gameObject.AddComponent<ReapItem>();
+            //    gameObject.GetComponent<ReapItem>().InitCropData(itemDetails.itemID);
+            //}
         }
         /// <summary>
         /// PLayer进入物体吸附范围
