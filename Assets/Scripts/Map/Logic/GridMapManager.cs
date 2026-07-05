@@ -1054,6 +1054,22 @@ namespace MFarm.Map
         {
             valueMap.gameObject.GetComponent<TilemapRenderer>().enabled = false;
         }
+        /// <summary>
+        /// 根据传进来的场景名获取对应的农舍地图数据
+        /// </summary>
+        /// <param name="sceneName"></param>
+        /// <returns></returns>
+        public MapData_SO GetCoopMapDataOfName(string sceneName)
+        {
+            switch (sceneName)
+            {
+                case "ChickenCoop":
+                    return mapDataList[15];
+                case "CowCoop":
+                    return mapDataList[16];
+            }
+            return null;
+        }
         public GameSaveData GenerateSaveData()
         {
             GameSaveData saveData = new GameSaveData();
