@@ -109,7 +109,7 @@ public class BuildingItem : MonoBehaviour //调用在可建造建筑预制体上
         }
         //更改建筑的图片
         spriteRenderer.sprite = buildSprite[currentStage];
-        if(currentBuildingDay >= totalBuildingDays && !isDone)
+        if (currentBuildingDay >= totalBuildingDays && !isDone)
         {
             isDone = true;
             entrance.gameObject.SetActive(true);

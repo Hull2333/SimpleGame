@@ -286,6 +286,10 @@ public class NPCEvent
     public float maxSpeed;
     //下一个位置
     public Vector2[] nextPos;
+    //玩家的位置
+    public Vector2[] playerPos;
+    public float playerMinSpeed;
+    public float playerMaxSpeed;
     //对话内容
     public DialogueData_OS[] dialogueData;
     public AnimationClip[] animClip;

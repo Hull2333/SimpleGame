@@ -53,7 +53,7 @@ namespace MFarm.Inventory
         //用字典的方式存储建造建筑场景的物品点击信息，key为建造场景的buildCode，value为该建造场景的物品点击列表
         public Dictionary<int, List<SceneItem>> buildItemClickDict = new Dictionary<int, List<SceneItem>>();
         public ItemClick itemClickPrefab;
-        public MapData_SO ChickenCoopMap;
+        public MapData_SO chickenCoopMap;
         //当前动物走出建筑的协程
         private IEnumerator currentSpawnCoroutine;
         //等待走出建筑的动物列表
@@ -170,6 +170,7 @@ namespace MFarm.Inventory
            
             if (ExcludeMineScene(SceneManager.GetActiveScene().name))
             {
+                Debug.Log("IsCurrentSceneOfCoop():  " + IsCurrentSceneOfCoop());
                 if (IsCurrentSceneOfCoop())
                 {
                     RecreateBuildFurniture();
@@ -182,7 +183,7 @@ namespace MFarm.Inventory
                     {
                         if (item.buildCode == currentBuildCode)
                         {
-                            var producePos = GridMapManager.Instance.GetRandomPlaceFurnitureTile(ChickenCoopMap);
+                            var producePos = GridMapManager.Instance.GetRandomPlaceFurnitureTile(chickenCoopMap);
                             if (producePos != null)
                             {
                                 var produceItem = Instantiate(itemClickPrefab, new Vector3(producePos.gridX + 0.5f, producePos.gridY + 0.5f, 0), Quaternion.identity, itemParent);
@@ -198,7 +199,7 @@ namespace MFarm.Inventory
                         buildProduceItemList.Remove(item);
                     }
                     RecreateBuildSceneItemClick();
-                    //玩家进入建造建筑把还会走出的动物放回buildAnimalCountDict，以保证玩家进入建造建筑场景动物数量正常显示
+                    //玩家进入建造建筑把还未走出的动物放回buildAnimalCountDict，以保证玩家进入建造建筑场景动物数量正常显示
                     if (pendingSpawnList.Count > 0)
                     {
                         foreach (var info in pendingSpawnList)
@@ -798,12 +799,14 @@ namespace MFarm.Inventory
         /// </summary>
         private void RecreateBuildSceneAnimal()
         {
+           
             if (buildAnimalCountDict.TryGetValue(currentBuildCode, out List<SceneAnimal> animals))
             {
+                Debug.Log("animals.Count:  " + animals.Count);
                 foreach (SceneAnimal animal in animals)
                 {
                     //TODO:Ŀǰֻ�ܸ��ݼ���ģ�峡������ȡ���λ�ã�֮�������������콨���ĳ���
-                    TileDetails pos = GridMapManager.Instance.GetRandomPlaceFurnitureTile(ChickenCoopMap);
+                    TileDetails pos = GridMapManager.Instance.GetRandomPlaceFurnitureTile(GridMapManager.Instance.GetCoopMapDataOfName(SceneManager.GetActiveScene().name));
                     Collider2D area = FindAnyObjectByType<AnimalArea>().GetComponent<Collider2D>();
                     if (pos != null)
                     {

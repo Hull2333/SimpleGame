@@ -18,10 +18,10 @@ namespace MFarm.Transition
         public CanvasGroup fadeCanvasGroup;
         private bool isFade;
         [Header("转场效果")]
-        public Canvas transtionCanvas;
+        private Canvas transtionCanvas;
         public Material transtionMaterial;
-        public int transtionValue;
-        public int smoothValue;
+        private int transtionValue;
+        private int smoothValue;
         private Tween currentTween;
         public string GUID => GetComponent<DataGUID>().guid;
 

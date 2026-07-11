@@ -1432,6 +1432,10 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         defenceEffects[effectIndex].gameObject.SetActive(true);
         defenceEffects[effectIndex].gameObject.transform.position = point;
     }
+    public void SetPlayerPos()
+    {
+
+    }
     /// <summary>
     /// 保存SaveData
     /// </summary>
