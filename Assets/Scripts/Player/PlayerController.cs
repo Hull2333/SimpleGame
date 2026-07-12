@@ -5,11 +5,13 @@ using MFarm.Save;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using static UnityEngine.Rendering.DebugUI;
 using static UnityEngine.RuleTile.TilingRuleOutput;
 using Transform = UnityEngine.Transform;
-
+using UnityEngine.SceneManagement;
+using MFarm.AStar;
 public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
 {
     [Header("玩家属性")]
@@ -173,6 +175,8 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     public int effectIndex;
     //正在继续NPC事件
     public bool isNpcEvent;
+    //NPC开始时的位置
+    private Vector2 npcEventOriginPos;
     public void Awake()
     {
 
@@ -1070,12 +1074,14 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     private void OnStartNPCEvent()
     {
         isNpcEvent = true;
-        inputDisable = true; ;
+        inputDisable = true;
+        npcEventOriginPos = transform.position;
     }
     private void OnEndNPCEvent()
     {
         isNpcEvent = false;
         inputDisable = false;
+        transform.position = npcEventOriginPos;
     }
     private void OnPlayEatAnimEvent(int ID)
     {
@@ -1432,9 +1438,79 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         defenceEffects[effectIndex].gameObject.SetActive(true);
         defenceEffects[effectIndex].gameObject.transform.position = point;
     }
-    public void SetPlayerPos()
+    /// <summary>
+    /// 控制玩家移动到指定位置
+    /// </summary>
+    /// <param name="targetPos"></param>
+    /// <param name="speed"></param>
+    /// <returns></returns>
+    public IEnumerator SetPlayerPos(Vector2 targetPos,float speed , Vector2 faceDir,bool isFirstStop)
     {
+        inputDisable = true;
 
+        // A* 寻路
+        string sceneName = SceneManager.GetActiveScene().name;
+        var grid = FindObjectOfType<Grid>();
+        Vector3Int currentGridPos = grid.WorldToCell(transform.position);
+        Vector3Int targetGridPos = grid.WorldToCell(new Vector3(targetPos.x, targetPos.y, 0));
+        Vector2 dir = Vector2.down;
+        // 构建路径
+        Stack<MovementStep> pathStack = new Stack<MovementStep>();
+        AStar.Instance.buildPath(sceneName, (Vector2Int)currentGridPos, (Vector2Int)targetGridPos, pathStack);
+
+        if (pathStack.Count == 0)
+        {
+            inputDisable = false;
+            yield break;
+        }
+
+        // Stack 顶部是起点、底部是终点，逆序取出得到 起点→终点 的路径列表
+        List<Vector2Int> path = new List<Vector2Int>();
+        while (pathStack.Count > 0)
+        {
+            path.Add(pathStack.Pop().gridCoordinate);
+        }
+
+        // 沿路径逐格移动（跳过起点 i=0）
+        for (int i = 1; i < path.Count; i++)
+        {
+            Vector3 worldPos = grid.CellToWorld(new Vector3Int(path[i].x, path[i].y, 0));
+            worldPos = new Vector3(worldPos.x + Settings.gridCellSize / 2, worldPos.y + Settings.gridCellSize / 2, 0);
+            Vector2 stepTarget = new Vector2(worldPos.x, worldPos.y);
+
+            while (Vector2.Distance(transform.position, stepTarget) > Settings.pixelSize)
+            {
+                dir = (stepTarget - (Vector2)transform.position).normalized;
+                transform.position = Vector2.MoveTowards(transform.position, stepTarget, speed * Time.deltaTime);
+
+                foreach (var anim in animators)
+                {
+                    anim.SetBool("isMoving", true);
+                    anim.SetFloat("mouseX", dir.x);
+                    anim.SetFloat("mouseY", dir.y);
+                    anim.SetFloat("InputX", dir.x);
+                    anim.SetFloat("InputY", dir.y);
+                }
+
+                yield return null;
+            }
+        }
+
+        // 到达终点，停止移动动画
+        foreach (var anim in animators)
+        {
+            anim.SetBool("isMoving", false);
+            if (isFirstStop)
+            {
+                anim.SetFloat("mouseX", faceDir.x);
+                anim.SetFloat("mouseY", faceDir.y);
+            }
+            else
+            {
+                anim.SetFloat("mouseX", dir.x);
+                anim.SetFloat("mouseY", dir.y);
+            }
+        }
     }
     /// <summary>
     /// 保存SaveData
