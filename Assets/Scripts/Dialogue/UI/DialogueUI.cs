@@ -1,9 +1,7 @@
 using System.Collections;
-using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
+using UnityEngine.ProBuilder.Shapes;
 using UnityEngine.UI;
-using DG.Tweening;
 
 public class DialogueUI : Singleton<DialogueUI> //调用在DialogueCanvas01上
 {
@@ -23,7 +21,8 @@ public class DialogueUI : Singleton<DialogueUI> //调用在DialogueCanvas01上
     private int currentIndex = 0;
     //正在和NPC对话
     public bool talkWithNPC;
-
+    //直接显示全部对话字数
+    private bool isSkip = false;
     /// <summary>
     /// override在Singleton单例模式下启动
     /// </summary>
@@ -32,6 +31,13 @@ public class DialogueUI : Singleton<DialogueUI> //调用在DialogueCanvas01上
         base.Awake();
         //点击nextButton继续后续对话
         nextButton.onClick.AddListener(ContinueDialogue);
+    }
+    private void Update()
+    {
+        if (Input.GetMouseButtonDown(0) && dialoguePanel.activeSelf)
+        {
+            isSkip = true;
+        }
     }
     /// <summary>
     /// 继续对话
@@ -59,7 +65,7 @@ public class DialogueUI : Singleton<DialogueUI> //调用在DialogueCanvas01上
                     ShakePartraitImage();
                 }
                 UpdateMainDialogue(currentData.dialoguePieces[currentIndex]);
-            } 
+            }
         }
         //点击nextButton后面没有对话后关闭对话UI
         else
@@ -106,24 +112,10 @@ public class DialogueUI : Singleton<DialogueUI> //调用在DialogueCanvas01上
             partrait.gameObject.SetActive(false);
             name.gameObject.SetActive(false);
         }
+        //在对话开始前将nextButton按钮关闭
+        nextButton.interactable = false;
+        nextButton.gameObject.SetActive(false);
         StartCoroutine(DelayTime(piece));
-       
-        //设置nextButton显示
-        //当此piece没有OptionButton且还有后续对话时显示nextButton
-        if (piece.options.Count == 0 && currentData.dialoguePieces.Count > 0)
-        { 
-            nextButton.interactable = true;
-            nextButton.gameObject.SetActive(true);
-           
-        }
-        //piece下有OptionButton就把nextButton失效且不显示
-        else
-        {
-            nextButton.interactable = false;
-            nextButton.gameObject.SetActive(false);
-        }
-        //创建option
-        CreateOption(piece);
     }
     /// <summary>
     /// 延迟文本的出现
@@ -132,10 +124,34 @@ public class DialogueUI : Singleton<DialogueUI> //调用在DialogueCanvas01上
     /// <returns></returns>
     private IEnumerator DelayTime(DialoguePieces currentpiece)
     {
+        isSkip = false; // 开始时重置标记
         yield return new WaitForSeconds(0.3f);
         //将对话文本初始化
         mainContent.text = "";
-        mainContent.DOText(currentpiece.text, 1f);
+        string fullText = currentpiece.text;
+        // 每个字符间隔时间，可自行调整
+        float charDelay = 0.05f;
+        for (int i = 0; i < fullText.Length; i++)
+        {
+            if (isSkip)
+            {
+                mainContent.text = fullText;
+                break;
+            }
+            mainContent.text += fullText[i];
+            yield return new WaitForSeconds(charDelay);
+        }
+        isSkip = false;
+        //在文本完全显示后再设置nextButton显示
+        //当此piece没有OptionButton且还有后续对话时显示nextButton
+        if (currentpiece.options.Count == 0 && currentData.dialoguePieces.Count > 0 )
+        {
+            nextButton.interactable = true;
+            nextButton.gameObject.SetActive(true);
+
+        }
+        //创建选项
+        CreateOption(currentpiece);
     }
     /// <summary>
     /// 生成OptionButton
@@ -146,13 +162,13 @@ public class DialogueUI : Singleton<DialogueUI> //调用在DialogueCanvas01上
         //清空optionPanel下的所有子物体
         if (optionPanel.childCount > 0)
         {
-            for(int i = 0;i< optionPanel.childCount; i++)
+            for (int i = 0; i < optionPanel.childCount; i++)
             {
                 Destroy(optionPanel.GetChild(i).gameObject);
             }
         }
         //根据picec生成对应数量的optionButton
-        for(int i = 0; i < piece.options.Count; i++)
+        for (int i = 0; i < piece.options.Count; i++)
         {
             var option = Instantiate(optionPrefab, optionPanel);
             option.UpdateOption(piece, piece.options[i]);
