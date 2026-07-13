@@ -77,7 +77,7 @@ namespace MFarm.AStar
                 {
                     //使获取到的瓦片坐标为正数
                     Vector3Int tilePos = new Vector3Int(x + originX, y + originY, 0);
-                    var key = tilePos.x + "x" + tilePos.y + "y" + sceneName;
+                    var key = tilePos.x + "X" + tilePos.y + "Y" + sceneName;
 
                     TileDetails tile = GridMapManager.Instance.GetTileDetails(key);
                     if(tile != null)

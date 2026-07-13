@@ -94,6 +94,7 @@ public class DialogueUI : Singleton<DialogueUI> //调用在DialogueCanvas01上
     /// <param name="piece"></param>
     public void UpdateMainDialogue(DialoguePieces piece)
     {
+        ClearOptions();
         talkWithNPC = true;
         //对话时游戏时间暂停
         EventHandler.CallUpdateGameStateEvent(GameState.Pause);
@@ -159,14 +160,7 @@ public class DialogueUI : Singleton<DialogueUI> //调用在DialogueCanvas01上
     /// <param name="piece"></param>
     private void CreateOption(DialoguePieces piece)
     {
-        //清空optionPanel下的所有子物体
-        if (optionPanel.childCount > 0)
-        {
-            for (int i = 0; i < optionPanel.childCount; i++)
-            {
-                Destroy(optionPanel.GetChild(i).gameObject);
-            }
-        }
+        ClearOptions();
         //根据picec生成对应数量的optionButton
         for (int i = 0; i < piece.options.Count; i++)
         {
@@ -192,5 +186,18 @@ public class DialogueUI : Singleton<DialogueUI> //调用在DialogueCanvas01上
     {
         //抖动NPC头像
         partraitAnim.SetTrigger("partraitShaking");
+    }
+    /// <summary>
+    /// 清除对话选项
+    /// </summary>
+    private void ClearOptions()
+    {
+        if (optionPanel.childCount > 0)
+        {
+            for (int i = 0; i < optionPanel.childCount; i++)
+            {
+                Destroy(optionPanel.GetChild(i).gameObject);
+            }
+        }
     }
 }

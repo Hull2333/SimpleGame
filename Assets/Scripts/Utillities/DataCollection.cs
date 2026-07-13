@@ -235,6 +235,25 @@ public class NPCPosition
     //当前位置
     public Vector3 position;
 }
+//NPC事件中其他出现的NPC
+[System.Serializable]
+public class EventNPC
+{
+    //对应的NPC事件步骤
+    public int step;
+    public GameObject NPC;
+    //一开始的位置
+    public Vector2 NPCStartPos;
+    public stepPos[] NPCMovePos;
+}
+//NPC事件每一步的位置
+[System.Serializable]
+public class stepPos 
+{
+    public int step;
+    public Vector2 pos;
+}
+
 [System.Serializable]
 public class EquipImage
 {
@@ -284,8 +303,10 @@ public class NPCEvent
     //速度
     public float normalSpeed;
     public float maxSpeed;
+    [Header("NPC的位置,NPC的位置、对话数据、动画数量要相等")]
     //下一个位置
     public Vector2[] nextPos;
+    [Header("玩家的位置")]
     //玩家的位置
     public Vector2[] playerPos;
     //玩家最开始移动后面朝的方向
@@ -293,6 +314,9 @@ public class NPCEvent
     //对话内容
     public DialogueData_OS[] dialogueData;
     public AnimationClip[] animClip;
+    [Header("其他NPC的出现")]
+    //其他NPC的出现
+    public EventNPC[] eventNPC;
 }
 [System.Serializable]
 public class NPCFriendLiness

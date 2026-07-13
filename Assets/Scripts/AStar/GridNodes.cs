@@ -34,11 +34,11 @@ namespace MFarm.AStar
 
         public Node GetGridNode(int xPos, int yPos)
         {
-            if (xPos < width && yPos < height)
+            if (xPos <= width && yPos <= height)
             {
                 return gridNode[xPos, yPos];
             }
-            Debug.Log("³¬³öÍø¸ñ·¶Î§");
+            Debug.Log("xPos:  " + xPos + "yPos:  " + yPos +  "³¬³öÍø¸ñ·¶Î§: " + width +"  "+ height);
             return null;
         }
     }
