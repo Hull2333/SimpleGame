@@ -6,7 +6,7 @@ public class Door : MonoBehaviour //调用在场景中一般时屋子内的Door对象上
 {
     private CursorManager cursorManager;
     public Animator anim;
-    private bool isOpened = false;
+    public bool isOpened = false;
     private bool canOpened = true;
     private void Start()
     {
@@ -18,12 +18,16 @@ public class Door : MonoBehaviour //调用在场景中一般时屋子内的Door对象上
         {
             if (Input.GetKey(KeyCode.Mouse1) && cursorManager.canPat && canOpened)
             {
-                canOpened = false;
-                isOpened = !isOpened;
-                anim.SetBool("isOpened", isOpened);
-                StartCoroutine(WaitForDoorAnim());
+                OpenDoor();
             }
         }
+    }
+    public void OpenDoor()
+    {
+        canOpened = false;
+        isOpened = !isOpened;
+        anim.SetBool("isOpened", isOpened);
+        StartCoroutine(WaitForDoorAnim());
     }
     private IEnumerator WaitForDoorAnim()
     {

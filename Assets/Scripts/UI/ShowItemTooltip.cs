@@ -51,18 +51,19 @@ namespace MFarm.Inventory
         {
             float distanceToTop = Screen.height - Input.mousePosition.y;
             RectTransform tooltipRect = InventoryUI.Instance.itemTooltip.GetComponent<RectTransform>();
-            Vector3 worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            //物品介绍显示在鼠标左下方
+            // 直接使用鼠标屏幕坐标，Screen Space - Overlay 下就是屏幕空间
+            Vector3 pos = Input.mousePosition;
+            // 物品介绍在屏幕下方时，显示在物品上方
             if (distanceToTop <= 300f)
             {
                 tooltipRect.pivot = new Vector2(1.1f, 1.1f);
             }
-            //物品介绍显示在鼠标右上方
+            // 物品介绍在屏幕上方时，显示在物品下方
             else
             {
                 tooltipRect.pivot = new Vector2(-0.1f, -0.1f);
             }
-            tooltipRect.position = worldPos;
+            tooltipRect.position = pos;
         }
 
         private void Awake()

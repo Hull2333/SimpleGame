@@ -1444,7 +1444,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     /// <param name="targetPos"></param>
     /// <param name="speed"></param>
     /// <returns></returns>
-    public IEnumerator SetPlayerPos(Vector2 targetPos,float speed , Vector2 faceDir,bool isFirstStop)
+    public IEnumerator SetPlayerPos(Vector2 targetPos,float speed , Vector2 faceDir)
     {
         inputDisable = true;
 
@@ -1500,16 +1500,8 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         foreach (var anim in animators)
         {
             anim.SetBool("isMoving", false);
-            if (isFirstStop)
-            {
-                anim.SetFloat("mouseX", faceDir.x);
-                anim.SetFloat("mouseY", faceDir.y);
-            }
-            else
-            {
-                anim.SetFloat("mouseX", dir.x);
-                anim.SetFloat("mouseY", dir.y);
-            }
+            anim.SetFloat("InputX", faceDir.x);
+            anim.SetFloat("InputY", faceDir.y);
         }
     }
     /// <summary>

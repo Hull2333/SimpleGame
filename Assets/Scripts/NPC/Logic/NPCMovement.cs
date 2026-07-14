@@ -352,6 +352,13 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
     {
         npcMove = true;
         nextWorldPosition = GetWorldPosition(gridPos);
+        // 检测目标点是否有门
+        Door door = Physics2D.OverlapPoint(nextWorldPosition, LayerMask.GetMask("Check"))?.GetComponent<Door>();
+        if (door != null && !door.isOpened)
+        {
+            door.OpenDoor();
+            yield return new WaitForSeconds(0.4f);
+        }
         if (stepTime > gameTime)
         {
             //用来移动的时间差，以秒为单位
@@ -369,32 +376,23 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
                     dir = (nextWorldPosition - transform.position).normalized;
                     //沿x,y轴移动
                     Vector2 posOffset = new Vector2(dir.x * speed * Time.fixedDeltaTime, dir.y * speed * Time.fixedDeltaTime);
+                    //Vector2 posOffset = new Vector2(dir.x * 3f * Time.fixedDeltaTime, dir.y * 3f * Time.fixedDeltaTime);
                     rb.MovePosition(rb.position + posOffset);
                     //每次FixedUpdate执行一次
                     yield return new WaitForFixedUpdate();
                 }
             }
         }
-        //npcMove = true;
-        //nextWorldPosition = GetWorldPosition(gridPos);
-        ////给NPC的移动设定时间，时间到了就直接瞬移到目标点位
-        //float elapsedTime = 0f;
-        //float maxMoveTime = 25f;
-        //while (Vector3.Distance(transform.position, nextWorldPosition) > Settings.pixelSize
-        //       && elapsedTime < maxMoveTime)
-        //{
-        //    dir = (nextWorldPosition - transform.position).normalized;
-        //    Vector2 posOffset = new Vector2(dir.x * normalSpeed * Time.fixedDeltaTime, dir.y * normalSpeed * Time.fixedDeltaTime);
-        //    rb.MovePosition(rb.position + posOffset);
-        //    elapsedTime += Time.fixedDeltaTime;
-        //    yield return new WaitForFixedUpdate();
-        //}
+        npcMove = true;
+        nextWorldPosition = GetWorldPosition(gridPos);
 
         //如果时间到了就瞬移到目标点位
         rb.position = nextWorldPosition;
         currentGridPosition = gridPos;
         nextGridPosition = currentGridPosition;
-
+        // 经过后关门
+        if (door != null && door.isOpened)
+            door.OpenDoor();
         npcMove = false;
     }
     /// <summary>
@@ -585,7 +583,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
             anim.Play(currentNPCEvent.animClip[0].name);
             originNPCPos = transform.position;
             //设置事件最开始的位置
-            rb.position = currentNPCEvent.nextPos[0];
+            rb.position = currentNPCEvent.nextPos[0].pos;
             //设置对话
             dialogueController.currentData = currentNPCEvent.dialogueData[NPCEventStep];
         }
@@ -600,7 +598,16 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
     /// <returns></returns>
     private IEnumerator StartNPCEventRoutine()
     {
-        yield return playerController.SetPlayerPos(currentNPCEvent.playerPos[0], currentNPCEvent.normalSpeed, currentNPCEvent.playerFaceDir,true);
+        float currentSpeed = 0;
+        if (currentNPCEvent.playerPos[0].isMaxSpeed)
+        {
+            currentSpeed = currentNPCEvent.maxSpeed;
+        }
+        else
+        {
+            currentSpeed = currentNPCEvent.normalSpeed;
+        }
+        yield return playerController.SetPlayerPos(currentNPCEvent.playerPos[0].pos, currentSpeed, currentNPCEvent.playerFaceDir[0]);
         yield return StartCoroutine(MoveEventNPCsToPos(0));
         StartCoroutine(WaitForOpenStartDialue());
     }
@@ -637,7 +644,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
     /// <returns></returns>
     private IEnumerator WaitForOpenStartDialue()
     {
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(1.5f);
 
         //开始第一段对话
         dialogueController.OpenDialogue();
@@ -650,19 +657,25 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
     {
         npcMove = true;
         Coroutine eventMoveRoutine = StartCoroutine(MoveEventNPCsToPos(NPCEventStep));
+        float currentNPCSpeed;
+        // 玩家速度 — 根据 playerPos
+        float playerSpeed = currentNPCEvent.playerPos[NPCEventStep].isMaxSpeed
+            ? currentNPCEvent.maxSpeed : currentNPCEvent.normalSpeed;
+        // 主 NPC 速度 — 根据 nextPos
+        float mainNPCSpeed = currentNPCEvent.nextPos[NPCEventStep].isMaxSpeed
+            ? currentNPCEvent.maxSpeed : currentNPCEvent.normalSpeed;
         // 触发玩家移动（一次）
         if (NPCEventStep < currentNPCEvent.playerPos.Length)
         {
             StartCoroutine(playerController.SetPlayerPos(
-                currentNPCEvent.playerPos[NPCEventStep],
-                currentNPCEvent.normalSpeed,
-                Vector2.down,
-                false
+                currentNPCEvent.playerPos[NPCEventStep].pos,
+                playerSpeed,
+                currentNPCEvent.playerFaceDir[NPCEventStep]
             ));
         }
         // A* 寻路
         Vector3Int startGrid = grid.WorldToCell(transform.position);
-        Vector3Int targetGrid = grid.WorldToCell((Vector3)currentNPCEvent.nextPos[NPCEventStep]);
+        Vector3Int targetGrid = grid.WorldToCell((Vector3)currentNPCEvent.nextPos[NPCEventStep].pos);
 
         Stack<MovementStep> pathStack = new Stack<MovementStep>();
         AStar.Instance.buildPath(currentScene, (Vector2Int)startGrid, (Vector2Int)targetGrid, pathStack);
@@ -684,7 +697,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
 
                 while (Vector2.Distance(transform.position, worldPos) > Settings.pixelSize)
                 {
-                    transform.position = Vector2.MoveTowards(transform.position, worldPos, currentNPCEvent.normalSpeed * Time.deltaTime); ;
+                    transform.position = Vector2.MoveTowards(transform.position, worldPos, mainNPCSpeed * Time.deltaTime);
                     yield return null;
                 }
             }
@@ -720,22 +733,29 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
     private IEnumerator MoveEventNPCsToPos(int step)
     {
         List<Coroutine> moveCoroutines = new List<Coroutine>();
-
         foreach (var kvp in spawnedEventNPCs)
         {
             GameObject npc = kvp.Key;
             EventNPC eventNPCData = kvp.Value;
 
             if (npc == null || eventNPCData.NPCMovePos == null) continue;
-
+           
             Vector2? target = null;
+            float speed = currentNPCEvent.normalSpeed;
+            AnimationClip clip = null;
             foreach (var sp in eventNPCData.NPCMovePos)
             {
-                if (sp.step == step) { target = sp.pos; break; }
+                if (sp.step == step)
+                {
+                    target = sp.pos;
+                    speed = sp.isMaxSpeed ? currentNPCEvent.maxSpeed : currentNPCEvent.normalSpeed;
+                    clip = sp.animClip;
+                    break;
+                }
             }
             if (!target.HasValue) continue;
 
-            Coroutine c = StartCoroutine(MoveSingleEventNPC(npc, target.Value));
+            Coroutine c = StartCoroutine(MoveSingleEventNPC(npc, target.Value, speed, clip));
             moveCoroutines.Add(c);
         }
 
@@ -746,11 +766,11 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
     /// <summary>
     /// 单个EventNPC的A*网格移动
     /// </summary>
-    private IEnumerator MoveSingleEventNPC(GameObject npc, Vector2 targetWorldPos)
+    private IEnumerator MoveSingleEventNPC(GameObject npc, Vector2 targetWorldPos, float speed, AnimationClip animClip)
     {
         Vector3Int startGrid = grid.WorldToCell(npc.transform.position);
         Vector3Int targetGrid = grid.WorldToCell((Vector3)targetWorldPos);
-
+        
         Stack<MovementStep> pathStack = new Stack<MovementStep>();
         AStar.Instance.buildPath(currentScene, (Vector2Int)startGrid, (Vector2Int)targetGrid, pathStack);
 
@@ -764,6 +784,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
         // 开始移动动画
         if (npcAnim != null)
         {
+            npcAnim.SetBool("ActionExit", true);
             npcAnim.SetBool("isMoving", true);
             npcAnim.SetBool("Exit", true);
         }
@@ -778,12 +799,13 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
                 npcAnim.SetFloat("DirX", moveDir.x);
                 npcAnim.SetFloat("DirY", moveDir.y);
             }
-
+            // 用传入的速度
+            float moveSpeed = speed;  
             while (Vector2.Distance(npc.transform.position, worldPos) > Settings.pixelSize)
             {
                 npc.transform.position = Vector2.MoveTowards(
                     npc.transform.position, worldPos,
-                    currentNPCEvent.normalSpeed * Time.deltaTime
+                    moveSpeed * Time.deltaTime
                 );
                 yield return null;
             }
@@ -793,7 +815,22 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
         {
             npcAnim.SetBool("isMoving", false);
             npcAnim.SetBool("Exit", false);
+            npcAnim.SetBool("ActionExit", false);
+            if (animClip != null)
+                npcAnim.Play(animClip.name);
         }
+        // 播放当前 step 对应的动画
+        //if (spawnedEventNPCs.TryGetValue(npc, out EventNPC eventData) && npcAnim != null)
+        //{
+        //    foreach (StepPos sp in eventData.NPCMovePos)
+        //    {
+        //        if (sp.step == step && sp.animClip != null)
+        //        {
+        //            npcAnim.Play(sp.animClip.name);
+        //            break;
+        //        }
+        //    }
+        //}
     }
     public GameSaveData GenerateSaveData()
     {

@@ -582,8 +582,6 @@ namespace MFarm.Inventory
             quitAskUIButton.onClick.AddListener(QuitAnimalAskUI);
             quitAnimalShopButton.onClick.AddListener(QuitAnimalShopUI);
             commitAmountButton.onClick.AddListener(ClickAnimalCommitAmountButton);
-            coinParent.GetComponentInParent<Canvas>().worldCamera = Camera.main;
-            coinParent.GetComponentInParent<Canvas>().sortingLayerName = "ValueTile";
         }
       
         private void Update()

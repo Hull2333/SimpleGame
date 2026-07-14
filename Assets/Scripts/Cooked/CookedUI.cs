@@ -37,8 +37,6 @@ namespace MFarm.Cooked
         {
             makeButton.onClick.AddListener(MakeRecipe);
             quitButton.onClick.AddListener(QuitCookedUI);
-            GetComponent<Canvas>().worldCamera = Camera.main;
-            GetComponent<Canvas>().sortingLayerName = "ValueTile";
         }
 
         private void OnEnable()

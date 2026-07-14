@@ -133,6 +133,8 @@ namespace MFarm.Transition
         {
             //开始出现加载界面使，鼠标无法点击
             isFade = true;
+            foreach (Transform child in fadeCanvasGroup.transform)
+                child.gameObject.SetActive(true);
             fadeCanvasGroup.blocksRaycasts = true;
             float speed = Mathf.Abs(fadeCanvasGroup.alpha - targetAlpha) / Settings.fadeDuration;
 
@@ -143,6 +145,8 @@ namespace MFarm.Transition
             }
             fadeCanvasGroup.blocksRaycasts = false;
             isFade = false;
+            foreach (Transform child in fadeCanvasGroup.transform)
+                child.gameObject.SetActive(false);
         }
         /// <summary>
         /// 焦点收缩转场

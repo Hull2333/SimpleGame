@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class SwitchBoundary : MonoBehaviour //调用在Virtual Camera对象摄像机上
 {
+
     private void OnEnable()
     {
         EventHandler.AfterSceneLoadedEvent += SwitchConfinerShape;
