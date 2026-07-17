@@ -1477,7 +1477,13 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
             Vector3 worldPos = grid.CellToWorld(new Vector3Int(path[i].x, path[i].y, 0));
             worldPos = new Vector3(worldPos.x + Settings.gridCellSize / 2, worldPos.y + Settings.gridCellSize / 2, 0);
             Vector2 stepTarget = new Vector2(worldPos.x, worldPos.y);
-
+            // 检查目标位置是否有门
+            Door door = Physics2D.OverlapPoint(stepTarget, LayerMask.GetMask("Check"))?.GetComponent<Door>();
+            if (door != null && !door.isOpened)
+            {
+                door.OpenDoor();
+                yield return new WaitForSeconds(0.4f);
+            }
             while (Vector2.Distance(transform.position, stepTarget) > Settings.pixelSize)
             {
                 dir = (stepTarget - (Vector2)transform.position).normalized;

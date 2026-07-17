@@ -29,11 +29,10 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
     private Vector3 nextWorldPosition;
     //设置StartScene的值为currentScene的值
     public string StartScene { set => currentScene = value; }
-
+    // 记录开始移动的时间
+    private TimeSpan? movementStartTime;
     [Header("移动属性")]
     private float normalSpeed = 3f;
-    private float minSpeed = 2f;
-    private float maxSpeed = 6f;
     //移动方向
     private Vector2 dir;
     public bool isMoving;
@@ -320,15 +319,14 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
             {
                 //Pop移除第一个并拿出来
                 MovementStep step = movementSteps.Pop();
+                // 判断是否发生了场景切换
+                bool sceneChanged = step.sceneName != currentScene;
                 //判断当前场景是否是这一步所在的场景
                 currentScene = step.sceneName;
                 CheckVisiable();
                 //下一步
                 nextGridPosition = (Vector3Int)step.gridCoordinate;
-                //获取当前的时间戳
-                TimeSpan stepTime = new TimeSpan(step.hour, step.minute, step.second);
-
-                MoveToGridPosition(nextGridPosition, stepTime);
+                MoveToGridPosition(nextGridPosition, sceneChanged);
             }
             else if (!isMoving && canPlayStopAnimation)
             {
@@ -337,10 +335,9 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
         }
     }
 
-    private void MoveToGridPosition(Vector3Int gridPos, TimeSpan stepTime)
+    private void MoveToGridPosition(Vector3Int gridPos, bool sceneChanged)
     {
-        //NPC移动的协程 
-        npcMoveRoutine = StartCoroutine(MoveRoutine(gridPos, stepTime));
+        npcMoveRoutine = StartCoroutine(MoveRoutine(gridPos, sceneChanged));
     }
     /// <summary>
     /// NPC移动的协程
@@ -348,51 +345,50 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
     /// <param name="gridPos"></param>
     /// <param name="stepTime"></param>
     /// <returns></returns>
-    private IEnumerator MoveRoutine(Vector3Int gridPos, TimeSpan stepTime)
+    private IEnumerator MoveRoutine(Vector3Int gridPos, bool sceneChanged)
     {
         npcMove = true;
         nextWorldPosition = GetWorldPosition(gridPos);
-        // 检测目标点是否有门
+        // 超过20分钟游戏时间，直接瞬移到最终目标点
+        movementStartTime = gameTime;
+        if (gameTime - movementStartTime >= TimeSpan.FromMinutes(20))
+        {
+            movementSteps.Clear();
+            rb.position = GetWorldPosition(targetGridPosition);
+            currentGridPosition = targetGridPosition;
+            nextGridPosition = targetGridPosition;
+            currentScene = targetScene;       
+            CheckVisiable();                  
+            npcMove = false;
+            yield break;
+        }
+        // 场景切换时：直接瞬移到目标位置，不做平滑移动
+        if (sceneChanged)
+        {
+            rb.position = nextWorldPosition;
+            currentGridPosition = gridPos;
+            nextGridPosition = currentGridPosition;
+            npcMove = false;
+            yield break;
+        }
+        // 检查目标是否有门
         Door door = Physics2D.OverlapPoint(nextWorldPosition, LayerMask.GetMask("Check"))?.GetComponent<Door>();
         if (door != null && !door.isOpened)
         {
             door.OpenDoor();
             yield return new WaitForSeconds(0.4f);
         }
-        if (stepTime > gameTime)
+        // 始终匀速移动
+        while (Vector3.Distance(transform.position, nextWorldPosition) > Settings.pixelSize)
         {
-            //用来移动的时间差，以秒为单位
-            float timeToMove = (float)(stepTime.TotalSeconds - gameTime.TotalSeconds);
-            //实际移动距离
-            float distance = Vector3.Distance(transform.position, nextWorldPosition);
-            //实际移动速度，Mathf.Max取最大值 
-            float speed = Mathf.Max(minSpeed, (distance / timeToMove / Settings.secondThreshold));
-            //还有时间来移动
-            if (speed <= maxSpeed)
-            {
-                //当前未到达下一步的网格
-                while (Vector3.Distance(transform.position, nextWorldPosition) > Settings.pixelSize)
-                {
-                    dir = (nextWorldPosition - transform.position).normalized;
-                    //沿x,y轴移动
-                    Vector2 posOffset = new Vector2(dir.x * speed * Time.fixedDeltaTime, dir.y * speed * Time.fixedDeltaTime);
-                    //Vector2 posOffset = new Vector2(dir.x * 3f * Time.fixedDeltaTime, dir.y * 3f * Time.fixedDeltaTime);
-                    rb.MovePosition(rb.position + posOffset);
-                    //每次FixedUpdate执行一次
-                    yield return new WaitForFixedUpdate();
-                }
-            }
+            dir = (nextWorldPosition - transform.position).normalized;
+            Vector2 posOffset = new Vector2(dir.x * 3f * Time.fixedDeltaTime, dir.y * 3f * Time.fixedDeltaTime);
+            rb.MovePosition(rb.position + posOffset);
+            yield return new WaitForFixedUpdate();
         }
-        npcMove = true;
-        nextWorldPosition = GetWorldPosition(gridPos);
-
-        //如果时间到了就瞬移到目标点位
         rb.position = nextWorldPosition;
         currentGridPosition = gridPos;
         nextGridPosition = currentGridPosition;
-        // 经过后关门
-        if (door != null && door.isOpened)
-            door.OpenDoor();
         npcMove = false;
     }
     /// <summary>
@@ -413,7 +409,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
         {
             AStar.Instance.buildPath(schedule.targetScene, (Vector2Int)currentGridPosition, schedule.targetGridPosition, movementSteps);
         }
-        ///跨场景移动
+        //跨场景移动
         else if (schedule.targetScene != currentScene)
         {
             SceneRoute sceneRoute = NPCManager.Instance.GetSceneRoute(currentScene, schedule.targetScene);
@@ -690,7 +686,14 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
             {
                 Vector3 worldPos = grid.CellToWorld(new Vector3Int(path[i].x, path[i].y, 0));
                 worldPos = new Vector3(worldPos.x + Settings.gridCellSize / 2, worldPos.y + Settings.gridCellSize / 2, 0);
-
+                // 检查目标位置是否有门
+                Door door = Physics2D.OverlapPoint(worldPos, LayerMask.GetMask("Check"))?.GetComponent<Door>();
+                if (door != null && !door.isOpened)
+                {
+                    Debug.Log("OpenDoor");
+                    door.OpenDoor();
+                    yield return new WaitForSeconds(0.4f);
+                }
                 dir = (worldPos - transform.position).normalized;
                 anim.SetFloat("DirX", dir.x);
                 anim.SetFloat("DirY", dir.y);
@@ -792,6 +795,13 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
         {
             Vector3 worldPos = grid.CellToWorld(new Vector3Int(path[i].x, path[i].y, 0));
             worldPos = new Vector3(worldPos.x + Settings.gridCellSize / 2, worldPos.y + Settings.gridCellSize / 2, 0);
+            // 检查目标位置是否有门
+            Door door = Physics2D.OverlapPoint(worldPos, LayerMask.GetMask("Check"))?.GetComponent<Door>();
+            if (door != null && !door.isOpened)
+            {
+                door.OpenDoor();
+                yield return new WaitForSeconds(0.4f);
+            }
 
             Vector2 moveDir = (worldPos - npc.transform.position).normalized;
             if (npcAnim != null)
