@@ -1,18 +1,15 @@
 
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
-using MFarm.Map;
+using Cinemachine;
 using MFarm.CropPlant;
 using MFarm.Inventory;
-using Unity.VisualScripting;
-using System;
-using Cinemachine;
-using UnityEngine.SceneManagement;
-using static AnimalData_SO;
-using UnityEditor.Build.Pipeline.Utilities;
+using MFarm.Map;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using static AnimalData_SO;
 
 public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
 {
@@ -122,7 +119,7 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         EventHandler.InstantiateAnimalInScene -= OnInstantiateAnimalInScene;
     }
 
-  
+
 
     private void Start()
     {
@@ -182,26 +179,26 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
             CheckCursorValid();
             CheckPlayerInput();
         }
-        else if(InteractWithUI() && !cursorEnable)
+        else if (InteractWithUI() && !cursorEnable)
         {
-            
+
             cursorImage.gameObject.SetActive(true);
             //关闭建造图片、动态鼠标图片
             otherCursorImage.gameObject.SetActive(false);
         }
-        if(currentItem == null || currentItem.itemID == 0)
+        if (currentItem == null || currentItem.itemID == 0)
         {
             SwitchCursorImage();
         }
         //点击鼠标左键执行鼠标Clicked动画 
         if (Input.GetMouseButton(0))
         {
-            cursorAnim.SetBool("Clicked",true);
+            cursorAnim.SetBool("Clicked", true);
             if (animalSelectMode && !InteractWithUI())
             {
                 if (CheckBuildingAcceptAnimalSize(currentAnimalDetails.animSize))
                 {
-                   
+
                     InventoryUI.Instance.OpenAnimalAskUI(currentAnimalDetails.animalSprite);
                     Debug.Log("这个位置可以");
                 }
@@ -211,11 +208,11 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
                 }
             }
             //触摸动物
-            if(canPat && !InteractWithUI())
+            if (canPat && !InteractWithUI())
             {
-                if(checkCollider.GetComponent<AnimalController>() != null)
+                if (checkCollider.GetComponent<AnimalController>() != null)
                 {
-                    checkCollider.GetComponent<AnimalController>().AddAnimalFriendliness(0.5f,playerTransform.position);
+                    checkCollider.GetComponent<AnimalController>().AddAnimalFriendliness(0.5f, playerTransform.position);
                 }
             }
         }
@@ -228,7 +225,7 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         {
             if (bluPrintPrefab != null)
             {
-                
+
                 bluPrintPrefab.transform.position = mouseGridPos;
                 Bounds currentBounds = bluPrintPrefab.GetComponent<BoxCollider2D>().bounds;
                 if (currentBounds != lastBounds)
@@ -243,20 +240,20 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
                     EventHandler.CallInstantiateBuildingOnMapEvent(currentBuildingDetails, mouseGridPos, buildingParent);
                 }
             }
-            
+
         }
         EmptyHandHatvestCrop();
 
     }
-   
+
     /// <summary>
     /// 获取当前地图的瓦片位置
     /// </summary>
     private void OnAfterSceneLoadedEvent()
     {
-       currentGrid = FindObjectOfType<Grid>();
-       furnitureParent = FindObjectOfType<FurnitureParent>().transform;
-       buildingParent = FindObjectOfType<BuildingParent>().transform;
+        currentGrid = FindObjectOfType<Grid>();
+        furnitureParent = FindObjectOfType<FurnitureParent>().transform;
+        buildingParent = FindObjectOfType<BuildingParent>().transform;
         animalParent = FindObjectOfType<AnimalParent>().transform;
         if (buildMode)
         {
@@ -282,13 +279,13 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         cursorAnim.runtimeAnimatorController = cursorAnimList[0].cursorController;
         canCheck = false;
     }
-   
+
     /// <summary>
     /// 设置鼠标随物品类型而变化
     /// </summary>
     /// <param name="itemDetails"></param>
     /// <param name="isSelected"></param>
-    private void OnItemSelectEvent(ItemDetails itemDetails,bool isSelected)
+    private void OnItemSelectEvent(ItemDetails itemDetails, bool isSelected)
     {
         canExcuteMouse = isSelected;
         if (bluPrintPrefab != null)
@@ -307,7 +304,7 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         else
         {
             currentItem = itemDetails;
-            
+
             //利用switch语句循环各种Item类型来返回不同的鼠标动画
             currentCursorType = itemDetails.itemType switch
             {
@@ -326,22 +323,22 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
             cursorEnable = true;
             for (int i = 0; i < cursorAnimList.Count; i++)
             {
-                if(currentCursorType == cursorAnimList[i].cursorType)
+                if (currentCursorType == cursorAnimList[i].cursorType)
                 {
                     cursorAnim.runtimeAnimatorController = cursorAnimList[i].cursorController;
                 }
             }
             //当选择家具物品时，预生成家具
-            if(itemDetails.itemType == ItemType.Furniture)
+            if (itemDetails.itemType == ItemType.Furniture)
             {
                 currentBluPrintDetails = bluPrintData.GetBluPrintDetails(currentItem.itemID);
                 bluPrintPrefab = Instantiate(currentBluPrintDetails.buildPrefab, furnitureParent);
                 bluPrintPrefab.GetComponent<Furniture>().SetCollider(false);
-                bluPrintPrefab.GetComponent<SpriteRenderer>().color = new Color(1,1,1,0.75f);
-                EventHandler.CallGetCurrentBluPrintPrefab(currentBluPrintDetails, furnitureParent , bluPrintTileList);
+                bluPrintPrefab.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.75f);
+                EventHandler.CallGetCurrentBluPrintPrefab(currentBluPrintDetails, furnitureParent, bluPrintTileList);
             }
         }
-        
+
     }
     /// <summary>
     /// 在UI开启时禁止使用道具
@@ -360,7 +357,7 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
     {
         gameState = state;
     }
-    private void OnBuildindModeEvent(BuildingDetails building ,AnimalDetails animal, bool startMode)
+    private void OnBuildindModeEvent(BuildingDetails building, AnimalDetails animal, bool startMode)
     {
         if (startMode)
         {
@@ -396,12 +393,17 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
                 Destroy(bluPrintPrefab);
             }
             EventHandler.CallTransitionEvent(currentScene, currentPlayerPos);
-            camera.Follow = playerTransform;
-            camera.m_Lens.OrthographicSize = 7;
+            StartCoroutine(DelayChangeCamera());
             currentBuildingDetails = null;
             buildMode = false;
             animalSelectMode = false;
         }
+    }
+    private IEnumerator DelayChangeCamera()
+    {
+        yield return new WaitForSeconds(0.5f);
+        camera.Follow = playerTransform;
+        camera.m_Lens.OrthographicSize = 7;
     }
     private IEnumerator ShowBuindingIcon()
     {
@@ -478,9 +480,9 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
     /// <returns></returns>
     public bool CheckBuildingAcceptAnimalSize(AnimalSizeType size)
     {
-       
+
         checkCollider = Physics2D.OverlapPoint(mouseWorldPos, checkLayer);
-        if(checkCollider != null && checkCollider.GetComponent<BuildingItem>())
+        if (checkCollider != null && checkCollider.GetComponent<BuildingItem>())
         {
             if (checkCollider.GetComponent<BuildingItem>().acceptSize == size)
             {
@@ -496,7 +498,7 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
     /// </summary>
     private void EmptyHandHatvestCrop()
     {
-        if(Mathf.Abs(mouseGridPos.x - playerGridPos.x) <= 2 && Mathf.Abs(mouseGridPos.y - playerGridPos.y) <= 2)
+        if (Mathf.Abs(mouseGridPos.x - playerGridPos.x) <= 2 && Mathf.Abs(mouseGridPos.y - playerGridPos.y) <= 2)
         {
             if (currentItem == null || currentItem.itemID == 0)
             {
@@ -511,7 +513,7 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
                         clickCrop.ProcessCropAction();
                         return;
                     }
-                    if(clickItem != null)
+                    if (clickItem != null)
                     {
                         //播放玩家收获动画
                         EventHandler.CallDisplayCollectItemSprite(clickItem.itemID);
@@ -520,8 +522,8 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
                 }
             }
         }
-       
-        
+
+
     }
     /// <summary>
     /// 鼠标点击物品时执行的操作
@@ -583,7 +585,7 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
                     }
 
                 }
-               
+
             }
             //挤奶
             if (currentItem.itemType == ItemType.Bucket)
@@ -615,7 +617,7 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
             }
         }
     }
-    private void UpdateBluPrintCellList(Bounds bounds , Bounds lastBounds)
+    private void UpdateBluPrintCellList(Bounds bounds, Bounds lastBounds)
     {
         bluPrintTileList.Clear();
         lastBluPrintTileList.Clear();
@@ -663,7 +665,7 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
     /// </summary>
     private void CheckCursorValid()
     {
-        
+
         //判断是否鼠标丢弃的位置超过该物品的使用范围
         //if(currentItem != null && currentItem.canDropped)
         //{
@@ -692,7 +694,7 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
             CropDetails currentCrop = CropManager.Instance.GetCropDetails(currentTile.seedItemID);
             //获取鼠标点击位置的Crop脚本组件
             Crop crop = GridMapManager.Instance.GetCropObject(mouseWorldPos);
-            
+
             switch (currentItem.itemType)
             {
                 case ItemType.Seed:
@@ -712,16 +714,16 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
                 case ItemType.WaterTool:
                 //判断选择的瓦片是否可以挖坑
                 case ItemType.HoeTool:
-                    GridMapManager.Instance.DisplayerAvailableGround(currentItem,currentTile);
+                    GridMapManager.Instance.DisplayerAvailableGround(currentItem, currentTile);
                     //SetCursorValid();
                     break;
                 case ItemType.AxeTool:
                     //GridMapManager.Instance.QuitDigAvailableGround();
                     if (crop != null)
                     {
-                        if (crop.canHarvest == true && crop.cropDetails.CheckToolAvailable(currentItem.itemID)==true)
+                        if (crop.canHarvest == true && crop.cropDetails.CheckToolAvailable(currentItem.itemID) == true)
                         {
-                            
+
                             //SetCursorValid();
                         }
                         else
@@ -752,7 +754,7 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
                     if (checkCollider.GetComponent<AnimalController>().isAdult)
                     {
                         cursorAnim.runtimeAnimatorController = cursorAnimList[4].cursorController;
-                       
+
                     }
                     break;
 
@@ -765,7 +767,7 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
     /// <returns></returns>
     private bool InteractWithUI()
     {
-       
+
         if (canDetectionMouseWorldPos)
         {
             if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
@@ -783,10 +785,10 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
     /// <returns></returns>
     private bool CheckRoundEnemy()
     {
-        
+
         //Collider2D[] roundColliders = new Collider2D[10];
         Gizmos.color = Color.yellow;
-        int count = Physics2D.OverlapCircleNonAlloc(playerTransform.position,5f,roundColliders);
+        int count = Physics2D.OverlapCircleNonAlloc(playerTransform.position, 5f, roundColliders);
         for (int i = 0; i < count; i++)
         {
             Collider2D collider = roundColliders[i];
@@ -797,9 +799,9 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         }
         return false;
     }
-   /// <summary>
-   /// 建造模式下触碰摄像机边缘移动摄像机
-   /// </summary>
+    /// <summary>
+    /// 建造模式下触碰摄像机边缘移动摄像机
+    /// </summary>
     private void MoveBuildModeCameraPos()
     {
         Vector3 mousePos = Input.mousePosition;

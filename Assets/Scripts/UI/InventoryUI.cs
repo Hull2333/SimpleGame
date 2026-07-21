@@ -102,6 +102,8 @@ namespace MFarm.Inventory
         public Button buildModeExitButton;
         public Button animalModeExitButton;
         public Button buildingShopExitButton;
+        //等待建造商店打开的标志位
+        private bool pendingBuildShopOpen;
         //提示材料不足
         public GameObject resourceLock;
         [Header("动物商店")]
@@ -120,7 +122,8 @@ namespace MFarm.Inventory
         public Button commitAmountButton;
         //当前选择的数量
         private int currentAskAmount;
-        
+        //等待动物商店打开的标志位
+        private bool pendingAnimalShopOpen;
         private void OnEnable()
         {
             EventHandler.UpdateInventoryUI += OnUpdateInventoryUI;
@@ -175,6 +178,16 @@ namespace MFarm.Inventory
         {
             //初始化玩家金钱
             playerMoneyText.text = InventoryManager.Instance.playerMoney.ToString();
+            if (pendingBuildShopOpen)
+            {
+                pendingBuildShopOpen = false;
+                StartCoroutine(DelayedOpenBuildShop());
+            }
+            if (pendingAnimalShopOpen)
+            {
+                pendingAnimalShopOpen = false;
+                StartCoroutine(DelayedOpenAnimalShop());
+            }
         }
         /// <summary>
         /// 设置打开的箱子或商店
@@ -507,19 +520,19 @@ namespace MFarm.Inventory
                 animalShopUI.SetActive(false);
                 if (build != null)
                 {
-                    buildModeExitButton.gameObject.SetActive(true);
-                    animalModeExitButton.gameObject.SetActive(false);
+                    StartCoroutine(OpenBuildModeQuitButton());
                     return;
                 }
                 if (animal != null)
                 {
-                    buildModeExitButton.gameObject.SetActive(false);
-                    animalModeExitButton.gameObject.SetActive(true);
+                    StartCoroutine(OpenAnimalModeQuitButton());
                     return;
                 }
             }
             else
             {
+                buildModeExitButton.gameObject.SetActive(false);
+                animalModeExitButton.gameObject.SetActive(false);
                 buildModePanel.SetActive(false);
             }
             playerMoneyUIAnim.gameObject.SetActive(!startMode);
@@ -1071,12 +1084,30 @@ namespace MFarm.Inventory
         /// </summary>
         private void ExitBuildMode()
         {
-            EventHandler.CallBuildindModeEvent(null,null,false);
+            EventHandler.CallBuildindModeEvent(null, null, false);
+            pendingBuildShopOpen = true;
+        }
+        /// <summary>
+        /// 延迟打开建造商店
+        /// </summary>
+        /// <returns></returns>
+        private System.Collections.IEnumerator DelayedOpenBuildShop()
+        {
+            yield return new WaitForSeconds(0.1f);
             buildShopPanel.SetActive(true);
         }
         private void ExitAnimalMode()
         {
             EventHandler.CallBuildindModeEvent(null, null, false);
+            pendingAnimalShopOpen = true;
+        }
+        /// <summary>
+        /// 延迟打开动物商店
+        /// </summary>
+        /// <returns></returns>
+        private System.Collections.IEnumerator DelayedOpenAnimalShop()
+        {
+            yield return new WaitForSeconds(0.1f);
             animalShopUI.SetActive(true);
         }
         private void QuitBuildingShopUI()
@@ -1090,8 +1121,7 @@ namespace MFarm.Inventory
         /// </summary>
         public void ShowResouceLackText()
         {
-            Vector3 pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Instantiate(resourceLock, pos, Quaternion.identity, coinParent);
+            Instantiate(resourceLock, Input.mousePosition, Quaternion.identity, coinParent);
         }
         /// <summary>
         /// 打开动物询问数量UI
@@ -1143,7 +1173,20 @@ namespace MFarm.Inventory
             animalShopUI.SetActive(false);
             EventHandler.CallUpdateGameStateEvent(GameState.Gameplay);
         }
+        private System.Collections.IEnumerator OpenBuildModeQuitButton()
+        {
+            yield return new WaitForSeconds(1f);
+            buildModeExitButton.gameObject.SetActive(true);
+            animalModeExitButton.gameObject.SetActive(false);
+        }
+        private System.Collections.IEnumerator OpenAnimalModeQuitButton()
+        {
+            yield return new WaitForSeconds(1f);
+            buildModeExitButton.gameObject.SetActive(false);
+            animalModeExitButton.gameObject.SetActive(true);
+        }
     }
+
 }
 
 
