@@ -330,6 +330,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
             }
             else if (!isMoving && canPlayStopAnimation)
             {
+                movementStartTime = null;
                 StartCoroutine(SetStopAnimation());
             }
         }
@@ -350,7 +351,8 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
         npcMove = true;
         nextWorldPosition = GetWorldPosition(gridPos);
         // 超过20分钟游戏时间，直接瞬移到最终目标点
-        movementStartTime = gameTime;
+        if (movementStartTime == null)
+            movementStartTime = gameTime;
         if (gameTime - movementStartTime >= TimeSpan.FromMinutes(20))
         {
             movementSteps.Clear();
@@ -371,8 +373,9 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
             npcMove = false;
             yield break;
         }
-        // 检查目标是否有门
-        Door door = Physics2D.OverlapPoint(nextWorldPosition, LayerMask.GetMask("Check"))?.GetComponent<Door>();
+        Door door = FindObjectsByType<Door>(FindObjectsSortMode.None)
+      .OrderBy(d => Vector2.Distance(d.transform.position, nextWorldPosition))
+      .FirstOrDefault(d => Vector2.Distance(d.transform.position, nextWorldPosition) < 0.7f);
         if (door != null && !door.isOpened)
         {
             door.OpenDoor();
@@ -687,10 +690,11 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
                 Vector3 worldPos = grid.CellToWorld(new Vector3Int(path[i].x, path[i].y, 0));
                 worldPos = new Vector3(worldPos.x + Settings.gridCellSize / 2, worldPos.y + Settings.gridCellSize / 2, 0);
                 // 检查目标位置是否有门
-                Door door = Physics2D.OverlapPoint(worldPos, LayerMask.GetMask("Check"))?.GetComponent<Door>();
+                Door door = FindObjectsByType<Door>(FindObjectsSortMode.None)
+      .OrderBy(d => Vector2.Distance(d.transform.position, worldPos))
+      .FirstOrDefault(d => Vector2.Distance(d.transform.position, worldPos) < 0.7f);
                 if (door != null && !door.isOpened)
                 {
-                    Debug.Log("OpenDoor");
                     door.OpenDoor();
                     yield return new WaitForSeconds(0.4f);
                 }
@@ -796,7 +800,9 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
             Vector3 worldPos = grid.CellToWorld(new Vector3Int(path[i].x, path[i].y, 0));
             worldPos = new Vector3(worldPos.x + Settings.gridCellSize / 2, worldPos.y + Settings.gridCellSize / 2, 0);
             // 检查目标位置是否有门
-            Door door = Physics2D.OverlapPoint(worldPos, LayerMask.GetMask("Check"))?.GetComponent<Door>();
+            Door door = FindObjectsByType<Door>(FindObjectsSortMode.None)
+       .OrderBy(d => Vector2.Distance(d.transform.position, worldPos))
+       .FirstOrDefault(d => Vector2.Distance(d.transform.position, worldPos) < 0.7f);
             if (door != null && !door.isOpened)
             {
                 door.OpenDoor();

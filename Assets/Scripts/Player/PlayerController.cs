@@ -12,6 +12,7 @@ using static UnityEngine.RuleTile.TilingRuleOutput;
 using Transform = UnityEngine.Transform;
 using UnityEngine.SceneManagement;
 using MFarm.AStar;
+using System.Linq;
 public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
 {
     [Header("玩家属性")]
@@ -1478,7 +1479,9 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
             worldPos = new Vector3(worldPos.x + Settings.gridCellSize / 2, worldPos.y + Settings.gridCellSize / 2, 0);
             Vector2 stepTarget = new Vector2(worldPos.x, worldPos.y);
             // 检查目标位置是否有门
-            Door door = Physics2D.OverlapPoint(stepTarget, LayerMask.GetMask("Check"))?.GetComponent<Door>();
+            Door door = FindObjectsByType<Door>(FindObjectsSortMode.None)
+     .OrderBy(d => Vector2.Distance(d.transform.position, stepTarget))
+     .FirstOrDefault(d => Vector2.Distance(d.transform.position, stepTarget) < 0.7f);
             if (door != null && !door.isOpened)
             {
                 door.OpenDoor();
