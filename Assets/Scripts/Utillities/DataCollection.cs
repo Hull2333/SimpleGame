@@ -301,6 +301,8 @@ public class NPCEvent
     [Header("其他NPC的出现")]
     //其他NPC的出现
     public EventNPC[] eventNPC;
+    [Header("这一步是否切换摄像头跟随对象")]
+    public changeCameraFollow[] changeCameraFollow;
 }
 //NPC事件中其他出现的NPC
 [System.Serializable]
@@ -330,6 +332,13 @@ public class  movePosAndSpeed
 {
     public Vector2 pos;
     public bool isMaxSpeed;
+}
+//该步骤是否切换摄像机跟随对象
+[System.Serializable]
+public class changeCameraFollow
+{
+    public int step;
+    public NPCname NPCname;
 }
 
 [System.Serializable]
