@@ -16,6 +16,7 @@ using System.Linq;
 public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
 {
     [Header("玩家属性")]
+    public string playerName;
     public float speed;
     public float tiredSpeed;
     public float maxHealth;

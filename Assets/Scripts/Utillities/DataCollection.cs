@@ -338,7 +338,7 @@ public class  movePosAndSpeed
 public class changeCameraFollow
 {
     public int step;
-    public NPCname NPCname;
+    public string NPCname;
 }
 
 [System.Serializable]

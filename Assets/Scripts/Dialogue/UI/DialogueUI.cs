@@ -126,10 +126,12 @@ public class DialogueUI : Singleton<DialogueUI> //调用在DialogueCanvas01上
     private IEnumerator DelayTime(DialoguePieces currentpiece)
     {
         isSkip = false; // 开始时重置标记
+
         yield return new WaitForSeconds(0.3f);
         //将对话文本初始化
         mainContent.text = "";
-        string fullText = currentpiece.text;
+        //有{playerName}的就显示为当前的玩家姓名
+        string fullText = currentpiece.text.Replace("{playerName}", FindObjectOfType<PlayerController>().playerName);
         // 每个字符间隔时间，可自行调整
         float charDelay = 0.05f;
         for (int i = 0; i < fullText.Length; i++)

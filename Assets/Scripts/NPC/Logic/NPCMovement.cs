@@ -81,6 +81,8 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
     private PlayerController playerController;
     //NPC事件开始前NPC的位置
     private Vector2 originNPCPos;
+    //EventNPC的位置
+    public Transform eventNPCParent;
     //出现的其他NPC字典
     private Dictionary<GameObject, EventNPC> spawnedEventNPCs = new Dictionary<GameObject, EventNPC>();
     private void Awake()
@@ -221,7 +223,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
             BuildPath(schedule);
             isFirstLoad = true;
         }
-        if (npcEventData.GetfriendlinessEvent(dialoguaGiver.currentFriendliness, currentScene) != null)
+        if (npcEventData.GetfriendlinessEvent(dialoguaGiver.currentFriendliness, currentScene) != null && interactable)
         {
             currentNPCEvent = npcEventData.GetfriendlinessEvent(dialoguaGiver.currentFriendliness, currentScene);
             StartCoroutine(DelayStartNPCEvent());
@@ -258,6 +260,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
         {
             NPCEventStep++;
             //TODO:结束事件
+            //进行到该步骤是否需要切换摄像头跟随对象
             if (NPCEventStep >= currentNPCEvent.dialogueData.Length)
             {
                 //清理其他NPC
@@ -575,6 +578,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
     {
         //对焦NPC
         cameraFollow.Follow = GameObject.Find(currentNPCEvent.npcName).transform;
+        HandleEventNPCs(0);
         if (NPCEventStep == 0)
         {
             anim.SetBool("ActionExit", false);
@@ -587,7 +591,6 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
             dialogueController.currentData = currentNPCEvent.dialogueData[NPCEventStep];
         }
         EventHandler.CallStartNPCEvent();
-        HandleEventNPCs(0);
         StartCoroutine(StartNPCEventRoutine());
 
     }
@@ -729,8 +732,19 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
         {
             if (eventNPCData.step == step && eventNPCData.NPC != null)
             {
-                GameObject instance = Instantiate(eventNPCData.NPC, eventNPCData.NPCStartPos, Quaternion.identity);
+                GameObject instance = Instantiate(eventNPCData.NPC, eventNPCData.NPCStartPos, Quaternion.identity, eventNPCParent);
                 spawnedEventNPCs[instance] = eventNPCData;
+            }
+        }
+        //更新摄像头跟随对象
+        if (currentNPCEvent.changeCameraFollow.Length > 0)
+        {
+            foreach (var ccf in currentNPCEvent.changeCameraFollow)
+            {
+                if (ccf.step == NPCEventStep)
+                {
+                    cameraFollow.Follow = GameObject.Find(ccf.NPCname).transform;
+                }
             }
         }
     }
