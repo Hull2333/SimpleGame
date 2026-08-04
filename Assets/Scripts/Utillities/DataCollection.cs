@@ -303,6 +303,8 @@ public class NPCEvent
     public EventNPC[] eventNPC;
     [Header("这一步是否切换摄像头跟随对象")]
     public changeCameraFollow[] changeCameraFollow;
+    [Header("该时间结束后送的道具")]
+    public int[] getItemID;
 }
 //NPC事件中其他出现的NPC
 [System.Serializable]
@@ -332,6 +334,8 @@ public class  movePosAndSpeed
 {
     public Vector2 pos;
     public bool isMaxSpeed;
+    //到达位置是否坐下
+    public bool isSit;
 }
 //该步骤是否切换摄像机跟随对象
 [System.Serializable]

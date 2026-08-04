@@ -313,7 +313,7 @@ namespace MFarm.Inventory
                         getItem.GetComponent<ItemGetTipUI>().ModifyItemParameter(getItemDetails);
                     }
                 }
-                //currentGetItemID = getItemDetails.itemID;
+                //currentGetItemID = getItemDetails.getItemID;
                 ////?????????????§Ø???????????§Ò??§Ý???????????????????
                 //if (ItemListConditons(getItemDetails) == -1)
                 //{
@@ -330,7 +330,7 @@ namespace MFarm.Inventory
                 //    int amountText = itemGetTipList[index].tipAmount++;
                 //    foreach(var tip in itemGetBg.GetComponentsInChildren<ItemGetTipUI>())
                 //    {
-                //        if(tip.itemID == getItemDetails.itemID)
+                //        if(tip.getItemID == getItemDetails.getItemID)
                 //        {
                 //            tip.ModifyItemAmount(amountText + 1);
 

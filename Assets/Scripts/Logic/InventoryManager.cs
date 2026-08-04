@@ -119,10 +119,10 @@ namespace MFarm.Inventory
         private void OnBuildFurnitureEvent(BluPrintDetails building, Vector3 mousePos , Transform parent)
         {
             RemoveItemOfIndex(1);
-            //BuildingDetails building = bluPrintData.GetBuildingDetails(buildingPrefab.GetComponent<Furniture>().itemID);
+            //BuildingDetails building = bluPrintData.GetBuildingDetails(buildingPrefab.GetComponent<Furniture>().getItemID);
             //foreach(var item in building.resourceItem)
             //{
-            //    RemoveItem(item.itemID, item.itemAmount);
+            //    RemoveItem(item.getItemID, item.itemAmount);
             //}
         }
 
@@ -253,7 +253,7 @@ namespace MFarm.Inventory
         /// <returns></returns>
         public ItemDetails GetItemDetails(int ID)
         {
-            //通过传进来的ID来和itemDetailList中的i.itemID(item.itemID)进行比对搜索,搜索的结果再放回给上面的方法
+            //通过传进来的ID来和itemDetailList中的i.getItemID(item.getItemID)进行比对搜索,搜索的结果再放回给上面的方法
             return itemDataList_SO.itemDetailsList.Find(i => i.itemID == ID);
         }
         /// <summary>
@@ -937,7 +937,7 @@ namespace MFarm.Inventory
         {
             int cost = itemDetails.itemPrice * amount;
             //获得物品背包位置
-            //int index = GetItemIndexInBag(itemDetails.itemID);
+            //int index = GetItemIndexInBag(itemDetails.getItemID);
             //卖
             if (isSellTrade)
             {

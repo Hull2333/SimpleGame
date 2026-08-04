@@ -60,14 +60,14 @@ namespace MFarm.Inventory
             //if (itemDetails.itemType == ItemType.ReapableScenery)
             //{
                 //gameObject.AddComponent<ReapableItem>();
-                //gameObject.GetComponent<ReapItem>().InitCropData(itemDetails.itemID);
+                //gameObject.GetComponent<ReapItem>().InitCropData(itemDetails.getItemID);
                 //人物经过杂草时晃动
                 //gameObject.AddComponent<ItemInterActive>();  
             //}
             //if(itemDetails.itemType == ItemType.Enemy)
             //{
             //    gameObject.AddComponent<ReapItem>();
-            //    gameObject.GetComponent<ReapItem>().InitCropData(itemDetails.itemID);
+            //    gameObject.GetComponent<ReapItem>().InitCropData(itemDetails.getItemID);
             //}
         }
         /// <summary>

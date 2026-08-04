@@ -22,7 +22,7 @@ namespace MFarm.Inventory
                 //if (slotUI.itemDetails.itemType == ItemType.Furniture)
                 //{
                 //    InventoryUI.Instance.itemTooltip.resourcePanel.SetActive(true) ;
-                //    InventoryUI.Instance.itemTooltip.SetupResourcePanel(slotUI.itemDetails.itemID);
+                //    InventoryUI.Instance.itemTooltip.SetupResourcePanel(slotUI.itemDetails.getItemID);
                 //}
                 //类型不是Furniture就关闭材料需求
                 //else

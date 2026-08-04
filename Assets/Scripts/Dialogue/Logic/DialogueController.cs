@@ -74,7 +74,7 @@ namespace MFarm.Dialogue
                    
                     if (NPCCollider.name == "NPCTrigger")
                     {
-                        if (Input.GetKey(KeyCode.Mouse1) && DialogueUI.Instance.talkWithNPC == false && canTalk && !InventoryManager.Instance.anyBagOpened)
+                        if (Input.GetKey(KeyCode.Mouse1) && DialogueUI.Instance.talkWithNPC == false && canTalk && !InventoryManager.Instance.anyBagOpened && !other.GetComponent<PlayerController>().isNpcEvent)
                         {
                             //玩家此时是否拿着物品
                             if (InventoryManager.Instance.currentSelectedItem != null )

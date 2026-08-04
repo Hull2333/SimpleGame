@@ -1,6 +1,7 @@
 using Cinemachine;
 using MFarm.AStar;
 using MFarm.Dialogue;
+using MFarm.Inventory;
 using MFarm.Save;
 using System;
 using System.Collections;
@@ -272,6 +273,14 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
                 transform.transform.position = originNPCPos;
                 cameraFollow.Follow = playerTransform;
                 currentNPCEvent.isHappened = true;
+                //获取事件奖励道具
+                if(currentNPCEvent.getItemID.Length > 0)
+                {
+                    foreach (var itemID in currentNPCEvent.getItemID)
+                    {
+                        InventoryManager.Instance.AddRewardItem(itemID, 1);
+                    }
+                }
                 EventHandler.CallEndNPCEvent();
                 currentNPCEvent = null;
                 anim.SetBool("ActionExit", true);
@@ -365,6 +374,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
             currentScene = targetScene;       
             CheckVisiable();                  
             npcMove = false;
+            interactable = true;
             yield break;
         }
         // 场景切换时：直接瞬移到目标位置，不做平滑移动
@@ -396,6 +406,9 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
         currentGridPosition = gridPos;
         nextGridPosition = currentGridPosition;
         npcMove = false;
+        if (gridPos == targetGridPosition)
+            interactable = true;
+
     }
     /// <summary>
     /// 根据Schedule构建路径
@@ -609,7 +622,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
         {
             currentSpeed = currentNPCEvent.normalSpeed;
         }
-        yield return playerController.SetPlayerPos(currentNPCEvent.playerPos[0].pos, currentSpeed, currentNPCEvent.playerFaceDir[0]);
+        yield return playerController.SetPlayerPos(currentNPCEvent.playerPos[0].pos, currentSpeed, currentNPCEvent.playerFaceDir[0], currentNPCEvent.playerPos[0].isSit);
         yield return StartCoroutine(MoveEventNPCsToPos(0));
         StartCoroutine(WaitForOpenStartDialue());
     }
@@ -672,7 +685,8 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
             StartCoroutine(playerController.SetPlayerPos(
                 currentNPCEvent.playerPos[NPCEventStep].pos,
                 playerSpeed,
-                currentNPCEvent.playerFaceDir[NPCEventStep]
+                currentNPCEvent.playerFaceDir[NPCEventStep],
+                 currentNPCEvent.playerPos[NPCEventStep].isSit
             ));
         }
         // A* 寻路

@@ -13,6 +13,7 @@ using Transform = UnityEngine.Transform;
 using UnityEngine.SceneManagement;
 using MFarm.AStar;
 using System.Linq;
+using DG.Tweening;
 public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
 {
     [Header("玩家属性")]
@@ -175,10 +176,17 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     //防御碰撞特效
     public GameObject[] defenceEffects;
     public int effectIndex;
-    //正在继续NPC事件
+    //正在进行NPC事件
     public bool isNpcEvent;
     //NPC开始时的位置
     private Vector2 npcEventOriginPos;
+    //坐椅子相关
+    // 坐椅子前的位置
+    private Vector3 sitOriginPos;  
+    private bool isSittingOnChair;
+    private Chair currentChair;
+    // 正在弧线移动中
+    private bool isSittingInProgress;  
     public void Awake()
     {
 
@@ -270,6 +278,10 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
             StartCoroutine(WaitTime());
             EventHandler.CallControlPlayerBagOpen(true);
 
+        }
+        if (isSittingOnChair && !isSittingInProgress && Input.anyKeyDown && !isNpcEvent)
+        {
+            LeaveChair();
         }
     }
     private void FixedUpdate()
@@ -894,14 +906,14 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         //if (isLaterFishing)
         //{
         //    //fishDetails = InventoryManager.Instance.GetFishDetails(randomFishIndex, true);
-        //    fishPrefab.GetComponent<Item>().itemID = fishDetails.itemID;
+        //    fishPrefab.GetComponent<Item>().getItemID = fishDetails.getItemID;
         //    var fishItems = Instantiate(fishPrefab, baitGameObject.transform.position, Quaternion.identity);
         //    fish = fishItems;
         //}
         //else
         //{
         //    //fishDetails = InventoryManager.Instance.GetFishDetails(randomSeaFishIndex, true);
-        //    fishPrefab.GetComponent<Item>().itemID = fishDetails.itemID;
+        //    fishPrefab.GetComponent<Item>().getItemID = fishDetails.getItemID;
         //    var fishItems = Instantiate(fishPrefab, baitGameObject.transform.position, Quaternion.identity);
         //    fish = fishItems;
         //}
@@ -1078,12 +1090,22 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         isNpcEvent = true;
         inputDisable = true;
         npcEventOriginPos = transform.position;
+        InventoryManager.Instance.anyBagOpened = true;
     }
     private void OnEndNPCEvent()
     {
         isNpcEvent = false;
         inputDisable = false;
         transform.position = npcEventOriginPos;
+        currentChair = null;
+        isSittingInProgress = false;
+        isSittingOnChair = false;
+        InventoryManager.Instance.anyBagOpened = false;
+        foreach (var anim in animators)
+        {
+            anim.SetBool("isSit", false);
+        }
+
     }
     private void OnPlayEatAnimEvent(int ID)
     {
@@ -1446,73 +1468,173 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     /// <param name="targetPos"></param>
     /// <param name="speed"></param>
     /// <returns></returns>
-    public IEnumerator SetPlayerPos(Vector2 targetPos,float speed , Vector2 faceDir)
+    public IEnumerator SetPlayerPos(Vector2 targetPos,float speed , Vector2 faceDir,bool isSit)
     {
+        if (!isSittingOnChair)
+        {
+            inputDisable = true;
+            // A* 寻路
+            string sceneName = SceneManager.GetActiveScene().name;
+            var grid = FindObjectOfType<Grid>();
+            Vector3Int currentGridPos = grid.WorldToCell(transform.position);
+            Vector3Int targetGridPos = grid.WorldToCell(new Vector3(targetPos.x, targetPos.y, 0));
+            Vector2 dir = Vector2.down;
+            // 构建路径
+            Stack<MovementStep> pathStack = new Stack<MovementStep>();
+            AStar.Instance.buildPath(sceneName, (Vector2Int)currentGridPos, (Vector2Int)targetGridPos, pathStack);
+
+            if (pathStack.Count == 0)
+            {
+                inputDisable = false;
+                yield break;
+            }
+
+            // Stack 顶部是起点、底部是终点，逆序取出得到 起点→终点 的路径列表
+            List<Vector2Int> path = new List<Vector2Int>();
+            while (pathStack.Count > 0)
+            {
+                path.Add(pathStack.Pop().gridCoordinate);
+            }
+
+            // 沿路径逐格移动（跳过起点 i=0）
+            for (int i = 1; i < path.Count; i++)
+            {
+                Vector3 worldPos = grid.CellToWorld(new Vector3Int(path[i].x, path[i].y, 0));
+                worldPos = new Vector3(worldPos.x + Settings.gridCellSize / 2, worldPos.y + Settings.gridCellSize / 2, 0);
+                Vector2 stepTarget = new Vector2(worldPos.x, worldPos.y);
+                // 检查目标位置是否有门
+                Door door = FindObjectsByType<Door>(FindObjectsSortMode.None)
+         .OrderBy(d => Vector2.Distance(d.transform.position, stepTarget))
+         .FirstOrDefault(d => Vector2.Distance(d.transform.position, stepTarget) < 0.7f);
+                if (door != null && !door.isOpened)
+                {
+                    door.OpenDoor();
+                    yield return new WaitForSeconds(0.4f);
+                }
+                while (Vector2.Distance(transform.position, stepTarget) > Settings.pixelSize)
+                {
+                    dir = (stepTarget - (Vector2)transform.position).normalized;
+                    transform.position = Vector2.MoveTowards(transform.position, stepTarget, speed * Time.deltaTime);
+
+                    foreach (var anim in animators)
+                    {
+                        anim.SetBool("isMoving", true);
+                        anim.SetFloat("mouseX", dir.x);
+                        anim.SetFloat("mouseY", dir.y);
+                        anim.SetFloat("InputX", dir.x);
+                        anim.SetFloat("InputY", dir.y);
+                    }
+
+                    yield return null;
+                }
+            }
+            //如果到达目标点要坐下就找椅子坐
+            if (isSit)
+            {
+                currentChair = FindObjectsByType<Chair>(FindObjectsSortMode.None)
+          .OrderBy(d => Vector2.Distance(d.transform.position, transform.position))
+          .FirstOrDefault(d => Vector2.Distance(d.transform.position, transform.position) < 2f);
+                if (currentChair != null)
+                    SitOnChair(currentChair);
+            }
+            // 到达终点，停止移动动画
+            foreach (var anim in animators)
+            {
+                anim.SetBool("isMoving", false);
+                anim.SetFloat("InputX", faceDir.x);
+                anim.SetFloat("InputY", faceDir.y);
+            }
+        }
+        
+    }
+    /// <summary>
+    /// 坐椅子
+    /// </summary>
+    /// <param name="chairPos"></param>
+    /// <param name="sitFaceDir"></param>
+    public void SitOnChair(Chair chair)
+    {
+        sitOriginPos = transform.position;
+        //transform.position = new Vector2(chair.transform.position.x,chair.transform.position.y-0.15f);
+        isSittingOnChair = true;
+        inputDisable = true;
+        currentChair = chair;
+        chair.ActiveChairBoxCollider();
+        StartCoroutine(SitArcMove(chair));
+    }
+    /// <summary>
+    /// 离开椅子
+    /// </summary>
+    public void LeaveChair()
+    {
+        if (isSittingInProgress) return;
+        StartCoroutine(LeaveArcMove());
+    }
+    private IEnumerator SitArcMove(Chair chair)
+    {
+        isSittingInProgress = true;
         inputDisable = true;
 
-        // A* 寻路
-        string sceneName = SceneManager.GetActiveScene().name;
-        var grid = FindObjectOfType<Grid>();
-        Vector3Int currentGridPos = grid.WorldToCell(transform.position);
-        Vector3Int targetGridPos = grid.WorldToCell(new Vector3(targetPos.x, targetPos.y, 0));
-        Vector2 dir = Vector2.down;
-        // 构建路径
-        Stack<MovementStep> pathStack = new Stack<MovementStep>();
-        AStar.Instance.buildPath(sceneName, (Vector2Int)currentGridPos, (Vector2Int)targetGridPos, pathStack);
-
-        if (pathStack.Count == 0)
+        Vector3 targetPos = new Vector2(chair.transform.position.x, chair.transform.position.y - 0.15f);
+        Vector3 mid = (transform.position + targetPos) / 2f + Vector3.up * 0.5f;
+        // 手动生成贝塞尔路径点
+        List<Vector3> points = new List<Vector3>();
+        for (int i = 0; i <= 30; i++)
         {
-            inputDisable = false;
-            yield break;
+            float t = i / 30.0f;
+            Vector3 p0p1 = Vector3.Lerp(transform.position, mid, t);
+            Vector3 p1p2 = Vector3.Lerp(mid, targetPos, t);
+            points.Add(Vector3.Lerp(p0p1, p1p2, t));
         }
 
-        // Stack 顶部是起点、底部是终点，逆序取出得到 起点→终点 的路径列表
-        List<Vector2Int> path = new List<Vector2Int>();
-        while (pathStack.Count > 0)
-        {
-            path.Add(pathStack.Pop().gridCoordinate);
-        }
-
-        // 沿路径逐格移动（跳过起点 i=0）
-        for (int i = 1; i < path.Count; i++)
-        {
-            Vector3 worldPos = grid.CellToWorld(new Vector3Int(path[i].x, path[i].y, 0));
-            worldPos = new Vector3(worldPos.x + Settings.gridCellSize / 2, worldPos.y + Settings.gridCellSize / 2, 0);
-            Vector2 stepTarget = new Vector2(worldPos.x, worldPos.y);
-            // 检查目标位置是否有门
-            Door door = FindObjectsByType<Door>(FindObjectsSortMode.None)
-     .OrderBy(d => Vector2.Distance(d.transform.position, stepTarget))
-     .FirstOrDefault(d => Vector2.Distance(d.transform.position, stepTarget) < 0.7f);
-            if (door != null && !door.isOpened)
+        Tween tween = transform.DOPath(points.ToArray(), 0.2f, PathType.Linear)
+             .SetEase(Ease.Linear)
+            .OnUpdate(() =>
             {
-                door.OpenDoor();
-                yield return new WaitForSeconds(0.4f);
-            }
-            while (Vector2.Distance(transform.position, stepTarget) > Settings.pixelSize)
-            {
-                dir = (stepTarget - (Vector2)transform.position).normalized;
-                transform.position = Vector2.MoveTowards(transform.position, stepTarget, speed * Time.deltaTime);
+                Vector3 dir = (transform.position - points[0]).normalized;
+            });
 
-                foreach (var anim in animators)
-                {
-                    anim.SetBool("isMoving", true);
-                    anim.SetFloat("mouseX", dir.x);
-                    anim.SetFloat("mouseY", dir.y);
-                    anim.SetFloat("InputX", dir.x);
-                    anim.SetFloat("InputY", dir.y);
-                }
+        yield return tween.WaitForCompletion();
 
-                yield return null;
-            }
-        }
-
-        // 到达终点，停止移动动画
+        transform.position = targetPos;
         foreach (var anim in animators)
         {
             anim.SetBool("isMoving", false);
-            anim.SetFloat("InputX", faceDir.x);
-            anim.SetFloat("InputY", faceDir.y);
+            anim.SetBool("isSit", true);
+            anim.SetFloat("InputX", chair.chairFaceDir.x);
+            anim.SetFloat("InputY", chair.chairFaceDir.y);
         }
+
+        isSittingInProgress = false;
+    }
+    private IEnumerator LeaveArcMove()
+    {
+        isSittingInProgress = true;
+
+        foreach (var anim in animators)
+            anim.SetBool("isSit", false);
+
+        Vector3 mid = (transform.position + sitOriginPos) / 2f + Vector3.up * 0.5f;
+
+        List<Vector3> points = new List<Vector3>();
+        for (int i = 0; i <= 30; i++)
+        {
+            float t = i / 30.0f;
+            Vector3 p0p1 = Vector3.Lerp(transform.position, mid, t);
+            Vector3 p1p2 = Vector3.Lerp(mid, sitOriginPos, t);
+            points.Add(Vector3.Lerp(p0p1, p1p2, t));
+        }
+
+        Tween tween = transform.DOPath(points.ToArray(), 0.2f, PathType.Linear)
+            .SetEase(Ease.Linear);
+
+        yield return tween.WaitForCompletion();
+
+        transform.position = sitOriginPos;
+        isSittingOnChair = false;
+        inputDisable = false;
+        currentChair.QuitChairBoxCollider();
+        isSittingInProgress = false;
     }
     /// <summary>
     /// 保存SaveData

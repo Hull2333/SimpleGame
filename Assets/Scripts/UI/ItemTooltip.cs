@@ -78,7 +78,7 @@ public class ItemTooltip : MonoBehaviour    //调用在ItemToolTip对象上
     //            var item = bluPrintDetails.resourceItem[i];
     //            //需要多少种资源显示多少中资源
     //            resourceItem[i].gameObject.SetActive(true);
-    //            resourceItem[i].sprite = InventoryManager.Instance.GetItemDetails(item.itemID).itemIcon;
+    //            resourceItem[i].sprite = InventoryManager.Instance.GetItemDetails(item.getItemID).itemIcon;
     //            resourceItem[i].transform.GetChild(0).GetComponent<Text>().text = item.itemAmount.ToString(); 
     //        }
     //        else

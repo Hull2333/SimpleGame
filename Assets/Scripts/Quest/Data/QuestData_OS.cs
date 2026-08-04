@@ -64,7 +64,7 @@ public class QuestData_OS : ScriptableObject
             //else
             //{
             //    //获取任务奖励
-            //    InventoryManager.Instance.AddRewardItem(reward.itemID, reward.itemAmount);
+            //    InventoryManager.Instance.AddRewardItem(reward.getItemID, reward.itemAmount);
             //}
         }
     }

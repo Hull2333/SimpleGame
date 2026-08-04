@@ -92,6 +92,7 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
     [SerializeField] private int areaCode;
     //当前的激活场景协程
     private IEnumerator currentTranstion;
+    
     private void OnEnable()
     {
         EventHandler.ItemSelectEvent += OnItemSelectEvent;
@@ -207,12 +208,18 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
                     Debug.Log("没法放在这个位置");
                 }
             }
-            //触摸动物
             if (canPat && !InteractWithUI())
             {
+                //触摸动物
                 if (checkCollider.GetComponent<AnimalController>() != null)
                 {
                     checkCollider.GetComponent<AnimalController>().AddAnimalFriendliness(0.5f, playerTransform.position);
+                }
+                //坐椅子
+                if(checkCollider.GetComponent<Chair>() != null && Vector2.Distance(playerTransform.position, checkCollider.transform.position) <= 3f)
+                {
+                    var chair = checkCollider.GetComponent<Chair>();
+                    playerController.SitOnChair(chair);
                 }
             }
         }
