@@ -165,8 +165,8 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     public GameObject fishItem;
     //生成鱼的信息
     private ItemDetails fishDetails;
-    //确认渔获
-    private bool confirmFishGet = false;
+    //游戏时间是否停止状态
+    private bool isGameTimePause = false;
     [Header("慢动作设置")]
     public float normalTimeScale = 1f;
     public float slowMotionTimeScale = 0.1f;
@@ -264,20 +264,22 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
             StartFishGame();
         }
         //确认渔获后恢复站立状态
-        if (confirmFishGet && Input.GetMouseButton(0))
+        if (isGameTimePause && Input.anyKeyDown)
         {
             foreach (var anim in animators)
             {
                 anim.SetBool("Tool5", false);
+                anim.SetBool("isRecerve", false);
             }
             fishItem.SetActive(false);
             inputDisable = false;
             fishMove = false;
-            confirmFishGet = false;
+            isGameTimePause = false;
             cM.fishingEventDisable = false;
             StartCoroutine(WaitTime());
             EventHandler.CallControlPlayerBagOpen(true);
-
+            EventHandler.CallUpdateGameStateEvent(GameState.Gameplay);
+            EventHandler.CallQuitRecerveItemUIEvent();
         }
         if (isSittingOnChair && !isSittingInProgress && Input.anyKeyDown && !isNpcEvent)
         {
@@ -334,6 +336,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         EventHandler.StartNPCEvent += OnStartNPCEvent;
         EventHandler.EndNPCEvent += OnEndNPCEvent;
         EventHandler.PlayEatAnimEvent += OnPlayEatAnimEvent;
+        EventHandler.RecerveItemEvent += OnRecerveItemEvent;
     }
 
    
@@ -361,9 +364,10 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         EventHandler.StartNPCEvent -= OnStartNPCEvent;
         EventHandler.EndNPCEvent -= OnEndNPCEvent;
         EventHandler.PlayEatAnimEvent -= OnPlayEatAnimEvent;
+        EventHandler.RecerveItemEvent -= OnRecerveItemEvent;
     }
 
-    
+  
 
     private void OnMouseClickedEvent(Vector3 mouseWorldPos, ItemDetails itemDetails)
     {
@@ -447,7 +451,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     }
     private void OnMouseUpEvent()
     {
-        Debug.Log("MouseUp");
+        EventHandler.CallUpdateGameStateEvent(GameState.Pause);
         cM.fishingEventDisable = true;
         isMouseDownTimerIncrease = true;
         fishPowerProcessCanvas.SetActive(false);
@@ -745,7 +749,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
                 inputDisable = false;
                 //关闭鱼钩
                 baitGameObject.SetActive(false);
-
+                EventHandler.CallUpdateGameStateEvent(GameState.Gameplay);
             }
         }
         //若鱼钩落点的TileDetail为空
@@ -971,7 +975,8 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         fishItem.SetActive(true);
         fishItem.GetComponent<SpriteRenderer>().sprite = fishDetails.itemOnWorldSprite;
         yield return new WaitForSeconds(0.5f);
-        confirmFishGet = true;
+        isGameTimePause = true;
+        
 
     }
     /// <summary>
@@ -1106,6 +1111,19 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
             anim.SetBool("isSit", false);
         }
 
+    }
+    /// <summary>
+    /// 播放获取重要道具动画
+    /// </summary>
+    /// <param name="itemName"></param>
+    private void OnRecerveItemEvent(ItemDetails item)
+    {
+        isGameTimePause = true;
+        EventHandler.CallUpdateGameStateEvent(GameState.Pause);
+        foreach (var anim in animators)
+        {
+            anim.SetBool("isRecerve", true);
+        }
     }
     private void OnPlayEatAnimEvent(int ID)
     {
@@ -1559,7 +1577,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         isSittingOnChair = true;
         inputDisable = true;
         currentChair = chair;
-        chair.ActiveChairBoxCollider();
+        chair.QuitChairBoxCollider();
         StartCoroutine(SitArcMove(chair));
     }
     /// <summary>
@@ -1575,7 +1593,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         isSittingInProgress = true;
         inputDisable = true;
 
-        Vector3 targetPos = new Vector2(chair.transform.position.x, chair.transform.position.y - 0.15f);
+        Vector3 targetPos = new Vector2(chair.transform.position.x, chair.transform.position.y - 0.15f );
         Vector3 mid = (transform.position + targetPos) / 2f + Vector3.up * 0.5f;
         // 手动生成贝塞尔路径点
         List<Vector3> points = new List<Vector3>();
@@ -1633,7 +1651,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         transform.position = sitOriginPos;
         isSittingOnChair = false;
         inputDisable = false;
-        currentChair.QuitChairBoxCollider();
+        currentChair.ActiveChairBoxCollider();
         isSittingInProgress = false;
     }
     /// <summary>

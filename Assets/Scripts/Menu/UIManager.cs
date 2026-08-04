@@ -4,28 +4,32 @@ using System.Xml.Serialization;
 using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
+using TMPro;
+using DG.Tweening;
 namespace MFarm.Inventory
 {
-    public class UIManager : Singleton<UIManager>  //µ÷ÓÃÔÚMainCanvas¶ÔÏóÉÏ
+    public class UIManager : Singleton<UIManager>  //è°ƒç”¨åœ¨MainCanvaså¯¹è±¡ä¸Š
     {
         private GameObject menuCanvas;
 
         public GameObject menuPrefab;
 
-        //»ñÈ¡ÓÒÉÏ½ÇÉèÖÃ°´Å¥
+        //è·å–å³ä¸Šè§’è®¾ç½®æŒ‰é’®
         public Button settingBtn;
-        //ÔİÍ£²Ëµ¥
+        //æš‚åœèœå•
         public GameObject pausePanel;
-        //ÒôÁ¿¿ØÖÆSlider
+        //éŸ³é‡æ§åˆ¶Slider
         public Slider volumeSlider;
         public Canvas blackBoardCanvas;
-
-
+        //è·å–é‡è¦é“å…·UI
+        public GameObject recerveUIPanel;
+        public TextMeshProUGUI recerveUIText;
+        private Coroutine bounceCoroutine;
         private void Awake()
         {
-            //µã»÷settingBtn°´Å¥Ö´ĞĞTogglePausePanel·½·¨
+            //ç‚¹å‡»settingBtnæŒ‰é’®æ‰§è¡ŒTogglePausePanelæ–¹æ³•
             settingBtn.onClick.AddListener(TogglePausePanel);
-            //»¬¶¯volumeSliderÖ´ĞĞAudioManager½Å±¾ÏÂµÄSetMasterVolume·½·¨
+            //æ»‘åŠ¨volumeSlideræ‰§è¡ŒAudioManagerè„šæœ¬ä¸‹çš„SetMasterVolumeæ–¹æ³•
             volumeSlider.onValueChanged.AddListener(AudioManager.Instance.SetMasterVolume);
         }
 
@@ -34,6 +38,8 @@ namespace MFarm.Inventory
             EventHandler.AfterSceneLoadedEvent += OnAfterSceneLoadedEvent;
             EventHandler.StartNPCEvent += OnStartNPCEvent;
             EventHandler.EndNPCEvent += OnEndNPCEvent;
+            EventHandler.RecerveItemEvent += OnRecerveItemEvent;
+            EventHandler.QuitRecerveItemUIEvent += OnQuitRecerveItemUIEvent;
         }
 
         private void OnDisable()
@@ -41,9 +47,11 @@ namespace MFarm.Inventory
             EventHandler.AfterSceneLoadedEvent -= OnAfterSceneLoadedEvent;
             EventHandler.StartNPCEvent -= OnStartNPCEvent;
             EventHandler.EndNPCEvent -= OnEndNPCEvent;
+            EventHandler.RecerveItemEvent -= OnRecerveItemEvent;
+            EventHandler.QuitRecerveItemUIEvent -= OnQuitRecerveItemUIEvent;
         }
 
-     
+
 
         private void Start()
         {
@@ -54,7 +62,7 @@ namespace MFarm.Inventory
         }
         private void OnAfterSceneLoadedEvent()
         {
-            //Èç¹ûmenuCanvasÏÂÃæÓĞ×ÓÎïÌå¾ÍÉ¾³ı
+            //å¦‚æœmenuCanvasä¸‹é¢æœ‰å­ç‰©ä½“å°±åˆ é™¤
             if (menuCanvas.transform.childCount > 0)
             {
                 Destroy(menuCanvas.transform.GetChild(0).gameObject);
@@ -72,14 +80,102 @@ namespace MFarm.Inventory
             GetComponent<Canvas>().enabled = true;
             blackBoardCanvas.gameObject.SetActive(false);
         }
+        private void OnRecerveItemEvent(ItemDetails item)
+        {
+            recerveUIPanel.gameObject.SetActive(true);
+            StartCoroutine(DelayedSetPanelPosition());
+            StartCoroutine(BounceLoopDoTween(item));
+            bounceCoroutine = StartCoroutine(BounceLoopDoTween(item));
+        }
+        private void OnQuitRecerveItemUIEvent()
+        {
+            recerveUIPanel.gameObject.SetActive(false);
+            StopCoroutine(bounceCoroutine);
+        }
         /// <summary>
-        /// ÇĞ³öÔİÍ£²Ëµ¥
+        /// å®šä½Player
+        /// </summary>
+        private void SetPanelAtPlayerPosition()
+        {
+            var player = FindObjectOfType<PlayerController>();
+            if (player != null && Camera.main != null)
+            {
+                Vector3 screenPos = Camera.main.WorldToScreenPoint(player.transform.position);
+                screenPos.y += 50f;
+                recerveUIPanel.GetComponent<RectTransform>().position = screenPos;
+            }
+        }
+        /// <summary>
+        /// æ–‡å­—è·³åŠ¨åç¨‹
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        private IEnumerator BounceLoopDoTween(ItemDetails item)
+        {
+            string prefix = "è·å¾—";
+            string suffix = "!";
+            recerveUIText.text = $"{prefix}<color=red>{item.itemName}</color>{suffix}";
+            recerveUIText.ForceMeshUpdate();
+
+            TMP_TextInfo textInfo = recerveUIText.textInfo;
+            int charCount = textInfo.characterCount;
+
+            // ç¼“å­˜åŸå§‹é¡¶ç‚¹ä½ç½®
+            Vector3[][] originalVerts = new Vector3[textInfo.meshInfo.Length][];
+            for (int m = 0; m < textInfo.meshInfo.Length; m++)
+                originalVerts[m] = (Vector3[])textInfo.meshInfo[m].vertices.Clone();
+
+            // æ¢å¤æ‰€æœ‰é¡¶ç‚¹åˆ°åŸå§‹ä½ç½®
+            void RestoreAll()
+            {
+                for (int m = 0; m < textInfo.meshInfo.Length; m++)
+                    System.Array.Copy(originalVerts[m], textInfo.meshInfo[m].vertices, originalVerts[m].Length);
+            }
+
+            while (true)
+            {
+                for (int i = 0; i < charCount; i++)
+                {
+                    if (!textInfo.characterInfo[i].isVisible) continue;
+
+                    int matIdx = textInfo.characterInfo[i].materialReferenceIndex;
+                    int vertIdx = textInfo.characterInfo[i].vertexIndex;
+                    Vector3[] verts = textInfo.meshInfo[matIdx].vertices;
+
+                    Tween tween = DOTween.To(
+                        () => 0f,
+                        (y) =>
+                        {
+                            RestoreAll();
+                            for (int v = 0; v < 4; v++)
+                                verts[vertIdx + v] = originalVerts[matIdx][vertIdx + v] + Vector3.up * y;
+                            recerveUIText.UpdateVertexData(TMP_VertexDataUpdateFlags.Vertices);
+                        },
+                        10f, 0.1f
+                    ).SetEase(Ease.OutQuad).SetLoops(2, LoopType.Yoyo);
+
+                    yield return tween.WaitForCompletion();
+                }
+                yield return new WaitForSeconds(0.3f);
+            }
+        }
+        /// <summary>
+        /// ç­‰ç›¸æœºæ›´æ–°å®Œè¿™ä¸€å¸§
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerator DelayedSetPanelPosition()
+        {
+            yield return new WaitForEndOfFrame(); 
+            SetPanelAtPlayerPosition();
+        }
+        /// <summary>
+        /// åˆ‡å‡ºæš‚åœèœå•
         /// </summary>
         private void TogglePausePanel()
         {
-            //ÅĞ¶Ïµ±Ç°ÊÇ·ñ´ò¿ªÁËÔİÍ£²Ëµ¥
+            //åˆ¤æ–­å½“å‰æ˜¯å¦æ‰“å¼€äº†æš‚åœèœå•
             bool isOpen = pausePanel.activeInHierarchy;
-            //µ±ÔİÍ£²Ëµ¥´ò¿ªÊ±£¬µã»÷¹Ø±ÕÔİÍ£²Ëµ¥
+            //å½“æš‚åœèœå•æ‰“å¼€æ—¶ï¼Œç‚¹å‡»å…³é—­æš‚åœèœå•
             if (isOpen)
             {
                 pausePanel.SetActive(false);
@@ -87,24 +183,24 @@ namespace MFarm.Inventory
             }
             else
             {
-                //À¬»ø»ØÊÕ£¬ÇåÀíÄÚ´æ
+                //åƒåœ¾å›æ”¶ï¼Œæ¸…ç†å†…å­˜
                 System.GC.Collect();
                 pausePanel.SetActive(true);
-                //ÓÎÏ·Ê±¼äÔİÍ£
+                //æ¸¸æˆæ—¶é—´æš‚åœ
                 Time.timeScale = 0f;
             }
         }
         /// <summary>
-        /// ´ÓÔİÍ£²Ëµ¥»Øµ½Ö÷²Ëµ¥
+        /// ä»æš‚åœèœå•å›åˆ°ä¸»èœå•
         /// </summary>
         public void ReturnMenuCanvas()
         {
-            //ÔÚ·µ»ØÖ÷²Ëµ¥Ç°Òª°ÑÊ±¼äÔİÍ£È¡Ïû£¬·ñÔò»áÊ¹ºóÃæ½øÈëÓÎÏ·ÎŞ·¨ÔËĞĞ
+            //åœ¨è¿”å›ä¸»èœå•å‰è¦æŠŠæ—¶é—´æš‚åœå–æ¶ˆï¼Œå¦åˆ™ä¼šä½¿åé¢è¿›å…¥æ¸¸æˆæ— æ³•è¿è¡Œ
             Time.timeScale = 1.0f;
             StartCoroutine(BackToMenu());
         }
         /// <summary>
-        /// ´ÓÔİÍ£²Ëµ¥·µ»Øµ½ÓÎÏ·ÖĞ
+        /// ä»æš‚åœèœå•è¿”å›åˆ°æ¸¸æˆä¸­
         /// </summary>
         public void ReturnGame()
         {
@@ -113,21 +209,18 @@ namespace MFarm.Inventory
 
         }
         /// <summary>
-        /// ÍË³öµ½Ö÷²Ëµ¥
+        /// é€€å‡ºåˆ°ä¸»èœå•
         /// </summary>
         /// <returns></returns>
         private IEnumerator BackToMenu()
         {
             pausePanel.SetActive(false);
-            //½áÊøÓÎÏ·µÄÊÂ¼ş
+            //ç»“æŸæ¸¸æˆçš„äº‹ä»¶
             EventHandler.CallEndGameEvent();
             yield return new WaitForSeconds(1);
             Instantiate(menuPrefab, menuCanvas.transform);
         }
 
-      
+
     }
 }
- 
-
-

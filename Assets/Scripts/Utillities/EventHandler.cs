@@ -465,4 +465,16 @@ public static class EventHandler
     {
         AnimalExitCoopEvent?.Invoke(buildCode, animal);
     }
+    //获取重要物品的事件
+    public static event Action<ItemDetails> RecerveItemEvent;
+    public static void CallRecerveItemEvent(ItemDetails item)
+    {
+        RecerveItemEvent?.Invoke(item);
+    }
+    //关闭获取重要道具的UI
+    public static event Action QuitRecerveItemUIEvent;
+    public static void CallQuitRecerveItemUIEvent()
+    {
+        QuitRecerveItemUIEvent?.Invoke();
+    }
 }

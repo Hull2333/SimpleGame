@@ -33,6 +33,8 @@ public class AnimatorOverride : MonoBehaviour   //调用在Player对象上
         EventHandler.EquipSlotEvent += OnEquipSlotEvent;
         EventHandler.DisplayCollectItemSprite += OnDisplayCollectItemSprite;
         EventHandler.PlayEatAnimEvent += OnPlayEatAnimEvent;
+        EventHandler.RecerveItemEvent += OnRecerveItemEvent;
+        EventHandler.QuitRecerveItemUIEvent += OnQuitRecerveItemUIEvent;
     }
     private void OnDisable()
     {
@@ -41,9 +43,15 @@ public class AnimatorOverride : MonoBehaviour   //调用在Player对象上
         EventHandler.EquipSlotEvent -= OnEquipSlotEvent;
         EventHandler.DisplayCollectItemSprite -= OnDisplayCollectItemSprite;
         EventHandler.PlayEatAnimEvent -= OnPlayEatAnimEvent;
+        EventHandler.RecerveItemEvent -= OnRecerveItemEvent;
+        EventHandler.QuitRecerveItemUIEvent -= OnQuitRecerveItemUIEvent;
     }
 
    
+
+
+
+
 
     /// <summary>
     /// 设置切换场景后，手部动作恢复为默认，且拿着的东西回到背包
@@ -129,6 +137,15 @@ public class AnimatorOverride : MonoBehaviour   //调用在Player对象上
         holdItem.SetActive(true);
         holdItem.GetComponent<SpriteRenderer>().sprite = InventoryManager.Instance.GetItemDetails(ID).itemOnWorldSprite;
         holdItem.gameObject.GetComponent<Animator>().SetTrigger("isEat");
+    }
+    private void OnRecerveItemEvent(ItemDetails item)
+    {
+        holdItem.SetActive(true);
+        holdItem.GetComponent<SpriteRenderer>().sprite = item.itemOnWorldSprite;
+    }
+    private void OnQuitRecerveItemUIEvent()
+    {
+        holdItem.SetActive(false);
     }
     /// <summary>
     /// 根据当前的玩家部位类型来切换对应的玩家动画   

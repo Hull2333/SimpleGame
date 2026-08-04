@@ -273,15 +273,17 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
                 transform.transform.position = originNPCPos;
                 cameraFollow.Follow = playerTransform;
                 currentNPCEvent.isHappened = true;
+                EventHandler.CallEndNPCEvent();
                 //获取事件奖励道具
-                if(currentNPCEvent.getItemID.Length > 0)
+                if (currentNPCEvent.getItemID.Length > 0)
                 {
                     foreach (var itemID in currentNPCEvent.getItemID)
                     {
+                        ItemDetails itemDetails = InventoryManager.Instance.GetItemDetails(itemID);
+                        EventHandler.CallRecerveItemEvent(itemDetails);
                         InventoryManager.Instance.AddRewardItem(itemID, 1);
                     }
                 }
-                EventHandler.CallEndNPCEvent();
                 currentNPCEvent = null;
                 anim.SetBool("ActionExit", true);
                 timeToMoveNextPos = false;

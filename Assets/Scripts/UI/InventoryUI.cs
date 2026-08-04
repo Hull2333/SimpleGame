@@ -8,7 +8,7 @@ using UnityEngine.UI;
 using static AnimalData_SO;
 namespace MFarm.Inventory
 {
-    public class InventoryUI : Singleton<InventoryUI>    //??????Inventory??????
+    public class InventoryUI : Singleton<InventoryUI>    //调用在InventoryUI对象上
     {
         [Header("???????")]
         public Canvas tweenCanvas;
@@ -177,7 +177,7 @@ namespace MFarm.Inventory
             playerMoneyText.text = InventoryManager.Instance.playerMoney.ToString();
         }
         /// <summary>
-        /// ??????????????
+        /// 商店UI打开
         /// </summary>
         /// <param name="slotType"></param>
         /// <param name="bag_SO"></param>
@@ -223,7 +223,7 @@ namespace MFarm.Inventory
 
         }
         /// <summary>
-        /// ?????????????
+        /// 商店UI关闭
         /// </summary>
         /// <param name="slotType"></param>
         /// <param name="bagData"></param>
