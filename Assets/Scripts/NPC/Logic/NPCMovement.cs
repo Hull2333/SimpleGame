@@ -296,6 +296,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
             }
         }
     }
+  
     /// <summary>
     /// 根据NPC所在场景判断是否可见
     /// </summary>

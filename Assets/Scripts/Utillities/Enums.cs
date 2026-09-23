@@ -127,7 +127,7 @@ public enum TaskType
 /// </summary>
 public enum NPCname
 {
-    Freda,DaTuan,Hanies,Liam,Adolf,Rose,Anderson,
+    Freda,DaTuan,Hanies,Liam,Adolf,Rose,Anderson,Axing,
 }
 /// <summary>
 /// 任务类型
