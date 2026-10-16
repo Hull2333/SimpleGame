@@ -24,7 +24,7 @@ public class TreeGrowing : MonoBehaviour //调用在树预制体上
         EventHandler.GameDayEvent -= OnGameDayEvent;
     }
 
-    private void OnGameDayEvent(int arg1, Season season)                                            
+    private void OnGameDayEvent(int arg1, Season season, Weekday weekday)                                            
     {
         if (isTreeGrow)
         {

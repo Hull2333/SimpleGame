@@ -50,10 +50,10 @@ public static class EventHandler
         GameMinuteEvent?.Invoke(minute, hour, day, season);
     }
     //每天每季节对应的事件
-    public static event Action<int, Season> GameDayEvent;
-    public static void CallGameDayEvent(int day, Season season)
+    public static event Action<int, Season, Weekday> GameDayEvent;
+    public static void CallGameDayEvent(int day, Season season, Weekday weekday)
     {
-        GameDayEvent?.Invoke(day, season);
+        GameDayEvent?.Invoke(day, season, weekday);
     }
    
     //每小时，天，月，年,季节的事件

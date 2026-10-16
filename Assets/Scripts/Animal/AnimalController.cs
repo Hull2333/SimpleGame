@@ -83,7 +83,7 @@ public class AnimalController : MonoBehaviour //调用在每个动物预制体�
     }
 
 
-    private void OnGameDayEvent(int arg1, Season season)
+    private void OnGameDayEvent(int arg1, Season season, Weekday weekday)
     {
         isTouch = false;
         isProduce = false;

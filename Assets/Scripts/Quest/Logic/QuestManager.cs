@@ -50,7 +50,7 @@ public class QuestManager : Singleton<QuestManager> //调用在QuestManager对象上
             task.questData.CheckQuestProgress();
         }
     }
-    private void OnGameDayEvent(int arg1, Season season)
+    private void OnGameDayEvent(int arg1, Season season, Weekday weekday)
     {
         InstantiateBulletinBoardQuest();
         UpdateQuestDay();

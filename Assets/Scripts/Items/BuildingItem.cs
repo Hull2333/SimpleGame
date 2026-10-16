@@ -53,7 +53,7 @@ public class BuildingItem : MonoBehaviour //调用在可建造建筑预制体上
         EventHandler.DisplayBuildingArrowIcon -= OnDisplayBuildingArrowIcon;
     }
   
-    private void OnGameDayEvent(int arg1, Season season)
+    private void OnGameDayEvent(int arg1, Season season, Weekday weekday)
     {
         Building(false);
     }

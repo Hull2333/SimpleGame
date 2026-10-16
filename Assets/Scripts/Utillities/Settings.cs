@@ -15,7 +15,7 @@ public class Settings //不需要调用在任何物体上
     public const int secondHold = 59;
     public const int minuteHold = 59;
     public const int hourHold = 23;
-    public const int dayHold = 30;
+    public const int dayHold = 28;
     public const int seasonHold = 3;
     //加载界面浮现的时间
     public const float fadeDuration = 1.5f;

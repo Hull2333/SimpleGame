@@ -37,8 +37,8 @@ namespace MFarm.AStar
             if (moveNPC)
             {
                 moveNPC = false;
-                var schedule = new ScheduleDetails(0,0,0,0,Season.´ºÌì,targetScene,targetPos,stopClip,true);
-                NPCMovement.BuildPath(schedule);
+                //var schedule = new ScheduleDetails(0,0,0,0,Season.´ºÌì,targetScene,targetPos,stopClip,true);
+                //NPCMovement.BuildPath(schedule);
             }
         }
 

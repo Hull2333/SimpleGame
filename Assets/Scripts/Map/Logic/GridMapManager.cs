@@ -135,7 +135,7 @@ namespace MFarm.Map
         /// </summary>
         /// <param name="day"></param>
         /// <param name="season"></param>
-        private void OnGameDayEvent(int day, Season season)
+        private void OnGameDayEvent(int day, Season season, Weekday weekday)
         {
      
             currentSeason = season;

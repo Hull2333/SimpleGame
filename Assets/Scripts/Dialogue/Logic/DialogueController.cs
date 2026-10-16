@@ -42,7 +42,7 @@ namespace MFarm.Dialogue
         {
             EventHandler.GameDayEvent -= OnGameDayEvent;
         }
-        private void OnGameDayEvent(int arg1, Season season)
+        private void OnGameDayEvent(int arg1, Season season, Weekday weekday)
         {
             isFristTalk = true;
             isTodayNotGetGift = true;
@@ -74,7 +74,7 @@ namespace MFarm.Dialogue
                    
                     if (NPCCollider.name == "NPCTrigger")
                     {
-                        if (Input.GetKey(KeyCode.Mouse1) && DialogueUI.Instance.talkWithNPC == false && canTalk && !InventoryManager.Instance.anyBagOpened && !other.GetComponent<PlayerController>().isNpcEvent)
+                        if (Input.GetKey(KeyCode.Mouse1) && DialogueUI.Instance.talkWithNPC == false && canTalk && npc.spriteVisible && !InventoryManager.Instance.anyBagOpened && !other.GetComponentInParent<PlayerController>().isNpcEvent)
                         {
                             //玩家此时是否拿着物品
                             if (InventoryManager.Instance.currentSelectedItem != null )
@@ -105,6 +105,17 @@ namespace MFarm.Dialogue
         //    }
         //}
         /// <summary>
+        /// 等待对话结束，把NPC的朝向恢复为对话开始前的方向
+        /// </summary>
+        private IEnumerator WatchDialogueEnd()
+        {
+            while (DialogueUI.Instance.talkWithNPC)
+            {
+                yield return null;
+            }
+            npc.RestoreFaceDirection();
+        }
+        /// <summary>
         /// 显示对话UI
         /// </summary>
         public void OpenDialogue()
@@ -113,6 +124,9 @@ namespace MFarm.Dialogue
             {
                 DialogueUI.Instance.UpdateDialogueData(currentData);
                 DialogueUI.Instance.UpdateMainDialogue(currentData.dialoguePieces[0]);
+                //对话时NPC主动面向玩家
+                npc.FaceToPlayer();
+                StartCoroutine(WatchDialogueEnd());
             }
            
         }

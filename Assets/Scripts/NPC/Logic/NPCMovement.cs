@@ -61,11 +61,21 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
     private float animationBreakTime;
     private bool canPlayStopAnimation;
     private AnimationClip stopAnimationClip;
+    //到达目的点后NPC的朝向
+    private int faceDirX, faceDirY;
+    //到达目的点后是否一直播放停止动画
+    private bool alwaysPlayAnimation;
+    //对话时临时面向的目标，不为空时优先面向它
+    private Transform faceTarget;
+    //面向目标之前NPC的朝向，对话结束后恢复用
+    private int originFaceDirX, originFaceDirY;
     public AnimationClip blankAnimationClip;
     private AnimatorOverrideController animOverride;
     //游戏结束时的协程
     private Coroutine npcMoveRoutine;
     private TimeSpan gameTime => TimeManager.Instance.gameTime;
+    //NPC的SpriteRenderer是否激活，未激活表示NPC在当前场景不可见
+    public bool spriteVisible => spriteRenderer.enabled;
 
     public string GUID => GetComponent<DataGUID>().guid;
     //NPC好感度事件
@@ -177,12 +187,30 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
         {
             if (schedule.Time == time)
             {
-                //TODO:天气事件
                 if (schedule.day != day && schedule.day != 0)
                 {
                     continue;
                 }
-                if (schedule.season != season)
+                //填写了季节的行程，与当前季节不符则跳过，seasons为空表示所有季节都生效
+                if (schedule.seasons != null && schedule.seasons.Length > 0 &&
+                    !schedule.seasons.Contains(season))
+                {
+                    continue;
+                }
+                //填写了星期的行程，与当前星期不符则跳过，weekdays为空表示每天都生效
+                if (schedule.weekdays != null && schedule.weekdays.Length > 0 &&
+                    !schedule.weekdays.Contains(TimeManager.Instance.gameWeekday))
+                {
+                    continue;
+                }
+                //填写了天气的行程，与当天天气不符则跳过，weathers为空表示所有天气都生效
+                if (schedule.weathers != null && schedule.weathers.Length > 0 &&
+                    !schedule.weathers.Contains(TimeManager.Instance.currentWeather))
+                {
+                    continue;
+                }
+                //好感度没达到该行程要求的最低好感度则跳过
+                if (dialoguaGiver.currentFriendliness < schedule.minFriendliness)
                 {
                     continue;
                 }
@@ -220,7 +248,8 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
         {
             currentGridPosition = grid.WorldToCell(transform.position);
             //重新生成NPC Schedule
-            var schedule = new ScheduleDetails(0, 0, 0, 0, currentSeason, targetScene, (Vector2Int)targetGridPosition, stopAnimationClip, interactable);
+            //seasons传null表示不限制季节，这条数据只用于重建NPC所在位置的路径，不参与行程匹配
+            var schedule = new ScheduleDetails(0, 0, 0, 0, null, targetScene, (Vector2Int)targetGridPosition, stopAnimationClip, interactable);
             BuildPath(schedule);
             isFirstLoad = true;
         }
@@ -343,7 +372,8 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
                 nextGridPosition = (Vector3Int)step.gridCoordinate;
                 MoveToGridPosition(nextGridPosition, sceneChanged);
             }
-            else if (!isMoving && canPlayStopAnimation)
+            //faceTarget不为空表示正在和玩家对话，对话中不播放停止动画
+            else if (!isMoving && canPlayStopAnimation && faceTarget == null)
             {
                 movementStartTime = null;
                 StartCoroutine(SetStopAnimation());
@@ -365,10 +395,10 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
     {
         npcMove = true;
         nextWorldPosition = GetWorldPosition(gridPos);
-        // 超过20分钟游戏时间，直接瞬移到最终目标点
+        // 超过30分钟游戏时间，直接瞬移到最终目标点
         if (movementStartTime == null)
             movementStartTime = gameTime;
-        if (gameTime - movementStartTime >= TimeSpan.FromMinutes(20))
+        if (gameTime - movementStartTime >= TimeSpan.FromMinutes(30))
         {
             movementSteps.Clear();
             rb.position = GetWorldPosition(targetGridPosition);
@@ -425,11 +455,16 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
         targetScene = schedule.targetScene;
         targetGridPosition = (Vector3Int)schedule.targetGridPosition;
         stopAnimationClip = schedule.clipAtStop;
+        alwaysPlayAnimation = schedule.alwaysPlayAnimation;
+        faceDirX = schedule.faceDirX;
+        faceDirY = schedule.faceDirY;
         this.interactable = schedule.interactable;
+        //开始走新行程，先关掉上一个行程可能一直播放的停止动画
+        anim.SetBool("EventAnimation", false);
         //同场景移动
         if (schedule.targetScene == currentScene)
         {
-            AStar.Instance.buildPath(schedule.targetScene, (Vector2Int)currentGridPosition, schedule.targetGridPosition, movementSteps);
+            AStar.Instance.buildPath(schedule.targetScene, (Vector2Int)currentGridPosition, schedule.targetGridPosition, movementSteps, false);
         }
         //跨场景移动
         else if (schedule.targetScene != currentScene)
@@ -463,7 +498,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
                         gotoPos = path.gotoGridCell;
                     }
                     Debug.Log(fromPos.ToString() + gotoPos.ToString());
-                    AStar.Instance.buildPath(path.sceneName, fromPos, gotoPos, movementSteps);
+                    AStar.Instance.buildPath(path.sceneName, fromPos, gotoPos, movementSteps, false);
                 }
             }
         }
@@ -478,48 +513,19 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
     /// </summary>
     private void UPdateTimeOnPath()
     {
-        //上一个MovementStep
-        MovementStep previousStep = null;
         //时间戳
         TimeSpan currentGameTime = gameTime;
 
         foreach (MovementStep step in movementSteps)
         {
-            if (previousStep == null)
-            {
-                previousStep = step;
-            }
             step.hour = currentGameTime.Hours;
             step.minute = currentGameTime.Minutes;
             step.second = currentGameTime.Seconds;
-            //走过每一个格子所需要的时间
-            TimeSpan gridMovementStepTime;
-            //判断是否为斜方向
-            if (MoveInDiagonal(step, previousStep))
-            {
-                gridMovementStepTime = new TimeSpan(0, 0, (int)(Settings.gridCellDiagonalSize / normalSpeed / Settings.secondThreshold));
-            }
-            //横向移动
-            else
-            {
-                gridMovementStepTime = new TimeSpan(0, 0, (int)(Settings.gridCellSize / normalSpeed / Settings.secondThreshold));
-            }
+            //走过每一个格子所需要的时间（只走上下左右，每步耗时相同）
+            TimeSpan gridMovementStepTime = new TimeSpan(0, 0, (int)(Settings.gridCellSize / normalSpeed / Settings.secondThreshold));
             //累加获得下一步的时间
             currentGameTime = currentGameTime.Add(gridMovementStepTime);
-            //当前时间变为走完一格后的时间，并把当前步改为上一步,之后继续循环第二步
-            previousStep = step;
         }
-    }
-    /// <summary>
-    /// 判断走直线还是斜线
-    /// </summary>
-    /// <param name="currentStep"></param>
-    /// <param name="nextStep"></param>
-    /// <returns></returns>
-    private bool MoveInDiagonal(MovementStep currentStep, MovementStep previousStep)
-    {
-        //当上一格的x,y坐标不等于当前的网格x,y轴，就判断为斜方向
-        return (currentStep.gridCoordinate.x != previousStep.gridCoordinate.x) && (currentStep.gridCoordinate.y != currentStep.gridCoordinate.y);
     }
 
     /// <summary>
@@ -541,33 +547,83 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
         anim.SetBool("isMoving", isMoving);
         if (isMoving)
         {
-            anim.SetBool("Exit", true);
+            //anim.SetBool("Exit", true);
             anim.SetFloat("DirX", dir.x);
             anim.SetFloat("DirY", dir.y);
         }
         else
         {
-            anim.SetBool("Exit", false);
+            //anim.SetBool("Exit", false);
         }
 
     }
     private IEnumerator SetStopAnimation()
     {
-        //强制面向镜头
-        anim.SetFloat("DirX", 0);
-        anim.SetFloat("DirY", -1);
+        //设置NPC的面朝方向，对话中朝玩家，否则用行程表配置的朝向
+        UpdateFaceDir();
         animationBreakTime = Settings.animationBreakTime;
         if (stopAnimationClip != null)
         {
             animOverride[blankAnimationClip] = stopAnimationClip;
             anim.SetBool("EventAnimation", true);
-            yield return null;
-            anim.SetBool("EventAnimation", false);
+            //配置为一直播放时不关闭动画，否则等动画播完一个周期再关闭
+            if (!alwaysPlayAnimation)
+            {
+                yield return new WaitForSeconds(stopAnimationClip.length);
+                anim.SetBool("EventAnimation", false);
+            }
         }
         else
         {
             animOverride[stopAnimationClip] = blankAnimationClip;
             anim.SetBool("EventAnimation", false);
+        }
+    }
+    /// <summary>
+    /// 对话时让NPC面向玩家，并记录当前朝向
+    /// </summary>
+    public void FaceToPlayer()
+    {
+        originFaceDirX = Mathf.RoundToInt(anim.GetFloat("DirX"));
+        originFaceDirY = Mathf.RoundToInt(anim.GetFloat("DirY"));
+        faceTarget = playerTransform;
+        UpdateFaceDir();
+        //对话中不播放停止动画，关掉正在一直播放的动画
+        anim.SetBool("EventAnimation", false);
+    }
+    /// <summary>
+    /// 恢复为面向目标之前的方向
+    /// </summary>
+    public void RestoreFaceDirection()
+    {
+        faceTarget = null;
+        anim.SetFloat("DirX", originFaceDirX);
+        anim.SetFloat("DirY", originFaceDirY);
+    }
+    /// <summary>
+    /// 更新NPC面朝方向，有面向目标时朝目标，否则用行程表里的朝向
+    /// </summary>
+    private void UpdateFaceDir()
+    {
+        if (faceTarget != null)
+        {
+            //动画只有上下左右四个方向，取偏移量大的那一轴
+            Vector2 targetDir = faceTarget.position - transform.position;
+            if (Mathf.Abs(targetDir.x) > Mathf.Abs(targetDir.y))
+            {
+                anim.SetFloat("DirX", targetDir.x > 0 ? 1 : -1);
+                anim.SetFloat("DirY", 0);
+            }
+            else
+            {
+                anim.SetFloat("DirX", 0);
+                anim.SetFloat("DirY", targetDir.y > 0 ? 1 : -1);
+            }
+        }
+        else
+        {
+            anim.SetFloat("DirX", faceDirX);
+            anim.SetFloat("DirY", faceDirY);
         }
     }
     #region 设置NPC显示情况
@@ -697,7 +753,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
         Vector3Int targetGrid = grid.WorldToCell((Vector3)currentNPCEvent.nextPos[NPCEventStep].pos);
 
         Stack<MovementStep> pathStack = new Stack<MovementStep>();
-        AStar.Instance.buildPath(currentScene, (Vector2Int)startGrid, (Vector2Int)targetGrid, pathStack);
+        AStar.Instance.buildPath(currentScene, (Vector2Int)startGrid, (Vector2Int)targetGrid, pathStack, false);
 
         if (pathStack.Count > 0)
         {
@@ -810,7 +866,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
         Vector3Int targetGrid = grid.WorldToCell((Vector3)targetWorldPos);
         
         Stack<MovementStep> pathStack = new Stack<MovementStep>();
-        AStar.Instance.buildPath(currentScene, (Vector2Int)startGrid, (Vector2Int)targetGrid, pathStack);
+        AStar.Instance.buildPath(currentScene, (Vector2Int)startGrid, (Vector2Int)targetGrid, pathStack, false);
 
         if (pathStack.Count <= 0) yield break;
 
@@ -824,7 +880,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
         {
             npcAnim.SetBool("ActionExit", true);
             npcAnim.SetBool("isMoving", true);
-            npcAnim.SetBool("Exit", true);
+            //npcAnim.SetBool("Exit", true);
         }
         for (int i = 1; i < path.Count; i++)
         {
@@ -861,7 +917,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
         if (npcAnim != null)
         {
             npcAnim.SetBool("isMoving", false);
-            npcAnim.SetBool("Exit", false);
+           //npcAnim.SetBool("Exit", false);
             npcAnim.SetBool("ActionExit", false);
             if (animClip != null)
                 npcAnim.Play(animClip.name);

@@ -77,7 +77,7 @@ namespace MFarm.Task
 
         }
 
-        private void OnGameDayEvent(int arg1, Season season)
+        private void OnGameDayEvent(int arg1, Season season, Weekday weekday)
         {
             ///公告栏任务刷新时间为3到4天
             if(taskFreshDay == 0)

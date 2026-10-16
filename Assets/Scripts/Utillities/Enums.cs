@@ -65,6 +65,14 @@ public enum Season
     春天,夏天,秋天,冬天
 }
 /// <summary>
+/// 星期类型
+/// 顺序与System.DayOfWeek保持一致（周日为0），方便(int)强转
+/// </summary>
+public enum Weekday
+{
+    周日,周一,周二,周三,周四,周五,周六
+}
+/// <summary>
 /// 瓦片的类型
 /// </summary>
 public enum GridType
@@ -127,7 +135,7 @@ public enum TaskType
 /// </summary>
 public enum NPCname
 {
-    Freda,DaTuan,Hanies,Liam,Adolf,Rose,Anderson,Axing,
+    Freda,DaTuan,Hanies,Liam,Adolf,Rose,Anderson,Axing,Marn,Viho,Jenny,Sandor,Precia,Carlos,Plessi
 }
 /// <summary>
 /// 任务类型
@@ -164,5 +172,13 @@ public enum AnimalSizeType
 {
     Small,Middle,Large,
 }
+/// <summary>
+/// 天气
+/// </summary>
+public enum Weather 
+{
+    Sunny,Rainy,Thunder,
+}
+
 
 

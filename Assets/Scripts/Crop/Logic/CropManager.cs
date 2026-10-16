@@ -22,7 +22,7 @@ namespace MFarm.CropPlant
             EventHandler.GameDayEvent -= OnGameDayEvent;
         }
 
-        private void OnGameDayEvent(int day, Season season)
+        private void OnGameDayEvent(int day, Season season, Weekday weekday)
         {
             currentSeason = season;
         }

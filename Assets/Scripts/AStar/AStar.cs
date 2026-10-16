@@ -21,6 +21,8 @@ namespace MFarm.AStar
         private HashSet<Node> closedNodeList;
         //是否找到路径
         private bool pathFound;
+        //当前寻路是否允许斜方向移动
+        private bool allowDiagonal = true;
         /// <summary>
         /// 构建路径更新Stack每一步
         /// </summary>
@@ -28,8 +30,10 @@ namespace MFarm.AStar
         /// <param name="startPos"></param>
         /// <param name="endPos"></param>
         /// <param name="npcMocementStep"></param>
-        public void buildPath(string sceneName,Vector2Int startPos,Vector2Int endPos,Stack<MovementStep> npcMocementStep)
+        /// <param name="allowDiagonal">是否允许斜方向移动，false时只走上下左右四个方向</param>
+        public void buildPath(string sceneName,Vector2Int startPos,Vector2Int endPos,Stack<MovementStep> npcMocementStep,bool allowDiagonal = true)
         {
+            this.allowDiagonal = allowDiagonal;
             pathFound = false;
             if(GenerateGridNodes(sceneName,startPos,endPos))
             {
@@ -138,6 +142,11 @@ namespace MFarm.AStar
                     {
                         continue;
                     }
+                    //不允许斜方向移动时，跳过斜方向的四个点
+                    if (!allowDiagonal && x != 0 && y != 0)
+                    {
+                        continue;
+                    }
                     validNeighbourNote = GetValidNeighbourNode(currentNodePos.x + x, currentNodePos.y + y);
                     if (validNeighbourNote != null)
                     {
@@ -188,8 +197,12 @@ namespace MFarm.AStar
         {
             int xDistance = Mathf.Abs(nodeA.gridPosition.x - nodeB.gridPosition.x);
             int yDistance = Mathf.Abs(nodeA.gridPosition.y - nodeB.gridPosition.y);
-
-            if(xDistance > yDistance)
+            //不允许斜方向移动时，使用曼哈顿距离
+            if (!allowDiagonal)
+            {
+                return 10 * (xDistance + yDistance);
+            }
+            if (xDistance > yDistance)
             {
                 return 14 * yDistance + 10 * (xDistance - yDistance);
             }

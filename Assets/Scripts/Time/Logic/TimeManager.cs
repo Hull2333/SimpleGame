@@ -8,9 +8,22 @@ using Unity.VisualScripting;
 public class TimeManager : Singleton<TimeManager>,ISaveable    //调用在TimeManager对象上
 {
     [HideInInspector] public int gameSecond, gameMinute,gameHour,gameDay,gameMonth,gameYear;
+    [HideInInspector] public Weekday gameWeekday = Weekday.周四;
     private Season gameSeason=Season.春天;
     //一季有多少月
-    private int monthInSeason = 3;
+    private int monthInSeason = 1;
+    //天气预报，0为今天，1~3为未来三天
+    private Weather[] weatherForecast = new Weather[4];
+    //今天的天气
+    public Weather currentWeather => weatherForecast[0];
+    //各季节随机各天气的权重，行顺序与Season枚举一致，列顺序与Weather枚举一致
+    private readonly int[,] weatherWeight = new int[,]
+    {
+        { 50, 40, 10 },   //春天：晴天50%、雨天40%、打雷10%
+        { 60, 20, 20 },   //夏天：晴天60%、雨天20%、打雷20%
+        { 80, 20, 0 },    //秋天：晴天80%、雨天20%、打雷0%
+        { 60, 40, 0 },    //冬天：晴天60%、雨天40%、打雷0%
+    };
     //计时器
     private float tikTime;
     //时间暂停
@@ -49,6 +62,8 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //调用在TimeManag
         ISaveable saveable = this;
         saveable.RegisterSaveable();
         gameClockPause = true;
+        //先随机一套天气预报，读档时会被存档数据覆盖
+        RandomWeatherForecast();
         //EventHandler.CallGameMinuteEvent(gameMinute, gameHour,gameDay,gameSeason);
         //EventHandler.CallGameDateEvemnt(gameHour, gameDay, gameMonth, gameYear, gameSeason);
         ////切换灯光
@@ -75,10 +90,10 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //调用在TimeManag
                 UpdateGameTime();
             }
         }
+        //按G键快速过一天，与正常时间流逝走同一套日期推进逻辑
         if (Input.GetKeyDown(KeyCode.G))
         {
-            gameDay++;
-            EventHandler.CallGameDayEvent(gameDay,gameSeason);
+            NextDay();
             EventHandler.CallGameDateEvemnt(gameHour, gameDay, gameMonth, gameYear, gameSeason);
         }
     }
@@ -139,6 +154,15 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //调用在TimeManag
         gameMonth = 1;
         gameYear = 1;
         gameSeason = Season.春天;
+        gameWeekday = Weekday.周四;
+        //新游戏重新随机四天的天气预报
+        RandomWeatherForecast();
+        //==========测试用：自定义新游戏第一天的星期和天气，测试完删掉这一段即可==========
+        //星期可选：周日、周一、周二、周三、周四、周五、周六
+        //天气可选：Sunny（晴天）、Rainy（雨天）、Thunder（打雷）
+        gameWeekday = Weekday.周日;
+        weatherForecast[0] = Weather.Sunny;
+        //==============================================================================
     }
     /// <summary>
     /// 游戏时间、季节变化循环
@@ -156,36 +180,8 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //调用在TimeManag
                 gameMinute = 0;
                 if (gameHour > Settings.hourHold)
                 {
-                    gameDay++;
                     gameHour = 0;
-                    if(gameDay > Settings.dayHold)
-                    {
-                        gameMonth++;
-                        gameDay = 1;
-                        if(gameMonth > 12)
-                        {
-                            gameMonth = 1;
-                        }
-                        //每过一整月，减少monthInSeason
-                        monthInSeason--;
-                        if(monthInSeason == 0)
-                        {
-                            monthInSeason = 3;
-                            //gameSeason为枚举,int化后gameSeason值为4,因为有四个枚举
-                            int seasonNumber = (int)gameSeason;
-                            seasonNumber++;
-                            if (seasonNumber > Settings.seasonHold)
-                            {
-                                seasonNumber = 0;
-                                gameYear++;
-                            }
-                            //再把int化后gameSeason改为原来的枚举类型
-                            gameSeason = (Season)seasonNumber;
-                        }
-                        //每天刷新各地图瓦片信息和作物信息
-                        EventHandler.CallGameDayEvent(gameDay, gameSeason);
-                    }
-                    
+                    NextDay();
                 }
                 //每一小时过去，开始执行小时事件
                 EventHandler.CallGameDateEvemnt(gameHour, gameDay, gameMonth, gameYear, gameSeason);
@@ -197,6 +193,98 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //调用在TimeManag
         }
         
     }
+    /// <summary>
+    /// 推进到下一天，处理星期、月份、季节和年份的变化
+    /// </summary>
+    private void NextDay()
+    {
+        gameDay++;
+        //每过一天，星期循环推进一天
+        gameWeekday = GetNextWeekday(gameWeekday);
+        if(gameDay > Settings.dayHold)
+        {
+            gameMonth++;
+            gameDay = 1;
+            if(gameMonth > 4)
+            {
+                gameMonth = 1;
+            }
+            //每过一整月，减少monthInSeason
+            monthInSeason--;
+            if(monthInSeason == 0)
+            {
+                monthInSeason = 1;
+                //gameSeason为枚举,int化后gameSeason值为4,因为有四个枚举
+                int seasonNumber = (int)gameSeason;
+                seasonNumber++;
+                if (seasonNumber > Settings.seasonHold)
+                {
+                    seasonNumber = 0;
+                    gameYear++;
+                }
+                //再把int化后gameSeason改为原来的枚举类型
+                gameSeason = (Season)seasonNumber;
+            }
+            //每天刷新各地图瓦片信息和作物信息
+            EventHandler.CallGameDayEvent(gameDay, gameSeason, gameWeekday);
+        }
+        //天气预报整体前移一天，只随机补上新的第四天
+        for (int i = 0; i < weatherForecast.Length - 1; i++)
+        {
+            weatherForecast[i] = weatherForecast[i + 1];
+        }
+        weatherForecast[weatherForecast.Length - 1] = GetRandomWeather();
+    }
+    /// <summary>
+    /// 随机生成四天的天气预报
+    /// </summary>
+    private void RandomWeatherForecast()
+    {
+        for (int i = 0; i < weatherForecast.Length; i++)
+        {
+            weatherForecast[i] = GetRandomWeather();
+        }
+    }
+    /// <summary>
+    /// 按当前季节的概率随机一个天气
+    /// </summary>
+    private Weather GetRandomWeather()
+    {
+        int seasonIndex = (int)gameSeason;
+        int weatherCount = weatherWeight.GetLength(1);
+        //先算出当前季节所有天气的权重总和
+        int totalWeight = 0;
+        for (int i = 0; i < weatherCount; i++)
+        {
+            totalWeight += weatherWeight[seasonIndex, i];
+        }
+        //在权重总和内随机一个数，落在哪个天气的权重区间就返回哪个天气
+        int roll = UnityEngine.Random.Range(0, totalWeight);
+        for (int i = 0; i < weatherCount; i++)
+        {
+            roll -= weatherWeight[seasonIndex, i];
+            if (roll < 0)
+            {
+                return (Weather)i;
+            }
+        }
+        return Weather.Sunny;
+    }
+    /// <summary>
+    /// 获取下一天的星期，0~6环形循环
+    /// </summary>
+    private Weekday GetNextWeekday(Weekday weekday)
+    {
+        //Weekday共有7个枚举值（周日~周六）
+        int weekdayNumber = (int)weekday;
+        weekdayNumber++;
+        if (weekdayNumber > 6)
+        {
+            weekdayNumber = 0;
+        }
+        return (Weekday)weekdayNumber;
+    }
+
     /// <summary>
     /// 根据当前游戏时间切换地图灯光模式
     /// </summary>
@@ -229,6 +317,12 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //调用在TimeManag
         saveData.timeDict.Add("gameMinute", gameMinute);
         saveData.timeDict.Add("gameSecond", gameSecond);
         saveData.timeDict.Add("gameSeason", (int)gameSeason);
+        saveData.timeDict.Add("gameWeekday", (int)gameWeekday);
+        //保存今天和未来三天的天气
+        for (int i = 0; i < weatherForecast.Length; i++)
+        {
+            saveData.timeDict.Add("weather" + i, (int)weatherForecast[i]);
+        }
 
         return saveData;
     }
@@ -242,5 +336,19 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //调用在TimeManag
         gameMinute = saveData.timeDict["gameMinute"];
         gameSecond = saveData.timeDict["gameSecond"];
         gameSeason = (Season)saveData.timeDict["gameSeason"];
+        //旧存档中没有gameWeekday字段，没有时保持默认值，避免抛KeyNotFoundException
+        if (saveData.timeDict.ContainsKey("gameWeekday"))
+        {
+            gameWeekday = (Weekday)saveData.timeDict["gameWeekday"];
+        }
+        //旧存档中没有天气字段，没有时保持当前随机值
+        for (int i = 0; i < weatherForecast.Length; i++)
+        {
+            string weatherKey = "weather" + i;
+            if (saveData.timeDict.ContainsKey(weatherKey))
+            {
+                weatherForecast[i] = (Weather)saveData.timeDict[weatherKey];
+            }
+        }
     }
 }

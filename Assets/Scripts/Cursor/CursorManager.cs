@@ -440,6 +440,18 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
             checkCollider = Physics2D.OverlapPoint(mouseWorldPos, checkLayer);
             if (checkCollider != null)
             {
+                //SpriteRenderer未激活的NPC看不见，鼠标停上去也不切换成可调查的鼠标图片
+                if (checkCollider.CompareTag("NPC"))
+                {
+                    NPCMovement npc = checkCollider.GetComponentInParent<NPCMovement>();
+                    if (npc != null && !npc.spriteVisible)
+                    {
+                        cursorAnim.runtimeAnimatorController = cursorAnimList[0].cursorController;
+                        canCheck = false;
+                        canPat = false;
+                        return;
+                    }
+                }
                 //NPC或者可调查事物
                 if (checkCollider.CompareTag("NPC") || checkCollider.CompareTag("Investigable"))
                 {
