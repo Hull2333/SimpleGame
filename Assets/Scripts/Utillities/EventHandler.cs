@@ -477,4 +477,10 @@ public static class EventHandler
     {
         QuitRecerveItemUIEvent?.Invoke();
     }
+    //打开睡觉面板的事件
+    public static event Action OpenSleepPanelEvent;
+    public static void CallOpenSleepPanelEvent()
+    {
+        OpenSleepPanelEvent?.Invoke();
+    }
 }

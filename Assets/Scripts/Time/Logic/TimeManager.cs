@@ -9,7 +9,7 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //调用在TimeManag
 {
     [HideInInspector] public int gameSecond, gameMinute,gameHour,gameDay,gameMonth,gameYear;
     [HideInInspector] public Weekday gameWeekday = Weekday.周四;
-    private Season gameSeason=Season.春天;
+    public Season gameSeason=Season.春天;
     //一季有多少月
     private int monthInSeason = 1;
     //天气预报，0为今天，1~3为未来三天
@@ -196,7 +196,7 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //调用在TimeManag
     /// <summary>
     /// 推进到下一天，处理星期、月份、季节和年份的变化
     /// </summary>
-    private void NextDay()
+    public void NextDay()
     {
         gameDay++;
         //每过一天，星期循环推进一天

@@ -25,12 +25,20 @@ namespace MFarm.Inventory
         public GameObject recerveUIPanel;
         public TextMeshProUGUI recerveUIText;
         private Coroutine bounceCoroutine;
+
+        //睡觉提示UI
+        public GameObject sleepPanel;
+        public Button sleepYesButton;
+        public Button sleepNoButton;
         private void Awake()
         {
             //点击settingBtn按钮执行TogglePausePanel方法
             settingBtn.onClick.AddListener(TogglePausePanel);
             //滑动volumeSlider执行AudioManager脚本下的SetMasterVolume方法
             volumeSlider.onValueChanged.AddListener(AudioManager.Instance.SetMasterVolume);
+            //点击睡觉面板的按钮时执行对应方法
+            sleepYesButton.onClick.AddListener(SleepYesButtonClick);
+            sleepNoButton.onClick.AddListener(SleepNoButtonClick);
         }
 
         private void OnEnable()
@@ -40,6 +48,7 @@ namespace MFarm.Inventory
             EventHandler.EndNPCEvent += OnEndNPCEvent;
             EventHandler.RecerveItemEvent += OnRecerveItemEvent;
             EventHandler.QuitRecerveItemUIEvent += OnQuitRecerveItemUIEvent;
+            EventHandler.OpenSleepPanelEvent += OnOpenSleepPanelEvent;
         }
 
         private void OnDisable()
@@ -49,6 +58,7 @@ namespace MFarm.Inventory
             EventHandler.EndNPCEvent -= OnEndNPCEvent;
             EventHandler.RecerveItemEvent -= OnRecerveItemEvent;
             EventHandler.QuitRecerveItemUIEvent -= OnQuitRecerveItemUIEvent;
+            EventHandler.OpenSleepPanelEvent -= OnOpenSleepPanelEvent;
         }
 
 
@@ -220,7 +230,47 @@ namespace MFarm.Inventory
             yield return new WaitForSeconds(1);
             Instantiate(menuPrefab, menuCanvas.transform);
         }
-
-
+        /// <summary>
+        /// 玩家触碰睡觉区域时打开睡觉面板，并暂停游戏
+        /// </summary>
+        private void OnOpenSleepPanelEvent()
+        {
+            sleepPanel.SetActive(true);
+            //打开面板期间暂停游戏时间和玩家操作
+            Time.timeScale = 0f;
+            EventHandler.CallUpdateGameStateEvent(GameState.Pause);
+        }
+        /// <summary>
+        /// 点击睡觉面板的“是”：度过当前这一天，时间来到第二天的7:00
+        /// </summary>
+        private void SleepYesButtonClick()
+        {
+            //把日期推进到下一天
+            TimeManager.Instance.NextDay();
+            //时间设为第二天的7:00
+            TimeManager.Instance.gameHour = 7;
+            TimeManager.Instance.gameMinute = 0;
+            TimeManager.Instance.gameSecond = 0;
+            //派发时间和日期事件，刷新时间和日期UI
+            EventHandler.CallGameMinuteEvent(TimeManager.Instance.gameMinute, TimeManager.Instance.gameHour, TimeManager.Instance.gameDay, TimeManager.Instance.gameSeason);
+            EventHandler.CallGameDateEvemnt(TimeManager.Instance.gameHour, TimeManager.Instance.gameDay, TimeManager.Instance.gameMonth, TimeManager.Instance.gameYear, TimeManager.Instance.gameSeason);
+            CloseSleepPanel();
+        }
+        /// <summary>
+        /// 点击睡觉面板的“否”：不进入第二天
+        /// </summary>
+        private void SleepNoButtonClick()
+        {
+            CloseSleepPanel();
+        }
+        /// <summary>
+        /// 关闭睡觉面板并恢复游戏
+        /// </summary>
+        private void CloseSleepPanel()
+        {
+            sleepPanel.SetActive(false);
+            Time.timeScale = 1f;
+            EventHandler.CallUpdateGameStateEvent(GameState.Gameplay);
+        }
     }
 }

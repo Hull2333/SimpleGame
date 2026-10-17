@@ -1014,6 +1014,29 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         inputDisable = false;
     }
 
+    //玩家已弹出过睡觉面板，需要先离开SleepBox后才允许再次弹出
+    private bool canShowSleepPanel = true;
+    /// <summary>
+    /// 玩家碰到Tag为SleepBox的触发器，且与触发器所在物体的X轴相差不到0.1f时，通知UIManager打开睡觉面板
+    /// </summary>
+    private void OnTriggerStay2D(Collider2D other)
+    {
+        if (canShowSleepPanel && other.CompareTag("SleepBox") && (Mathf.Abs(transform.position.x - other.transform.position.x) < 0.1f))
+        {
+            //标记为已弹出，避免面板关闭后立刻重复弹出
+            canShowSleepPanel = false;
+            //通知UIManager打开睡觉面板
+            EventHandler.CallOpenSleepPanelEvent();
+        }
+    }
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        //离开SleepBox后重置标记，下一次进入时才能再次弹出
+        if (other.CompareTag("SleepBox"))
+        {
+            canShowSleepPanel = true;
+        }
+    }
     private void OnMoveToPosition(Vector3 targetPosition)
     {
         //将玩家位置设置为targetPosition位置
