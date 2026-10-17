@@ -38,6 +38,10 @@ namespace MFarm.Map
         public Dictionary<string,TileDetails> tileDetailsDict = new Dictionary<string,TileDetails>();
         //string场景名称，bool是否为第一次加载
         public Dictionary<string,bool> firstLoadDict = new Dictionary<string,bool>();
+        //本次游玩经过的天数，用于计算各场景错过了多少天的随机资源生成
+        private int elapsedDays;
+        //记录每个场景最近一次生成随机资源时经过的天数
+        private Dictionary<string,int> sceneLastGenDayDict = new Dictionary<string,int>();
         private Grid currentGrid;
         private Season currentSeason;
         [Header("可收割场景")]
@@ -125,12 +129,30 @@ namespace MFarm.Map
             {
                 //预先生成Crop,再把第一次加载改为false
                 EventHandler.CallGenerateCropEvent();
-                //第一天进入场景时预先生成一批可互动资源
-                RandomGenerateInterView();
                 firstLoadDict[SceneManager.GetActiveScene().name] = false;
             }
+            StartCoroutine(CatchUpGenerateRandomInterView());
            
             OnRefreshCurrentMap();
+        }
+        /// <summary>
+        /// 按该场景错过的时间补生成随机资源，最多补掷7次
+        /// 延后一帧执行，确保在ItemManager按快照重建完场景资源之后再补生成，避免刚生成的物件被销毁
+        /// </summary>
+        private IEnumerator CatchUpGenerateRandomInterView()
+        {
+            yield return new WaitForEndOfFrame();
+            string sceneName = SceneManager.GetActiveScene().name;
+            int lastGenDay;
+            //已生成过则补掷错过的天数，未生成过至少掷一次
+            int missedDays = sceneLastGenDayDict.TryGetValue(sceneName, out lastGenDay)
+                ? Mathf.Clamp(elapsedDays - lastGenDay, 0, 7)
+                : 1;
+            for (int i = 0; i < missedDays; i++)
+            {
+                RandomGenerateInterView();
+            }
+            sceneLastGenDayDict[sceneName] = elapsedDays;
         }
         /// <summary>
         /// 每天执行一次
@@ -139,6 +161,8 @@ namespace MFarm.Map
         /// <param name="season"></param>
         private void OnGameDayEvent(int day, Season season, Weekday weekday)
         {
+            //过天计数器加一，供各场景补生成随机资源时计算错过的天数
+            elapsedDays++;
      
             currentSeason = season;
             foreach(var tile in tileDetailsDict)
@@ -167,6 +191,7 @@ namespace MFarm.Map
                
             }
             RandomGenerateInterView();
+            sceneLastGenDayDict[SceneManager.GetActiveScene().name] = elapsedDays;
             OnRefreshCurrentMap();
             //每日更新鱼类获取列表
             switch(currentSeason)
@@ -374,7 +399,7 @@ namespace MFarm.Map
 
                         }
                         //生成可劈砍物体
-                        if (currentTile.canChopItem)
+                        if (currentTile.canChopItem && currentTile.haveChop == -1)
                         {
                             int odds = Random.Range(0, 10);
                             if (odds > 7)

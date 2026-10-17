@@ -70,6 +70,8 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     //玩家是否正在移动
     [HideInInspector] public bool isMoving;
     [HideInInspector] public bool inputDisable;
+    // Ignore new tool clicks while a tool animation is playing, so the action does not restart midway
+    private bool isUsingTool;
     //动画使用工具面朝方向
     private float mouseX;
     private float mouseY;
@@ -374,6 +376,11 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         //TODO:执行动画
         if (itemDetails.itemType != ItemType.Seed && itemDetails.itemType != ItemType.Commodity && itemDetails.itemType != ItemType.Furniture && itemDetails.itemType != ItemType.FishingRod && itemDetails.itemType != ItemType.Cooked)
         {
+            // A tool animation is still playing: drop this click until the current one finishes
+            if (isUsingTool)
+            {
+                return;
+            }
             //判断使用工具时面朝方向
             mouseX = mouseWorldPos.x - transform.position.x;
             mouseY = mouseWorldPos.y - (transform.position.y + 0.85f);
@@ -546,6 +553,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     /// <returns></returns>
     private IEnumerator UseToolRoutine(Vector3 mouseWorldPos, ItemDetails itemDetails)
     {
+        isUsingTool = true;
         cM.cursorEnable = false;
         inputDisable = true;
         //确保上面的代码执行完在执行下面的代码
@@ -564,6 +572,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         //工具使用动画结束后恢复未使用工具状态
         inputDisable = false;
         cM.cursorEnable = true;
+        isUsingTool = false;
     }
     /// <summary>
     /// 长按鼠标左键触发的动作
