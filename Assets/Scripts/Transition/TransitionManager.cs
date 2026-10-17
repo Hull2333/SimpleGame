@@ -23,6 +23,11 @@ namespace MFarm.Transition
         private int transtionValue;
         private int smoothValue;
         private Tween currentTween;
+        //焦点转场图片所在面板，用于把收缩焦点移到玩家身上
+        private RectTransform transtionPanel;
+        //面板铺满屏幕时的原始尺寸和锚点位置，转场结束后还原
+        private Vector2 transtionPanelSize;
+        private Vector2 transtionPanelAnchoredPosition;
         public string GUID => GetComponent<DataGUID>().guid;
 
         protected override void Awake()
@@ -59,6 +64,9 @@ namespace MFarm.Transition
             transtionCanvas = FindObjectOfType<TranstionCanve>().GetComponent<Canvas>();
             transtionCanvas.worldCamera = Camera.main;
             transtionCanvas.sortingLayerName = "ValueTile";
+            transtionPanel = transtionCanvas.transform.Find("TranstionPanel") as RectTransform;
+            transtionPanelSize = transtionPanel.sizeDelta;
+            transtionPanelAnchoredPosition = transtionPanel.anchoredPosition;
             transtionValue = Shader.PropertyToID("_Value");
             smoothValue = Shader.PropertyToID("_SmoothValue");
             transtionMaterial.SetFloat(transtionValue, 1 + transtionMaterial.GetFloat(smoothValue));
@@ -154,27 +162,63 @@ namespace MFarm.Transition
         private IEnumerator PlayFadeTranstion()
         {
             isFade = true;
-            currentTween = transtionMaterial.DOFloat(0f - transtionMaterial.GetFloat(smoothValue), transtionValue, 0.5f)
-         .SetEase(Ease.InQuad).OnComplete(() =>
+            //收缩焦点从屏幕中心移到玩家身上
+            SetTranstionFocusToPlayer();
+            currentTween = transtionMaterial.DOFloat(0f - transtionMaterial.GetFloat(smoothValue), transtionValue, 1f)
+         .SetEase(Ease.OutQuad).OnComplete(() =>
          {
              transtionMaterial.SetFloat(transtionValue, -0.1f);
          });
             yield return currentTween.WaitForCompletion();
+            //此时画面已全黑，还原面板看不到变化
+            ResetTranstionPanel();
+        }
+        /// <summary>
+        /// 把焦点收缩的中心移到玩家的屏幕位置
+        /// </summary>
+        private void SetTranstionFocusToPlayer()
+        {
+            PlayerController player = FindObjectOfType<PlayerController>();
+            if (transtionPanel == null || player == null) return;
+            Camera camera = transtionCanvas.worldCamera;
+
+            Vector2 playerScreenPos = camera.WorldToScreenPoint(player.transform.position);
+            //玩家相对面板当前中心(pivot)的本地坐标，pivot在中心所以换算结果就是偏移量
+            Vector2 localPoint;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(transtionPanel, playerScreenPos, camera, out localPoint);
+            //玩家相对面板初始(铺满屏幕)位置的偏移
+            Vector2 offset = transtionPanel.anchoredPosition + localPoint - transtionPanelAnchoredPosition;
+
+            //面板中心偏离屏幕中心后，要放大才能继续盖满屏幕，放大量取两个轴中较大的一个
+            float zoom = 1f + 2f * Mathf.Max(Mathf.Abs(offset.x) / transtionPanelSize.x, Mathf.Abs(offset.y) / transtionPanelSize.y);
+            transtionPanel.sizeDelta = transtionPanelSize * zoom;
+            transtionPanel.anchoredPosition = transtionPanelAnchoredPosition + offset;
+        }
+        /// <summary>
+        /// 还原转场面板的尺寸和位置
+        /// </summary>
+        private void ResetTranstionPanel()
+        {
+            transtionPanel.sizeDelta = transtionPanelSize;
+            transtionPanel.anchoredPosition = transtionPanelAnchoredPosition;
         }
         /// <summary>
         /// 焦点展开转场
         /// </summary>
         private IEnumerator PlayOpenTranstion()
         {
-            
-            currentTween = transtionMaterial.DOFloat(1f + transtionMaterial.GetFloat(smoothValue), transtionValue, 0.5f)
-         .SetEase(Ease.OutQuad).OnComplete(() =>
+            //展开焦点也从玩家身上开始，展开期间持续跟随(此时相机可能才刚追上被传送的玩家)
+            SetTranstionFocusToPlayer();
+            currentTween = transtionMaterial.DOFloat(1f + transtionMaterial.GetFloat(smoothValue), transtionValue, 1f)
+         .SetEase(Ease.OutQuad).OnUpdate(SetTranstionFocusToPlayer).OnComplete(() =>
          {
              transtionMaterial.SetFloat(transtionValue, 1f);
              isFade = false;
          });
            
             yield return currentTween.WaitForCompletion();
+            //此时画面已透明，还原面板看不到变化
+            ResetTranstionPanel();
         }
         /// <summary>
         /// 加载游戏进度场景
