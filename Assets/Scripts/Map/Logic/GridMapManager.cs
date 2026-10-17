@@ -109,7 +109,7 @@ namespace MFarm.Map
             EventHandler.NextTeleportAppearEvent -= OnNextTeleportAppearEvent;
             EventHandler.GetCurrentBluPrintDetails -= OnGetCurrentBluPrintDetails;
             EventHandler.GetCurrentBuildingDetails -= OnGetCurrentBuildingDetails;
-            EventHandler.InstantiateBuildingOnMapEvent += OnInstantiateBuildingOnMapEvent;
+            EventHandler.InstantiateBuildingOnMapEvent -= OnInstantiateBuildingOnMapEvent;
         }
 
      
@@ -125,6 +125,8 @@ namespace MFarm.Map
             {
                 //预先生成Crop,再把第一次加载改为false
                 EventHandler.CallGenerateCropEvent();
+                //第一天进入场景时预先生成一批可互动资源
+                RandomGenerateInterView();
                 firstLoadDict[SceneManager.GetActiveScene().name] = false;
             }
            

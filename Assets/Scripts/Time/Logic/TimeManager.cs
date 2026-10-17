@@ -225,8 +225,6 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //调用在TimeManag
                 //再把int化后gameSeason改为原来的枚举类型
                 gameSeason = (Season)seasonNumber;
             }
-            //每天刷新各地图瓦片信息和作物信息
-            EventHandler.CallGameDayEvent(gameDay, gameSeason, gameWeekday);
         }
         //天气预报整体前移一天，只随机补上新的第四天
         for (int i = 0; i < weatherForecast.Length - 1; i++)
@@ -234,6 +232,8 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //调用在TimeManag
             weatherForecast[i] = weatherForecast[i + 1];
         }
         weatherForecast[weatherForecast.Length - 1] = GetRandomWeather();
+        //每天刷新各地图瓦片信息和作物信息
+        EventHandler.CallGameDayEvent(gameDay, gameSeason, gameWeekday);
     }
     /// <summary>
     /// 随机生成四天的天气预报
