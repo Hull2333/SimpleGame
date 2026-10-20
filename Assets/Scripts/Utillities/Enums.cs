@@ -32,7 +32,8 @@ public enum SlotType
 /// </summary>
 public enum InventoryLocation
 {
-    Player, Box, SellBox,Shop
+    Player, Box, SellBox,Shop,
+    SellCar   // 卖车格子
 }
 
 /// <summary>

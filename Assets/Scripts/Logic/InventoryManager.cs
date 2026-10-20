@@ -34,6 +34,8 @@ namespace MFarm.Inventory
         private InventoryBag_SO currentBoxBag;
         public InventoryBag_SO sellBoxBag;
         public InventoryBag_SO sellBoxBagTemp;
+        // 卖车格子的物品数据（81 格），暂不参与售卖结算
+        public List<InventoryItem> sellCarItemList = new List<InventoryItem>();
        [Header("交易")]
         [HideInInspector]public int playerMoney;
         //存储地图中所有的箱子里的物品数据
@@ -65,6 +67,11 @@ namespace MFarm.Inventory
             saveable.RegisterSaveable();
             //animatorOverride = GameObject.FindAnyObjectByType<AnimatorOverride>();
             inventoryUI = GameObject.FindWithTag("InventoryUI").gameObject.GetComponent<InventoryUI>();
+            // 卖车格子固定 81 格，先全部初始化为空物品
+            for (int i = 0; i < 81; i++)
+            {
+                sellCarItemList.Add(new InventoryItem());
+            }
             //EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, playerBag.itemList);
 
         }
@@ -875,6 +882,7 @@ namespace MFarm.Inventory
                 InventoryLocation.Player => playerBag.itemList,
                 InventoryLocation.Box => currentBoxBag.itemList,
                 InventoryLocation.SellBox => sellBoxBag.itemList,
+                InventoryLocation.SellCar => sellCarItemList,
                 _ => null
             };
         }
@@ -1083,6 +1091,28 @@ namespace MFarm.Inventory
             sellBoxBag = Instantiate(sellBoxBagTemp);
             EventHandler.CallUpdateInventoryUI(InventoryLocation.SellBox, sellBoxBag.itemList, value);
             
+        }
+        /// <summary>
+        /// 结算卖车格子：总价值加到玩家金钱，并清空所有卖车格子
+        /// </summary>
+        public void SettleSellCarItems()
+        {
+            int totalValue = 0;
+            foreach (InventoryItem item in sellCarItemList)
+            {
+                if (item.itemID != 0 && item.itemAmount > 0)
+                {
+                    ItemDetails details = GetItemDetails(item.itemID);
+                    totalValue += (int)(item.itemAmount * details.itemPrice * details.sellPercentage);
+                }
+            }
+            // 清空卖车格子，保留 81 格结构
+            for (int i = 0; i < sellCarItemList.Count; i++)
+            {
+                sellCarItemList[i] = new InventoryItem();
+            }
+            // 刷新卖车格子的 UI，同时把总价值加到玩家金钱上
+            EventHandler.CallUpdateInventoryUI(InventoryLocation.SellCar, sellCarItemList, totalValue);
         }
         public GameSaveData GenerateSaveData()
         {

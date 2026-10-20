@@ -42,6 +42,7 @@ namespace MFarm.Inventory
                     SlotType.Bag => InventoryLocation.Player,
                     SlotType.Box => InventoryLocation.Box,
                     SlotType.SellBox => InventoryLocation.SellBox,
+                    SlotType.SellCar => InventoryLocation.SellCar,
                     SlotType.Shop => InventoryLocation.Shop,
                     _ => InventoryLocation.Player
                 };              
@@ -191,6 +192,31 @@ namespace MFarm.Inventory
             //右键点击Slot
             if (eventData.button == PointerEventData.InputButton.Right)
             {
+                // 卖车面板打开时，右键把整组物品送进卖车格子
+                if (Location == InventoryLocation.Player && InventoryUI.Instance.IsSellCarBoxOpened)
+                {
+                    // 只允许指定类型的物品送进卖车格子
+                    if (!IsSellCarMovable(itemDetails))
+                    {
+                        return;
+                    }
+                    int sellCarIndex = inventoryUI.GetEmptySellCarIndex(itemDetails.itemID);
+                    if (sellCarIndex >= 0)
+                    {
+                        InventoryManager.Instance.SwapItem(Location, slotIndex, InventoryLocation.SellCar, sellCarIndex, false, itemAmount);
+                    }
+                    return;
+                }
+                // 卖车面板打开时，右键把卖车格子里的整组物品收回背包
+                if (Location == InventoryLocation.SellCar && InventoryUI.Instance.IsSellCarBoxOpened)
+                {
+                    int bagIndex = inventoryUI.GetEmptySellBoxIndex(itemDetails.itemID, InventoryManager.Instance.playerBag.itemList, InventoryLocation.SellCar);
+                    if (bagIndex >= 0)
+                    {
+                        InventoryManager.Instance.SwapItem(Location, slotIndex, InventoryLocation.Player, bagIndex, false, itemAmount);
+                    }
+                    return;
+                }
                 //在商店打开时
                 if (InventoryManager.Instance.isSellState)
                 {
@@ -368,6 +394,24 @@ namespace MFarm.Inventory
                                 }
                             }
                         }
+                        // 拖到卖车格子：整组物品移过去，售卖逻辑暂不处理
+                        if (targetSlot.slotType == SlotType.SellCar)
+                        {
+                            if (InventoryManager.Instance.isHalfAmount)
+                            {
+                                // 半分拖拽不支持拖进卖车格子，直接刷新背包复原
+                                InventoryManager.Instance.isHalfAmount = false;
+                                EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, InventoryManager.Instance.playerBag.itemList, 0);
+                                return;
+                            }
+                            // 只允许指定类型的物品送进卖车格子
+                            if (!IsSellCarMovable(itemDetails))
+                            {
+                                return;
+                            }
+                            InventoryManager.Instance.SwapItem(Location, slotIndex, targetSlot.Location, targetIndex, false, itemAmount);
+                            return;
+                        }
                         //拖到商店
                         if(targetSlot.slotType == SlotType.Shop)
                         {
@@ -407,6 +451,20 @@ namespace MFarm.Inventory
                         }
                         return;
                         
+                    }
+                    // 从卖车格子拖出：拖回背包，或在卖车格子之间交换
+                    if (slotType == SlotType.SellCar)
+                    {
+                        if (targetSlot.slotType == SlotType.Bag || targetSlot.slotType == SlotType.SellCar)
+                        {
+                            // 拖回卖车格子的同一格时直接忽略，避免数量翻倍
+                            if (targetSlot.slotType == SlotType.SellCar && slotIndex == targetIndex)
+                            {
+                                return;
+                            }
+                            InventoryManager.Instance.SwapItem(Location, slotIndex, targetSlot.Location, targetIndex, false, itemAmount);
+                        }
+                        return;
                     }
                     //从头装备栏拖出
                     if (slotType == SlotType.Equipment_Head)
@@ -497,6 +555,25 @@ namespace MFarm.Inventory
                 }
             }
            
+        }
+        /// <summary>
+        /// 判断该物品是否允许在背包和卖车格子之间移动
+        /// </summary>
+        private bool IsSellCarMovable(ItemDetails item)
+        {
+            switch (item.itemType)
+            {
+                case ItemType.Seed:
+                case ItemType.Commodity:
+                case ItemType.Furniture:
+                case ItemType.Cooked:
+                case ItemType.Laterfish:
+                case ItemType.Seafish:
+                case ItemType.TreeSeed:
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 }

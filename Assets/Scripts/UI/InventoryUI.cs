@@ -2,6 +2,7 @@ using DG.Tweening;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using TMPro.Examples;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
@@ -65,6 +66,7 @@ namespace MFarm.Inventory
         private Vector2 bagOriginalPos;
         // 卖车面板的所有格子，用于批量清空（在 Inspector 中拖入）
         public SlotUI[] sellCarSlots;
+        
         [SerializeField] private List<SlotUI> baseBagSlots;
         //出售箱中残存的物品
         private List<InventoryItem> haveSellBoxItemList = new List<InventoryItem>();
@@ -408,6 +410,20 @@ namespace MFarm.Inventory
                         sellTip.SetActive(false);
                     }
                     break;
+                case InventoryLocation.SellCar:
+                    for (int i = 0; i < sellCarSlots.Length; i++)
+                    {
+                        if (i < list.Count && list[i].itemAmount > 0)
+                        {
+                            var item = InventoryManager.Instance.GetItemDetails(list[i].itemID);
+                            sellCarSlots[i].UpdateSlot(item, list[i].itemAmount, false, 0);
+                        }
+                        else
+                        {
+                            sellCarSlots[i].UpdateEmptySlot();
+                        }
+                    }
+                    break;
             }
             if (diffence != 0)
             {
@@ -576,6 +592,11 @@ namespace MFarm.Inventory
             {
                 sellCarBox = sellCarBoxTran.gameObject;
             }
+            // 卖车格子的序号按数组顺序重新指定，保证和数据下标一致
+            for (int i = 0; i < sellCarSlots.Length; i++)
+            {
+                sellCarSlots[i].slotIndex = i;
+            }
             // 卖车格子不在背包刷新循环里，这里批量清空预制体自带的图标和数量
             foreach (var slot in sellCarSlots)
             {
@@ -692,6 +713,34 @@ namespace MFarm.Inventory
                 }
                 sellCarBox.SetActive(true);
             }
+        }
+        /// <summary>
+        /// 卖车面板是否处于打开状态
+        /// </summary>
+        public bool IsSellCarBoxOpened => sellCarBox != null && sellCarBox.activeSelf;
+
+        /// <summary>
+        /// 找一个能放下该物品的卖车格子：优先同种物品所在格，其次第一个空格
+        /// </summary>
+        /// <param name="currentItemID">要放入的物品ID</param>
+        /// <returns>卖车格子的下标，-1 表示没有位置</returns>
+        public int GetEmptySellCarIndex(int currentItemID)
+        {
+            // 卖车格子里已有同种物品时堆叠到该格
+            int index = InventoryManager.Instance.GetItemIndexInBag(currentItemID, InventoryManager.Instance.sellCarItemList);
+            if (index != -1)
+            {
+                return index;
+            }
+            // 没有同种物品就取第一个空格
+            foreach (var slot in sellCarSlots)
+            {
+                if (slot.itemDetails == null)
+                {
+                    return slot.slotIndex;
+                }
+            }
+            return -1;
         }
 
         /// <summary>
@@ -1043,7 +1092,7 @@ namespace MFarm.Inventory
                     return index;
                 }
             }
-            if(location == InventoryLocation.SellBox || location == InventoryLocation.Shop)
+            if(location == InventoryLocation.SellBox || location == InventoryLocation.Shop || location == InventoryLocation.SellCar)
             {
                 //没有这个物品 
                 if (index == -1)

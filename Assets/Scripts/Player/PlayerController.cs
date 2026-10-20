@@ -1087,6 +1087,8 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         yield return TransitionManager.Instance.PlayEyeClose();
         //推进到下一天，时间来到次日7:00
         TimeManager.Instance.NextDay();
+        // 睡觉度过一天：结算卖车格子里的物品并清空
+        InventoryManager.Instance.SettleSellCarItems();
         TimeManager.Instance.gameHour = 7;
         TimeManager.Instance.gameMinute = 0;
         TimeManager.Instance.gameSecond = 0;
