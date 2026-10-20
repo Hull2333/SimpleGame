@@ -10,34 +10,34 @@ namespace MFarm.Inventory
 {
     public class InventoryUI : Singleton<InventoryUI>    //调用在InventoryUI对象上
     {
-        [Header("???????")]
+        [Header("物品描述")]
         public Canvas tweenCanvas;
         public ItemTooltip itemTooltip;
-        [Header("?????")]
+        [Header("拖拽图片")]
         public Image dragItem;
         public TextMeshProUGUI dragItemAmount;
-        [Header("??????UI")]
+        [Header("玩家背包UI")]
         [SerializeField] private GameObject bagUI;
         [SerializeField] private GameObject playerEquipUI;
-        //????????????????
+        //当前是否可以打开玩家背包
         [HideInInspector] public bool canOpenBag = true;
         public GameObject activeBagBar;
         public GameObject bagButton;
         private bool bagOpened;
-        [Header("??????")]
+        [Header("通用背包")]
         [SerializeField] private GameObject baseBag;
-        //??????UI?е??л???尴?
+        //玩家背包UI中的切换面板按钮
         public GameObject[] playerBagSupButtons;
         public GameObject shopSlotPrefab;
         public GameObject boxSlotPrefab;
-        //???SlotUI????
+        //鱼饵SlotUI动画
         public Animator baitBarAnim;
-        //??????
+        //鱼饵信息
         public SlotUI baitItemSlot;
-        [Header("???????????UI")]
+        [Header("交易数量选择UI")]
         public GameObject tradeUIPanel;
         public TradeUI tradeUI;
-        //??????????????UI
+        //还没卖完显示提醒UI
         public GameObject haveItemUIPanel;
         public Button yesButton;
         public Button noButton;
@@ -45,56 +45,62 @@ namespace MFarm.Inventory
         public Animator playerMoneyUIAnim;
         public SlotUI[] playerSlots;
         public SlotUI[] sellBoxSlots;
-        [Header("NPC???UI")]
+        [Header("NPC商店UI")]
         public GameObject shopSlotHolder;
         public Button quitShopButton;
         public Button shopButton;
-        [Header("NPC??????UI")]
+        [Header("NPC出售箱UI")]
         public GameObject sellBoxSlotHolder;
         public Button sellBoxButton;
         public GameObject sellJoy;
         public GameObject allValue;
         public TextMeshProUGUI allValueText;
-        //??????ж????????
+        //提示还有东西没卖掉
         public GameObject sellHaveItemTipPrefab;
-        //????????????
+        //点击摇杆出售提示
         public GameObject sellTip;
+        // 卖车面板（默认关闭），靠近车子左键点击时与玩家背包一起打开
+        private GameObject sellCarBox;
+        // 打开卖车面板前记录背包的原位置，关闭时还原
+        private Vector2 bagOriginalPos;
+        // 卖车面板的所有格子，用于批量清空（在 Inspector 中拖入）
+        public SlotUI[] sellCarSlots;
         [SerializeField] private List<SlotUI> baseBagSlots;
-        //???????вд?????
+        //出售箱中残存的物品
         private List<InventoryItem> haveSellBoxItemList = new List<InventoryItem>();
-        [Header("???")]
+        [Header("金币")]
         private RectTransform coinRectTran;
-        //????????
+        //金币预制体
         public GameObject coinPrefab;
-        //????????????Parent
+        //金币生成物体的Parent
         public Transform coinParent;
         private List<GameObject> coinList = new List<GameObject>();
         private int coinNum;
-        //???????
+        //金币的终点
         public Transform coinTargetPos;
-        [Header("????????")]
-        //??????UI????λ??
+        [Header("物品拾取提示")]
+        //物品提示UI生成位置
         [SerializeField] private Transform itemGetBg;
-        //??????UI
+        //物品提示UI
         public GameObject itemGetTipPrefab; 
-        //?????UI
+        //玩家等级UI
         public GameObject skillPanel;
         [HideInInspector] public bool skillBarOpened;
-        [Header("??????")]
+        [Header("玩家面板")]
         public GameObject[] playerPanels;
-        //?????
+        //装备框
         public SlotUI equipHeadSlot, equipBodySlot;
-        //???????????
+        //攻击防御数值
         public Text attackNumber, defenseNumber;
-        [Header("??????б?")] 
-        //??????????
+        [Header("装备图片列表")] 
+        //装备显示图片库
         public List<EquipImage> equipImageSprites = new List<EquipImage>();
-        //????????????
+        //玩家身上装备图片
         public List<Image> equipImageList = new List<Image>();
         public Dictionary<string, Image> equipImageDict = new Dictionary<string, Image>();
-        [Header("??ж?")]
+        [Header("好感度")]
         public Image[] friendlinessImages;
-        [Header("????UI")]
+        [Header("建造UI")]
         public SlotUI_Build buildSlotUI;
         public Transform buildSlotUIParent;
         public GameObject buildShopPanel;
@@ -102,23 +108,23 @@ namespace MFarm.Inventory
         public Button buildModeExitButton;
         public Button animalModeExitButton;
         public Button buildingShopExitButton;
-        //??????????
+        //提示材料不足
         public GameObject resourceLock;
-        [Header("???????")]
+        [Header("动物商店")]
         public GameObject animalShopUI;
         public Transform animalSlotParent;
         public AnimalSlotUI animalShopSlotUI;
         public Button quitAnimalShopButton;
-        //????????????UI
+        //询问购买动物数量UI
         public GameObject animalAskUI;
         public Image askImage;
         public TextMeshProUGUI askAmountText;
         public Button increaseAmountButton;
         public Button decreaseAmountButton;
         public Button quitAskUIButton;
-        //??????????
+        //确定数量按钮
         public Button commitAmountButton;
-        //???????????
+        //当前选择的数量
         private int currentAskAmount;
         
         private void OnEnable()
@@ -164,7 +170,7 @@ namespace MFarm.Inventory
 
 
         /// <summary>
-        /// ?????????????????????
+        /// 加载新场景后物品高亮取消
         /// </summary>
         private void OnBeforeSceneUnloadEvent()
         {
@@ -173,7 +179,7 @@ namespace MFarm.Inventory
         }
         private void OnAfterSceneLoadedEvent()
         {
-            //??????????
+            //初始化玩家金钱
             playerMoneyText.text = InventoryManager.Instance.playerMoney.ToString();
         }
         /// <summary>
@@ -183,14 +189,14 @@ namespace MFarm.Inventory
         /// <param name="bag_SO"></param>
         private void OnBaseBagOpenEvent(SlotType slotType, InventoryBag_SO bagData)
         {
-            //TODO:???????Prefab
+            //TODO:通用箱子Prefab
             GameObject prefab = slotType switch
             {
                 SlotType.Shop => shopSlotPrefab,
                 SlotType.Box => boxSlotPrefab,
                 _ => null,
             };
-            //???????UI
+            //显示背包UI
             baseBag.SetActive(true);
             foreach (var button in playerBagSupButtons)
             {
@@ -201,16 +207,16 @@ namespace MFarm.Inventory
             baseBagSlots = new List<SlotUI>();
             for (int i = 0; i < bagData.itemList.Count; i++)
             {
-                //????????????????????
+                //根据指定数量生成背包格
                 var slot = Instantiate(prefab, baseBag.transform.GetChild(0)).GetComponent<SlotUI>();
-                //??????????????????
+                //将背包格序号与背包匹配
                 slot.slotIndex = i;
-                //????????slot?????baseBag?б???
+                //再将匹配好的slot添加到baseBag列表中
                 baseBagSlots.Add(slot);
             }
-            //???????????????????????????????????????
+            //强制重建背包格局，使每次增加物品格时背包显示正常
             LayoutRebuilder.ForceRebuildLayoutImmediate(baseBag.GetComponent<RectTransform>());
-            //?????????????????,?????????????λ??
+            //打开商店时也顺便打开玩家背包,并重新设置背包位置
             if (slotType == SlotType.Shop)
             {
                 bagUI.GetComponent<RectTransform>().anchoredPosition = new Vector2(449.2f, 199.2f);
@@ -218,7 +224,7 @@ namespace MFarm.Inventory
                 bagOpened = true;
             }
             EventHandler.CallRestoreNormalCursorImageEvent();
-            //????UI???
+            //更新UI显示
             OnUpdateInventoryUI(InventoryLocation.Box, bagData.itemList,0);
 
         }
@@ -236,7 +242,7 @@ namespace MFarm.Inventory
                 button.SetActive(true);
             }
             baseBag.SetActive(false);
-            //????????е????
+            //取消当前选中的物品
             InventoryManager.Instance.currentSelectedItem = null;
             EventHandler.CallItemSelectEvent(InventoryManager.Instance.currentSelectedItem, false);
             itemTooltip.gameObject.SetActive(false);
@@ -246,7 +252,7 @@ namespace MFarm.Inventory
                 Destroy(slot.gameObject);
             }
             baseBagSlots.Clear();
-            //?????????????,???????λ??
+            //关闭商店后背包一起关闭,还原背包位置
             if (slotType == SlotType.Shop)
             {
                 bagUI.GetComponent<RectTransform>().anchoredPosition = new Vector2(385.2f, 197);
@@ -255,7 +261,7 @@ namespace MFarm.Inventory
             }
         }
         /// <summary> 
-        /// ??????????
+        /// 显示交易界面
         /// </summary>
         /// <param name="item"></param>
         /// <param name="isSell"></param>
@@ -263,7 +269,7 @@ namespace MFarm.Inventory
         {
             if(toIndex < sellBoxSlots.Length)
             {
-                //????????????????????????н???UI???
+                //物品和目的物品不是用一种就不执行交易UI显示
                 if (sellBoxSlots[toIndex].itemDetails != null && isSell)
                 {
                     if (sellBoxSlots[toIndex].itemDetails.itemID != playerSlots[fromIndex].itemDetails.itemID)
@@ -276,26 +282,26 @@ namespace MFarm.Inventory
             tradeUI.SetupTradeUI(item, isSell, maxAmount, fromIndex, toIndex,startLocation,endLocation, isToSellBox);
         }
         /// <summary>
-        /// ??????????????????ItemTipList?б???
+        /// 将刚拾取到的物品添加到ItemTipList列表中
         /// </summary>
         /// <param name="getItemDetails"></param>
         private void OnGetItemTipEvent(ItemDetails getItemDetails)
         {
             if (getItemDetails != null)
             {
-                //itemGetBg?????????
+                //itemGetBg下的子物体
                 ItemGetTipUI[] itemGetTipUIs;
                 itemGetTipUIs = itemGetBg.GetComponentsInChildren<ItemGetTipUI>();
-                //?????????
+                //没有拾取提示时
                 if(itemGetTipUIs.Length <= 0)
                 {
                     GameObject getItem = Instantiate(itemGetTipPrefab, itemGetBg);
                     getItem.GetComponent<ItemGetTipUI>().ModifyItemParameter(getItemDetails);
                 }
-                //????????
+                //有拾取提示时
                 else
                 {
-                    //?????????????????
+                    //短时间内捡到相同的物品时
                     if (FindItemGetTipUIs(getItemDetails, itemGetTipUIs))
                     {
                         foreach (var tip in itemGetTipUIs)
@@ -306,7 +312,7 @@ namespace MFarm.Inventory
                             }
                         }
                     }
-                    //????????
+                    //捡到不同物品时
                     else
                     {
                         GameObject getItem = Instantiate(itemGetTipPrefab, itemGetBg);
@@ -314,7 +320,7 @@ namespace MFarm.Inventory
                     }
                 }
                 //currentGetItemID = getItemDetails.getItemID;
-                ////?????????????ж???????????б??л???????????????????
+                ////根据是否重复来判断是在添加到列表中还是添加重复物品的数量
                 //if (ItemListConditons(getItemDetails) == -1)
                 //{
                 //    itemGetTipList.Add(getItemDetails);
@@ -322,10 +328,10 @@ namespace MFarm.Inventory
                 //    itemGetTipPrefab.transform.GetChild(0).GetComponent<Image>().sprite = getItemDetails.itemIcon;
                 //    itemGetTipPrefab.transform.GetChild(1).GetComponent<Text>().recipeName = "X" + " " + "1";
                 //}
-                ////?????????????????????????????????????????
+                ////若拾取的物品正显示在游戏界面上，只修改物品的拾取数量
                 //else
                 //{
-                //    //????????????????????????б???index
+                //    //获取正显示的物品所在的拾取物品列表的index
                 //    int index = ItemListConditons(getItemDetails);
                 //    int amountText = itemGetTipList[index].tipAmount++;
                 //    foreach(var tip in itemGetBg.GetComponentsInChildren<ItemGetTipUI>())
@@ -340,9 +346,9 @@ namespace MFarm.Inventory
             }
         }
         /// <summary>
-        /// ???????б????е?????????????????????
+        /// 根据现有背包中的物品数量来增加拾取的物品
         /// </summary>
-        /// <param name="location">???????λ??????</param>
+        /// <param name="location">更新哪个位置的背包</param>
         /// <param name="list"></param>
         private void OnUpdateInventoryUI(InventoryLocation location, List<InventoryItem> list, int diffence)
         {
@@ -362,7 +368,7 @@ namespace MFarm.Inventory
                         }
                     }
                     break;
-                //Shop??Box??????????
+                //Shop和Box属于同一类型
                 case InventoryLocation.Box:
                     for (int i = 0; i < baseBagSlots.Count; i++)
                     {
@@ -390,9 +396,9 @@ namespace MFarm.Inventory
                             sellBoxSlots[i].UpdateEmptySlot();
                         }
                     }
-                    //?????????????????
+                    //修改出售箱显示的总价值
                     allValueText.text = InventoryManager.Instance.ModifySellBoxValue().ToString();
-                    //???????????????????????
+                    //根据出售箱金额来显示出售提示
                     if (InventoryManager.Instance.ModifySellBoxValue() > 0)
                     {
                         sellTip.SetActive(true);
@@ -409,13 +415,13 @@ namespace MFarm.Inventory
             }
         }
         /// <summary>
-        /// ????????????????????????????仯
+        /// 修改玩家金钱并实现玩家金钱“流动”的变化
         /// </summary>
         /// <param name="fromValue"></param>
         /// <param name="difference"></param>
         public void OnDoTweenPlayerMoneyChageEvent(int fromValue, int difference)
         {
-            //????仯????
+            //金钱变化前的值
             int originValue = fromValue;
             DOTween.To(
             () => fromValue,
@@ -432,7 +438,7 @@ namespace MFarm.Inventory
             });
         }
         /// <summary>
-        /// ????itemGetTipUIs?????????
+        /// 查找itemGetTipUIs下的相同提示
         /// </summary>
         /// <param name="newTip"></param>
         /// <returns></returns>
@@ -448,7 +454,7 @@ namespace MFarm.Inventory
             return false;
         }
         /// <summary>
-        /// ?????????????????????????
+        /// 收获农作物之后取消所有物品的选取
         /// </summary>
         /// <param name="ID"></param>
         private void OnDisplayCollectItemSprite(int ID)
@@ -529,12 +535,12 @@ namespace MFarm.Inventory
         private void OnOpenBuildShopEvent(BuildingBagData_SO buildShop)
         {
             buildShopPanel.SetActive(true);
-            //???buildSlotUIParent?????????
+            //清空buildSlotUIParent下的子物体
             for (int i = 0; i < buildSlotUIParent.childCount; i++)
             {
                 Destroy(buildSlotUIParent.GetChild(i).gameObject);
             }
-            //?????????????
+            //生成对应的可造建筑
             for (int i = 0; i < buildShop.buildingList.Count; i++)
             {
                 var buildingSlot = Instantiate(buildSlotUI, buildSlotUIParent);
@@ -557,13 +563,24 @@ namespace MFarm.Inventory
         }
         private void Start()
         {
-            //??????????????????
+            //给每个背包格子赋值序号
             for (int i = 0; i < playerSlots.Length; i++)
             {
                 playerSlots[i].slotIndex = i;
             }
-            //???????????Player Bag ??????
+            //游戏开始时设置Player Bag 是否显示
             bagOpened = bagUI.activeInHierarchy;
+            // 缓存卖车面板（SellCarBox，默认关闭），供靠近车子点击时打开
+            Transform sellCarBoxTran = transform.Find("SellCarBox");
+            if (sellCarBoxTran != null)
+            {
+                sellCarBox = sellCarBoxTran.gameObject;
+            }
+            // 卖车格子不在背包刷新循环里，这里批量清空预制体自带的图标和数量
+            foreach (var slot in sellCarSlots)
+            {
+                slot.UpdateEmptySlot();
+            }
             itemGetBg = GameObject.FindGameObjectWithTag("ItemGetBg").transform;
             foreach (Image image in equipImageList)
             {
@@ -593,13 +610,13 @@ namespace MFarm.Inventory
         }
        
         /// <summary>
-        /// ???????UI?????
+        /// 控制背包UI的开关
         /// </summary>
         public void OpenBagUI()
         {
             if (canOpenBag)
             {
-                //???Bag Button?????????
+                //实现Bag Button可以反复点按
                 bagOpened = !bagOpened;
                 InventoryManager.Instance.anyBagOpened = bagOpened;
 
@@ -607,20 +624,20 @@ namespace MFarm.Inventory
                 {
                     //Time.timeScale = 0f;
                     EventHandler.CallUpdateGameStateEvent(GameState.Pause);
-                    //???α????????????????????
+                    //每一次背包打开都是默认显示背包栏
                     playerPanels[0].SetActive(true);
                     //SwitchBagSlotHolderPageButton();
                 }
                 else
                 {
-                    //????ActionBar????????????????????????????????????????????????null
+                    //除了ActionBar的物品外，其他被选择后要进行取消举手动作，把当前的物品设置为null
                     for (int i = 0; i < playerSlots.Length - 9; i++)
                     {
                         if (playerSlots[i].isSelected)
                         {
                             UpdateSlotHighlight(-1);
                             InventoryManager.Instance.currentSelectedItem = null;
-                            //??ι?????UI????????????Player??????????????
+                            //每次关闭背包UI时，重新检测一下Player动画并取消举起动画
                             EventHandler.CallItemSelectEvent(InventoryManager.Instance.currentSelectedItem, false);
                         }
                     }
@@ -628,10 +645,21 @@ namespace MFarm.Inventory
                     {
                         panel.gameObject.SetActive(false);
                     }
+                    // 关闭卖车面板，并把玩家背包放回原位
+                    if (sellCarBox != null && sellCarBox.activeSelf)
+                    {
+                        sellCarBox.SetActive(false);
+                        bagUI.GetComponent<RectTransform>().anchoredPosition = bagOriginalPos;
+                        // 恢复切换到其他面板的按钮
+                        foreach (var button in playerBagSupButtons)
+                        {
+                            button.SetActive(true);
+                        }
+                    }
                     EventHandler.CallEquipSlotEvent(equipHeadSlot, equipBodySlot);
                     //Time.timeScale = 1f;
                     EventHandler.CallUpdateGameStateEvent(GameState.Gameplay);
-                    //??????UI????????????UI
+                    //关闭背包UI同时也关闭道具介绍UI
                     itemTooltip.gameObject.SetActive(false);
                 }
                 playerEquipUI.SetActive(bagOpened);
@@ -642,12 +670,37 @@ namespace MFarm.Inventory
         }
 
         /// <summary>
-        /// ???????????и?????????????
+        /// 打开卖车界面：同时打开玩家背包面板与卖车面板（两者默认都是关闭的）
         /// </summary>
-        /// <param name="index">OnPointerClick????????????slotIndex</param>
+        public void OpenSellCarUI()
+        {
+            // 背包已经打开时不重复打开，避免 OpenBagUI 的反向切换把界面关掉
+            if (InventoryManager.Instance.anyBagOpened)
+            {
+                return;
+            }
+            OpenBagUI();
+            if (sellCarBox != null)
+            {
+                // 记录背包原位置，再把背包挪到卖车面板对应的位置
+                bagOriginalPos = bagUI.GetComponent<RectTransform>().anchoredPosition;
+                bagUI.GetComponent<RectTransform>().anchoredPosition = new Vector2(452f, 197f);
+                // 卖车界面只显示背包物品，隐藏切换到其他面板的按钮
+                foreach (var button in playerBagSupButtons)
+                {
+                    button.SetActive(false);
+                }
+                sellCarBox.SetActive(true);
+            }
+        }
+
+        /// <summary>
+        /// 控制背包格选中高亮的显示和消失
+        /// </summary>
+        /// <param name="index">OnPointerClick方法传进来的slotIndex</param>
         public void UpdateSlotHighlight(int index)
         {
-            //???????playerSlots???????????slot
+            //快速遍历playerSlots中每一项，声明为slot
             foreach (var slot in playerSlots)
             {
                 if (slot.isSelected && slot.slotIndex == index)
@@ -656,14 +709,14 @@ namespace MFarm.Inventory
                 }
                 else
                 {
-                    //?????????е?slot?????????????????????
+                    //其他没被选中的slot要取消选中状态以及不显示高亮
                     slot.isSelected = false;
                     slot.slotHighlight.gameObject.SetActive(false);
                 }
             }
         }
         /// <summary>
-        /// ?????????????????,????????????UI????????
+        /// 开启玩家相关的各个面板,调用在玩家背包UI的选择按钮上
         /// </summary>
         /// <param name="index"></param>
         public void SwitchPlayerPanel(int index)
@@ -674,12 +727,12 @@ namespace MFarm.Inventory
             {
                 if (i == index)
                 {
-                    //?????????????
+                    //开启玩家等级面板时
                     if(index == 1)
                     {
                         skillPanel.GetComponent<SkillBar>().UpdateSkillBar();
                     }
-                    //????????????
+                    //开启任务面板时
                     if(index == 2)
                     {
                         QuestUI.Instance.SetUpQuestList();
@@ -695,7 +748,7 @@ namespace MFarm.Inventory
             }
         }
         /// <summary>
-        /// ??????????,??????PlayerEquipUI???QuitButton?????
+        /// 玩家面板关闭按钮,调用在PlayerEquipUI下的QuitButton按钮上
         /// </summary>
         public void PlayerPanelsQuit()
         {
@@ -703,10 +756,21 @@ namespace MFarm.Inventory
             {
                 panel.gameObject.SetActive(false);
             }
+            // 关闭卖车面板，并把玩家背包放回原位
+            if (sellCarBox != null && sellCarBox.activeSelf)
+            {
+                sellCarBox.SetActive(false);
+                bagUI.GetComponent<RectTransform>().anchoredPosition = bagOriginalPos;
+                // 恢复切换到其他面板的按钮
+                foreach (var button in playerBagSupButtons)
+                {
+                    button.SetActive(true);
+                }
+            }
             playerEquipUI.SetActive(bagOpened);
             InventoryManager.Instance.anyBagOpened = false;
             EventHandler.CallItemUselessEvent(false);
-            //??ι?????UI????????????Player??????????????
+            //每次关闭背包UI时，重新检测一下Player动画并取消举起动画
             EventHandler.CallEquipSlotEvent(equipHeadSlot, equipBodySlot);
             EventHandler.CallItemSelectEvent(InventoryManager.Instance.currentSelectedItem, false);
             bagOpened = false;
@@ -716,7 +780,7 @@ namespace MFarm.Inventory
             playerEquipUI.SetActive(false);
         }
         ///// <summary>
-        ///// ?????????????
+        ///// 点击玩家背包下一页
         ///// </summary>
         //public void BagSlotHolderNextPage()
         //{
@@ -727,7 +791,7 @@ namespace MFarm.Inventory
         //    SwitchBagSlotHolderPageButton();
         //}
         ///// <summary>
-        ///// ?????????????
+        ///// 点击玩家背包上一页
         ///// </summary>
         //public void BagSlotHolderPreviousPage()
         //{
@@ -738,7 +802,7 @@ namespace MFarm.Inventory
         //    SwitchBagSlotHolderPageButton();
         //}
         ///// <summary>
-        ///// ????????????????????
+        ///// 检测背包翻上下页按钮的开关
         ///// </summary>
         //public void SwitchBagSlotHolderPageButton()
         //{
@@ -760,17 +824,17 @@ namespace MFarm.Inventory
         //    }
         //}
         /// <summary>
-        /// ????????????????
+        /// 显示玩家身上的装备图片
         /// </summary>
         /// <param name="itemDetails"></param>
         public void SetEquipImage(ItemDetails itemDetails,SlotUI targetSlot)
         {
             if (itemDetails != null)
             {
-                //??????itemDetails????
+                //装备头部itemDetails装备时
                 if (targetSlot.slotType == SlotType.Equipment_Head)
                 {
-                    //??????????????
+                    //搜索装备显示图片库
                     foreach (EquipImage s in equipImageSprites)
                     {
                         if (s.itemID == itemDetails.itemID && s.equipPartName == PartName.Head)
@@ -780,10 +844,10 @@ namespace MFarm.Inventory
                     }
 
                 }
-                //???????????
+                //装备身体装备时
                 else
                 {
-                    //??????????????
+                    //搜索装备显示图片库
                     foreach (EquipImage s in equipImageSprites)
                     {
                         if (s.itemID == itemDetails.itemID)
@@ -803,7 +867,7 @@ namespace MFarm.Inventory
             
         }
         /// <summary>
-        /// ?????????
+        /// 恢复默认装扮
         /// </summary>
         /// <param name="currentSlot"></param>
         public void ResetEquipImage(SlotType currentSlot)
@@ -819,7 +883,7 @@ namespace MFarm.Inventory
             }
         }
         /// <summary>
-        /// ????????????????
+        /// 更新显示玩家攻击数值
         /// </summary>
         /// <param name="itemDetail"></param>
         public void UpdatePlayerAttackNum(ItemDetails itemDetail)
@@ -838,7 +902,7 @@ namespace MFarm.Inventory
             }
         }
         /// <summary>
-        /// ????????????????
+        /// 更新显示玩家防御数值
         /// </summary>
         public void UpdatePlayerDefenseNum()
         {
@@ -851,16 +915,16 @@ namespace MFarm.Inventory
             {
                 num += equipBodySlot.itemDetails.maxValue;
             }
-            //????????????
+            //更新玩家防御力
             EventHandler.CallEquipArmorEven(num);
             defenseNumber.text = num.ToString();
         }
         /// <summary>
-        /// ????sellButton???????,??????sellButton?????
+        /// 按下sellButton开始出售,调用在sellButton按钮上
         /// </summary>
         public void ClickSellButton()
         {
-            //??????????sellBox??UI
+            //优先刷新一下sellBox的UI
             if(InventoryManager.Instance.ModifySellBoxValue() > 0)
             {
                 for (int i = 0; i < sellBoxSlots.Length; i++)
@@ -875,13 +939,13 @@ namespace MFarm.Inventory
            
         }
         /// <summary>
-        /// ???????л???? 
+        /// 点击商店切换按钮 
         /// </summary>
         public void ClickShopSwitchButton()
         {
             foreach (var slot in sellBoxSlots)
             {
-                //?????????????????????UI
+                //有物品还在出售箱就显示询问UI
                 if (slot.itemDetails != null)
                 {
                     Instantiate(sellHaveItemTipPrefab, Input.mousePosition, Quaternion.identity, baseBag.transform);
@@ -896,7 +960,7 @@ namespace MFarm.Inventory
             sellTip.SetActive(false);
         }
         /// <summary>
-        /// ??????????л????
+        /// 点击出售箱切换按钮
         /// </summary>
         public void ClickSellSwitchButton()
         {
@@ -909,12 +973,12 @@ namespace MFarm.Inventory
             
         }
         /// <summary>
-        /// ??????????
+        /// 点击商店关闭按钮
         /// </summary>
         public void ClickQuitShopButton()
         {
             haveSellBoxItemList.Clear();
-            //??????UI?????????????вд????
+            //关闭商店UI时检查出售箱是否还有残存物品
             foreach (var slot in sellBoxSlots)
             {
                 if (slot.itemDetails != null)
@@ -924,7 +988,7 @@ namespace MFarm.Inventory
                 }
             }
           
-            //?????????????????????UI
+            //有物品还在出售箱就显示询问UI
             if(haveSellBoxItemList.Count > 0)
             {
                 haveItemUIPanel.SetActive(true);
@@ -937,7 +1001,7 @@ namespace MFarm.Inventory
            
         }
         /// <summary>
-        /// ?????????????????
+        /// 点击收回物品询问是的按钮
         /// </summary>
         private void ClickYesButton()
         {
@@ -948,11 +1012,11 @@ namespace MFarm.Inventory
             haveItemUIPanel.SetActive(false);
         }
         /// <summary>
-        ///  ??????????????????index?????????index
+        ///  获取对方箱子的已有物品index或者空的格子index
         /// </summary>
-        /// <param name="currentItemID">??????</param>
-        /// <param name="lists">????????InventoryItem????</param>
-        /// <param name="location">??????????λ??</param>
+        /// <param name="currentItemID">当前物品</param>
+        /// <param name="lists">对方箱子的InventoryItem队列</param>
+        /// <param name="location">自身的箱子位置</param>
         /// <returns></returns>
         public int GetEmptySellBoxIndex(int currentItemID,List<InventoryItem> lists,InventoryLocation location)
         {
@@ -961,7 +1025,7 @@ namespace MFarm.Inventory
            
             if(location == InventoryLocation.Player)
             {
-                //??????????????????????????index
+                //出售箱没有这个物品就返回一个空的index
                 if (index == -1)
                 {
                     foreach (var slot in sellBoxSlots)
@@ -973,7 +1037,7 @@ namespace MFarm.Inventory
                         }
                     }
                 }
-                //????????
+                //有这个物品
                 else
                 {
                     return index;
@@ -981,10 +1045,10 @@ namespace MFarm.Inventory
             }
             if(location == InventoryLocation.SellBox || location == InventoryLocation.Shop)
             {
-                //????????? 
+                //没有这个物品 
                 if (index == -1)
                 {
-                    //?????????в??????
+                    //在玩家背包中查找物品
                     foreach (var slot in playerSlots)
                     {
                         if (slot.itemDetails == null)
@@ -994,7 +1058,7 @@ namespace MFarm.Inventory
                         }
                     }
                 }
-                //????????
+                //有这个物品
                 else
                 {
                     return index;
@@ -1003,7 +1067,7 @@ namespace MFarm.Inventory
             return index;
         }
         /// <summary>
-        /// ?????????????UI??
+        /// 实现金币划到玩家金钱UI上
         /// </summary>
         private void MakeTween()
         {
@@ -1017,12 +1081,12 @@ namespace MFarm.Inventory
             }
         }
         /// <summary>
-        /// ??????
+        /// 生成金币
         /// </summary>
         private void GenerateCoins()
         {
             coinList.Clear();
-            //??????????
+            //金币生成个数
             int num = 1;
             if(InventoryManager.Instance.ModifySellBoxValue() > 50)
             {
@@ -1067,7 +1131,7 @@ namespace MFarm.Inventory
             MakeTween();
         }
         /// <summary>
-        /// ?????????
+        /// 退出建造模式
         /// </summary>
         private void ExitBuildMode()
         {
@@ -1086,7 +1150,7 @@ namespace MFarm.Inventory
         }
        
         /// <summary>
-        /// ?????????????
+        /// 显示材料不足提示
         /// </summary>
         public void ShowResouceLackText()
         {
@@ -1094,7 +1158,7 @@ namespace MFarm.Inventory
             Instantiate(resourceLock, pos, Quaternion.identity, coinParent);
         }
         /// <summary>
-        /// ????????????UI
+        /// 打开动物询问数量UI
         /// </summary>
         public void OpenAnimalAskUI(Sprite sprite)
         {
@@ -1105,14 +1169,14 @@ namespace MFarm.Inventory
 
         }
         /// <summary>
-        /// ?????????????UI
+        /// 关闭动物询问数量UI
         /// </summary>
         public void QuitAnimalAskUI()
         {
             animalAskUI.SetActive(false);
         }
         /// <summary>
-        /// ?????????????????
+        /// 点击增加动物数量按钮
         /// </summary>
         public void ClickAnimalIncreaseButton()
         {
@@ -1120,7 +1184,7 @@ namespace MFarm.Inventory
             askAmountText.text = currentAskAmount.ToString();
         }
         /// <summary>
-        /// ?????????????????
+        /// 点击减少动物数量按钮
         /// </summary>
         public void ClickAnimalDecreaseButton()
         {
@@ -1136,7 +1200,7 @@ namespace MFarm.Inventory
             animalAskUI.SetActive(false);
         }
         /// <summary>
-        /// ?????????
+        /// 关闭动物商店
         /// </summary>
         public void QuitAnimalShopUI()
         {

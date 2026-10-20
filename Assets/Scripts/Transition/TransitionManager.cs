@@ -20,8 +20,13 @@ namespace MFarm.Transition
         [Header("转场效果")]
         private Canvas transtionCanvas;
         public Material transtionMaterial;
+        // Eye shaped curtain used by the sleep transition (MFarm/UI/EyeTransition)
+        public Material eyeTranstionMaterial;
         private int transtionValue;
         private int smoothValue;
+        private int eyeZoomValue;
+        // _Zoom at which no curtain is left. The current mask needs about 2.1.
+        private const float EyeOpenZoom = 2.5f;
         private Tween currentTween;
         //焦点转场图片所在面板，用于把收缩焦点移到玩家身上
         private RectTransform transtionPanel;
@@ -69,7 +74,13 @@ namespace MFarm.Transition
             transtionPanelAnchoredPosition = transtionPanel.anchoredPosition;
             transtionValue = Shader.PropertyToID("_Value");
             smoothValue = Shader.PropertyToID("_SmoothValue");
+            eyeZoomValue = Shader.PropertyToID("_Zoom");
             transtionMaterial.SetFloat(transtionValue, 1 + transtionMaterial.GetFloat(smoothValue));
+            // Same as above: the eye curtain starts fully open
+            if (eyeTranstionMaterial != null)
+            {
+                eyeTranstionMaterial.SetFloat(eyeZoomValue, EyeOpenZoom);
+            }
         }
         private void OnTransitionEvent(string sceneToGo, Vector3 positionToGo)
         {
@@ -159,7 +170,7 @@ namespace MFarm.Transition
         /// <summary>
         /// 焦点收缩转场
         /// </summary>
-        private IEnumerator PlayFadeTranstion()
+        public IEnumerator PlayFadeTranstion()
         {
             isFade = true;
             //收缩焦点从屏幕中心移到玩家身上
@@ -205,7 +216,7 @@ namespace MFarm.Transition
         /// <summary>
         /// 焦点展开转场
         /// </summary>
-        private IEnumerator PlayOpenTranstion()
+        public IEnumerator PlayOpenTranstion()
         {
             //展开焦点也从玩家身上开始，展开期间持续跟随(此时相机可能才刚追上被传送的玩家)
             SetTranstionFocusToPlayer();
@@ -219,6 +230,34 @@ namespace MFarm.Transition
             yield return currentTween.WaitForCompletion();
             //此时画面已透明，还原面板看不到变化
             ResetTranstionPanel();
+        }
+        /// <summary>
+        /// Eye curtain close: like a sleepy eye the hole fights up and down, then closes to black.
+        /// </summary>
+        public IEnumerator PlayEyeClose()
+        {
+            if (eyeTranstionMaterial == null) yield break;
+            isFade = true;
+            // The lid drops once and jerks back wide once, then the eye gives in and shuts
+            yield return eyeTranstionMaterial.DOFloat(0.6f, eyeZoomValue, 0.6f).WaitForCompletion();
+            yield return eyeTranstionMaterial.DOFloat(1.3f, eyeZoomValue, 0.4f).SetEase(Ease.OutQuad).WaitForCompletion();
+            yield return eyeTranstionMaterial.DOFloat(0.5f, eyeZoomValue, 0.4f).SetEase(Ease.InQuad).WaitForCompletion();
+            yield return eyeTranstionMaterial.DOFloat(1.1f, eyeZoomValue, 0.4f).SetEase(Ease.InQuad).WaitForCompletion();
+            yield return eyeTranstionMaterial.DOFloat(0f, eyeZoomValue, 0.70f).SetEase(Ease.InQuad).WaitForCompletion();
+        }
+        /// <summary>
+        /// Eye curtain open: the hole grows to a medium size, wobbles up and down, then opens all
+        /// the way. Ending at EyeOpenZoom is deliberate: no curtain is left on any screen size.
+        /// </summary>
+        public IEnumerator PlayEyeOpen()
+        {
+            if (eyeTranstionMaterial == null) yield break;
+            // Medium first, a small up and down wobble, then the whole screen
+            yield return eyeTranstionMaterial.DOFloat(0.45f, eyeZoomValue, 0.45f).SetEase(Ease.OutQuad).WaitForCompletion();
+            yield return eyeTranstionMaterial.DOFloat(0.65f, eyeZoomValue, 0.4f).SetEase(Ease.InQuad).WaitForCompletion();
+            yield return eyeTranstionMaterial.DOFloat(0.42f, eyeZoomValue, 0.4f).SetEase(Ease.OutQuad).WaitForCompletion();
+            yield return eyeTranstionMaterial.DOFloat(EyeOpenZoom, eyeZoomValue, 0.80f).SetEase(Ease.InOutQuad).WaitForCompletion();
+            isFade = false;
         }
         /// <summary>
         /// 加载游戏进度场景

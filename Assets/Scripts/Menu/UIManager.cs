@@ -241,20 +241,13 @@ namespace MFarm.Inventory
             EventHandler.CallUpdateGameStateEvent(GameState.Pause);
         }
         /// <summary>
-        /// 点击睡觉面板的“是”：度过当前这一天，时间来到第二天的7:00
+        /// 点击睡觉面板的“是”：关闭面板并恢复游戏状态，然后通知PlayerController开始睡觉流程
         /// </summary>
         private void SleepYesButtonClick()
         {
-            //把日期推进到下一天
-            TimeManager.Instance.NextDay();
-            //时间设为第二天的7:00
-            TimeManager.Instance.gameHour = 7;
-            TimeManager.Instance.gameMinute = 0;
-            TimeManager.Instance.gameSecond = 0;
-            //派发时间和日期事件，刷新时间和日期UI
-            EventHandler.CallGameMinuteEvent(TimeManager.Instance.gameMinute, TimeManager.Instance.gameHour, TimeManager.Instance.gameDay, TimeManager.Instance.gameSeason);
-            EventHandler.CallGameDateEvemnt(TimeManager.Instance.gameHour, TimeManager.Instance.gameDay, TimeManager.Instance.gameMonth, TimeManager.Instance.gameYear, TimeManager.Instance.gameSeason);
+            //关闭面板，恢复timeScale与游戏状态，睡觉流程交给PlayerController执行
             CloseSleepPanel();
+            EventHandler.CallSleepEvent();
         }
         /// <summary>
         /// 点击睡觉面板的“否”：不进入第二天

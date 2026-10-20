@@ -483,4 +483,10 @@ public static class EventHandler
     {
         OpenSleepPanelEvent?.Invoke();
     }
+    //玩家点击睡觉面板“是”后的事件
+    public static event Action SleepEvent;
+    public static void CallSleepEvent()
+    {
+        SleepEvent?.Invoke();
+    }
 }

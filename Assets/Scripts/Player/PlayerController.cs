@@ -14,6 +14,7 @@ using UnityEngine.SceneManagement;
 using MFarm.AStar;
 using System.Linq;
 using DG.Tweening;
+using MFarm.Transition;
 public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
 {
     [Header("玩家属性")]
@@ -339,6 +340,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         EventHandler.EndNPCEvent += OnEndNPCEvent;
         EventHandler.PlayEatAnimEvent += OnPlayEatAnimEvent;
         EventHandler.RecerveItemEvent += OnRecerveItemEvent;
+        EventHandler.SleepEvent += OnSleepEvent;
     }
 
    
@@ -367,6 +369,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         EventHandler.EndNPCEvent -= OnEndNPCEvent;
         EventHandler.PlayEatAnimEvent -= OnPlayEatAnimEvent;
         EventHandler.RecerveItemEvent -= OnRecerveItemEvent;
+        EventHandler.SleepEvent -= OnSleepEvent;
     }
 
   
@@ -1025,6 +1028,8 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
 
     //玩家已弹出过睡觉面板，需要先离开SleepBox后才允许再次弹出
     private bool canShowSleepPanel = true;
+    //触发睡觉的SleepBox位置，睡觉时把玩家强制移动到该位置
+    private Vector3 sleepBoxPos;
     /// <summary>
     /// 玩家碰到Tag为SleepBox的触发器，且与触发器所在物体的X轴相差不到0.1f时，通知UIManager打开睡觉面板
     /// </summary>
@@ -1034,6 +1039,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         {
             //标记为已弹出，避免面板关闭后立刻重复弹出
             canShowSleepPanel = false;
+            sleepBoxPos = other.transform.position;
             //通知UIManager打开睡觉面板
             EventHandler.CallOpenSleepPanelEvent();
         }
@@ -1045,6 +1051,52 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         {
             canShowSleepPanel = true;
         }
+    }
+    /// <summary>
+    /// 睡觉面板点击“是”后由UIManager派发，开始睡觉流程
+    /// </summary>
+    private void OnSleepEvent()
+    {
+        StartCoroutine(SleepRoutine());
+    }
+    /// <summary>
+    /// 睡觉流程：瞬移到SleepBox、播放睡觉动画、眼眶过场覆盖后推进到下一天，再展开眼眶过场恢复视野
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator SleepRoutine()
+    {
+        //把玩家位置强制设置为触发睡觉的SleepBox位置
+        transform.position = sleepBoxPos;
+        inputDisable = true;
+        //睡觉结束后回到Idle时朝下(0,-1)
+        mouseX = 0;
+        mouseY = -1;
+        PlayerFaceDirection();
+        //睡觉期间暂停游戏时钟并屏蔽点击，避免睡觉途中被打断
+        EventHandler.CallUpdateGameStateEvent(GameState.Pause);
+        foreach (var anim in animators)
+        {
+            //Idle方向由InputX/InputY驱动，SwitchAnimation只在isMoving时写这两个参数，这里直接写入Animator
+            anim.SetFloat("InputX", 0f);
+            anim.SetFloat("InputY", -1f);
+            anim.Play("Sleep");
+        }
+        //播放睡觉动画2s后开始眼眶过场
+        yield return new WaitForSeconds(1f);
+        // Eye curtain close: the lids fight up and down like a sleepy eye, then it closes to black
+        yield return TransitionManager.Instance.PlayEyeClose();
+        //推进到下一天，时间来到次日7:00
+        TimeManager.Instance.NextDay();
+        TimeManager.Instance.gameHour = 7;
+        TimeManager.Instance.gameMinute = 0;
+        TimeManager.Instance.gameSecond = 0;
+        EventHandler.CallGameMinuteEvent(TimeManager.Instance.gameMinute, TimeManager.Instance.gameHour, TimeManager.Instance.gameDay, TimeManager.Instance.gameSeason);
+        EventHandler.CallGameDateEvemnt(TimeManager.Instance.gameHour, TimeManager.Instance.gameDay, TimeManager.Instance.gameMonth, TimeManager.Instance.gameYear, TimeManager.Instance.gameSeason);
+        // Eye curtain open: open to a medium size, wobble up and down, then open the whole screen
+        yield return TransitionManager.Instance.PlayEyeOpen();
+        //恢复玩家操作
+        inputDisable = false;
+        EventHandler.CallUpdateGameStateEvent(GameState.Gameplay);
     }
     private void OnMoveToPosition(Vector3 targetPosition)
     {

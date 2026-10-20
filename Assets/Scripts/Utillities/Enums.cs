@@ -25,7 +25,7 @@ public enum FishlifeTime
 /// </summary>
 public enum SlotType 
 {
-    Bag,Box,Shop,Reward,Equipment_Head,Equipment_Body,SellBox,Bait,Ingredient
+    Bag,Box,Shop,Reward,Equipment_Head,Equipment_Body,SellBox,Bait,Ingredient,SellCar
 }
 /// <summary>
 /// 背包库存的位置
