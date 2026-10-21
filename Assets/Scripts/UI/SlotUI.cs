@@ -164,19 +164,23 @@ namespace MFarm.Inventory
             //如果物品不存在或者玩家背包无法打开时不让点选
             if (itemDetails == null || !InventoryUI.Instance.canOpenBag || slotType == SlotType.Ingredient || slotType == SlotType.Reward) return;
            
-            isSelected = !isSelected;
-            
-            inventoryUI.UpdateSlotHighlight(slotIndex);
-            //只有点击的玩家背包内的物品，才实现物品图片出现在头顶
-            if(slotType == SlotType.Bag)
+            // 玩家背包内的物品只有左键点击才会被选中，右键只执行快捷移动
+            if (slotType != SlotType.Bag || eventData.button == PointerEventData.InputButton.Left)
             {
-                //在InventoryManager上拿到当前选取的物品信息
-                InventoryManager.Instance.currentSelectedItem = itemDetails;
-                if (!isSelected)
+                isSelected = !isSelected;
+            
+                inventoryUI.UpdateSlotHighlight(slotIndex);
+                //只有点击的玩家背包内的物品，才实现物品图片出现在头顶
+                if(slotType == SlotType.Bag)
                 {
-                    InventoryManager.Instance.currentSelectedItem = null;
+                    //在InventoryManager上拿到当前选取的物品信息
+                    InventoryManager.Instance.currentSelectedItem = itemDetails;
+                    if (!isSelected)
+                    {
+                        InventoryManager.Instance.currentSelectedItem = null;
+                    }
+                    EventHandler.CallItemSelectEvent(itemDetails,isSelected);
                 }
-                EventHandler.CallItemSelectEvent(itemDetails,isSelected);
             }
             //左键点击的时商店格子
             if (Location == InventoryLocation.Shop)
@@ -249,6 +253,11 @@ namespace MFarm.Inventory
         public void OnBeginDrag(PointerEventData eventData)
         {
 
+            // 右键任何情况下都不允许拖动物品，只有左键可以拖拽
+            if (eventData.button != PointerEventData.InputButton.Left)
+            {
+                return;
+            }
             EventHandler.CallControlPlayerBagOpen(false);
             //空格子不可以拖拽和任务栏的奖励物品也不可以拖拽
             if (itemDetails != null &&itemDetails.itemID != 0 && slotType != SlotType.Reward && slotType != SlotType.Shop && slotType != SlotType.Ingredient)
@@ -300,6 +309,11 @@ namespace MFarm.Inventory
         /// <exception cref="System.NotImplementedException"></exception>
         public void OnDrag(PointerEventData eventData)
         {   
+            // 右键任何情况下都不允许拖动物品，只有左键可以拖拽
+            if (eventData.button != PointerEventData.InputButton.Left)
+            {
+                return;
+            }
             //拖拽过程中拖拽物体位置随鼠标移动
             inventoryUI.dragItem.transform.position = Input.mousePosition;
         }
@@ -310,6 +324,11 @@ namespace MFarm.Inventory
         public void OnEndDrag(PointerEventData eventData)
         {
           
+            // 右键任何情况下都不允许拖动物品，只有左键可以拖拽
+            if (eventData.button != PointerEventData.InputButton.Left)
+            {
+                return;
+            }
             cursorManager.cursorImage.enabled = true;
             inventoryUI.dragItem.enabled = false;
             inventoryUI.dragItemAmount.enabled = false;

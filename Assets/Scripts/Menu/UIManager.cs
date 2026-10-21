@@ -30,6 +30,10 @@ namespace MFarm.Inventory
         public GameObject sleepPanel;
         public Button sleepYesButton;
         public Button sleepNoButton;
+        //结算物品UI
+        public GameObject SetleUI;
+        //结算物品格
+        public GameObject SetleSlotPrefab;
         private void Awake()
         {
             //点击settingBtn按钮执行TogglePausePanel方法
