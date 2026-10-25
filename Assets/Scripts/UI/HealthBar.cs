@@ -5,7 +5,8 @@ using UnityEngine.UI;
 using static AnimalData_SO;
 public class HealthBar : Singleton<HealthBar>  //调用在StateBar对象上
 {
-    
+    public GameObject HealthBg;
+    public GameObject StminaBg;
     public Image hpImage;
     public Image bufferHpImage;
     public Image stminaImage;
@@ -15,6 +16,11 @@ public class HealthBar : Singleton<HealthBar>  //调用在StateBar对象上
     private float bufferTime = 0.5f;
     //血量缓冲协程
     private Coroutine updateCoroutine;
+    // 玩家离摄像机下边界小于 3 时，血条和体力条上移 240
+    private const float bgRaiseThreshold = 3f;
+    private const float bgRaiseOffset = 240f;
+    private Vector2 healthBgOriginalPos;
+    private Vector2 stminaBgOriginalPos;
     public void OnEnable()
     {
         EventHandler.StartNPCEvent += OnStartNPCEvent;
@@ -32,12 +38,51 @@ public class HealthBar : Singleton<HealthBar>  //调用在StateBar对象上
     {
         stateCanvas.worldCamera = FindAnyObjectByType<Camera>();
         stateCanvas.sortingLayerName = "Collision";
+        // 记录血条和体力条的原位置，贴近摄像机下边界时上移，离开后复原
+        if (HealthBg != null)
+        {
+            healthBgOriginalPos = HealthBg.GetComponent<RectTransform>().anchoredPosition;
+        }
+        if (StminaBg != null)
+        {
+            stminaBgOriginalPos = StminaBg.GetComponent<RectTransform>().anchoredPosition;
+        }
     }
 
     private void Update()
     {
         UpdateHealthBar();
         UpdateStminaBar();
+        UpdateBgPosition();
+    }
+
+    /// <summary>
+    /// 玩家离摄像机下边界小于 100 时，血条和体力条上移 240，否则回到原位置
+    /// </summary>
+    private void UpdateBgPosition()
+    {
+        Camera cam = Camera.main;
+        if (cam == null || playerController == null)
+        {
+            return;
+        }
+        // 摄像机下边界的世界 Y
+        float bottomY = cam.ViewportToWorldPoint(new Vector3(0.5f, 0f)).y;
+        bool nearBottom = playerController.transform.position.y - bottomY < bgRaiseThreshold;
+        if (HealthBg != null)
+        {
+            RectTransform rect = HealthBg.GetComponent<RectTransform>();
+            rect.anchoredPosition = nearBottom
+                ? new Vector2(healthBgOriginalPos.x, healthBgOriginalPos.y + bgRaiseOffset)
+                : healthBgOriginalPos;
+        }
+        if (StminaBg != null)
+        {
+            RectTransform rect = StminaBg.GetComponent<RectTransform>();
+            rect.anchoredPosition = nearBottom
+                ? new Vector2(stminaBgOriginalPos.x, stminaBgOriginalPos.y + bgRaiseOffset)
+                : stminaBgOriginalPos;
+        }
     }
     private void OnStartNPCEvent()
     {

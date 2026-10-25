@@ -476,6 +476,11 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
                     }
                     return;
                 }
+                //点击可把出售物品卖掉
+                if (checkCollider.CompareTag("SellBox"))
+                {
+                    cursorAnim.runtimeAnimatorController = cursorAnimList[6].cursorController;
+                }
             }
             else
             {

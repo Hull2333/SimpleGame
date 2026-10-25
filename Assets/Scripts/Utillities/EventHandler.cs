@@ -489,4 +489,34 @@ public static class EventHandler
     {
         SleepEvent?.Invoke();
     }
+    // 显示卖车结算界面的事件
+    public static event Action ShowSettleUIEvent;
+    public static void CallShowSettleUIEvent()
+    {
+        ShowSettleUIEvent?.Invoke();
+    }
+    // 关闭卖车结算界面的事件
+    public static event Action HideSettleUIEvent;
+    public static void CallHideSettleUIEvent()
+    {
+        HideSettleUIEvent?.Invoke();
+    }
+    // 结算界面结算格全部生成完毕的事件
+    public static event Action SettleUIGenerateDoneEvent;
+    public static void CallSettleUIGenerateDoneEvent()
+    {
+        SettleUIGenerateDoneEvent?.Invoke();
+    }
+    // 结算界面关闭动画播放完毕的事件
+    public static event Action SettleUIHideDoneEvent;
+    public static void CallSettleUIHideDoneEvent()
+    {
+        SettleUIHideDoneEvent?.Invoke();
+    }
+    // 背包已满，无法捡起物品时的提示事件
+    public static event Action BagFullTipEvent;
+    public static void CallBagFullTipEvent()
+    {
+        BagFullTipEvent?.Invoke();
+    }
 }

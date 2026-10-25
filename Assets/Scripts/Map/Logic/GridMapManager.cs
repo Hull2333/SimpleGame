@@ -24,6 +24,7 @@ namespace MFarm.Map
         private Transform playerTransform => FindObjectOfType<PlayerController>().transform;
         [Header("种地瓦片切换信息")]
         public RuleTile digTile;
+        public RuleTile diaWinterTile;
         public RuleTile waterTile;
         public RuleTile availableTilemap;
         public RuleTile unAvailableTilemap;
@@ -47,9 +48,10 @@ namespace MFarm.Map
         [Header("可收割场景")]
         //当前场景
         private MapData_SO currentSceneMap;
-        //杂草预制体和杂草图片
+        //杂草预制体
         public GameObject weedPrefab;
-        public Sprite[] weedSprites;
+        //记录本次生成的杂草，季节变化时刷新图片用
+        private List<ReapableItem> weedList = new List<ReapableItem>();
         private TileDetails aroundWeedsTileDetail,aroundBigRockTileDetail,aroundTreeTileDetail;
         public GameObject bigWeedPrefab;
         public Sprite[] bigWeedSprites;
@@ -125,6 +127,8 @@ namespace MFarm.Map
             waterTilemap = GameObject.FindGameObjectWithTag("Water").GetComponent<Tilemap>();
             valueMap = GameObject.FindGameObjectWithTag("ValueTile").GetComponent<Tilemap>();
             canGetPlayerPos = true;
+            //进入场景时同步当前季节，否则冬季重新进入场景后耕地仍按普通图块显示
+            currentSeason = TimeManager.Instance.gameSeason;
             if (firstLoadDict[SceneManager.GetActiveScene().name])
             {
                 //预先生成Crop,再把第一次加载改为false
@@ -155,6 +159,23 @@ namespace MFarm.Map
             sceneLastGenDayDict[sceneName] = elapsedDays;
         }
         /// <summary>
+        /// 季节变化后刷新场上已有杂草的图片
+        /// </summary>
+        private void RefreshWeedSprites()
+        {
+            for (int i = weedList.Count - 1; i >= 0; i--)
+            {
+                //被割掉或随场景卸载销毁的杂草直接移除
+                if (weedList[i] == null)
+                {
+                    weedList.RemoveAt(i);
+                    continue;
+                }
+                weedList[i].SetWeedSprite();
+            }
+        }
+
+        /// <summary>
         /// 每天执行一次
         /// </summary>
         /// <param name="day"></param>
@@ -164,6 +185,7 @@ namespace MFarm.Map
             //过天计数器加一，供各场景补生成随机资源时计算错过的天数
             elapsedDays++;
      
+            Season lastSeason = currentSeason;
             currentSeason = season;
             foreach(var tile in tileDetailsDict)
             {
@@ -190,7 +212,14 @@ namespace MFarm.Map
                 }
                
             }
+            //雨天和雷雨天自动给所有已耕种的坑浇水
+            RainWaterTiles();
             RandomGenerateInterView();
+            //季节变化后刷新场上已有杂草的图片
+            if (lastSeason != currentSeason)
+            {
+                RefreshWeedSprites();
+            }
             sceneLastGenDayDict[SceneManager.GetActiveScene().name] = elapsedDays;
             OnRefreshCurrentMap();
             //每日更新鱼类获取列表
@@ -303,7 +332,9 @@ namespace MFarm.Map
                                             {
                                                 //随机生成杂草预制体
                                                 var weed = Instantiate(weedPrefab, new Vector2(Random.Range(weedsPos.x - 0.5f, weedsPos.x + 0.5f), Random.Range(weedsPos.y - 0.5f, weedsPos.y + 0.5f)), Quaternion.identity);
-                                                weed.GetComponentInChildren<SpriteRenderer>().sprite = weedSprites[Random.Range(0, weedSprites.Length)];
+                                                var weedItem = weed.GetComponentInChildren<ReapableItem>();
+                                                weedItem.SetWeedSprite();
+                                                weedList.Add(weedItem);
                                                 //已生成杂草
                                                 currentTile.predictHaveWeeds++;
                                             }
@@ -316,7 +347,9 @@ namespace MFarm.Map
                                             {
                                                 //随机生成杂草预制体
                                                 var weed = Instantiate(weedPrefab, new Vector2(Random.Range(weedsPos.x - 0.5f, weedsPos.x + 0.5f), Random.Range(weedsPos.y - 0.5f, weedsPos.y + 0.5f)), Quaternion.identity);
-                                                weed.GetComponentInChildren<SpriteRenderer>().sprite = weedSprites[Random.Range(0, weedSprites.Length)];
+                                                var weedItem = weed.GetComponentInChildren<ReapableItem>();
+                                                weedItem.SetWeedSprite();
+                                                weedList.Add(weedItem);
                                                 //已生成杂草
                                                 currentTile.predictHaveWeeds++;
                                             }
@@ -329,7 +362,9 @@ namespace MFarm.Map
                                         if (generateOdds <= 50)
                                         {
                                             var weed = Instantiate(weedPrefab, new Vector2(Random.Range(currentTile.gridX - 0.5f, currentTile.gridX + 0.5f), Random.Range(currentTile.gridY - 0.5f, currentTile.gridY + 0.5f)), Quaternion.identity);
-                                            weed.GetComponentInChildren<SpriteRenderer>().sprite = weedSprites[Random.Range(0, weedSprites.Length)];
+                                            var weedItem = weed.GetComponentInChildren<ReapableItem>();
+                                            weedItem.SetWeedSprite();
+                                            weedList.Add(weedItem);
                                             currentTile.predictHaveWeeds++;
                                         }
                                     }
@@ -648,6 +683,12 @@ namespace MFarm.Map
                             EventHandler.CallParticleEffectEvent(ParticalEffectType.HoeEffect02, new Vector3(mouseGridPos.x+0.5f, mouseGridPos.y + 0.5f, mouseGridPos.z), Vector2.zero);
                             SetDigGround(currentTile);
                             currentTile.daysSinceDug = 0;
+                            //雨天/雷雨天挖出来的坑直接是湿的
+                            if ((TimeManager.Instance.currentWeather == Weather.Rainy || TimeManager.Instance.currentWeather == Weather.Thunder) && currentSeason != Season.冬天)
+                            {
+                                SetWaterGround(currentTile);
+                                currentTile.daysSinceWatered = 0;
+                            }
                             currentTile.canDig = false;
                             currentTile.canDropItem = false;
                         }
@@ -852,8 +893,8 @@ namespace MFarm.Map
             Vector3Int pos = new Vector3Int(tile.gridX, tile.gridY, 0);
             if(digTilemap!=null)
             {
-                //再pos位置显示Rule Tile digTile
-                digTilemap.SetTile(pos, digTile);
+                //冬季显示冬季耕地图块，其他季节显示普通耕地
+                digTilemap.SetTile(pos, currentSeason == Season.冬天 ? diaWinterTile : digTile);
             }
         }
         /// <summary>
@@ -866,6 +907,32 @@ namespace MFarm.Map
             if (waterTilemap != null)
             {
                 waterTilemap.SetTile(pos, waterTile);
+            }
+        }
+
+        /// <summary>
+        /// 雨天和雷雨天时，自动给所有已经耕过的坑浇水
+        /// </summary>
+        private void RainWaterTiles()
+        {
+            Weather weather = TimeManager.Instance.currentWeather;
+            //只有雨天和雷雨天才会自动浇水
+            if (weather != Weather.Rainy && weather != Weather.Thunder)
+            {
+                return;
+            }
+            //冬季下雨不会给耕地浇水
+            if (currentSeason == Season.冬天)
+            {
+                return;
+            }
+            foreach (var tile in tileDetailsDict)
+            {
+                //只处理已经耕过的坑
+                if (tile.Value.daysSinceDug > -1)
+                {
+                    tile.Value.daysSinceWatered = 0;
+                }
             }
         }
        

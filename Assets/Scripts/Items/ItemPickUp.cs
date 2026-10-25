@@ -20,12 +20,15 @@ namespace MFarm.Inventory
             {
                 if (item.itemDetails.canPickedup)
                 {
-                    //给拾取提示物品赋值ID，图片，数量
-                    var itemTip = new GetItemTip { itemID = item.itemDetails.itemID, itemIcon = item.itemDetails.itemIcon, tipAmount = 1 };
-                    //拾取物品提示
-                    EventHandler.CallGetItemTipEvent(item.itemDetails);
-                    //播放拾取音效
-                    EventHandler.CallPlaySoundEvent(SoundName.Pickup);
+                    if (InventoryManager.Instance.CanAddItem(item.itemDetails.itemID))
+                    {
+                        //给拾取提示物品赋值ID，图片，数量
+                        var itemTip = new GetItemTip { itemID = item.itemDetails.itemID, itemIcon = item.itemDetails.itemIcon, tipAmount = 1 };
+                        //拾取物品提示
+                        EventHandler.CallGetItemTipEvent(item.itemDetails);
+                        //播放拾取音效
+                        EventHandler.CallPlaySoundEvent(SoundName.Pickup);
+                    }
                 }
             }
 

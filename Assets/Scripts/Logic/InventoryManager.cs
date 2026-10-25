@@ -289,12 +289,19 @@ namespace MFarm.Inventory
         /// <param name="toDestory">是否要销毁物品</param>
         public void AddItem(Item item,bool toDestory)
         {
+            //先找背包里同类物品的位置
+            var index = GetStackableItemIndex(item.itemID);
+            //背包已满且没有可继续叠加的同类物品时捡不起来，物品留在场景中
+            bool canAdd = CanAddItem(item.itemID);
+            if (!canAdd)
+            {
+                EventHandler.CallBagFullTipEvent();
+                return;
+            }
             if (toDestory)
             {
                 Destroy(item.gameObject);
             }
-            //背包格序号
-            var index = GetItemIndexInBag(item.itemID, playerBag.itemList);
             AddItemAtIndex(item.itemID, index, 1,false);
             
             //更新UI,将需要更新的背包位置和此背包的item列表输入进去
@@ -317,7 +324,7 @@ namespace MFarm.Inventory
         /// <returns></returns>
         public bool CheckBagCapacity()
         {
-            for (int i = 0; i < playerBag.itemList.Count; i++)
+            for (int i = 0; i < playerBag.itemList.Count - 4; i++)
             {
                 if (playerBag.itemList[i].itemID == 0)
                 {
@@ -325,6 +332,14 @@ namespace MFarm.Inventory
                 }
             }
             return false;
+        }
+
+        /// <summary>
+        /// 背包是否还能放入该物品：有未满 99 的同类堆叠，或者有空位
+        /// </summary>
+        public bool CanAddItem(int ID)
+        {
+            return CheckBagCapacity() || GetStackableItemIndex(ID) != -1;
         }
         /// <summary>
         /// 通过物品ID找到背包已有物品位置
@@ -356,6 +371,21 @@ namespace MFarm.Inventory
                 }
                 return -1;
             }
+        }
+
+        /// <summary>
+        /// 找背包里还能继续叠加（未满 99）的同类物品位置，没有则返回 -1
+        /// </summary>
+        public int GetStackableItemIndex(int ID)
+        {
+            for (int i = 0; i < playerBag.itemList.Count - 4; i++)
+            {
+                if (playerBag.itemList[i].itemID == ID && playerBag.itemList[i].itemAmount < 99)
+                {
+                    return i;
+                }
+            }
+            return -1;
         }
         /// <summary>
         /// 通过物品ID查找指定bagList中的相同物品的index集合
@@ -480,7 +510,7 @@ namespace MFarm.Inventory
                     //初始化这个物品
                     var item = new InventoryItem { itemID = ID, itemAmount = amount };
                     //找到背包空位的位置并把新物品赋值到空位上
-                    for (int i = 0; i < playerBag.itemList.Count; i++)
+                    for (int i = 0; i < playerBag.itemList.Count - 4; i++)
                     {
                         if (playerBag.itemList[i].itemID == 0)
                         {
@@ -494,8 +524,26 @@ namespace MFarm.Inventory
                 {
                     //增加当前物品的数量,并初始化物品的ID和数量和找到该物品的位置重新赋值新的物品信息
                     int currentAmount = playerBag.itemList[index].itemAmount + amount;
-                    var item = new InventoryItem { itemID = ID, itemAmount = currentAmount };
-                    playerBag.itemList[index] = item;
+                    //堆叠不能超过 99，超出部分放到背包空位
+                    if (currentAmount <= 99)
+                    {
+                        var item = new InventoryItem { itemID = ID, itemAmount = currentAmount };
+                        playerBag.itemList[index] = item;
+                    }
+                    else
+                    {
+                        int remainingAmount = amount - (99 - playerBag.itemList[index].itemAmount);
+                        var fullItem = new InventoryItem { itemID = ID, itemAmount = 99 };
+                        playerBag.itemList[index] = fullItem;
+                        for (int i = 0; i < playerBag.itemList.Count - 4; i++)
+                        {
+                            if (playerBag.itemList[i].itemID == 0)
+                            {
+                                playerBag.itemList[i] = new InventoryItem { itemID = ID, itemAmount = remainingAmount };
+                                break;
+                            }
+                        }
+                    }
 
                 }
             }

@@ -196,6 +196,16 @@ namespace MFarm.Inventory
             //右键点击Slot
             if (eventData.button == PointerEventData.InputButton.Right)
             {
+                // 右键穿戴：只有仅打开玩家背包时，装备/装饰品可以直接穿上，已有装备则替换
+                if (TryEquipByRightClick())
+                {
+                    return;
+                }
+                // 右键脱下：右键点装备格里的装备，放回玩家背包的空格
+                if (TryUnequipByRightClick())
+                {
+                    return;
+                }
                 // 卖车面板打开时，右键把整组物品送进卖车格子
                 if (Location == InventoryLocation.Player && InventoryUI.Instance.IsSellCarBoxOpened)
                 {
@@ -388,6 +398,20 @@ namespace MFarm.Inventory
                                 return;
                             }
                         }
+                        // 从背包把装饰品拖到装饰品格子
+                        if (targetSlot.slotType == SlotType.Equipment_Decoration)
+                        {
+                            // 只有装饰品类型的物品才能放入
+                            if (itemDetails.itemType == ItemType.Decoration)
+                            {
+                                InventoryManager.Instance.Swapitem(slotIndex, targetIndex, 1, 0);
+                                return;
+                            }
+                            else
+                            {
+                                return;
+                            }
+                        }
                         //拖到出售箱
                         if(targetSlot.slotType == SlotType.SellBox)
                         {
@@ -497,7 +521,20 @@ namespace MFarm.Inventory
                         //拖到背包中
                         if(targetSlot.slotType == SlotType.Bag)
                         {
-                            inventoryUI.ResetEquipImage(slotType);
+                            // 背包格必须为空，或者装有头部装备，其他类型一律不交换
+                            if (targetSlot.itemDetails != null && targetSlot.itemDetails.itemType != ItemType.Equipment_Head)
+                            {
+                                return;
+                            }
+                            // 背包格里有头部装备时，交换后头格会换成它，需要刷新角色外观
+                            if (targetSlot.itemDetails != null)
+                            {
+                                inventoryUI.SetEquipImage(targetSlot.itemDetails, this);
+                            }
+                            else
+                            {
+                                inventoryUI.ResetEquipImage(slotType);
+                            }
                             InventoryManager.Instance.Swapitem(slotIndex, targetIndex,1,0);
                         }
                         inventoryUI.UpdatePlayerDefenseNum();
@@ -515,10 +552,39 @@ namespace MFarm.Inventory
                         //拖到背包中
                         if (targetSlot.slotType == SlotType.Bag)
                         {
-                            inventoryUI.ResetEquipImage(slotType);
+                            // 背包格必须为空，或者装有身体装备，其他类型一律不交换
+                            if (targetSlot.itemDetails != null && targetSlot.itemDetails.itemType != ItemType.Equipment_Body)
+                            {
+                                return;
+                            }
+                            // 背包格里有身体装备时，交换后身体格会换成它，需要刷新角色外观
+                            if (targetSlot.itemDetails != null)
+                            {
+                                inventoryUI.SetEquipImage(targetSlot.itemDetails, this);
+                            }
+                            else
+                            {
+                                inventoryUI.ResetEquipImage(slotType);
+                            }
                             InventoryManager.Instance.Swapitem(slotIndex, targetIndex, 1, 0);
                         }
                         inventoryUI.UpdatePlayerDefenseNum();
+                        return;
+                    }
+                    //从装饰品格子拖出
+                    if (slotType == SlotType.Equipment_Decoration)
+                    {
+                        // 只允许放回背包，其他格子一律不接收
+                        if (targetSlot.slotType != SlotType.Bag)
+                        {
+                            return;
+                        }
+                        // 背包格已有物品时，只有装饰品才能与它交换
+                        if (targetSlot.itemDetails != null && targetSlot.itemDetails.itemType != ItemType.Decoration)
+                        {
+                            return;
+                        }
+                        InventoryManager.Instance.Swapitem(slotIndex, targetIndex, 1, 0);
                         return;
                     }
                     //从鱼饵格中拖出
@@ -593,6 +659,143 @@ namespace MFarm.Inventory
                 default:
                     return false;
             }
+        }
+
+        /// <summary>
+        /// 右键穿戴：只有仅打开玩家背包时生效，装备/装饰品直接穿到对应装备格，已有装备则替换
+        /// </summary>
+        private bool TryEquipByRightClick()
+        {
+            // 只处理玩家背包格里的物品
+            if (Location != InventoryLocation.Player || slotType != SlotType.Bag || itemDetails == null)
+            {
+                return false;
+            }
+            // 商店、出售、卖车等界面同时打开时不可以右键穿戴
+            if (!inventoryUI.IsOnlyPlayerBagOpened)
+            {
+                return false;
+            }
+            SlotType targetType;
+            switch (itemDetails.itemType)
+            {
+                case ItemType.Equipment_Head:
+                    targetType = SlotType.Equipment_Head;
+                    break;
+                case ItemType.Equipment_Body:
+                    targetType = SlotType.Equipment_Body;
+                    break;
+                case ItemType.Decoration:
+                    targetType = SlotType.Equipment_Decoration;
+                    break;
+                default:
+                    return false;
+            }
+            SlotUI equipSlot = FindEquipSlot(targetType);
+            if (equipSlot == null)
+            {
+                return false;
+            }
+            // 身上已经是同一件装备时不处理
+            if (equipSlot.itemDetails != null && equipSlot.itemDetails.itemID == itemDetails.itemID)
+            {
+                return false;
+            }
+            // 头/身装备先刷新预览外观（Swapitem 刷新界面时会把背包格的 itemDetails 置空）
+            if (targetType == SlotType.Equipment_Head || targetType == SlotType.Equipment_Body)
+            {
+                inventoryUI.SetEquipImage(itemDetails, equipSlot);
+            }
+            // 交换两格数据：装备格为空直接穿上，已有装备则旧装备回到刚才点击的背包格
+            InventoryManager.Instance.Swapitem(slotIndex, equipSlot.slotIndex, 1, 0);
+            // 刷新防御力（读取交换后的装备格数据）
+            if (targetType == SlotType.Equipment_Head || targetType == SlotType.Equipment_Body)
+            {
+                inventoryUI.UpdatePlayerDefenseNum();
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 在玩家背包所有格子中查找指定类型的装备格
+        /// </summary>
+        private SlotUI FindEquipSlot(SlotType targetType)
+        {
+            if (inventoryUI.playerSlots == null)
+            {
+                return null;
+            }
+            foreach (SlotUI slot in inventoryUI.playerSlots)
+            {
+                if (slot != null && slot.slotType == targetType)
+                {
+                    return slot;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 右键脱下装备：只有仅打开玩家背包时生效，装备放回背包空格，没有空格则不做任何事
+        /// </summary>
+        private bool TryUnequipByRightClick()
+        {
+            // 只处理玩家身上的三个装备格
+            if (Location != InventoryLocation.Player || itemDetails == null)
+            {
+                return false;
+            }
+            if (slotType != SlotType.Equipment_Head && slotType != SlotType.Equipment_Body && slotType != SlotType.Equipment_Decoration)
+            {
+                return false;
+            }
+            // 商店、出售、卖车等界面同时打开时不可以脱下
+            if (!inventoryUI.IsOnlyPlayerBagOpened)
+            {
+                return false;
+            }
+            // 背包没有空格就什么也不做
+            int emptyIndex = FindEmptyBagIndex();
+            if (emptyIndex < 0)
+            {
+                return false;
+            }
+            // 装备从装备格移动到背包空格
+            InventoryManager.Instance.Swapitem(slotIndex, emptyIndex, 1, 0);
+            // 头/身装备脱下后恢复默认外观并刷新防御力
+            if (slotType == SlotType.Equipment_Head || slotType == SlotType.Equipment_Body)
+            {
+                inventoryUI.ResetEquipImage(slotType);
+                inventoryUI.UpdatePlayerDefenseNum();
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 查找玩家背包格中第一个空格的下标，没有空格返回 -1
+        /// </summary>
+        private int FindEmptyBagIndex()
+        {
+            if (inventoryUI.playerSlots == null)
+            {
+                return -1;
+            }
+            foreach (SlotUI slot in inventoryUI.playerSlots)
+            {
+                if (slot == null || slot.slotType != SlotType.Bag)
+                {
+                    continue;
+                }
+                if (slot.itemDetails != null || slot.slotIndex >= InventoryManager.Instance.playerBag.itemList.Count)
+                {
+                    continue;
+                }
+                if (InventoryManager.Instance.playerBag.itemList[slot.slotIndex].itemID == 0)
+                {
+                    return slot.slotIndex;
+                }
+            }
+            return -1;
         }
     }
 }

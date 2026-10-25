@@ -341,6 +341,8 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         EventHandler.PlayEatAnimEvent += OnPlayEatAnimEvent;
         EventHandler.RecerveItemEvent += OnRecerveItemEvent;
         EventHandler.SleepEvent += OnSleepEvent;
+        EventHandler.SettleUIGenerateDoneEvent += OnSettleUIGenerateDoneEvent;
+        EventHandler.SettleUIHideDoneEvent += OnSettleUIHideDoneEvent;
     }
 
    
@@ -370,6 +372,8 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         EventHandler.PlayEatAnimEvent -= OnPlayEatAnimEvent;
         EventHandler.RecerveItemEvent -= OnRecerveItemEvent;
         EventHandler.SleepEvent -= OnSleepEvent;
+        EventHandler.SettleUIGenerateDoneEvent -= OnSettleUIGenerateDoneEvent;
+        EventHandler.SettleUIHideDoneEvent -= OnSettleUIHideDoneEvent;
     }
 
   
@@ -1030,6 +1034,8 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     private bool canShowSleepPanel = true;
     //触发睡觉的SleepBox位置，睡觉时把玩家强制移动到该位置
     private Vector3 sleepBoxPos;
+    private bool settleUIReady;   // 结算格是否已全部生成完毕
+    private bool settleUIHidden;   // 结算界面是否已关闭完毕
     /// <summary>
     /// 玩家碰到Tag为SleepBox的触发器，且与触发器所在物体的X轴相差不到0.1f时，通知UIManager打开睡觉面板
     /// </summary>
@@ -1060,6 +1066,21 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         StartCoroutine(SleepRoutine());
     }
     /// <summary>
+    /// 结算格全部生成完毕，允许玩家点击继续睡觉流程
+    /// </summary>
+    private void OnSettleUIGenerateDoneEvent()
+    {
+        settleUIReady = true;
+    }
+    /// <summary>
+    /// 结算界面关闭动画播放完毕，允许睡觉流程继续
+    /// </summary>
+    private void OnSettleUIHideDoneEvent()
+    {
+        settleUIHidden = true;
+    }
+
+    /// <summary>
     /// 睡觉流程：瞬移到SleepBox、播放睡觉动画、眼眶过场覆盖后推进到下一天，再展开眼眶过场恢复视野
     /// </summary>
     /// <returns></returns>
@@ -1085,10 +1106,30 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
         yield return new WaitForSeconds(1f);
         // Eye curtain close: the lids fight up and down like a sleepy eye, then it closes to black
         yield return TransitionManager.Instance.PlayEyeClose();
+        // 幕布合上后先显示卖车结算界面，等玩家左键点击再关闭
+        // 先复位标志，再显示结算界面，等待结算格全部生成
+        settleUIReady = false;
+        EventHandler.CallShowSettleUIEvent();
+        while (!settleUIReady)
+        {
+            yield return null;
+        }
+        while (!Input.GetMouseButtonDown(0))
+        {
+            yield return null;
+        }
+        // 播放关闭动画并等待动画结束，再继续结算
+        settleUIHidden = false;
+        EventHandler.CallHideSettleUIEvent();
+        while (!settleUIHidden)
+        {
+            yield return null;
+        }
+        // 关闭结算界面后结算卖车物品的金钱
+        InventoryManager.Instance.SettleSellCarItems();
         //推进到下一天，时间来到次日7:00
         TimeManager.Instance.NextDay();
         // 睡觉度过一天：结算卖车格子里的物品并清空
-        InventoryManager.Instance.SettleSellCarItems();
         TimeManager.Instance.gameHour = 7;
         TimeManager.Instance.gameMinute = 0;
         TimeManager.Instance.gameSecond = 0;

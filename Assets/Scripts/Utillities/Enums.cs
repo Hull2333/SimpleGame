@@ -4,7 +4,7 @@ public enum ItemType
     Seed,Commodity,Furniture,Cooked,Laterfish,Seafish,
     //锄头，斧头，镐头，镰刀，水壶，收割，剑，服装、桶
     HoeTool,AxeTool,BreakTool,ReapTool,WaterTool,Sword,FishingRod,Equipment_Head,Equipment_Body,Bucket,
-    TreeSeed
+    TreeSeed,Decoration,
 
 }
 public enum FishLevel
@@ -25,7 +25,7 @@ public enum FishlifeTime
 /// </summary>
 public enum SlotType 
 {
-    Bag,Box,Shop,Reward,Equipment_Head,Equipment_Body,SellBox,Bait,Ingredient,SellCar
+    Bag,Box,Shop,Reward,Equipment_Head,Equipment_Body,SellBox,Bait,Ingredient,SellCar, Equipment_Decoration,
 }
 /// <summary>
 /// 背包库存的位置

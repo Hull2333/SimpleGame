@@ -6,66 +6,77 @@ using UnityEngine.Tilemaps;
 using UnityEngine.UIElements;
 using UnityEngine.WSA;
 
-public class SwapTimemap : MonoBehaviour //调用在每个scenen中的Grid对象上
+public class SwapTimemap : MonoBehaviour //挂在每个scene的Grid上，随季节切换地图图块
 {
     public Tilemap[] tilemaps;
     public TileBase[] springTileBase;
     public TileBase[] summerTileBase;
     public TileBase[] autumnTileBase;
     public TileBase[] WinterTileBase;
-    private Dictionary<TileBase,TileBase> springToSummerTileDic = new Dictionary<TileBase, TileBase>();
-    private Dictionary<TileBase, TileBase> summerToAutumnTileDic = new Dictionary<TileBase, TileBase>();
-    private Dictionary<TileBase, TileBase> autumnToWinterTileDic = new Dictionary<TileBase, TileBase>();
-    private Dictionary<TileBase, TileBase> winterToSpringTileDic  = new Dictionary<TileBase, TileBase>();
-    public int swapInt;
-    public void Start()
-    {
-        //匹配春天和夏天之间的瓦片
-        for (int i = 0; i < springTileBase.Length; i++)
-        {
-            if (!springToSummerTileDic.ContainsKey(springTileBase[i]))
-            {
-                springToSummerTileDic.Add(springTileBase[i], summerTileBase[i]);
-            }
-        }
-        //匹配夏天和秋天之间的瓦片
-        for (int i = 0; i < summerTileBase.Length; i++)
-        {
-            if (!summerToAutumnTileDic.ContainsKey(summerTileBase[i]))
-            {
-                summerToAutumnTileDic.Add(summerTileBase[i], autumnTileBase[i]);
-            }
-        }
-        //匹配秋天和冬天之间的瓦片
-        for (int i = 0; i < autumnTileBase.Length; i++)
-        {
-            if (!autumnToWinterTileDic.ContainsKey(autumnTileBase[i]))
-            {
-                autumnToWinterTileDic.Add(autumnTileBase[i], WinterTileBase[i]);
-            }
-        }
-        //匹配冬天和春天之间的瓦片
-        for (int i = 0; i < WinterTileBase.Length; i++)
-        {
-            if (!winterToSpringTileDic.ContainsKey(WinterTileBase[i]))
-            {
-                winterToSpringTileDic.Add(WinterTileBase[i], springTileBase[i]);
-            }
-        }
-     
-    }
+    //记录每张图块在同组里的下标，四季数组按同一下标对应同一块地图
+    private Dictionary<TileBase, int> tileIndexDic = new Dictionary<TileBase, int>();
+    private TileBase[][] seasonTileBases;
+    //当前地图所处的季节，场景中的图块默认按春季摆放
+    private Season currentSeason = Season.春天;
+
     private void Update()
     {
+        //测试用：按 Q 让地图切到下一个季节
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            SwapSeasonTile();
+            SwapSeasonTile((Season)(((int)currentSeason + 1) % seasonTileBases.Length));
         }
     }
-    /// <summary>
-    /// 更换季节瓦片
-    /// </summary>
-    public void SwapSeasonTile()
+
+    private void Awake()
     {
+        seasonTileBases = new TileBase[][] { springTileBase, summerTileBase, autumnTileBase, WinterTileBase };
+        for (int season = 0; season < seasonTileBases.Length; season++)
+        {
+            for (int i = 0; i < seasonTileBases[season].Length; i++)
+            {
+                if (!tileIndexDic.ContainsKey(seasonTileBases[season][i]))
+                {
+                    tileIndexDic.Add(seasonTileBases[season][i], i);
+                }
+            }
+        }
+    }
+
+    private void OnEnable()
+    {
+        EventHandler.GameDayEvent += OnGameDayEvent;
+        EventHandler.AfterSceneLoadedEvent += OnAfterSceneLoadedEvent;
+    }
+
+    private void OnDisable()
+    {
+        EventHandler.GameDayEvent -= OnGameDayEvent;
+        EventHandler.AfterSceneLoadedEvent -= OnAfterSceneLoadedEvent;
+    }
+
+    //日期推进时季节可能变化，按当前季节同步地图
+    private void OnGameDayEvent(int day, Season season, Weekday weekday)
+    {
+        SwapSeasonTile(season);
+    }
+
+    //进入场景时同步一次，室内场景没有该脚本，回到室外时地图可能还停留在旧季节
+    private void OnAfterSceneLoadedEvent()
+    {
+        SwapSeasonTile(TimeManager.Instance.gameSeason);
+    }
+
+    /// <summary>
+    /// 把地图图块切换到指定季节
+    /// </summary>
+    public void SwapSeasonTile(Season season)
+    {
+        if (season == currentSeason)
+        {
+            return;
+        }
+        TileBase[] targetTiles = seasonTileBases[(int)season];
         for (int i = 0; i < tilemaps.Length; i++)
         {
             BoundsInt bounds = tilemaps[i].cellBounds;
@@ -76,47 +87,13 @@ public class SwapTimemap : MonoBehaviour //调用在每个scenen中的Grid对象上
                 {
                     Vector3Int position = new Vector3Int(x, y);
                     TileBase tile = tilemaps[i].GetTile(position);
-                    if (tile != null)
+                    if (tile != null && tileIndexDic.TryGetValue(tile, out int index) && index < targetTiles.Length)
                     {
-                       
-                        if (swapInt == 0)
-                        {
-                            swapInt++;
-                            if (springToSummerTileDic.TryGetValue(tile, out TileBase newTile))
-                            {
-                                tilemaps[i].SetTile(position, newTile);
-                            }
-                        }
-                        if (swapInt == 1)
-                        {
-                            if (summerToAutumnTileDic.TryGetValue(tile, out TileBase newTile))
-                            {
-                                tilemaps[i].SetTile(position, newTile);
-                            }
-                            swapInt++;
-                        }
-                        if (swapInt == 2)
-                        {
-                            if (autumnToWinterTileDic.TryGetValue(tile, out TileBase newTile))
-                            {
-                                tilemaps[i].SetTile(position, newTile);
-                            }
-                            swapInt++;
-                        }
-                        if (swapInt == 3)
-                        {
-                            if (winterToSpringTileDic.TryGetValue(tile, out TileBase newTile))
-                            {
-                                tilemaps[i].SetTile(position, newTile);
-                            }
-                            swapInt = 0;
-                        }
+                        tilemaps[i].SetTile(position, targetTiles[index]);
                     }
-
                 }
             }
         }
-
-
+        currentSeason = season;
     }
 }

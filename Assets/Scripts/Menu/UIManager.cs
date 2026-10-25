@@ -30,10 +30,17 @@ namespace MFarm.Inventory
         public GameObject sleepPanel;
         public Button sleepYesButton;
         public Button sleepNoButton;
+        [Header("结算界面UI")]
         //结算物品UI
         public GameObject SetleUI;
+        public Transform SetleSlotHolder;
         //结算物品格
         public GameObject SetleSlotPrefab;
+        public TextMeshProUGUI SetleAllValue;
+        //结算物品详情
+        public GameObject SetleDesUI;
+        public TextMeshProUGUI setleItemName;
+        public TextMeshProUGUI setleItemValue;
         private void Awake()
         {
             //点击settingBtn按钮执行TogglePausePanel方法
@@ -43,6 +50,13 @@ namespace MFarm.Inventory
             //点击睡觉面板的按钮时执行对应方法
             sleepYesButton.onClick.AddListener(SleepYesButtonClick);
             sleepNoButton.onClick.AddListener(SleepNoButtonClick);
+            // 结算界面只在睡觉后显示，开局先隐藏
+            // 结算物品详情开局先隐藏
+            if (SetleDesUI != null)
+            {
+                SetleDesUI.SetActive(false);
+            }
+            SetleUI.SetActive(false);
         }
 
         private void OnEnable()
@@ -53,6 +67,8 @@ namespace MFarm.Inventory
             EventHandler.RecerveItemEvent += OnRecerveItemEvent;
             EventHandler.QuitRecerveItemUIEvent += OnQuitRecerveItemUIEvent;
             EventHandler.OpenSleepPanelEvent += OnOpenSleepPanelEvent;
+            EventHandler.ShowSettleUIEvent += ShowSettleUI;
+            EventHandler.HideSettleUIEvent += HideSettleUI;
         }
 
         private void OnDisable()
@@ -63,6 +79,8 @@ namespace MFarm.Inventory
             EventHandler.RecerveItemEvent -= OnRecerveItemEvent;
             EventHandler.QuitRecerveItemUIEvent -= OnQuitRecerveItemUIEvent;
             EventHandler.OpenSleepPanelEvent -= OnOpenSleepPanelEvent;
+            EventHandler.ShowSettleUIEvent -= ShowSettleUI;
+            EventHandler.HideSettleUIEvent -= HideSettleUI;
         }
 
 
@@ -268,6 +286,128 @@ namespace MFarm.Inventory
             sleepPanel.SetActive(false);
             Time.timeScale = 1f;
             EventHandler.CallUpdateGameStateEvent(GameState.Gameplay);
+        }
+
+        /// <summary>
+        /// 显示卖车结算界面：按卖车格子里的物品种类生成结算格
+        /// </summary>
+        private void ShowSettleUI()
+        {
+            // 按物品ID汇总数量与总价值，同种物品只生成一个结算格
+            Dictionary<int, int[]> settleData = new Dictionary<int, int[]>();
+            foreach (InventoryItem item in InventoryManager.Instance.sellCarItemList)
+            {
+                if (item.itemID == 0 || item.itemAmount <= 0) continue;
+                ItemDetails details = InventoryManager.Instance.GetItemDetails(item.itemID);
+                int value = (int)(item.itemAmount * details.itemPrice * details.sellPercentage);
+                if (settleData.ContainsKey(item.itemID))
+                {
+                    settleData[item.itemID][0] += item.itemAmount;
+                    settleData[item.itemID][1] += value;
+                }
+                else
+                {
+                    settleData[item.itemID] = new int[] { item.itemAmount, value };
+                }
+            }
+            // 汇总卖车里所有物品的总价值
+            int allValue = 0;
+            foreach (int[] data in settleData.Values)
+            {
+                allValue += data[1];
+            }
+            // 总价值从0滚动到实际金额（结算界面处于暂停状态，需用不受时间缩放影响的更新）
+            int shownValue = 0;
+            DOTween.To(
+                () => shownValue,
+                x =>
+                {
+                    shownValue = x;
+                    SetleAllValue.text = x.ToString();
+                },
+                allValue,
+                2.5f
+            ).SetUpdate(true);
+            // 结算界面要盖在眼睛幕布(ValueTile层)之上，所以给它单独挂一个Canvas
+            if (SetleUI.GetComponent<Canvas>() == null)
+            {
+                Canvas settleCanvas = SetleUI.AddComponent<Canvas>();
+                settleCanvas.overrideSorting = true;
+                settleCanvas.sortingLayerName = "ValueTile";
+                settleCanvas.sortingOrder = 2;
+                // 嵌套Canvas需要自己的射线检测组件，否则结算格收不到鼠标事件
+                if (SetleUI.GetComponent<GraphicRaycaster>() == null)
+                {
+                    SetleUI.AddComponent<GraphicRaycaster>();
+                }
+            }
+            SetleUI.SetActive(true);
+            // 复位动画状态，避免上一次的关闭动画残留到本次显示
+            Animator settleAnim = SetleUI.GetComponent<Animator>();
+            if (settleAnim != null)
+            {
+                settleAnim.Rebind();
+                settleAnim.Update(0f);
+            }
+            // 界面激活后逐个生成结算格
+            StartCoroutine(GenerateSettleSlots(settleData));
+        }
+
+        /// <summary>
+        /// 每隔 0.1s 生成一个结算格，全部生成完后通知睡觉流程继续
+        /// </summary>
+        private IEnumerator GenerateSettleSlots(Dictionary<int, int[]> settleData)
+        {
+            foreach (KeyValuePair<int, int[]> data in settleData)
+            {
+                GameObject slot = Instantiate(SetleSlotPrefab, SetleSlotHolder);
+                SetleSlotUI slotUI = slot.GetComponent<SetleSlotUI>();
+                ItemDetails details = InventoryManager.Instance.GetItemDetails(data.Key);
+                slotUI.setleItemImage.sprite = details.itemIcon;
+                slotUI.itemDetails = details;
+                slotUI.SetleAmount.text = data.Value[0].ToString();
+                slotUI.SetleAllValue.text = data.Value[1].ToString();
+                // 每生成一个等待 0.1s，让结算格逐个出现
+                yield return new WaitForSeconds(0.1f);
+            }
+            // 通知睡觉流程：结算信息已全部显示
+            EventHandler.CallSettleUIGenerateDoneEvent();
+        }
+
+
+        /// <summary>
+        /// 关闭卖车结算界面
+        /// </summary>
+        private void HideSettleUI()
+        {
+            StartCoroutine(HideSettleUIRoutine());
+        }
+
+        /// <summary>
+        /// 播放关闭动画，动画结束后隐藏界面并清空结算格
+        /// </summary>
+        private IEnumerator HideSettleUIRoutine()
+        {
+            Animator settleAnim = SetleUI.GetComponent<Animator>();
+            if (settleAnim != null)
+            {
+                settleAnim.SetTrigger("SetlePanelClose");
+                yield return null;   // 等一帧，让动画状态切换生效
+                yield return new WaitForSeconds(settleAnim.GetCurrentAnimatorStateInfo(0).length);
+            }
+            SetleUI.SetActive(false);
+            // 关闭结算界面时一并隐藏物品详情
+            if (SetleDesUI != null)
+            {
+                SetleDesUI.SetActive(false);
+            }
+            // 清掉本次显示的结算格，下次显示时重新生成
+            for (int i = SetleSlotHolder.childCount - 1; i >= 0; i--)
+            {
+                Destroy(SetleSlotHolder.GetChild(i).gameObject);
+            }
+            // 通知睡觉流程：界面已关闭
+            EventHandler.CallSettleUIHideDoneEvent();
         }
     }
 }

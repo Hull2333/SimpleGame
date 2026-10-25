@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -96,6 +97,10 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
     public Transform eventNPCParent;
     //出现的其他NPC字典
     private Dictionary<GameObject, EventNPC> spawnedEventNPCs = new Dictionary<GameObject, EventNPC>();
+    [Header("NPC每天重置的场景和位置")]
+    public AnimationClip resetAnimClip;
+    public Vector2Int resetPos;
+    public String resetSceneName;
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -127,6 +132,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
         //游戏结束的事件
         EventHandler.EndGameEvent += OnEndGameEvent;
         EventHandler.PromoteNPCEvent += OnPromoteNPCEvent;
+        EventHandler.GameDayEvent += OnGameDayEvent;
     }
 
     private void OnDisable()
@@ -137,6 +143,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
         EventHandler.StartNewGameEvent += OnStartNewGameEvent;
         EventHandler.EndGameEvent -= OnEndGameEvent;
         EventHandler.PromoteNPCEvent -= OnPromoteNPCEvent;
+        EventHandler.GameDayEvent -= OnGameDayEvent;
     }
 
   
@@ -259,6 +266,44 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
             StartCoroutine(DelayStartNPCEvent());
         }
     }
+    /// <summary>
+    /// 新的一天开始时，把NPC重置到预设的场景、位置和动作
+    /// </summary>
+    private void OnGameDayEvent(int day, Season season, Weekday weekday)
+    {
+        // 停止正在执行的移动协程，并清空剩余路径
+        if (npcMoveRoutine != null)
+        {
+            StopCoroutine(npcMoveRoutine);
+            npcMoveRoutine = null;
+        }
+        movementSteps.Clear();
+        npcMove = false;
+        movementStartTime = null;
+        // 场景与格子坐标统一改为预设值
+        currentScene = resetSceneName;
+        targetScene = resetSceneName;
+        currentGridPosition = (Vector3Int)resetPos;
+        targetGridPosition = (Vector3Int)resetPos;
+        nextGridPosition = (Vector3Int)resetPos;
+        CheckVisiable();
+        // 各场景共用同一套网格坐标，直接瞬移到预设位置
+        if (grid != null)
+        {
+            transform.position = GetWorldPosition((Vector3Int)resetPos);
+        }
+        // 播放预设动作，并保持到下一次行程生效
+        stopAnimationClip = resetAnimClip;
+        alwaysPlayAnimation = true;
+        if (resetAnimClip != null)
+        {
+            animOverride[blankAnimationClip] = resetAnimClip;
+            anim.SetBool("EventAnimation", true);
+        }
+        interactable = true;
+    }
+
+
     /// <summary>
     /// 等一帧，确保所有 AfterSceneLoaded 处理完
     /// </summary>

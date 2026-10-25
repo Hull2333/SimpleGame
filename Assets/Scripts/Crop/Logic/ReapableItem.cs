@@ -24,6 +24,11 @@ public class ReapableItem : MonoBehaviour  //调用在地图杂草、地图小麦对象上
     private int reapCount;
     //是否是杂草
     public bool isWeeds;
+    //杂草春夏秋冬的图片
+    public Sprite[] springWeedSprites;
+    public Sprite[] summerWeedSprites;
+    public Sprite[] AutumnWeedSprites;
+    public Sprite[] winterWeedSprites;
     //是否是大杂草
     public bool isBigWeeds;
     private void Start()
@@ -103,6 +108,33 @@ public class ReapableItem : MonoBehaviour  //调用在地图杂草、地图小麦对象上
             Destroy(gameObject);
         }
         
+    }
+    /// <summary>
+    /// 设置杂草的季节图片
+    /// </summary>
+    public void SetWeedSprite()
+    {
+        Sprite[] sprites = GetSeasonWeedSprites(TimeManager.Instance.gameSeason);
+        if (sprites == null || sprites.Length == 0)
+        {
+            return;
+        }
+        GetComponentInChildren<SpriteRenderer>().sprite = sprites[Random.Range(0, sprites.Length)];
+    }
+
+    /// <summary>
+    /// 根据当前季节返回对应的杂草图片数组
+    /// </summary>
+    private Sprite[] GetSeasonWeedSprites(Season season)
+    {
+        switch (season)
+        {
+            case Season.春天: return springWeedSprites;
+            case Season.夏天: return summerWeedSprites;
+            case Season.秋天: return AutumnWeedSprites;
+            case Season.冬天: return winterWeedSprites;
+            default: return springWeedSprites;
+        }
     }
   
 }

@@ -78,7 +78,15 @@ namespace MFarm.Inventory
         {
             if (other.gameObject.tag == "Player")
             {
-                player = other.transform;
+                //背包放不下该物品时不吸附，只提示背包已满
+                if (InventoryManager.Instance.CanAddItem(itemID))
+                {
+                    player = other.transform;
+                }
+                else
+                {
+                    EventHandler.CallBagFullTipEvent();
+                }
             } 
         }
         /// <summary>

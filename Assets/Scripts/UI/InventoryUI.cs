@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -24,6 +25,12 @@ namespace MFarm.Inventory
         [HideInInspector] public bool canOpenBag = true;
         public GameObject activeBagBar;
         public GameObject bagButton;
+        // 玩家离摄像机下边界小于 3 时，快捷栏和背包按钮上移 305
+        private const float bagBarRaiseThreshold = 3;
+        private const float bagBarRaiseOffset = 305f;
+        // 快捷栏、背包按钮的原位置
+        private Vector2 activeBagBarOriginalPos;
+        private Vector2 bagButtonOriginalPos;
         private bool bagOpened;
         [Header("通用背包")]
         [SerializeField] private GameObject baseBag;
@@ -62,6 +69,10 @@ namespace MFarm.Inventory
         public GameObject sellTip;
         // 卖车面板（默认关闭），靠近车子左键点击时与玩家背包一起打开
         private GameObject sellCarBox;
+        // 卖车面板的关闭动画播放器（挂在 SellCarBox/Bg 上）
+        private Animator sellCarBoxAnim;
+        // 卖车面板是否正在播放关闭动画，避免重复触发
+        private bool isSellCarClosing;
         // 打开卖车面板前记录背包的原位置，关闭时还原
         private Vector2 bagOriginalPos;
         // 卖车面板的所有格子，用于批量清空（在 Inspector 中拖入）
@@ -128,6 +139,8 @@ namespace MFarm.Inventory
         public Button commitAmountButton;
         //当前选择的数量
         private int currentAskAmount;
+        //背包已满提示
+        public GameObject bagFullTip;
         
         private void OnEnable()
         {
@@ -146,6 +159,7 @@ namespace MFarm.Inventory
             EventHandler.BuildindModeEvent += OnBuildindModeEvent;
             EventHandler.OpenBuildShopEvent += OnOpenBuildShopEvent;
             EventHandler.OpenAnimalShopEvent += OnOpenAnimalShopEvent;
+            EventHandler.BagFullTipEvent += OnBagFullTipEvent;
         }
 
         private void OnDisable()
@@ -165,6 +179,33 @@ namespace MFarm.Inventory
             EventHandler.BuildindModeEvent -= OnBuildindModeEvent;
             EventHandler.OpenBuildShopEvent -= OnOpenBuildShopEvent;
             EventHandler.OpenAnimalShopEvent -= OnOpenAnimalShopEvent;
+            EventHandler.BagFullTipEvent -= OnBagFullTipEvent;
+        }
+
+        //背包已满时的提示，显示 1 秒后自动隐藏
+        private void OnBagFullTipEvent()
+        {
+            if (bagFullTip == null)
+            {
+                return;
+            }
+            //提示出现在玩家位置
+            PlayerController player = FindObjectOfType<PlayerController>();
+            if (player != null && Camera.main != null)
+            {
+                bagFullTip.transform.position = Camera.main.WorldToScreenPoint(player.transform.position);
+            }
+            bagFullTip.SetActive(true);
+            CancelInvoke(nameof(HideBagFullTip));
+            Invoke(nameof(HideBagFullTip), 1f);
+        }
+
+        private void HideBagFullTip()
+        {
+            if (bagFullTip != null)
+            {
+                bagFullTip.SetActive(false);
+            }
         }
 
      
@@ -592,6 +633,15 @@ namespace MFarm.Inventory
             {
                 sellCarBox = sellCarBoxTran.gameObject;
             }
+            // 缓存卖车面板的关闭动画播放器（挂在 SellCarBox/Bg 上）
+            if (sellCarBox != null)
+            {
+                Transform sellCarBoxBg = sellCarBox.transform.Find("Bg");
+                if (sellCarBoxBg != null)
+                {
+                    sellCarBoxAnim = sellCarBoxBg.GetComponent<Animator>();
+                }
+            }
             // 卖车格子的序号按数组顺序重新指定，保证和数据下标一致
             for (int i = 0; i < sellCarSlots.Length; i++)
             {
@@ -620,6 +670,15 @@ namespace MFarm.Inventory
             quitAskUIButton.onClick.AddListener(QuitAnimalAskUI);
             quitAnimalShopButton.onClick.AddListener(QuitAnimalShopUI);
             commitAmountButton.onClick.AddListener(ClickAnimalCommitAmountButton);
+            // 记录快捷栏和背包按钮的原位置，贴近摄像机下边界时上移，离开后复原
+            if (activeBagBar != null)
+            {
+                activeBagBarOriginalPos = activeBagBar.GetComponent<RectTransform>().anchoredPosition;
+            }
+            if (bagButton != null)
+            {
+                bagButtonOriginalPos = bagButton.GetComponent<RectTransform>().anchoredPosition;
+            }
         }
       
         private void Update()
@@ -627,6 +686,38 @@ namespace MFarm.Inventory
             if (Input.GetKeyDown(KeyCode.B) )
             {
                 OpenBagUI();
+            }
+            // 玩家贴近摄像机下边界时上移快捷栏和背包按钮
+            UpdateBagBarPosition();
+        }
+
+        /// <summary>
+        /// 玩家离摄像机下边界小于 100 时，快捷栏和背包按钮上移 310，否则回到原位置
+        /// </summary>
+        private void UpdateBagBarPosition()
+        {
+            Camera cam = Camera.main;
+            PlayerController player = FindObjectOfType<PlayerController>();
+            if (cam == null || player == null)
+            {
+                return;
+            }
+            // 摄像机下边界的世界 Y
+            float bottomY = cam.ViewportToWorldPoint(new Vector3(0.5f, 0f)).y;
+            bool nearBottom = player.transform.position.y - bottomY < bagBarRaiseThreshold;
+            if (activeBagBar != null)
+            {
+                RectTransform rect = activeBagBar.GetComponent<RectTransform>();
+                rect.anchoredPosition = nearBottom
+                    ? new Vector2(activeBagBarOriginalPos.x, activeBagBarOriginalPos.y + bagBarRaiseOffset)
+                    : activeBagBarOriginalPos;
+            }
+            if (bagButton != null)
+            {
+                RectTransform rect = bagButton.GetComponent<RectTransform>();
+                rect.anchoredPosition = nearBottom
+                    ? new Vector2(bagButtonOriginalPos.x, bagButtonOriginalPos.y + bagBarRaiseOffset)
+                    : bagButtonOriginalPos;
             }
         }
        
@@ -666,12 +757,12 @@ namespace MFarm.Inventory
                     {
                         panel.gameObject.SetActive(false);
                     }
-                    // 关闭卖车面板，并把玩家背包放回原位
+                    // 关闭卖车面板（先播放关闭动画，播完再隐藏），并把背包挪回原位
                     if (sellCarBox != null && sellCarBox.activeSelf)
                     {
-                        sellCarBox.SetActive(false);
+                        CloseSellCarBox();
                         bagUI.GetComponent<RectTransform>().anchoredPosition = bagOriginalPos;
-                        // 恢复切换到其他面板的按钮
+                        // 恢复切换其他面板的按钮
                         foreach (var button in playerBagSupButtons)
                         {
                             button.SetActive(true);
@@ -701,23 +792,109 @@ namespace MFarm.Inventory
                 return;
             }
             OpenBagUI();
+            // 卖车界面只显示背包，OpenBagUI 会顺带打开装备栏，这里再把它关掉
+            playerEquipUI.SetActive(false);
             if (sellCarBox != null)
             {
                 // 记录背包原位置，再把背包挪到卖车面板对应的位置
                 bagOriginalPos = bagUI.GetComponent<RectTransform>().anchoredPosition;
-                bagUI.GetComponent<RectTransform>().anchoredPosition = new Vector2(452f, 197f);
+                bagUI.GetComponent<RectTransform>().anchoredPosition = new Vector2(471f, 197f);
                 // 卖车界面只显示背包物品，隐藏切换到其他面板的按钮
                 foreach (var button in playerBagSupButtons)
                 {
                     button.SetActive(false);
                 }
                 sellCarBox.SetActive(true);
+                // 重新打开时重置动画状态，避免上次关闭动画的末帧残留
+                isSellCarClosing = false;
+                if (sellCarBoxAnim != null)
+                {
+                    sellCarBoxAnim.Rebind();
+                    sellCarBoxAnim.Update(0f);
+                }
             }
         }
         /// <summary>
         /// 卖车面板是否处于打开状态
         /// </summary>
         public bool IsSellCarBoxOpened => sellCarBox != null && sellCarBox.activeSelf;
+
+        /// <summary>
+        /// 是否只打开了玩家背包（商店、箱子、出售箱、卖车界面都没有同时打开），右键穿戴时使用
+        /// </summary>
+        public bool IsOnlyPlayerBagOpened
+        {
+            get
+            {
+                if (bagUI == null || !bagUI.activeInHierarchy)
+                {
+                    return false;
+                }
+                // 商店/箱子/出售箱面板
+                if (baseBag != null && baseBag.activeInHierarchy)
+                {
+                    return false;
+                }
+                // 卖车界面
+                if (sellCarBox != null && sellCarBox.activeSelf)
+                {
+                    return false;
+                }
+                // 购买/出售物品的确认面板
+                if (tradeUIPanel != null && tradeUIPanel.activeSelf)
+                {
+                    return false;
+                }
+                // 出售状态
+                if (InventoryManager.Instance.isSellState)
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// 关闭卖车面板：先播放关闭动画，动画播完后再失活
+        /// </summary>
+        private void CloseSellCarBox()
+        {
+            if (sellCarBox == null || !sellCarBox.activeSelf)
+            {
+                return;
+            }
+            // 已经在播放关闭动画时不重复触发
+            if (isSellCarClosing)
+            {
+                return;
+            }
+            // 没有动画组件时直接隐藏，避免界面卡住
+            if (sellCarBoxAnim == null)
+            {
+                sellCarBox.SetActive(false);
+                return;
+            }
+            StartCoroutine(CloseSellCarBoxRoutine());
+        }
+
+        /// <summary>
+        /// 播放关闭动画（Trigger: SellCarBoxDisappear），等待动画播完后失活
+        /// </summary>
+        private IEnumerator CloseSellCarBoxRoutine()
+        {
+            isSellCarClosing = true;
+            sellCarBoxAnim.SetTrigger("SellCarBoxDisappear");
+            // 等一帧让状态机切到关闭动画，再按当前动画时长等待
+            yield return null;
+            yield return new WaitForSeconds(sellCarBoxAnim.GetCurrentAnimatorStateInfo(0).length);
+            // 等待期间面板被重新打开时取消隐藏
+            if (!isSellCarClosing)
+            {
+                yield break;
+            }
+            sellCarBox.SetActive(false);
+            isSellCarClosing = false;
+        }
 
         /// <summary>
         /// 找一个能放下该物品的卖车格子：优先同种物品所在格，其次第一个空格
@@ -752,7 +929,8 @@ namespace MFarm.Inventory
             //快速遍历playerSlots中每一项，声明为slot
             foreach (var slot in playerSlots)
             {
-                if (slot.isSelected && slot.slotIndex == index)
+                // 只有背包格(Bag)才显示选中高亮，其他 SlotType 一律不显示
+                if (slot.slotType == SlotType.Bag && slot.isSelected && slot.slotIndex == index)
                 {
                     slot.slotHighlight.gameObject.SetActive(true);
                 }
@@ -805,12 +983,12 @@ namespace MFarm.Inventory
             {
                 panel.gameObject.SetActive(false);
             }
-            // 关闭卖车面板，并把玩家背包放回原位
+            // 关闭卖车面板（先播放关闭动画，播完再隐藏），并把背包挪回原位
             if (sellCarBox != null && sellCarBox.activeSelf)
             {
-                sellCarBox.SetActive(false);
+                CloseSellCarBox();
                 bagUI.GetComponent<RectTransform>().anchoredPosition = bagOriginalPos;
-                // 恢复切换到其他面板的按钮
+                // 恢复切换其他面板的按钮
                 foreach (var button in playerBagSupButtons)
                 {
                     button.SetActive(true);
