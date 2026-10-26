@@ -15,6 +15,8 @@ namespace MFarm.Inventory
         public ItemDetails itemDetails;
         private Transform player;
         private Item item;
+        //是否已经预定了拾取名额（正在飞向玩家但还没放进背包）
+        private bool reserved;
         private void Awake()
         {
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -78,16 +80,22 @@ namespace MFarm.Inventory
         {
             if (other.gameObject.tag == "Player")
             {
-                //背包放不下该物品时不吸附，只提示背包已满
-                if (InventoryManager.Instance.CanAddItem(itemID))
+                //已经预定过拾取名额就不再重复预定
+                if (reserved)
                 {
+                    return;
+                }
+                //按背包剩余容量预定拾取名额，容量不够时不吸附，只提示背包已满
+                if (InventoryManager.Instance.TryReservePickup(itemID))
+                {
+                    reserved = true;
                     player = other.transform;
                 }
                 else
                 {
                     EventHandler.CallBagFullTipEvent();
                 }
-            } 
+            }
         }
         /// <summary>
         /// Item找到PLayer开始往Player移动
@@ -99,12 +107,36 @@ namespace MFarm.Inventory
                 transform.position = Vector2.MoveTowards(transform.position, player.position, 8f * Time.deltaTime);
                 if (Vector3.Distance(gameObject.transform.position, player.transform.position) <= 0.1f)
                 {
-                    InventoryManager.Instance.AddItem(item, true);
+                    //飞行途中容量可能被别的东西占用，放不下就取消吸附并释放名额，避免一直跟着玩家
+                    if (!InventoryManager.Instance.AddItem(item, true))
+                    {
+                        player = null;
+                        ReleasePickupReservation();
+                        return;
+                    }
                     //更新玩家接受的任务
                     EventHandler.CallUpdateQuestProgressEvent(itemID,1);
                 }
 
             }
+        }
+
+        /// <summary>
+        /// 释放预定但没用上的拾取名额
+        /// </summary>
+        private void ReleasePickupReservation()
+        {
+            if (reserved)
+            {
+                InventoryManager.Instance.ReleasePickup(itemID);
+                reserved = false;
+            }
+        }
+
+        private void OnDestroy()
+        {
+            //物品被捡走销毁或随场景卸载时释放名额，避免名额泄漏
+            ReleasePickupReservation();
         }
     }
    

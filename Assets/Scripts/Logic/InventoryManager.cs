@@ -287,7 +287,7 @@ namespace MFarm.Inventory
         /// </summary>
         /// <param name="item"></param>
         /// <param name="toDestory">是否要销毁物品</param>
-        public void AddItem(Item item,bool toDestory)
+        public bool AddItem(Item item,bool toDestory)
         {
             //先找背包里同类物品的位置
             var index = GetStackableItemIndex(item.itemID);
@@ -296,7 +296,7 @@ namespace MFarm.Inventory
             if (!canAdd)
             {
                 EventHandler.CallBagFullTipEvent();
-                return;
+                return false;
             }
             if (toDestory)
             {
@@ -306,6 +306,7 @@ namespace MFarm.Inventory
             
             //更新UI,将需要更新的背包位置和此背包的item列表输入进去
             EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, playerBag.itemList,0);
+            return true;
         }
         /// <summary>
         /// 获取任务奖励物品
@@ -341,6 +342,64 @@ namespace MFarm.Inventory
         {
             return CheckBagCapacity() || GetStackableItemIndex(ID) != -1;
         }
+        //正在飞向玩家、已经预定但还没放进背包的拾取数量（按物品ID统计）
+        private Dictionary<int, int> pendingPickupDict = new Dictionary<int, int>();
+
+        /// <summary>
+        /// 背包还能放入多少个该物品：同类未满堆叠的余量加空格子的容量
+        /// </summary>
+        public int GetRemainingCapacity(int ID)
+        {
+            int capacity = 0;
+            for (int i = 0; i < playerBag.itemList.Count - 4; i++)
+            {
+                if (playerBag.itemList[i].itemID == ID)
+                {
+                    capacity += 99 - playerBag.itemList[i].itemAmount;
+                }
+                else if (playerBag.itemList[i].itemID == 0)
+                {
+                    capacity += 99;
+                }
+            }
+            return capacity;
+        }
+
+        /// <summary>
+        /// 预定一个拾取名额，只有还有剩余容量时才允许物品吸附到玩家
+        /// </summary>
+        public bool TryReservePickup(int ID)
+        {
+            int pending;
+            pendingPickupDict.TryGetValue(ID, out pending);
+            if (GetRemainingCapacity(ID) - pending <= 0)
+            {
+                return false;
+            }
+            pendingPickupDict[ID] = pending + 1;
+            return true;
+        }
+
+        /// <summary>
+        /// 释放预定的拾取名额（物品被销毁时调用）
+        /// </summary>
+        public void ReleasePickup(int ID)
+        {
+            int pending;
+            if (!pendingPickupDict.TryGetValue(ID, out pending))
+            {
+                return;
+            }
+            if (pending <= 1)
+            {
+                pendingPickupDict.Remove(ID);
+            }
+            else
+            {
+                pendingPickupDict[ID] = pending - 1;
+            }
+        }
+
         /// <summary>
         /// 通过物品ID找到背包已有物品位置
         /// </summary>

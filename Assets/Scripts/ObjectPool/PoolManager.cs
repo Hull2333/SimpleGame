@@ -71,7 +71,7 @@ public class PoolManager : MonoBehaviour    //调用在PoolManager对象上
             ParticalEffectType.EnemyHit01 => poolEffectList[5],
             ParticalEffectType.Eat01 => poolEffectList[6],
             ParticalEffectType.HoeEffect => poolEffectList[7],
-            ParticalEffectType.WeedFall => poolEffectList[8],
+            ParticalEffectType.WeedFall_Spring => poolEffectList[8],
             ParticalEffectType.WaterEffect01 => poolEffectList[9],
             ParticalEffectType.EarthenEffect => poolEffectList[10],
             ParticalEffectType.WoodEffect01 => poolEffectList[11],
@@ -79,12 +79,25 @@ public class PoolManager : MonoBehaviour    //调用在PoolManager对象上
             ParticalEffectType.FeatherEffect01 => poolEffectList[13],
             ParticalEffectType.FeatherEffect02 => poolEffectList[14],
             ParticalEffectType.HoeEffect02 => poolEffectList[15],
+            ParticalEffectType.WeedFall_Summer => poolEffectList[16],
+            ParticalEffectType.WeedFall_Autumn => poolEffectList[17],
+            ParticalEffectType.WeedFall_Winter => poolEffectList[18],
+            ParticalEffectType.WeedDisappear_Spring => poolEffectList[19],
+            ParticalEffectType.WeedDisappear_Summer => poolEffectList[20],
+            ParticalEffectType.WeedDisappear_Autumn => poolEffectList[21],
+            ParticalEffectType.WeedDisappear_Winter => poolEffectList[22],
+            ParticalEffectType.BigWeedFallEffect => poolEffectList[23],
             _ => null,
         };
         //在对象池中获取、释放对象
         GameObject obj = objPool.Get();
         obj.transform.position = pos;
-        obj.transform.rotation = Quaternion.LookRotation(dir);
+        //dir为0表示该特效不需要朝向，此时保留预制体自身的旋转
+        //LookRotation(Vector3.zero)会返回单位旋转，覆盖预制体的-90度X旋转，导致粒子发射面被压扁成一条线
+        if (dir != Vector2.zero)
+        {
+            obj.transform.rotation = Quaternion.LookRotation(dir);
+        }
         StartCoroutine(ReleaseRoutine(objPool, obj));
     }
     

@@ -85,9 +85,9 @@ public enum GridType
 /// </summary>
 public enum ParticalEffectType
 {
-    None,LeavesFall01,LeavesFall02,Rock,ReapableScenery,EnemyHit01,Eat01,HoeEffect,WeedFall,WaterEffect01,EarthenEffect,WoodEffect01,CropEffect01,FeatherEffect01, FeatherEffect02,
-    HoeEffect02,
-    
+    None,LeavesFall01,LeavesFall02,Rock,ReapableScenery,EnemyHit01,Eat01,HoeEffect,WeedFall_Spring,WaterEffect01,EarthenEffect,WoodEffect01,CropEffect01,FeatherEffect01, FeatherEffect02,
+    HoeEffect02, WeedFall_Summer,WeedFall_Autumn,WeedFall_Winter,WeedDisappear_Spring, WeedDisappear_Summer, WeedDisappear_Autumn, WeedDisappear_Winter,BigWeedFallEffect,
+
 }
 /// <summary>
 /// 游戏状态

@@ -276,6 +276,9 @@ public class CursorManager : MonoBehaviour  //调用在CursorManager对象上
         GridMapManager.Instance.canGetPlayerPos = false;
         //取消当前选择的物品和恢复鼠标图片为Normal
         InventoryManager.Instance.currentSelectedItem = null;
+        //清空当前持有的物品，否则切场景后仍会按旧工具执行互动，和空手动画对不上
+        currentItem = null;
+        canExcuteMouse = false;
         cursorAnim.runtimeAnimatorController = cursorAnimList[0].cursorController;
         canCheck = false;
         canPat = false;

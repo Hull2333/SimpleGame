@@ -3,6 +3,7 @@ using MFarm.Inventory;
 using MFarm.Map;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 
@@ -16,7 +17,8 @@ public class ReapableItem : MonoBehaviour  //调用在地图杂草、地图小麦对象上
     public int minProduceNum;
     public int maxPriduceNum;
     //粒子特效
-    public ParticalEffectType particalEffectType;
+    private ParticalEffectType WeedFullEffect;
+    private ParticalEffectType WeedDisappearEffect;
     private Grid weedGrid;
     //当前生成地图杂草的地图坐标
     private Vector3Int weedGridPos;
@@ -29,8 +31,11 @@ public class ReapableItem : MonoBehaviour  //调用在地图杂草、地图小麦对象上
     public Sprite[] summerWeedSprites;
     public Sprite[] AutumnWeedSprites;
     public Sprite[] winterWeedSprites;
+    //当前季节的杂草
+    public Season currentSeasonWeed;
     //是否是大杂草
     public bool isBigWeeds;
+    public Sprite[] bigWeedSprites;
     private void Start()
     {
         if (!isWeeds)
@@ -81,8 +86,36 @@ public class ReapableItem : MonoBehaviour  //调用在地图杂草、地图小麦对象上
                     EventHandler.CallInstantiateItemInScene(produceItemID, transform.position);
                 }
             }
-            //杂草粒子特效
-            EventHandler.CallParticleEffectEvent(particalEffectType, transform.position + Vector3.up, Vector2.zero);
+            if (isWeeds)
+            {
+                switch (currentSeasonWeed)
+                {
+                    case Season.春天:
+                        WeedFullEffect = ParticalEffectType.WeedFall_Spring;
+                        WeedDisappearEffect = ParticalEffectType.WeedDisappear_Spring;
+                        break;
+                    case Season.夏天:
+                        WeedFullEffect = ParticalEffectType.WeedDisappear_Summer;
+                        WeedDisappearEffect = ParticalEffectType.WeedDisappear_Summer;
+                        break;
+                    case Season.秋天:
+                        WeedFullEffect = ParticalEffectType.WeedFall_Autumn;
+                        WeedDisappearEffect = ParticalEffectType.WeedDisappear_Autumn;
+                        break;
+                    case Season.冬天:
+                        WeedFullEffect = ParticalEffectType.WeedFall_Winter;
+                        WeedDisappearEffect = ParticalEffectType.WeedDisappear_Winter;
+                        break;
+                };
+                //杂草粒子特效
+                EventHandler.CallParticleEffectEvent(WeedFullEffect, transform.position + Vector3.up, Vector2.zero);
+                EventHandler.CallParticleEffectEvent(WeedDisappearEffect, transform.position + Vector3.up, Vector2.zero);
+            }
+            else
+            {
+                //杂草粒子特效
+                EventHandler.CallParticleEffectEvent(ParticalEffectType.BigWeedFallEffect, transform.position, Vector2.zero);
+            }
             //获取当前生成地图杂草地块的TileDetail
             var currentTileDetails = GridMapManager.Instance.GetTileDetailsOnMousePosition(weedGridPos);
             if (!isBigWeeds)
@@ -121,7 +154,24 @@ public class ReapableItem : MonoBehaviour  //调用在地图杂草、地图小麦对象上
         }
         GetComponentInChildren<SpriteRenderer>().sprite = sprites[Random.Range(0, sprites.Length)];
     }
-
+    /// <summary>
+    /// 根据季节来设置杂草的图片
+    /// </summary>
+    public void AccordingSeasonChangeWeedSprite()
+    {
+        if(TimeManager.Instance.gameSeason == currentSeasonWeed)
+        {
+            return;
+        }
+        SetWeedSprite();
+    }
+    /// <summary>
+    /// 设置大杂草的图片
+    /// </summary>
+    public void SetBigWeedSprite()
+    {
+        GetComponentInChildren<SpriteRenderer>().sprite = bigWeedSprites[Random.Range(0, bigWeedSprites.Length)];
+    }
     /// <summary>
     /// 根据当前季节返回对应的杂草图片数组
     /// </summary>
@@ -129,12 +179,21 @@ public class ReapableItem : MonoBehaviour  //调用在地图杂草、地图小麦对象上
     {
         switch (season)
         {
-            case Season.春天: return springWeedSprites;
-            case Season.夏天: return summerWeedSprites;
-            case Season.秋天: return AutumnWeedSprites;
-            case Season.冬天: return winterWeedSprites;
+            case Season.春天: 
+                currentSeasonWeed = Season.春天; 
+                return springWeedSprites;
+            case Season.夏天:
+                currentSeasonWeed = Season.夏天; 
+                return summerWeedSprites;
+            case Season.秋天:
+                currentSeasonWeed = Season.秋天; 
+                return AutumnWeedSprites;
+            case Season.冬天: 
+                currentSeasonWeed = Season.冬天; 
+                return winterWeedSprites;
             default: return springWeedSprites;
         }
     }
+
   
 }

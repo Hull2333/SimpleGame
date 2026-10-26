@@ -171,6 +171,7 @@ public class SceneKnockItem
 public class SceneReapableItem
 {
     public SerializableVector3 position;
+    public Season weedSeason;
     public Sprite sprite;
 }
 

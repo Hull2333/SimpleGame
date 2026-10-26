@@ -50,11 +50,8 @@ namespace MFarm.Map
         private MapData_SO currentSceneMap;
         //杂草预制体
         public GameObject weedPrefab;
-        //记录本次生成的杂草，季节变化时刷新图片用
-        private List<ReapableItem> weedList = new List<ReapableItem>();
         private TileDetails aroundWeedsTileDetail,aroundBigRockTileDetail,aroundTreeTileDetail;
         public GameObject bigWeedPrefab;
-        public Sprite[] bigWeedSprites;
         //石矿预制体
         public GameObject[] rocksPrefabs;
         //石矿预制体序号
@@ -159,23 +156,6 @@ namespace MFarm.Map
             sceneLastGenDayDict[sceneName] = elapsedDays;
         }
         /// <summary>
-        /// 季节变化后刷新场上已有杂草的图片
-        /// </summary>
-        private void RefreshWeedSprites()
-        {
-            for (int i = weedList.Count - 1; i >= 0; i--)
-            {
-                //被割掉或随场景卸载销毁的杂草直接移除
-                if (weedList[i] == null)
-                {
-                    weedList.RemoveAt(i);
-                    continue;
-                }
-                weedList[i].SetWeedSprite();
-            }
-        }
-
-        /// <summary>
         /// 每天执行一次
         /// </summary>
         /// <param name="day"></param>
@@ -185,7 +165,6 @@ namespace MFarm.Map
             //过天计数器加一，供各场景补生成随机资源时计算错过的天数
             elapsedDays++;
      
-            Season lastSeason = currentSeason;
             currentSeason = season;
             foreach(var tile in tileDetailsDict)
             {
@@ -215,11 +194,6 @@ namespace MFarm.Map
             //雨天和雷雨天自动给所有已耕种的坑浇水
             RainWaterTiles();
             RandomGenerateInterView();
-            //季节变化后刷新场上已有杂草的图片
-            if (lastSeason != currentSeason)
-            {
-                RefreshWeedSprites();
-            }
             sceneLastGenDayDict[SceneManager.GetActiveScene().name] = elapsedDays;
             OnRefreshCurrentMap();
             //每日更新鱼类获取列表
@@ -332,9 +306,7 @@ namespace MFarm.Map
                                             {
                                                 //随机生成杂草预制体
                                                 var weed = Instantiate(weedPrefab, new Vector2(Random.Range(weedsPos.x - 0.5f, weedsPos.x + 0.5f), Random.Range(weedsPos.y - 0.5f, weedsPos.y + 0.5f)), Quaternion.identity);
-                                                var weedItem = weed.GetComponentInChildren<ReapableItem>();
-                                                weedItem.SetWeedSprite();
-                                                weedList.Add(weedItem);
+                                                weed.GetComponentInChildren<ReapableItem>().SetWeedSprite();
                                                 //已生成杂草
                                                 currentTile.predictHaveWeeds++;
                                             }
@@ -347,9 +319,7 @@ namespace MFarm.Map
                                             {
                                                 //随机生成杂草预制体
                                                 var weed = Instantiate(weedPrefab, new Vector2(Random.Range(weedsPos.x - 0.5f, weedsPos.x + 0.5f), Random.Range(weedsPos.y - 0.5f, weedsPos.y + 0.5f)), Quaternion.identity);
-                                                var weedItem = weed.GetComponentInChildren<ReapableItem>();
-                                                weedItem.SetWeedSprite();
-                                                weedList.Add(weedItem);
+                                                weed.GetComponentInChildren<ReapableItem>().SetWeedSprite();
                                                 //已生成杂草
                                                 currentTile.predictHaveWeeds++;
                                             }
@@ -362,9 +332,7 @@ namespace MFarm.Map
                                         if (generateOdds <= 50)
                                         {
                                             var weed = Instantiate(weedPrefab, new Vector2(Random.Range(currentTile.gridX - 0.5f, currentTile.gridX + 0.5f), Random.Range(currentTile.gridY - 0.5f, currentTile.gridY + 0.5f)), Quaternion.identity);
-                                            var weedItem = weed.GetComponentInChildren<ReapableItem>();
-                                            weedItem.SetWeedSprite();
-                                            weedList.Add(weedItem);
+                                            weed.GetComponentInChildren<ReapableItem>().SetWeedSprite();
                                             currentTile.predictHaveWeeds++;
                                         }
                                     }
@@ -444,13 +412,14 @@ namespace MFarm.Map
                             }
                         }
                         //生成大杂草
-                        if (currentTile.canBigWeeds && currentTile.haveBigWeeds == -1)
+                        //大杂草只在非冬季生成
+                        if (currentSeason != Season.冬天 && currentTile.canBigWeeds && currentTile.haveBigWeeds == -1)
                         {
                             int odds = Random.Range(0, 10);
                             if (odds > 5)
                             {
                                 var bigWeed = Instantiate(bigWeedPrefab, new Vector2(currentTile.gridX + 0.5f, currentTile.gridY + 0.5f), Quaternion.identity);
-                                bigWeed.GetComponentInChildren<SpriteRenderer>().sprite = bigWeedSprites[Random.Range(0, bigWeedSprites.Length)];
+                                bigWeed.GetComponent<ReapableItem>().SetBigWeedSprite();
                                 currentTile.haveBigWeeds = 1;
                             }
                         }

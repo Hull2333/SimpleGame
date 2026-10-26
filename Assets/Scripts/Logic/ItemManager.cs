@@ -479,6 +479,7 @@ namespace MFarm.Inventory
                 SceneReapableItem sceneItem = new SceneReapableItem()
                 {
                     position = new SerializableVector3(reapableItem.transform.position),
+                    weedSeason = reapableItem.currentSeasonWeed,
                     sprite = reapableItem.GetComponentInChildren<SpriteRenderer>().sprite
                 };
                 if (reapableItem.isWeeds)
@@ -713,11 +714,19 @@ namespace MFarm.Inventory
                     foreach (var item in currentWeedsItems)
                     {
                         var weedItem = Instantiate(weedItemPerfab, item.position.ToVector3(), Quaternion.identity);
+                        weedItem.currentSeasonWeed = item.weedSeason;
                         weedItem.GetComponentInChildren<SpriteRenderer>().sprite = item.sprite;
+                        weedItem.AccordingSeasonChangeWeedSprite();
                     }
                 }
             }
-            if (sceneBigWeedItemDict.TryGetValue(SceneManager.GetActiveScene().name, out currentBigWeedsItems))
+            //冬季不恢复大杂草，并清空已记录的所有大杂草信息
+            if (TimeManager.Instance.gameSeason == Season.冬天)
+            {
+                sceneBigWeedItemDict.Clear();
+            }
+            else if (sceneBigWeedItemDict.Count > 0 &&
+                sceneBigWeedItemDict.TryGetValue(SceneManager.GetActiveScene().name, out currentBigWeedsItems))
             {
                 if (currentBigWeedsItems != null)
                 {
