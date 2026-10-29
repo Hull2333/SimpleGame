@@ -20,6 +20,10 @@ namespace MFarm.Save
         /// </summary>
         public Dictionary<string, List<SceneItem>> sceneItemDict;
         /// <summary>
+        /// 存储所有灌木丛的状态
+        /// </summary>
+        public Dictionary<string, List<SceneBush>> sceneBushDict;
+        /// <summary>
         /// 存储所有家具信息
         /// </summary>
         public Dictionary<string, List<SceneFurniture>> sceneFurnitureDict;

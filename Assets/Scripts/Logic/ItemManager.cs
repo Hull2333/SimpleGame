@@ -29,6 +29,8 @@ namespace MFarm.Inventory
         public MineSceneDataList_SO mineData;
         //用字典的方式存储每个场景的物品信息，key为场景名，value为该场景的物品列表
         private Dictionary<string, List<SceneItem>> sceneItemDict = new Dictionary<string, List<SceneItem>>();
+        //用字典的方式存储每个场景的灌木丛状态，key为场景名，value为该场景的灌木列表
+        private Dictionary<string, List<SceneBush>> sceneBushDict = new Dictionary<string, List<SceneBush>>();
         //用字典的方式存储每个场景的家具信息，key为场景名，value为该场景的家具列表
         private Dictionary<string, List<SceneFurniture>> sceneFurnitureDict = new Dictionary<string, List<SceneFurniture>>();
         //用字典的方式存储每个场景的建筑信息，key为场景名，value为该场景的建筑列表
@@ -132,6 +134,7 @@ namespace MFarm.Inventory
                 else
                 {
                     GetAllSceneItems();
+                    GetAllSceneBushes();
                     GetAllSceneFurniture();
                     GetAllSceneBuilding();
                     GetAllSceneAnimal();
@@ -167,6 +170,8 @@ namespace MFarm.Inventory
             buildingParent = FindAnyObjectByType<BuildingParent>().transform;
             animalParent = FindAnyObjectByType<AnimalParent>().transform;
             furnitureParent = FindAnyObjectByType<FurnitureParent>().transform;
+            //进入场景后把存档里的灌木丛状态贴回去
+            ApplySceneBushes();
            
             if (ExcludeMineScene(SceneManager.GetActiveScene().name))
             {
@@ -267,6 +272,7 @@ namespace MFarm.Inventory
         private void OnStartNewGameEvent(int obj)
         {
             sceneItemDict.Clear();
+            sceneBushDict.Clear();
             sceneFurnitureDict.Clear();
             sceneBuildingDict.Clear();
         }
@@ -364,6 +370,11 @@ namespace MFarm.Inventory
             List<SceneItem> currentSceneItems = new List<SceneItem>();
             foreach (var item in FindObjectsOfType<Item>())
             {
+                //还挂在灌木丛上的果实由BushController自己管理，不按普通场景物品存档
+                if (item.GetComponentInParent<BushController>() != null)
+                {
+                    continue;
+                }
                 SceneItem sceneItem = new SceneItem()
                 {
                     itemID = item.itemID,
@@ -381,6 +392,50 @@ namespace MFarm.Inventory
                 sceneItemDict.Add(SceneManager.GetActiveScene().name, currentSceneItems);
             }
 
+        }
+        /// <summary>
+        /// 获取当前场景所有灌木丛的状态
+        /// </summary>
+        private void GetAllSceneBushes()
+        {
+            List<SceneBush> currentSceneBushes = new List<SceneBush>();
+            foreach (var bush in FindObjectsOfType<BushController>())
+            {
+                currentSceneBushes.Add(bush.GetSceneBush());
+            }
+            string sceneName = SceneManager.GetActiveScene().name;
+            if (sceneBushDict.ContainsKey(sceneName))
+            {
+                sceneBushDict[sceneName] = currentSceneBushes;
+            }
+            else
+            {
+                sceneBushDict.Add(sceneName, currentSceneBushes);
+            }
+        }
+        /// <summary>
+        /// 把当前场景存档里的灌木状态贴回每丛灌木
+        /// </summary>
+        private void ApplySceneBushes()
+        {
+            string sceneName = SceneManager.GetActiveScene().name;
+            if (!sceneBushDict.ContainsKey(sceneName))
+            {
+                return;
+            }
+            List<SceneBush> sceneBushes = sceneBushDict[sceneName];
+            foreach (var bush in FindObjectsOfType<BushController>())
+            {
+                for (int i = 0; i < sceneBushes.Count; i++)
+                {
+                    //灌木不会移动，用坐标匹配存档里的那一丛
+                    if (Vector3.Distance(bush.transform.position, sceneBushes[i].position.ToVector3()) < 0.1f)
+                    {
+                        bush.ApplySaveState(TimeManager.Instance.gameSeason, sceneBushes[i].isFruiting, sceneBushes[i].fruitCount, sceneBushes[i].pickedDayIndex);
+                        break;
+                    }
+                }
+            }
         }
         /// <summary>
         /// 获取所有场景的家具信息
@@ -591,6 +646,11 @@ namespace MFarm.Inventory
                     //先初始化当前场景的所有物品，避免重复生成
                     foreach (var item in FindObjectsOfType<Item>())
                     {
+                        //还挂在灌木丛上的果实由BushController管理，不参与物品重建
+                        if (item.GetComponentInParent<BushController>() != null)
+                        {
+                            continue;
+                        }
                         Destroy(item.gameObject);
                     }
                     //开始重新生成当前场景的所有物品
@@ -1003,10 +1063,12 @@ namespace MFarm.Inventory
             GetAllSceneBuilding();
             GetAllSceneAnimal();
             GetAllSceneItems();
+            GetAllSceneBushes();
             GetAllSceneKnockItem();
             GetAllSceneReapableItem();
             GameSaveData saveData = new GameSaveData();
             saveData.sceneItemDict = this.sceneItemDict;
+            saveData.sceneBushDict = this.sceneBushDict;
             saveData.sceneFurnitureDict = this.sceneFurnitureDict;
             saveData.sceneBuildingDict = this.sceneBuildingDict;
             return saveData;
@@ -1016,6 +1078,12 @@ namespace MFarm.Inventory
         {
             this.sceneFurnitureDict = saveData.sceneFurnitureDict;
             this.sceneItemDict = saveData.sceneItemDict;
+            //旧存档里没有灌木数据，判空避免空引用
+            if (saveData.sceneBushDict != null)
+            {
+                this.sceneBushDict = saveData.sceneBushDict;
+                ApplySceneBushes();
+            }
             this.sceneBuildingDict = saveData.sceneBuildingDict;
             RecreateAllItem();
             RebuilFurniture();

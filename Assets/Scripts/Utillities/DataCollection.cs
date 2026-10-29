@@ -106,6 +106,18 @@ public class SceneItem
     public int itemID;
     public SerializableVector3 position;
 }
+//场景中的灌木丛状态
+[System.Serializable]
+public class SceneBush
+{
+    public SerializableVector3 position;
+    //是否正挂着果实
+    public bool isFruiting;
+    //挂着的果实数量
+    public int fruitCount;
+    //上次采摘的绝对天数，-1表示还没采摘过
+    public int pickedDayIndex = -1;
+}
 //场景中的建造家具
 [System.Serializable]
 public class SceneFurniture

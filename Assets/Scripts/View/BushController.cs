@@ -6,9 +6,10 @@ using MFarm.Inventory;
 public class BushController : MonoBehaviour //调用在BigBush对象上
 {
     private CursorManager cursorManager;
-    private SpriteRenderer spriteRenderer;
-    //春冬季节灌木丛图片
+    public SpriteRenderer spriteRenderer;
+    //春秋冬季节灌木丛图片
     public Sprite springBushSprite;
+    public Sprite autumnBushSprite;
     public Sprite winterBushSprite;
     //灌木丛的花
     public GameObject flowerSprite;
@@ -26,12 +27,12 @@ public class BushController : MonoBehaviour //调用在BigBush对象上
     private bool hasSyncedSeason;
     //是否已结果
     private bool isFruiting;
-    //采摘后是否正在等待重新结果
-    private bool waitRegrow;
-    //采摘后已经过去的天数
-    private int daysAfterPicking;
+    //上次采摘果实时的绝对天数，-1表示还没采摘过
+    private int pickedDayIndex = -1;
     //记录已生成的果实，季节结束或切换场景时统一清理
     private List<GameObject> fruitList = new List<GameObject>();
+    //果实掉落后的父物体，用来把掉落的果实当作普通物品存档
+    private Transform itemParent;
 
     private void OnEnable()
     {
@@ -63,6 +64,12 @@ public class BushController : MonoBehaviour //调用在BigBush对象上
     private void Start()
     {
         cursorManager = GameObject.FindWithTag("CursorManager").GetComponent<CursorManager>();
+        //找到场景物品的父物体，果实掉落时转挂过去
+        GameObject itemParentObj = GameObject.FindWithTag("ItemParent");
+        if (itemParentObj != null)
+        {
+            itemParent = itemParentObj.transform;
+        }
     }
     private void OnTriggerStay2D(Collider2D other)
     {
@@ -81,9 +88,8 @@ public class BushController : MonoBehaviour //调用在BigBush对象上
     {
         //采摘后灌木丛不再处于结果状态，避免按住右键时重复触发
         isFruiting = false;
-        //采摘后开始计时，过三天重新结果
-        waitRegrow = true;
-        daysAfterPicking = 0;
+        //记录采摘当天的绝对天数，三天后重新结果
+        pickedDayIndex = CurrentDayIndex();
         for (int i = 0; i < fruitList.Count; i++)
         {
             GameObject fruit = fruitList[i];
@@ -103,6 +109,11 @@ public class BushController : MonoBehaviour //调用在BigBush对象上
             if (itemBounce != null)
             {
                 itemBounce.enabled = true;
+            }
+            //果实离开灌木丛后转挂到场景物品父物体下，之后按普通掉落物存档
+            if (itemParent != null)
+            {
+                fruit.transform.SetParent(itemParent);
             }
         }
         //果实已经采摘，清空记录避免后续重复处理
@@ -140,19 +151,21 @@ public class BushController : MonoBehaviour //调用在BigBush对象上
     /// </summary>
     private void UpdateBushSprite(Season season)
     {
-        //场景加载事件可能早于Start执行，这里补取一次组件避免空引用
-        SpriteRenderer renderer = spriteRenderer != null ? spriteRenderer : GetComponent<SpriteRenderer>();
-        if (renderer == null)
+        if (spriteRenderer == null)
         {
             return;
         }
         if (season == Season.春天 && springBushSprite != null)
         {
-            renderer.sprite = springBushSprite;
+            spriteRenderer.sprite = springBushSprite;
         }
         else if (season == Season.冬天 && winterBushSprite != null)
         {
-            renderer.sprite = winterBushSprite;
+            spriteRenderer.sprite = winterBushSprite;
+        }
+        else if (season == Season.秋天 && autumnBushSprite != null)
+        {
+            spriteRenderer.sprite = autumnBushSprite;
         }
     }
 
@@ -161,25 +174,24 @@ public class BushController : MonoBehaviour //调用在BigBush对象上
     /// </summary>
     private void TryRegrow(Season season)
     {
-        //没有在等待结果、已经结果或春天时不重新结果
-        if (!waitRegrow || isFruiting || season == Season.春天)
+        //没有采摘记录、已经结果或春天时不重新结果
+        if (pickedDayIndex < 0 || isFruiting || season == Season.春天)
         {
             return;
         }
-        daysAfterPicking++;
-        if (daysAfterPicking < 3)
+        //跨季跨年都能比较，不足三天就不结果
+        if (CurrentDayIndex() - pickedDayIndex < 3)
         {
             return;
         }
-        waitRegrow = false;
-        daysAfterPicking = 0;
+        pickedDayIndex = -1;
         GenerateFruits(season);
     }
 
     /// <summary>
     /// 结果：在随机的结果位置生成1~3个果实
     /// </summary>
-    private void GenerateFruits(Season season)
+    private void GenerateFruits(Season season, int fruitCount = -1)
     {
         if (bounceItemBase == null || fruitPos == null || fruitPos.Length == 0)
         {
@@ -198,9 +210,10 @@ public class BushController : MonoBehaviour //调用在BigBush对象上
             posIndexList[i] = posIndexList[randomIndex];
             posIndexList[randomIndex] = temp;
         }
-        //随机1~3个果实，结果位置不够时按实际位置数量生成
-        int fruitCount = Mathf.Min(Random.Range(1, 4), posIndexList.Count);
-        for (int i = 0; i < fruitCount; i++)
+        //没指定数量时随机1~3个，指定数量时按存档的数量生成；结果位置不够时按实际位置数量生成
+        int count = fruitCount > 0 ? fruitCount : Random.Range(1, 4);
+        count = Mathf.Min(count, posIndexList.Count);
+        for (int i = 0; i < count; i++)
         {
             Transform pos = fruitPos[posIndexList[i]];
             GameObject fruit = Instantiate(bounceItemBase, pos.position, Quaternion.identity,fruitParent);
@@ -228,6 +241,84 @@ public class BushController : MonoBehaviour //调用在BigBush对象上
             fruitList.Add(fruit);
         }
         isFruiting = true;
+    }
+
+    /// <summary>
+    /// 当前挂着且没有被销毁的果实数量
+    /// </summary>
+    public int GetFruitingCount()
+    {
+        int count = 0;
+        for (int i = 0; i < fruitList.Count; i++)
+        {
+            if (fruitList[i] != null)
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /// <summary>
+    /// 导出存档用的灌木状态
+    /// </summary>
+    public SceneBush GetSceneBush()
+    {
+        return new SceneBush()
+        {
+            position = new SerializableVector3(transform.position),
+            isFruiting = isFruiting,
+            fruitCount = GetFruitingCount(),
+            pickedDayIndex = pickedDayIndex
+        };
+    }
+
+    /// <summary>
+    /// 读档后把灌木状态贴回来
+    /// </summary>
+    public void ApplySaveState(Season season, bool fruiting, int fruitCount, int pickedDayIndex)
+    {
+        //先标记本季已同步，避免RefreshBushState在场景加载时又自动结果一次
+        hasSyncedSeason = true;
+        currentSeason = season;
+        flowerSprite.SetActive(season == Season.春天);
+        this.pickedDayIndex = pickedDayIndex;
+        //清掉场景加载时可能已经生成的果实，再按存档的数量重新生成
+        ClearHangingFruits();
+        isFruiting = false;
+        if (fruiting && fruitCount > 0)
+        {
+            GenerateFruits(season, fruitCount);
+        }
+        //没有果实且非春天：春天离开（无采摘记录）或采摘已满三天时按当前季节结果
+        else if (season != Season.春天 && (this.pickedDayIndex < 0 || CurrentDayIndex() - this.pickedDayIndex >= 3))
+        {
+            GenerateFruits(season);
+        }
+    }
+
+    /// <summary>
+    /// 清空当前挂着的果实
+    /// </summary>
+    private void ClearHangingFruits()
+    {
+        for (int i = 0; i < fruitList.Count; i++)
+        {
+            if (fruitList[i] != null)
+            {
+                Destroy(fruitList[i]);
+            }
+        }
+        fruitList.Clear();
+    }
+
+    /// <summary>
+    /// 由年、季、日合成的绝对天数，跨季和读档后依然可以比较
+    /// </summary>
+    private int CurrentDayIndex()
+    {
+        TimeManager timeManager = TimeManager.Instance;
+        return ((timeManager.gameYear * 4 + (int)timeManager.gameSeason) * Settings.dayHold) + timeManager.gameDay;
     }
 
 }
