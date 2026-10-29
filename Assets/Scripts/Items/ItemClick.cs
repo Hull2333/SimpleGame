@@ -16,7 +16,7 @@ public class ItemClick : MonoBehaviour //调用在ItemClick预制体上
     public void SetItemSprite()
     {
         itemDetails = InventoryManager.Instance.GetItemDetails(itemID);
-        sprite.sprite = itemDetails.itemOnWorldSprite;
+        sprite.sprite = itemDetails.itemOnWorldSprites[0];
     }
     /// <summary>
     /// 添加到玩家背包中

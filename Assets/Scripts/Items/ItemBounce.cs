@@ -79,8 +79,10 @@ namespace MFarm.Inventory
         /// <summary>
         /// 给刚出现的物体施加随机力和方向
         /// </summary>
-        private void GiveItemForce()
+        public void GiveItemForce()
         {
+            //以当前所在位置作为弹跳起点，避免依赖外部事件传入的位置
+            originalPos = transform.position;
             inSkyTime = 0.5f;
             randomPos = new Vector2(originalPos.x + Random.Range(-0.3f, 0.3f), originalPos.y + Random.Range(0.1f, 1f));
             direction = (randomPos - originalPos).normalized;

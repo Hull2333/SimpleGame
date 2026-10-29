@@ -47,7 +47,7 @@ namespace MFarm.Inventory
             //避免搜索结果为空
             if (itemDetails != null)
             {
-                spriteRenderer.sprite = itemDetails.itemOnWorldSprite != null ? itemDetails.itemOnWorldSprite : itemDetails.itemIcon;
+                spriteRenderer.sprite = itemDetails.itemOnWorldSprites[Random.Range(0, itemDetails.itemOnWorldSprites.Length)];
             }
                 //if(itemDetails != null)
                 //{

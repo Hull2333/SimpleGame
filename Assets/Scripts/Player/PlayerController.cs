@@ -989,7 +989,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
             anim.SetBool("Tool5",true);
         }
         fishItem.SetActive(true);
-        fishItem.GetComponent<SpriteRenderer>().sprite = fishDetails.itemOnWorldSprite;
+        fishItem.GetComponent<SpriteRenderer>().sprite = fishDetails.itemOnWorldSprites[0];
         yield return new WaitForSeconds(0.5f);
         isGameTimePause = true;
         

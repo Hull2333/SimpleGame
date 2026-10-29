@@ -109,7 +109,7 @@ public class AnimatorOverride : MonoBehaviour   //调用在Player对象上
             {
                 if (currentType == PartType.Carry)
                 {
-                    holdItem.GetComponent<SpriteRenderer>().sprite = itemDetails.itemOnWorldSprite;
+                    holdItem.GetComponent<SpriteRenderer>().sprite = itemDetails.itemOnWorldSprites[0];
                     holdItem.SetActive(true);
                 }
                 else
@@ -129,19 +129,19 @@ public class AnimatorOverride : MonoBehaviour   //调用在Player对象上
     private void OnDisplayCollectItemSprite(int ID)
     {
         holdItem.SetActive(true);
-        holdItem.GetComponent<SpriteRenderer>().sprite = InventoryManager.Instance.GetItemDetails(ID).itemOnWorldSprite;
+        holdItem.GetComponent<SpriteRenderer>().sprite = InventoryManager.Instance.GetItemDetails(ID).itemOnWorldSprites[0];
         holdItem.gameObject.GetComponent<Animator>().SetTrigger("isCollect");
     }
     private void OnPlayEatAnimEvent(int ID)
     {
         holdItem.SetActive(true);
-        holdItem.GetComponent<SpriteRenderer>().sprite = InventoryManager.Instance.GetItemDetails(ID).itemOnWorldSprite;
+        holdItem.GetComponent<SpriteRenderer>().sprite = InventoryManager.Instance.GetItemDetails(ID).itemOnWorldSprites[0];
         holdItem.gameObject.GetComponent<Animator>().SetTrigger("isEat");
     }
     private void OnRecerveItemEvent(ItemDetails item)
     {
         holdItem.SetActive(true);
-        holdItem.GetComponent<SpriteRenderer>().sprite = item.itemOnWorldSprite;
+        holdItem.GetComponent<SpriteRenderer>().sprite = item.itemOnWorldSprites[0];
     }
     private void OnQuitRecerveItemUIEvent()
     {

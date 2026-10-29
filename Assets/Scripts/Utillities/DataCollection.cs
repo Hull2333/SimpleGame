@@ -25,7 +25,7 @@ public class ItemDetails
     public FishlifeTime fishlifeTime;
     public int[] likeBaits;
     public Sprite itemIcon;
-    public Sprite itemOnWorldSprite;
+    public Sprite[] itemOnWorldSprites;
     [TextArea]
     public string itemDescription;
     public float itemUseRadius;
