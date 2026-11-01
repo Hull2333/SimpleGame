@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -17,9 +17,9 @@ public class SellCar : MonoBehaviour // Sell car script attached to the Car obje
     private SpriteRenderer coverRenderer;
     // True while the appear / leave routine is playing, used to ignore duplicated triggers
     private bool isRoutineRunning;
-    // ¹â±ê¹ÜÀíÆ÷£¬ÓÃÓÚÅĞ¶ÏÍæ¼ÒÊÇ·ñ¿ÕÊÖ
+    // å…‰æ ‡ç®¡ç†å™¨ï¼Œç”¨äºåˆ¤æ–­ç©å®¶æ˜¯å¦ç©ºæ‰‹
     private CursorManager cursorManager;
-    // ³µÖ÷ÉíÉÏµÄËùÓĞÅö×²Ìå£¬ÓÃÓÚÅĞ¶ÏÊó±êÊÇ·ñµãÔÚ³µÉíÉÏ
+    // è½¦ä¸»èº«ä¸Šçš„æ‰€æœ‰ç¢°æ’ä½“ï¼Œç”¨äºåˆ¤æ–­é¼ æ ‡æ˜¯å¦ç‚¹åœ¨è½¦èº«ä¸Š
     private Collider2D[] carColliders;
 
     private void Awake()
@@ -151,49 +151,49 @@ public class SellCar : MonoBehaviour // Sell car script attached to the Car obje
         carAnim.SetBool("IsShake", false);
     }
 
-    // Íæ¼Ò´¦ÓÚ³µµÄ´¥·¢·¶Î§ÄÚÊ±£¬¿ÕÊÖ×ó¼üµã»÷³µÉí¼´´ò¿ªÂô³µ½çÃæÓëÍæ¼Ò±³°ü
+    // ç©å®¶å¤„äºè½¦çš„è§¦å‘èŒƒå›´å†…æ—¶ï¼Œç©ºæ‰‹å·¦é”®ç‚¹å‡»è½¦èº«å³æ‰“å¼€å–è½¦ç•Œé¢ä¸ç©å®¶èƒŒåŒ…
     private void OnTriggerStay2D(Collider2D other)
     {
-        // Ö»ÏìÓ¦Íæ¼Ò
+        // åªå“åº”ç©å®¶
         if (!other.CompareTag("Player"))
         {
             return;
         }
-        // Î´ÓªÒµ£¨»¹Ã»³öÏÖ¡¢ÒÑÊÕÌ¯¡¢ÕıÔÚ²¥·Å³öÏÖ/ÊÕÌ¯Á÷³Ì£©Ê±²»ÄÜµã¿ª
+        // æœªè¥ä¸šï¼ˆè¿˜æ²¡å‡ºç°ã€å·²æ”¶æ‘Šã€æ­£åœ¨æ’­æ”¾å‡ºç°/æ”¶æ‘Šæµç¨‹ï¼‰æ—¶ä¸èƒ½ç‚¹å¼€
         if (!IsCarOpen())
         {
             return;
         }
-        // ½çÃæÒÑ¾­´ò¿ªÊ±²»ÔÙÏìÓ¦£¬±ÜÃâ°Ñ½çÃæ·´¸´¿ª¹Ø
+        // ç•Œé¢å·²ç»æ‰“å¼€æ—¶ä¸å†å“åº”ï¼Œé¿å…æŠŠç•Œé¢åå¤å¼€å…³
         if (InventoryManager.Instance.anyBagOpened)
         {
             return;
         }
-        // Ö»ÓĞ¿ÕÊÖÊ±²ÅÄÜµã¿ª£¬±ÜÃâÓëÊÖ³Ö¹¤¾ßµÄ×ó¼üÊ¹ÓÃ³åÍ»
+        // åªæœ‰ç©ºæ‰‹æ—¶æ‰èƒ½ç‚¹å¼€ï¼Œé¿å…ä¸æ‰‹æŒå·¥å…·çš„å·¦é”®ä½¿ç”¨å†²çª
         if (!IsHandEmpty())
         {
             return;
         }
-        // ×ó¼üµãÔÚ³µÉíÉÏÊ±²Å´ò¿ª£¨ÆäÓàÇé¿öÈÔÈ»½»¸øÔ­ÓĞµÄ¹¤¾ß/²É¼¯Âß¼­£©
+        // å·¦é”®ç‚¹åœ¨è½¦èº«ä¸Šæ—¶æ‰æ‰“å¼€ï¼ˆå…¶ä½™æƒ…å†µä»ç„¶äº¤ç»™åŸæœ‰çš„å·¥å…·/é‡‡é›†é€»è¾‘ï¼‰
         if (Input.GetMouseButtonDown(0) && IsMouseOnCar())
         {
             InventoryUI.Instance.OpenSellCarUI();
         }
     }
 
-    // ³µÊÇ·ñ´¦ÓÚÓªÒµ×´Ì¬£º³µÉí¿É¼ûÇÒÃ»ÓĞÔÚ²¥·Å³öÏÖ/ÊÕÌ¯Á÷³Ì
+    // è½¦æ˜¯å¦å¤„äºè¥ä¸šçŠ¶æ€ï¼šè½¦èº«å¯è§ä¸”æ²¡æœ‰åœ¨æ’­æ”¾å‡ºç°/æ”¶æ‘Šæµç¨‹
     private bool IsCarOpen()
     {
         return bodyRenderer.enabled && !isRoutineRunning;
     }
 
-    // Íæ¼ÒÊÇ·ñ¿ÕÊÖ£¨¹â±êÃ»ÓĞÑ¡ÖĞÈÎºÎÎïÆ·£©
+    // ç©å®¶æ˜¯å¦ç©ºæ‰‹ï¼ˆå…‰æ ‡æ²¡æœ‰é€‰ä¸­ä»»ä½•ç‰©å“ï¼‰
     private bool IsHandEmpty()
     {
         return cursorManager.currentItem == null || cursorManager.currentItem.itemID == 0;
     }
 
-    // Êó±êµ±Ç°Î»ÖÃÊÇ·ñÂäÔÚ³µÉíµÄÊµÌåÅö×²ÌåÉÏ£¨´¥·¢Æ÷Ö»ÓÃÓÚ¿¿½ü¼ì²â£¬²»Ëã³µÉí£©
+    // é¼ æ ‡å½“å‰ä½ç½®æ˜¯å¦è½åœ¨è½¦èº«çš„å®ä½“ç¢°æ’ä½“ä¸Šï¼ˆè§¦å‘å™¨åªç”¨äºé è¿‘æ£€æµ‹ï¼Œä¸ç®—è½¦èº«ï¼‰
     private bool IsMouseOnCar()
     {
         Vector2 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);

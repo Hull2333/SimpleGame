@@ -1,14 +1,14 @@
-using DG.Tweening;
+ï»¿using DG.Tweening;
 using MFarm.Inventory;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CoinTween : MonoBehaviour //µ÷ÓÃÔÚCoinÔ¤ÖÆÌåÉÏ
+public class CoinTween : MonoBehaviour //è°ƒç”¨åœ¨Coiné¢„åˆ¶ä½“ä¸Š
 {
     private Image image;
     public Image imageChild;
     public Vector2 targetPos;
-    //ÊÇ·ñÊÇµÚÒ»¸öÉú³ÉµÄ½ğ±Ò
+    //æ˜¯å¦æ˜¯ç¬¬ä¸€ä¸ªç”Ÿæˆçš„é‡‘å¸
     public bool isfirst = false;
     private void Awake()
     {
@@ -16,26 +16,26 @@ public class CoinTween : MonoBehaviour //µ÷ÓÃÔÚCoinÔ¤ÖÆÌåÉÏ
     }
 
     /// <summary>
-    /// ½ğ±Ò¿ªÊ¼»¬ĞĞ
+    /// é‡‘å¸å¼€å§‹æ»‘è¡Œ
     /// </summary>
-    /// <param name="delay">ÑÓ³Ù</param>
-    /// <param name="originPos">³õÊ¼Î»ÖÃ</param>
+    /// <param name="delay">å»¶è¿Ÿ</param>
+    /// <param name="originPos">åˆå§‹ä½ç½®</param>
     public void PlayTween(float delay, Vector3 originPos)
     {
-        //OnComplete(() =>{});Ö¸´ıÇ°ÃæµÄ·½·¨Íê³É¿ªÊ¼½ÓÏÂÀ´µÄ·½·¨
-        //¿ªÊ¼ÒÆ¶¯µ½originPos
+        //OnComplete(() =>{});æŒ‡å¾…å‰é¢çš„æ–¹æ³•å®Œæˆå¼€å§‹æ¥ä¸‹æ¥çš„æ–¹æ³•
+        //å¼€å§‹ç§»åŠ¨åˆ°originPos
         image.rectTransform.DOAnchorPos(originPos, 0.5f).SetEase(Ease.OutQuad).SetDelay(delay).OnComplete(() =>
         {
-            //¿ªÊ¼ÒÆ¶¯µ½targetPos
+            //å¼€å§‹ç§»åŠ¨åˆ°targetPos
             image.rectTransform.DOAnchorPos(targetPos, 0.6f).SetEase(Ease.OutQuad).SetDelay(delay).OnComplete(() =>
             {
-                //½ğ±Ò¿ªÊ¼ËõĞ¡µ½0
+                //é‡‘å¸å¼€å§‹ç¼©å°åˆ°0
                 transform.DOScale(0, 0.3f).SetEase(Ease.InBack).OnComplete(() =>
                 {
                     InventoryUI.Instance.playerMoneyUIAnim.Play("MoneyUIShake");
-                    //×îºó´İ»Ù¸ÃÎïÌå
+                    //æœ€åæ‘§æ¯è¯¥ç‰©ä½“
                     Destroy(gameObject);
-                    //ÔÚµÚÒ»¸ö½ğ±Òµ½´ïÊ±£¬½ğÇ®Ôö¼Ó
+                    //åœ¨ç¬¬ä¸€ä¸ªé‡‘å¸åˆ°è¾¾æ—¶ï¼Œé‡‘é’±å¢åŠ 
                     if (isfirst)
                     {
                         InventoryManager.Instance.IncreasePlayerMoney(InventoryManager.Instance.ModifySellBoxValue());
@@ -44,7 +44,7 @@ public class CoinTween : MonoBehaviour //µ÷ÓÃÔÚCoinÔ¤ÖÆÌåÉÏ
                 });
             });
         });
-        //½ğ±Ò·Å´óµ½1
+        //é‡‘å¸æ”¾å¤§åˆ°1
         //transform.DOScale(1, 0.5f).SetEase(Ease.OutBack).OnComplete(() =>
         //{
 
@@ -52,7 +52,7 @@ public class CoinTween : MonoBehaviour //µ÷ÓÃÔÚCoinÔ¤ÖÆÌåÉÏ
 
     }
     /// <summary>
-    /// ÏÈÂıÂıÏÔĞÔÔÙÒÆ¶¯µ½Ä¿±êµã
+    /// å…ˆæ…¢æ…¢æ˜¾æ€§å†ç§»åŠ¨åˆ°ç›®æ ‡ç‚¹
     /// </summary>
     /// <param name="delay"></param>
     public void PlayTweenOfAlpha(float delay)

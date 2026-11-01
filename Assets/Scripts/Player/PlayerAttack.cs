@@ -1,35 +1,35 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using UnityEngine;
-public class PlayerAttack : MonoBehaviour   //µ÷ÓÃÔÚTool¶ÔÏóÉÏ
+public class PlayerAttack : MonoBehaviour   //è°ƒç”¨åœ¨Toolå¯¹è±¡ä¸Š
 {
     public PlayerController playerController;
-    //Íæ¼Ò¹¥»÷Á¦
+    //ç©å®¶æ”»å‡»åŠ›
     public int playerDamage;
-    [Header("½üÕ½¹¥»÷")]
-    //¹¥»÷¿ò´óĞ¡
+    [Header("è¿‘æˆ˜æ”»å‡»")]
+    //æ”»å‡»æ¡†å¤§å°
     public Vector2 attackBoxSize;
     public Transform attackBoxCenter;
     private Vector2 attackBoxCenterOffset;
     public float attackCirD;
-    //x¡¢yÖáÆ«ÒÆÁ¿
+    //xã€yè½´åç§»é‡
     private float offsetX;
     private float offsetY;
-    //µĞÈËÍ¼²ã
+    //æ•Œäººå›¾å±‚
     public LayerMask enemyLayer;
-    //ÊÕ¸î³¡¾°Í¼²ã
+    //æ”¶å‰²åœºæ™¯å›¾å±‚
     public LayerMask reapableLayer;
     public CursorManager cursorManager;
-    //·ÀÓùÅö×²¿ò
+    //é˜²å¾¡ç¢°æ’æ¡†
     public BoxCollider2D[] defenceBoxs;
     /// <summary>
-    /// ¹¥»÷¿òÉèÖÃºÍ¼¤»î£¬ÔÚ¹¥»÷¶¯»­Ö¡ÖĞµ÷ÓÃ
+    /// æ”»å‡»æ¡†è®¾ç½®å’Œæ¿€æ´»ï¼Œåœ¨æ”»å‡»åŠ¨ç”»å¸§ä¸­è°ƒç”¨
     /// </summary>
     /// <param name="attackClip"></param>
     private void MeleeAttackAnimEvent(float attackClip)
     {
 
-        //µ÷ÕûÏòÏÂ¹¥»÷¿òµÄÆ«ÒÆÁ¿
+        //è°ƒæ•´å‘ä¸‹æ”»å‡»æ¡†çš„åç§»é‡
         if (attackClip == 1)
         {
             attackBoxSize = new Vector2(2.5f, 1f);
@@ -37,7 +37,7 @@ public class PlayerAttack : MonoBehaviour   //µ÷ÓÃÔÚTool¶ÔÏóÉÏ
             offsetY = 0.2f;
             attackBoxCenterOffset = new Vector2(attackBoxCenter.position.x + offsetX, attackBoxCenter.position.y + offsetY);
         }
-        //×ó¹¥»÷¿ò
+        //å·¦æ”»å‡»æ¡†
         if (attackClip == 2)
         {
             attackBoxSize = new Vector2(1f, 2.5f);
@@ -45,7 +45,7 @@ public class PlayerAttack : MonoBehaviour   //µ÷ÓÃÔÚTool¶ÔÏóÉÏ
             offsetY = 1.5f;
             attackBoxCenterOffset = new Vector2(attackBoxCenter.position.x + offsetX, attackBoxCenter.position.y + offsetY);
         }
-        //ÓÒ¹¥»÷¿ò
+        //å³æ”»å‡»æ¡†
         if (attackClip == 3)
         {
             attackBoxSize = new Vector2(1f, 2.5f);
@@ -53,7 +53,7 @@ public class PlayerAttack : MonoBehaviour   //µ÷ÓÃÔÚTool¶ÔÏóÉÏ
             offsetY = 1.5f;
             attackBoxCenterOffset = new Vector2(attackBoxCenter.position.x + offsetX, attackBoxCenter.position.y + offsetY);
         }
-        //ÉÏ¹¥»÷¿ò
+        //ä¸Šæ”»å‡»æ¡†
         if (attackClip == 4)
         {
             attackBoxSize = new Vector2(2.5f, 1f);
@@ -61,26 +61,26 @@ public class PlayerAttack : MonoBehaviour   //µ÷ÓÃÔÚTool¶ÔÏóÉÏ
             offsetY = 2.5f;
             attackBoxCenterOffset = new Vector2(attackBoxCenter.position.x + offsetX, attackBoxCenter.position.y + offsetY);
         }
-        //½£´¦¾ö¹¥»÷¿ò
+        //å‰‘å¤„å†³æ”»å‡»æ¡†
         if (attackClip == 5)
         {
             attackBoxSize = new Vector2(5f,5f);
             attackBoxCenterOffset = new Vector2(attackBoxCenter.position.x , attackBoxCenter.position.y);
         }
-        //¼¤»î¹¥»÷¿ò²¢¿ªÊ¼¼ì²â»¥¶¯Í¼²ã
+        //æ¿€æ´»æ”»å‡»æ¡†å¹¶å¼€å§‹æ£€æµ‹äº’åŠ¨å›¾å±‚
         Collider2D[] hitColliders = Physics2D.OverlapBoxAll(attackBoxCenterOffset, attackBoxSize, 0, enemyLayer);
         Collider2D[] reapColliders = Physics2D.OverlapBoxAll(attackBoxCenterOffset, attackBoxSize, 0, reapableLayer);
         switch (cursorManager.currentItem.itemType)
         {
 
             case ItemType.Sword:
-                //¹¥»÷¿ò¼¤»îÊ±¿ªÊ¼±éÀú´¥Åöµ½µÄËùÓĞÅö×²Ìå
+                //æ”»å‡»æ¡†æ¿€æ´»æ—¶å¼€å§‹éå†è§¦ç¢°åˆ°çš„æ‰€æœ‰ç¢°æ’ä½“
                 foreach (Collider2D hitCollider in hitColliders)
                 {
 
                     if (hitCollider.GetComponent<FSM>() != null)
                     {
-                        //´¦¾öÉËº¦
+                        //å¤„å†³ä¼¤å®³
                         if(attackClip == 5)
                         {
                             hitCollider.GetComponent<FSM>().EnemyHurted(cursorManager.currentItem.maxValue * 2, cursorManager.currentItem.forceValue * 2f);
@@ -91,14 +91,14 @@ public class PlayerAttack : MonoBehaviour   //µ÷ÓÃÔÚTool¶ÔÏóÉÏ
                         }
                         
                     }
-                    //ÓÃ½£ÆÆ»µÎïÌå
+                    //ç”¨å‰‘ç ´åç‰©ä½“
                     if (hitCollider.GetComponent<KnockableItem>() != null)
                     {
                         hitCollider.GetComponent<KnockableItem>().ChopItems();
                     }
                 }
                 break;
-            //ÊÕ¸î
+            //æ”¶å‰²
             case ItemType.ReapTool:
                 foreach (Collider2D reapCollider in reapColliders)
                 {
@@ -121,7 +121,7 @@ public class PlayerAttack : MonoBehaviour   //µ÷ÓÃÔÚTool¶ÔÏóÉÏ
 
     }
     /// <summary>
-    /// »Øµ½Idle¶¯»­£¬µ÷ÓÃÔÚ·ÀÓùºÍ´¦¾ö¶¯»­Ö¡
+    /// å›åˆ°IdleåŠ¨ç”»ï¼Œè°ƒç”¨åœ¨é˜²å¾¡å’Œå¤„å†³åŠ¨ç”»å¸§
     /// </summary>
     public void BackToIdle(int index)
     {
@@ -130,13 +130,13 @@ public class PlayerAttack : MonoBehaviour   //µ÷ÓÃÔÚTool¶ÔÏóÉÏ
 
     }
     /// <summary>
-    ///  ·ÀÓùÍêºó»Ö¸´Õ¾Á¢ÇÒ¹Ø±Õ¶ÔÓ¦µÄ·ÀÓùÅö×²¿ò
+    ///  é˜²å¾¡å®Œåæ¢å¤ç«™ç«‹ä¸”å…³é—­å¯¹åº”çš„é˜²å¾¡ç¢°æ’æ¡†
     /// </summary>
     /// <param name="index"></param>
     /// <returns></returns>
     private IEnumerator QuitDefenceBox(int index)
     {
-        //µÈ´ı¸ÃÖ¡½áÊøºóÖ´ĞĞ
+        //ç­‰å¾…è¯¥å¸§ç»“æŸåæ‰§è¡Œ
         yield return new WaitForEndOfFrame();
         defenceBoxs[index].enabled = false;
         playerController.playerCollider.enabled = true;
@@ -147,7 +147,7 @@ public class PlayerAttack : MonoBehaviour   //µ÷ÓÃÔÚTool¶ÔÏóÉÏ
         }
     }
     /// <summary>
-    /// ¿ªÆô¶ÔÓ¦·½ÏòµÄ·ÀÓùÅö×²¿ò,µ÷ÓÃÔÚÎäÆ÷·ÀÓù¶¯»­ÉÏ
+    /// å¼€å¯å¯¹åº”æ–¹å‘çš„é˜²å¾¡ç¢°æ’æ¡†,è°ƒç”¨åœ¨æ­¦å™¨é˜²å¾¡åŠ¨ç”»ä¸Š
     /// </summary>
     /// <param name="index"></param>
     public void TakeUpDefenceBox(int index)
@@ -156,12 +156,12 @@ public class PlayerAttack : MonoBehaviour   //µ÷ÓÃÔÚTool¶ÔÏóÉÏ
         defenceBoxs[index].enabled = true;
     }
     /// <summary>
-    /// ÔÚ±à¼­Æ÷ÖĞ»æÖÆ¹¥»÷¿ò
+    /// åœ¨ç¼–è¾‘å™¨ä¸­ç»˜åˆ¶æ”»å‡»æ¡†
     /// </summary>
     private void OnDrawGizmos()
     {
         //attackBoxCenter = transform.position;
-        //¹¥»÷¿ò±ß¿òÑÕÉ«
+        //æ”»å‡»æ¡†è¾¹æ¡†é¢œè‰²
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireCube(attackBoxCenterOffset, attackBoxSize);
         //Gizmos.DrawSphere(attackBoxCenter, attackCirD);

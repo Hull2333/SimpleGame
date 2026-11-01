@@ -1,14 +1,14 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class TriggerItemFader : MonoBehaviour   //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
+public class TriggerItemFader : MonoBehaviour   //è°ƒç”¨åœ¨Playerå¯¹è±¡ä¸Š
 {
 
     public void OnTriggerEnter2D(Collider2D other)
     {
-        //ÔËÓÃÊı×éµÄ·½Ê½À´µ÷ÓÃÎïÌåÕÚµ²Í¸ÊÓĞ§¹û
+        //è¿ç”¨æ•°ç»„çš„æ–¹å¼æ¥è°ƒç”¨ç‰©ä½“é®æŒ¡é€è§†æ•ˆæœ
         ItemFader[] faders = other.GetComponentsInChildren<ItemFader>();
         if(faders.Length > 0)
         {

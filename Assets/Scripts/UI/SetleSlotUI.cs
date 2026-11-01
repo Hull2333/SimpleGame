@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using MFarm.Inventory;
 using TMPro;
@@ -11,7 +11,7 @@ public class SetleSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     public Image setleItemImage;
     public TextMeshProUGUI SetleAmount;
     public TextMeshProUGUI SetleAllValue;
-    // ¸Ã½áËã¸ñ¶ÔÓ¦µÄÎïÆ·Êı¾İ£¬ÓÉ UIManager Éú³É½áËã¸ñÊ±Ğ´Èë
+    // è¯¥ç»“ç®—æ ¼å¯¹åº”çš„ç‰©å“æ•°æ®ï¼Œç”± UIManager ç”Ÿæˆç»“ç®—æ ¼æ—¶å†™å…¥
     public ItemDetails itemDetails;
     private UIManager uiManager;
 
@@ -20,7 +20,7 @@ public class SetleSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         uiManager = FindObjectOfType<UIManager>();
     }
 
-    // Êó±ê½øÈë½áËã¸ñÊ±ÏÔÊ¾ÎïÆ·ÏêÇé
+    // é¼ æ ‡è¿›å…¥ç»“ç®—æ ¼æ—¶æ˜¾ç¤ºç‰©å“è¯¦æƒ…
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (itemDetails == null || uiManager == null || uiManager.SetleDesUI == null)
@@ -29,18 +29,18 @@ public class SetleSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         }
         uiManager.SetleDesUI.SetActive(true);
         uiManager.setleItemName.text = itemDetails.itemName;
-        // µ¥¼Û°´³öÊÛ¼Û¼ÆËã£¬Óë½áËã×Ü¼ÛÖµÊ¹ÓÃÍ¬Ò»Ëã·¨
+        // å•ä»·æŒ‰å‡ºå”®ä»·è®¡ç®—ï¼Œä¸ç»“ç®—æ€»ä»·å€¼ä½¿ç”¨åŒä¸€ç®—æ³•
         uiManager.setleItemValue.text = ((int)(itemDetails.itemPrice * itemDetails.sellPercentage)).ToString();
         MoveDesToMouse();
     }
 
-    // Êó±êÔÚ±¾¸ñÉÏÒÆ¶¯Ê±£¬ÈÃÏêÇé¸úËæÊó±ê
+    // é¼ æ ‡åœ¨æœ¬æ ¼ä¸Šç§»åŠ¨æ—¶ï¼Œè®©è¯¦æƒ…è·Ÿéšé¼ æ ‡
     public void OnPointerMove(PointerEventData eventData)
     {
         MoveDesToMouse();
     }
 
-    // Êó±êÀë¿ª½áËã¸ñÊ±Òş²ØÎïÆ·ÏêÇé
+    // é¼ æ ‡ç¦»å¼€ç»“ç®—æ ¼æ—¶éšè—ç‰©å“è¯¦æƒ…
     public void OnPointerExit(PointerEventData eventData)
     {
         if (uiManager == null || uiManager.SetleDesUI == null)
@@ -50,14 +50,14 @@ public class SetleSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         uiManager.SetleDesUI.SetActive(false);
     }
 
-    // °ÑÏêÇé½çÃæÒÆ¶¯µ½µ±Ç°Êó±êÎ»ÖÃ
+    // æŠŠè¯¦æƒ…ç•Œé¢ç§»åŠ¨åˆ°å½“å‰é¼ æ ‡ä½ç½®
     private void MoveDesToMouse()
     {
         if (uiManager == null || uiManager.SetleDesUI == null)
         {
             return;
         }
-        // ½áËã½çÃæÊÇ Overlay »­²¼£¬ÆÁÄ»×ø±ê¿ÉÒÔÖ±½Ó×÷ÎªÎ»ÖÃ
+        // ç»“ç®—ç•Œé¢æ˜¯ Overlay ç”»å¸ƒï¼Œå±å¹•åæ ‡å¯ä»¥ç›´æ¥ä½œä¸ºä½ç½®
         uiManager.SetleDesUI.transform.position = Input.mousePosition;
     }
 }

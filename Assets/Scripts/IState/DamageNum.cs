@@ -1,19 +1,19 @@
-
+ï»¿
 using TMPro;
 using UnityEngine;
 
-public class DamageNum : MonoBehaviour //µ÷ÓÃÔÚDamageNumÔ¤ÖÆÌåÉÏ
+public class DamageNum : MonoBehaviour //è°ƒç”¨åœ¨DamageNumé¢„åˆ¶ä½“ä¸Š
 {
     public TextMeshPro damageNumText;
     /// <summary>
-    /// ´İ»Ù×ÔÉí£¬µ÷ÓÃÔÚ¶¯»­Ö¡ÉÏ
+    /// æ‘§æ¯è‡ªèº«ï¼Œè°ƒç”¨åœ¨åŠ¨ç”»å¸§ä¸Š
     /// </summary>
     public void DestroySelf()
     {
         Destroy(gameObject);
     }
     /// <summary>
-    /// ÉèÖÃÉËº¦Êı×Ö
+    /// è®¾ç½®ä¼¤å®³æ•°å­—
     /// </summary>
     /// <param name="Num"></param>
     public void SetDamageNumText(int Num)
@@ -21,7 +21,7 @@ public class DamageNum : MonoBehaviour //µ÷ÓÃÔÚDamageNumÔ¤ÖÆÌåÉÏ
         damageNumText.text = Num.ToString();
     }
     /// <summary>
-    /// ¸Ä±äÉËº¦Êı×ÖÑÕÉ«
+    /// æ”¹å˜ä¼¤å®³æ•°å­—é¢œè‰²
     /// </summary>
     /// <param name="isPowerful"></param>
     public void SetDamageNumColor(bool isPowerful)

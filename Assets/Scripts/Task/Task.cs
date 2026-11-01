@@ -1,4 +1,4 @@
-using MFarm.Inventory;
+ï»¿using MFarm.Inventory;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 namespace MFarm.Task
 {
-    public class Task : MonoBehaviour//IPointerEnterHandler, IPointerExitHandler //µ÷ÓÃÔÚTaskManagerÏÂµÄTaskPanelÉÏ
+    public class Task : MonoBehaviour//IPointerEnterHandler, IPointerExitHandler //è°ƒç”¨åœ¨TaskManagerä¸‹çš„TaskPanelä¸Š
     {
         private TaskDetails currentTaskDetail;
         public TextMeshProUGUI taskDes;
@@ -15,7 +15,7 @@ namespace MFarm.Task
         public TextMeshProUGUI taskManName;
         public GameObject acceptButton;
         public GameObject ingImage;
-        //ÉÏÒ»¸öÈÎÎñID
+        //ä¸Šä¸€ä¸ªä»»åŠ¡ID
         private int lastTaskID;
 
 
@@ -25,7 +25,7 @@ namespace MFarm.Task
            
         }
         /// <summary>
-        /// ÔÚ¹«¸æÀ¸ÉÏÏÔÊ¾ÈÎÎñĞÅÏ¢
+        /// åœ¨å…¬å‘Šæ ä¸Šæ˜¾ç¤ºä»»åŠ¡ä¿¡æ¯
         /// </summary>
         private void ShowTaskInBulletinBoard()
         {
@@ -37,14 +37,14 @@ namespace MFarm.Task
         }
 
         /// <summary>
-        /// ÉèÖÃ¹«¸æÀ¸ÈÎÎñÏÔÊ¾ÏêÇé
+        /// è®¾ç½®å…¬å‘Šæ ä»»åŠ¡æ˜¾ç¤ºè¯¦æƒ…
         /// </summary>
         private void SetTaskDes()
         {
             taskDes.text = currentTaskDetail.taskDescriptionInBulletinBoard;
-            taskDay.text = ("Ê±ÏŞ:" + currentTaskDetail.finishDay.ToString());
+            taskDay.text = ("æ—¶é™:" + currentTaskDetail.finishDay.ToString());
             taskManName.text = ("--"+ currentTaskDetail.taskName);
-            //ÏÔÊ¾½ÓÊÜÈÎÎñ°´Å¥
+            //æ˜¾ç¤ºæ¥å—ä»»åŠ¡æŒ‰é’®
             if(TaskManager.Instance.FindPlayerAcceptTaskDetails(currentTaskDetail) == -1)
             {
                 acceptButton.SetActive(true);
@@ -52,20 +52,20 @@ namespace MFarm.Task
             }
         }
         /// <summary>
-        /// ´«Êäµ±Ç°TaskDetail,µ÷ÓÃÔÚ½ÓÊÜÎ¯ÍĞ°´Å¥ÉÏ
+        /// ä¼ è¾“å½“å‰TaskDetail,è°ƒç”¨åœ¨æ¥å—å§”æ‰˜æŒ‰é’®ä¸Š
         /// </summary>
         public void GiveTaskDetail()
         {
             if (currentTaskDetail != null)
             {
                 TaskManager.Instance.currentTaskDetails = currentTaskDetail;
-                //Íæ¼ÒÃ»ÓĞ½ÓÊÜÈÎºÎÈÎÎñ£¬Ö±½ÓÌí¼Óµ½Íæ¼Ò½ÓÊÜÈÎÎñÁĞ±í
+                //ç©å®¶æ²¡æœ‰æ¥å—ä»»ä½•ä»»åŠ¡ï¼Œç›´æ¥æ·»åŠ åˆ°ç©å®¶æ¥å—ä»»åŠ¡åˆ—è¡¨
                 if (TaskManager.Instance.playerAcceptTaskDetails.Count <= 0)
                 {
                     TaskManager.Instance.playerAcceptTaskDetails.Add(currentTaskDetail);
                     currentTaskDetail.isFinshing = false;
                 }
-                //ÒÑÓĞ½ÓÊÜÈÎÎñ£¬ÅĞ¶ÏÊÇ·ñÎªÒ»ÑùµÄÈÎÎñ£¬²»Ò»ÑùÔÙÌí¼Óµ½ÈÎÎñÁĞ±í
+                //å·²æœ‰æ¥å—ä»»åŠ¡ï¼Œåˆ¤æ–­æ˜¯å¦ä¸ºä¸€æ ·çš„ä»»åŠ¡ï¼Œä¸ä¸€æ ·å†æ·»åŠ åˆ°ä»»åŠ¡åˆ—è¡¨
                 else
                 {
                     for(int i = 0;i < TaskManager.Instance.playerAcceptTaskDetails.Count; i++)

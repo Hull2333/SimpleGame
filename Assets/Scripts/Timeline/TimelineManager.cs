@@ -1,19 +1,19 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
 
-public class TimelineManager : Singleton<TimelineManager>    //µ÷ÓÃÔÚTimelineManager¶ÔÏóÉÏ
+public class TimelineManager : Singleton<TimelineManager>    //è°ƒç”¨åœ¨TimelineManagerå¯¹è±¡ä¸Š
 {
 
-    //³õÊ¼ÓÎÏ·ÊÇ²¥·ÅµÄPlayableDirector
+    //åˆå§‹æ¸¸æˆæ˜¯æ’­æ”¾çš„PlayableDirector
     public PlayableDirector startDirector;
-    //µ±Ç°ÕıÔÚ²¥·ÅµÄPlayableDirector
+    //å½“å‰æ­£åœ¨æ’­æ”¾çš„PlayableDirector
     private PlayableDirector currentDirector;
     private bool isPause;
-    //¶Ô»°ÊÇ·ñÍê³É
+    //å¯¹è¯æ˜¯å¦å®Œæˆ
     private bool isDone;
     public bool IsDone { set => isDone = value; }
 
@@ -25,11 +25,11 @@ public class TimelineManager : Singleton<TimelineManager>    //µ÷ÓÃÔÚTimelineMan
 
     private void Update()
     {
-        //²¥·ÅµÄPlayableÔİÍ£ÇÒ²¥·ÅÍêºó°´¿Õ¸ñ¼ü¼ÌĞø
+        //æ’­æ”¾çš„Playableæš‚åœä¸”æ’­æ”¾å®ŒåæŒ‰ç©ºæ ¼é”®ç»§ç»­
         if(isPause && Input.GetKeyDown(KeyCode.Space) && isDone)
         {
             isPause = false;
-            //»Ö¸´PlayableÔ­À´µÄËÙ¶È
+            //æ¢å¤PlayableåŸæ¥çš„é€Ÿåº¦
             currentDirector.playableGraph.GetRootPlayable(0).SetSpeed(1d);
         }
     }
@@ -44,7 +44,7 @@ public class TimelineManager : Singleton<TimelineManager>    //µ÷ÓÃÔÚTimelineMan
         EventHandler.AfterSceneLoadedEvent -= OnAfterSceneLoadedEvent;
     }
     /// <summary>
-    /// ³¡¾°¼ÓÔØºó¿ªÊ¼²¥·ÅPlayableDirector¶¯»­
+    /// åœºæ™¯åŠ è½½åå¼€å§‹æ’­æ”¾PlayableDirectoråŠ¨ç”»
     /// </summary>
     /// <exception cref="NotImplementedException"></exception>
     private void OnAfterSceneLoadedEvent()
@@ -57,13 +57,13 @@ public class TimelineManager : Singleton<TimelineManager>    //µ÷ÓÃÔÚTimelineMan
     }
 
     /// <summary>
-    /// ÔİÍ£µ±Ç°µÄPlayableDirector
+    /// æš‚åœå½“å‰çš„PlayableDirector
     /// </summary>
     /// <param name="director"></param>
     public void PauseTimeline(PlayableDirector director)
     {
         currentDirector = director;
-        //½«PlayableËÙ¶Èµ÷Îª0
+        //å°†Playableé€Ÿåº¦è°ƒä¸º0
         currentDirector.playableGraph.GetRootPlayable(0).SetSpeed(0d);
         isPause = true;
     }

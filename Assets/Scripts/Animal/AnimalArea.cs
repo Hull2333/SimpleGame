@@ -1,7 +1,7 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AnimalArea : MonoBehaviour //µ÷ÓÃÔÚAnimalArea¶ÔÏóÉÏ
+public class AnimalArea : MonoBehaviour //è°ƒç”¨åœ¨AnimalAreaå¯¹è±¡ä¸Š
 {
 }

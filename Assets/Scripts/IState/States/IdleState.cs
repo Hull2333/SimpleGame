@@ -1,39 +1,39 @@
-using DG.Tweening;
+ï»¿using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-//±ØĞëÖ´ĞĞ½Ó¿ÚIStateÀïÒ»ÑùµÄ·½·¨£¬·ñÔò±¨´í
+//å¿…é¡»æ‰§è¡Œæ¥å£IStateé‡Œä¸€æ ·çš„æ–¹æ³•ï¼Œå¦åˆ™æŠ¥é”™
 public class IdleState : IState
 {
     private FSM manager;
     private Parameter parameter;
-    //µĞÈËµ½Ñ²ÂßµãµÄÍ£ÁôÊ±¼ä
+    //æ•Œäººåˆ°å·¡é€»ç‚¹çš„åœç•™æ—¶é—´
     private float idleTimer;
     public IdleState(FSM manager)
     {
         this.manager = manager;
         this.parameter = manager.parameter;
     }
-    //´ı»ú×´Ì¬¿ªÊ¼
+    //å¾…æœºçŠ¶æ€å¼€å§‹
     public void OnEnter()
     {
-        //ÉèÖÃÒ»¿ªÊ¼½øÈë´ı»ú×´Ì¬µÄ¶¯»­ºÍÃæ³¯·½Ïò
+        //è®¾ç½®ä¸€å¼€å§‹è¿›å…¥å¾…æœºçŠ¶æ€çš„åŠ¨ç”»å’Œé¢æœæ–¹å‘
         parameter.isMoving = false;
         parameter.animator.SetBool("isMoving", parameter.isMoving);
         parameter.animator.SetFloat("MoveX", 0);
         parameter.animator.SetFloat("MoveY", 0);
-        //´ò¿ª¼ì²â´¥ÅöÈ¦
+        //æ‰“å¼€æ£€æµ‹è§¦ç¢°åœˆ
         parameter.chaseArae.enabled = true;
     }
     public void OnUpdate()
     {
-        //µĞÈËÊÜÉË
+        //æ•Œäººå—ä¼¤
         if (parameter.isHurted)
         {
             manager.TransitionState(EnemyStateType.Hurted);
         }
         idleTimer += Time.deltaTime;
-        //·¢ÏÖÄ¿±êÊ±×ªÎª×·»÷×´Ì¬
+        //å‘ç°ç›®æ ‡æ—¶è½¬ä¸ºè¿½å‡»çŠ¶æ€
         if(parameter.target != null )
         {
             if (manager.ShoutNoticeRay() && Vector2.Distance(parameter.target.position, parameter.parentPos.position) < 10f)

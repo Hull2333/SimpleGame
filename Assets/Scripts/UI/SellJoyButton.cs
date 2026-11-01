@@ -1,9 +1,9 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SellJoyButton : MonoBehaviour //µ÷ÓÃÔÚSellJoyButton¶ÔÏóÉÏ
+public class SellJoyButton : MonoBehaviour //è°ƒç”¨åœ¨SellJoyButtonå¯¹è±¡ä¸Š
 {
     private Animator anim;
     private Button button;
@@ -14,7 +14,7 @@ public class SellJoyButton : MonoBehaviour //µ÷ÓÃÔÚSellJoyButton¶ÔÏóÉÏ
         button.onClick.AddListener(ClickSellJoyButton);
     }
     /// <summary>
-    /// µã»÷³öÊÛÒ¡¸ËÊ±
+    /// ç‚¹å‡»å‡ºå”®æ‘‡æ†æ—¶
     /// </summary>
     private void ClickSellJoyButton()
     {
@@ -24,9 +24,9 @@ public class SellJoyButton : MonoBehaviour //µ÷ÓÃÔÚSellJoyButton¶ÔÏóÉÏ
     }
     private IEnumerator RestoreSellJoyButtonInter()
     {
-        //»ñÈ¡µ±Ç°µÄ²¥·Å¶¯»­µÄÊ±³¤
+        //è·å–å½“å‰çš„æ’­æ”¾åŠ¨ç”»çš„æ—¶é•¿
         AnimatorStateInfo currentInfo = anim.GetCurrentAnimatorStateInfo(0);
-        //È·±£ÏÖÔÚ²¥·ÅµÄ¶¯»­Ê±µã»÷¶¯»­
+        //ç¡®ä¿ç°åœ¨æ’­æ”¾çš„åŠ¨ç”»æ—¶ç‚¹å‡»åŠ¨ç”»
         while (!currentInfo.IsName("Pressed"))
         {
             yield return null;

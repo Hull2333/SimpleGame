@@ -1,27 +1,27 @@
-using MFarm.Dialogue;
+ï»¿using MFarm.Dialogue;
 using MFarm.Inventory;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 [RequireComponent(typeof(DialogueController))]
-public class DialoguaGiver : MonoBehaviour //µ÷ÓÃÔÚNPCÉÏ
+public class DialoguaGiver : MonoBehaviour //è°ƒç”¨åœ¨NPCä¸Š
 {
-    //µ±Ç°¸ÃNPCµÄºÃ¸Ğ¶È
+    //å½“å‰è¯¥NPCçš„å¥½æ„Ÿåº¦
     public float currentFriendliness;
-    //Ï²»¶µÄÎïÆ·ID
+    //å–œæ¬¢çš„ç‰©å“ID
     public List<int> favoriteItemIDList;
-    //ÌÖÑáµÄÎïÆ·ID
+    //è®¨åŒçš„ç‰©å“ID
     public List<int> hatefulItemIDList;
     private DialogueController controller;
     private QuestData_OS currentQuest;
-    [Header("ÈÎÎñÏà¹Ø¶Ô»°")]
-    //½ÓÊÜÈÎÎñ¡¢Ö´ĞĞÈÎÎñÖĞ¡¢ÁìÈ¡½±Àø¡¢Íê³ÉÈÎÎñºó¶Ô»°ÄÚÈİ
+    [Header("ä»»åŠ¡ç›¸å…³å¯¹è¯")]
+    //æ¥å—ä»»åŠ¡ã€æ‰§è¡Œä»»åŠ¡ä¸­ã€é¢†å–å¥–åŠ±ã€å®Œæˆä»»åŠ¡åå¯¹è¯å†…å®¹
     public DialogueData_OS startDialogue;
     public DialogueData_OS progressDialogue;
     public DialogueData_OS completeDialogue;
     public DialogueData_OS commitQuest1Dialogue;
     public DialogueData_OS commitQuest2Dialogue;
-    [Header("ËÍÀñÎïÏà¹Ø¶Ô»°")]
+    [Header("é€ç¤¼ç‰©ç›¸å…³å¯¹è¯")]
     public DialogueData_OS favorite1ItemDialogue;
     public DialogueData_OS favorite2ItemDialogue;
     public DialogueData_OS normal1ItemDialogue;
@@ -29,12 +29,12 @@ public class DialoguaGiver : MonoBehaviour //µ÷ÓÃÔÚNPCÉÏ
     public DialogueData_OS hateful1ItemDialogue;
     public DialogueData_OS hateful2ItemDialogue;
     public DialogueData_OS refuseGiftDialogue;
-    [Header("ÈÕ³£¶Ô»°")]
+    [Header("æ—¥å¸¸å¯¹è¯")]
     public DialogueData_OS dailyfirst1Dialogue;
     public DialogueData_OS morning1Dialogue;
     public DialogueData_OS morning2Dialogue;
     public DialogueData_OS morning3Dialogue;
-    #region »ñÈ¡Íæ¼Ò½ÓÊÜÈÎÎñµÄ×´Ì¬
+    #region è·å–ç©å®¶æ¥å—ä»»åŠ¡çš„çŠ¶æ€
     public bool IsStarted
     {
         get
@@ -113,54 +113,54 @@ public class DialoguaGiver : MonoBehaviour //µ÷ÓÃÔÚNPCÉÏ
         EventHandler.CallUpdateNPCFriendlinessUIPanel(gameObject.name, currentFriendliness);
     }
     /// <summary>
-    /// ÉèÖÃÓëÍæ¼ÒµÄ¶Ô»°
+    /// è®¾ç½®ä¸ç©å®¶çš„å¯¹è¯
     /// </summary>
     public void TalkWithPlayer(int itemID)
     {
-        //Ã¿ÌìµÄµÚÒ»´Î¶Ô»°
+        //æ¯å¤©çš„ç¬¬ä¸€æ¬¡å¯¹è¯
         if (controller.isFristTalk)
         {
-            //Ã¿ÌìµÄµÚÒ»´Î¶Ô»°¿ÉÒÔ¼ÓºÃ¸Ğ¶È
+            //æ¯å¤©çš„ç¬¬ä¸€æ¬¡å¯¹è¯å¯ä»¥åŠ å¥½æ„Ÿåº¦
             currentFriendliness += 0.5f;
             EventHandler.CallIncreaseFriendliness(currentFriendliness, gameObject.name);
             controller.isFristTalk = false;
-            //Íæ¼ÒÓĞÄÃÎïÆ·
+            //ç©å®¶æœ‰æ‹¿ç‰©å“
             if (itemID != 0)
             {
                 SetFriendlinessDialogue(itemID);
             }
-            //Ã»ËÍÀñÎï
+            //æ²¡é€ç¤¼ç‰©
             else
             {
                 controller.currentData = dailyfirst1Dialogue;
             }
            
         }
-        //²»ÊÇ½ñÌìµÄµÚÒ»´Î¶Ô»°
+        //ä¸æ˜¯ä»Šå¤©çš„ç¬¬ä¸€æ¬¡å¯¹è¯
         else
         {
             if (itemID != 0)
             {
                 SetFriendlinessDialogue(itemID);
             }
-            //Ã»ËÍÀñÎï
+            //æ²¡é€ç¤¼ç‰©
             else
             {
-                //Íæ¼Òµ±Ç°ÓĞÈÎÎñÊ±£¬ÇÒÈÎÎñÓë¸ÃNPCÏà¹Ø£¬ÉèÖÃ¶ÔÓ¦µÄ¶Ô»°
+                //ç©å®¶å½“å‰æœ‰ä»»åŠ¡æ—¶ï¼Œä¸”ä»»åŠ¡ä¸è¯¥NPCç›¸å…³ï¼Œè®¾ç½®å¯¹åº”çš„å¯¹è¯
                 foreach (var task in QuestManager.Instance.tasks)
                 {
                     if (task.questData.questman == controller.NPCname)
                     {
-                        //¸ù¾İµ±Ç°ÈÎÎñ½ø¶ÈÉèÖÃ¶ÔÓ¦µÄ¶Ô»°
+                        //æ ¹æ®å½“å‰ä»»åŠ¡è¿›åº¦è®¾ç½®å¯¹åº”çš„å¯¹è¯
                         if (task.questData.isComplete)
                         {
                             currentQuest = task.questData;
-                            if (currentQuest.questName == "ÊÕ¼¯8¸öÔÓ²İ")
+                            if (currentQuest.questName == "æ”¶é›†8ä¸ªæ‚è‰")
                             {
                                 controller.currentData = commitQuest1Dialogue;
                                 return;
                             }
-                            if (currentQuest.questName == "ÊÕ¼¯5¸ùÄ¾Í·")
+                            if (currentQuest.questName == "æ”¶é›†5æ ¹æœ¨å¤´")
                             {
                                 controller.currentData = commitQuest2Dialogue;
                                 return;
@@ -183,10 +183,10 @@ public class DialoguaGiver : MonoBehaviour //µ÷ÓÃÔÚNPCÉÏ
         }
     }
     /// <summary>
-    /// ±éÀúNPCÏ²»¶ºÍÌÖÑáµÄÎïÆ·ID
+    /// éå†NPCå–œæ¬¢å’Œè®¨åŒçš„ç‰©å“ID
     /// </summary>
     /// <param name="ID"></param>
-    /// <returns>Ï²»¶·µ»Ø1£¬²»Ï²»¶·µ»Ø-1£¬ÆäËû·µ»Ø0</returns>
+    /// <returns>å–œæ¬¢è¿”å›1ï¼Œä¸å–œæ¬¢è¿”å›-1ï¼Œå…¶ä»–è¿”å›0</returns>
     private int CheckNPCItemList(int ID)
     {
         foreach (int itemID in favoriteItemIDList)
@@ -206,21 +206,21 @@ public class DialoguaGiver : MonoBehaviour //µ÷ÓÃÔÚNPCÉÏ
         return 0;
     }
     /// <summary>
-    /// ÉèÖÃËÍÀñÎïÊ±µÄ¶Ô»°ºÍºÃ¸Ğ¶ÈµÄÉÏÉı
+    /// è®¾ç½®é€ç¤¼ç‰©æ—¶çš„å¯¹è¯å’Œå¥½æ„Ÿåº¦çš„ä¸Šå‡
     /// </summary>
     /// <param name="itemID"></param>
     private void SetFriendlinessDialogue(int itemID)
     {
-        //¾ÜÊÕÀñÎï¶Ô»°
+        //æ‹’æ”¶ç¤¼ç‰©å¯¹è¯
         if (!controller.isTodayNotGetGift)
         {
             controller.currentData = refuseGiftDialogue;
             return;
         }
-        //Íæ¼ÒËÍÏ²»¶ÀñÎïµÄ¶Ô»°
+        //ç©å®¶é€å–œæ¬¢ç¤¼ç‰©çš„å¯¹è¯
         if (CheckNPCItemList(itemID) == 1)
         {
-            //Íæ¼ÒËÍÀñÎïÆ·¼õÒ»
+            //ç©å®¶é€ç¤¼ç‰©å“å‡ä¸€
             InventoryManager.Instance.RemoveItem(itemID, 1);
             if (currentFriendliness < 30 && controller.isTodayNotGetGift)
             {
@@ -238,7 +238,7 @@ public class DialoguaGiver : MonoBehaviour //µ÷ÓÃÔÚNPCÉÏ
             }
             return;
         }
-        //Íæ¼ÒËÍÆäËûÀñÎïµÄ¶Ô»°
+        //ç©å®¶é€å…¶ä»–ç¤¼ç‰©çš„å¯¹è¯
         if (CheckNPCItemList(itemID) == 0)
         {
             if (currentFriendliness < 30 && controller.isTodayNotGetGift)
@@ -257,7 +257,7 @@ public class DialoguaGiver : MonoBehaviour //µ÷ÓÃÔÚNPCÉÏ
             }
             return;
         }
-        //Íæ¼ÒËÍÌÖÑáÀñÎïµÄ¶Ô»°
+        //ç©å®¶é€è®¨åŒç¤¼ç‰©çš„å¯¹è¯
         if (CheckNPCItemList(itemID) == -1)
         {
             int talkIndex = Random.Range(0, 2);

@@ -1,15 +1,15 @@
-using MFarm.Inventory;
+ï»¿using MFarm.Inventory;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class DialogueOptionUI : MonoBehaviour //µ÷ÓÃÔ¤ÖÆÌåOptionButton
+public class DialogueOptionUI : MonoBehaviour //è°ƒç”¨é¢„åˆ¶ä½“OptionButton
 {
     public Text optionText;
     private Button thisButton;
     private DialoguePieces currentPiece;
-    //ÏÂÒ»Ìõ¶Ô»°
+    //ä¸‹ä¸€æ¡å¯¹è¯
     private string nextPieceID;
     private InventoryBag_SO bag_SO;
     private BuildingBagData_SO buildingBag;
@@ -22,7 +22,7 @@ public class DialogueOptionUI : MonoBehaviour //µ÷ÓÃÔ¤ÖÆÌåOptionButton
         thisButton.onClick.AddListener(OnOptionClicked);
     }
     /// <summary>
-    /// ÉèÖÃoptionButtonµÄÒªËØ
+    /// è®¾ç½®optionButtonçš„è¦ç´ 
     /// </summary>
     /// <param name="piece"></param>
     /// <param name="option"></param>
@@ -38,7 +38,7 @@ public class DialogueOptionUI : MonoBehaviour //µ÷ÓÃÔ¤ÖÆÌåOptionButton
         animalBag = option.animalBag;
     }
     /// <summary>
-    /// µ±optionButtonµã»÷Ê±
+    /// å½“optionButtonç‚¹å‡»æ—¶
     /// </summary>
     public void OnOptionClicked()
     {
@@ -48,22 +48,22 @@ public class DialogueOptionUI : MonoBehaviour //µ÷ÓÃÔ¤ÖÆÌåOptionButton
             {
                 questData = Instantiate(currentPiece.quest)
             };
-            //Ìí¼Óµ½ÈÎÎñÁĞ±í
-            //ÊÇ·ñÒÑ¾­ÓĞÏàÍ¬ÈÎÎñ
+            //æ·»åŠ åˆ°ä»»åŠ¡åˆ—è¡¨
+            //æ˜¯å¦å·²ç»æœ‰ç›¸åŒä»»åŠ¡
             if (QuestManager.Instance.HaveQuest(newTask.questData))
             {
-                //ÅĞ¶ÏÊÇ·ñÍê³É¸øÓè½±Àø
+                //åˆ¤æ–­æ˜¯å¦å®Œæˆç»™äºˆå¥–åŠ±
                 if (QuestManager.Instance.GetTask(newTask.questData).IsComplete)
                 {
                     newTask.questData.GiveRewards();
                     if (newTask.questData.questType == QuestType.Plot)
                     {
-                        //½«ÈÎÎñ×´Ì¬¸ÄÎªIsFinish
+                        //å°†ä»»åŠ¡çŠ¶æ€æ”¹ä¸ºIsFinish
                         QuestManager.Instance.GetTask(newTask.questData).IsFinshed = true;
                     }
                     else
                     {
-                        //Èç¹û½ÓÊÜÈÎÎñÁĞ±íÖĞÈÎÎñÀàĞÍÊÇ¹«¸æÀ¸£¬¾ÍÒÆ³ı½ÓÊÜÈÎÎñÁĞ±í²»ĞèÒª¸Ä±ä×´Ì¬
+                        //å¦‚æœæ¥å—ä»»åŠ¡åˆ—è¡¨ä¸­ä»»åŠ¡ç±»å‹æ˜¯å…¬å‘Šæ ï¼Œå°±ç§»é™¤æ¥å—ä»»åŠ¡åˆ—è¡¨ä¸éœ€è¦æ”¹å˜çŠ¶æ€
                         for (int i = 0; i < QuestManager.Instance.tasks.Count; i++)
                         {
                             if (newTask.questData.questName == QuestManager.Instance.tasks[i].questData.questName)
@@ -76,7 +76,7 @@ public class DialogueOptionUI : MonoBehaviour //µ÷ÓÃÔ¤ÖÆÌåOptionButton
                 }
                 else
                 {
-                    //½«ÈÎÎñÌí¼Óµ½½ÓÊÜÈÎÎñÁĞ±íÖĞ²¢ĞŞ¸ÄÈÎÎñ×´Ì¬
+                    //å°†ä»»åŠ¡æ·»åŠ åˆ°æ¥å—ä»»åŠ¡åˆ—è¡¨ä¸­å¹¶ä¿®æ”¹ä»»åŠ¡çŠ¶æ€
                     QuestManager.Instance.tasks.Add(newTask);
                     QuestManager.Instance.GetTask(newTask.questData).IsStarted = true;
                     foreach (var requireItem in newTask.questData.RequireTargetItemID())
@@ -87,7 +87,7 @@ public class DialogueOptionUI : MonoBehaviour //µ÷ÓÃÔ¤ÖÆÌåOptionButton
             }
 
         }
-        //ÓĞ¶Ô»°Ñ¡Ïî´¥·¢NPC±³°ü
+        //æœ‰å¯¹è¯é€‰é¡¹è§¦å‘NPCèƒŒåŒ…
         if (optionType == DialogueOptionType.ItemShop)
         {
             EventHandler.CallBaseBagOpenEvent(SlotType.Shop, bag_SO);
@@ -95,7 +95,7 @@ public class DialogueOptionUI : MonoBehaviour //µ÷ÓÃÔ¤ÖÆÌåOptionButton
             EventHandler.CallUpdateGameStateEvent(GameState.Pause);
             return;
         }
-        //ÓĞ¶Ô»°Ñ¡Ïî´¥·¢Build±³°ü
+        //æœ‰å¯¹è¯é€‰é¡¹è§¦å‘BuildèƒŒåŒ…
         if (optionType == DialogueOptionType.BuildShop)
         {
             EventHandler.CallOpenBuildShopEvent(buildingBag);
@@ -103,7 +103,7 @@ public class DialogueOptionUI : MonoBehaviour //µ÷ÓÃÔ¤ÖÆÌåOptionButton
             EventHandler.CallUpdateGameStateEvent(GameState.Pause);
             return;
         }
-        //ÓĞ¶Ô»°Ñ¡Ïî´¥·¢Animal±³°ü
+        //æœ‰å¯¹è¯é€‰é¡¹è§¦å‘AnimalèƒŒåŒ…
         if(optionType == DialogueOptionType.AnimalShop)
         {
             EventHandler.CallOpenAnimalShopEvent(animalBag);
@@ -111,18 +111,18 @@ public class DialogueOptionUI : MonoBehaviour //µ÷ÓÃÔ¤ÖÆÌåOptionButton
             EventHandler.CallUpdateGameStateEvent(GameState.Pause);
             return;
         }
-        //µã»÷´ËÑ¡ÏîºóÃ»ÓĞ¶Ô»°ÄÇ¾Í½áÊø¶Ô»°
+        //ç‚¹å‡»æ­¤é€‰é¡¹åæ²¡æœ‰å¯¹è¯é‚£å°±ç»“æŸå¯¹è¯
         if (nextPieceID == null || nextPieceID == "0")
         {
             DialogueUI.Instance.QuitDialogueUI();
-            //Ôö¼ÓºÃ¸Ğ¶È
+            //å¢åŠ å¥½æ„Ÿåº¦
             EventHandler.CallIncreaseFriendliness(friendlinessValue, currentPiece.name.ToString());
             return;
         }
-        //ÓĞ¶Ô»°¾ÍÏÔÊ¾¶ÔÓ¦µÄpiece
+        //æœ‰å¯¹è¯å°±æ˜¾ç¤ºå¯¹åº”çš„piece
         else
         {
-            //Ôö¼ÓºÃ¸Ğ¶È
+            //å¢åŠ å¥½æ„Ÿåº¦
             EventHandler.CallIncreaseFriendliness(friendlinessValue,currentPiece.name.ToString());
             if (DialogueUI.Instance.currentData.dialogueIndex[nextPieceID].shakeImage)
             {

@@ -1,24 +1,24 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using MFarm.Inventory;
 using TMPro;
-public class ItemTooltip : MonoBehaviour    //µ÷ÓÃÔÚItemToolTip¶ÔÏóÉÏ
+public class ItemTooltip : MonoBehaviour    //è°ƒç”¨åœ¨ItemToolTipå¯¹è±¡ä¸Š
 {
     [SerializeField] private TextMeshProUGUI nameText;
     [SerializeField] private TextMeshProUGUI typeText;
     [SerializeField] private TextMeshProUGUI descriptionText;
     [SerializeField] private Text valueText;
     [SerializeField] private GameObject bottomPart;
-    //[Header("½¨Ôì")]
+    //[Header("å»ºé€ ")]
     //public GameObject resourcePanel;
     //[SerializeField] private Image[] resourceItem;
     /// <summary>
-    /// ÉèÖÃÎïÆ·ÃèÊöµÄÏÔÊ¾ÄÚÈİ
+    /// è®¾ç½®ç‰©å“æè¿°çš„æ˜¾ç¤ºå†…å®¹
     /// </summary>
     /// <param name="itemDetails"></param>
-    /// <param name="slotType">ÎïÆ·ÀàĞÍ</param>
+    /// <param name="slotType">ç‰©å“ç±»å‹</param>
     public void SetupTooltip(ItemDetails itemDetails,SlotType slotType)
     {
         nameText.text = itemDetails.itemName;
@@ -40,32 +40,32 @@ public class ItemTooltip : MonoBehaviour    //µ÷ÓÃÔÚItemToolTip¶ÔÏóÉÏ
         {
             bottomPart.SetActive(false);
         }
-        //Èç¹û¸÷ÎïÆ·Ö®¼äµÄÃèÊö¿ò¸ß¶È²»Ò»£¬»áÁ¢¼´¸Ä±äË¢ĞÂ¸ß¶È£¬²»»áÓĞÑÓ³Ù
+        //å¦‚æœå„ç‰©å“ä¹‹é—´çš„æè¿°æ¡†é«˜åº¦ä¸ä¸€ï¼Œä¼šç«‹å³æ”¹å˜åˆ·æ–°é«˜åº¦ï¼Œä¸ä¼šæœ‰å»¶è¿Ÿ
         LayoutRebuilder.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
     }
     /// <summary>
-    /// ¸øÎïÆ·ÀàĞÍ¸³ÖµÖĞÎÄÃû
+    /// ç»™ç‰©å“ç±»å‹èµ‹å€¼ä¸­æ–‡å
     /// </summary>
     /// <param name="itemType"></param>
     /// <returns></returns>
     private string GetItemType(ItemType itemType)
     {  
-        //Ñ­»·ItemTypeÖĞµÄÃ¶¾Ù£¬²¢·µ»ØÖĞÎÄÃû£¬_±íÊ¾default£¬ÆäËû
+        //å¾ªç¯ItemTypeä¸­çš„æšä¸¾ï¼Œå¹¶è¿”å›ä¸­æ–‡åï¼Œ_è¡¨ç¤ºdefaultï¼Œå…¶ä»–
         return itemType switch
         {
-            ItemType.Seed => "ÖÖ×Ó",
-            ItemType.Commodity => "ÉÌÆ·",
-            ItemType.Furniture => "¼Ò¾ß",
-            ItemType.BreakTool => "¹¤¾ß",
-            ItemType.AxeTool => "¹¤¾ß",
-            ItemType.HoeTool => "¹¤¾ß",
-            ItemType.ReapTool => "¹¤¾ß",
-            ItemType.WaterTool => "¹¤¾ß",
-            _ => "ÎŞ"
+            ItemType.Seed => "ç§å­",
+            ItemType.Commodity => "å•†å“",
+            ItemType.Furniture => "å®¶å…·",
+            ItemType.BreakTool => "å·¥å…·",
+            ItemType.AxeTool => "å·¥å…·",
+            ItemType.HoeTool => "å·¥å…·",
+            ItemType.ReapTool => "å·¥å…·",
+            ItemType.WaterTool => "å·¥å…·",
+            _ => "æ— "
         };
     }
     /// <summary>
-    /// ÉèÖÃÆô¶¯Í¼Ö½×ÊÔ´ÏêÇé
+    /// è®¾ç½®å¯åŠ¨å›¾çº¸èµ„æºè¯¦æƒ…
     /// </summary>
     /// <param name="bluPrintDetails"></param>
     //public void SetupResourcePanel(int ID)
@@ -76,7 +76,7 @@ public class ItemTooltip : MonoBehaviour    //µ÷ÓÃÔÚItemToolTip¶ÔÏóÉÏ
     //        if(i < bluPrintDetails.resourceItem.Length)
     //        {
     //            var item = bluPrintDetails.resourceItem[i];
-    //            //ĞèÒª¶àÉÙÖÖ×ÊÔ´ÏÔÊ¾¶àÉÙÖĞ×ÊÔ´
+    //            //éœ€è¦å¤šå°‘ç§èµ„æºæ˜¾ç¤ºå¤šå°‘ä¸­èµ„æº
     //            resourceItem[i].gameObject.SetActive(true);
     //            resourceItem[i].sprite = InventoryManager.Instance.GetItemDetails(item.getItemID).itemIcon;
     //            resourceItem[i].transform.GetChild(0).GetComponent<Text>().text = item.itemAmount.ToString(); 

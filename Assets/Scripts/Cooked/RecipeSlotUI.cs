@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -7,9 +7,9 @@ using UnityEngine.UI;
 using MFarm.Cooked;
 using TMPro;
 
-public class RecipeSlotUI : MonoBehaviour, IPointerClickHandler //µ÷ÓÃÔÚRecipeSlot°´Å¥ÉÏ
+public class RecipeSlotUI : MonoBehaviour, IPointerClickHandler //è°ƒç”¨åœ¨RecipeSlotæŒ‰é’®ä¸Š
 {
-    //Î´½âËø¸ÃÊ³Æ×
+    //æœªè§£é”è¯¥é£Ÿè°±
     public bool isGray;
     public CookedUI cookedUI;
     public int itemID;
@@ -22,7 +22,7 @@ public class RecipeSlotUI : MonoBehaviour, IPointerClickHandler //µ÷ÓÃÔÚRecipeSl
     {
         itemDetails = InventoryManager.Instance.GetItemDetails(itemID);
         cookedDetails = cookedData.GetCookedDetails(itemID);
-        //Î´½âËø
+        //æœªè§£é”
         if (isGray)
         {
             reciprImage.sprite = cookedDetails.graySprite;
@@ -39,7 +39,7 @@ public class RecipeSlotUI : MonoBehaviour, IPointerClickHandler //µ÷ÓÃÔÚRecipeSl
                 }
             }
         }
-        //ÒÑ½âËø
+        //å·²è§£é”
         else
         {
             reciprImage.sprite = itemDetails.itemIcon;
@@ -48,7 +48,7 @@ public class RecipeSlotUI : MonoBehaviour, IPointerClickHandler //µ÷ÓÃÔÚRecipeSl
         }
     }
     /// <summary>
-    /// µã»÷Ê³Æ×Ö´ĞĞµÄ·½·¨
+    /// ç‚¹å‡»é£Ÿè°±æ‰§è¡Œçš„æ–¹æ³•
     /// </summary>
     /// <param name="eventData"></param>
     public void OnPointerClick(PointerEventData eventData)

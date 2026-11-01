@@ -1,11 +1,11 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using DG.Tweening;
 using Unity.VisualScripting;
 
-public class LightController : MonoBehaviour    //µ÷ÓÃÔÚËùÓĞ¹â¶ÔÏóÉÏ
+public class LightController : MonoBehaviour    //è°ƒç”¨åœ¨æ‰€æœ‰å…‰å¯¹è±¡ä¸Š
 {
     public LightPattenList_SO lightData;
     private Light2D currentLight;
@@ -16,7 +16,7 @@ public class LightController : MonoBehaviour    //µ÷ÓÃÔÚËùÓĞ¹â¶ÔÏóÉÏ
         currentLight = GetComponent<Light2D>();
     }
     /// <summary>
-    /// ÔÚlightChangeDurationÊ±¼äÄÚÇĞ»»µÆ¹âÑÕÉ«ºÍÇ¿¶È
+    /// åœ¨lightChangeDurationæ—¶é—´å†…åˆ‡æ¢ç¯å…‰é¢œè‰²å’Œå¼ºåº¦
     /// </summary>
     /// <param name="season"></param>
     /// <param name="lightShift"></param>
@@ -24,17 +24,17 @@ public class LightController : MonoBehaviour    //µ÷ÓÃÔÚËùÓĞ¹â¶ÔÏóÉÏ
     public void ChangeLightShift(Season season ,LightShift lightShift,float timeDifference)
     {
         currentLightDetails = lightData.GetLightDetails(season, lightShift);
-        //»¹ÓĞÊ±¼äÇĞ»»ÑÕÉ«
+        //è¿˜æœ‰æ—¶é—´åˆ‡æ¢é¢œè‰²
         if(timeDifference < Settings.lightChangeDuration)
         {
-            //µ±Ç°ÑÕÉ«ÓëÄ¿±êÑÕÉ«µÄ²îÖµ
+            //å½“å‰é¢œè‰²ä¸ç›®æ ‡é¢œè‰²çš„å·®å€¼
             var colorOffset = (currentLightDetails.lightColor - currentLight.color) / Settings.lightChangeDuration * timeDifference;
             currentLight.color += colorOffset;
-            //ÑÕÉ«¿ªÊ¼Öğ½¥ÇĞ»»
+            //é¢œè‰²å¼€å§‹é€æ¸åˆ‡æ¢
             DOTween.To(() => currentLight.color, c => currentLight.color = c, currentLightDetails.lightColor, Settings.lightChangeDuration - timeDifference);
             DOTween.To(() => currentLight.intensity, i => currentLight.intensity = i, currentLightDetails.lightAmount, Settings.lightChangeDuration - timeDifference);
         }
-        //ÇĞ»»Ê±¼äÒÑµ½,Ö±½ÓÇĞ»»µ½Ä¿±êÑÕÉ«
+        //åˆ‡æ¢æ—¶é—´å·²åˆ°,ç›´æ¥åˆ‡æ¢åˆ°ç›®æ ‡é¢œè‰²
         if(timeDifference >= Settings.lightChangeDuration)
         {
             currentLight.color = currentLightDetails.lightColor;

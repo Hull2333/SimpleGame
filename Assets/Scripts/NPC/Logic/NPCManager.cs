@@ -1,8 +1,8 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NPCManager : Singleton<NPCManager> //µ÷ÓÃÔÚNPCManager¶ÔÏóÉÏ
+public class NPCManager : Singleton<NPCManager> //è°ƒç”¨åœ¨NPCManagerå¯¹è±¡ä¸Š
 {
     public SceneRouteDataList_SO sceneRouteData;
     public List<NPCPosition> npcPositionList;
@@ -18,7 +18,7 @@ public class NPCManager : Singleton<NPCManager> //µ÷ÓÃÔÚNPCManager¶ÔÏóÉÏ
 
     private void OnEnable()
     {
-        //ĞÂÓÎÏ·¿ªÊ¼Ê±ĞèÒªÖØÖÃµÄÊı¾İ
+        //æ–°æ¸¸æˆå¼€å§‹æ—¶éœ€è¦é‡ç½®çš„æ•°æ®
         EventHandler.StartNewGameEvent += OnStartNewGameEvent;
     }
 
@@ -37,7 +37,7 @@ public class NPCManager : Singleton<NPCManager> //µ÷ÓÃÔÚNPCManager¶ÔÏóÉÏ
     }
 
     /// <summary>
-    /// ³õÊ¼»¯Â·¾¶×Öµä
+    /// åˆå§‹åŒ–è·¯å¾„å­—å…¸
     /// </summary>
     private void InitSceneRouteDict()
     {
@@ -46,12 +46,12 @@ public class NPCManager : Singleton<NPCManager> //µ÷ÓÃÔÚNPCManager¶ÔÏóÉÏ
             foreach(SceneRoute route in sceneRouteData.sceneRouteList)
             {
                 var key = route.fromSceneName + route.gotoSceneName;
-                //Èç¹û×ÖµäÀïÒÑ¾­ÓĞÕâ¸ökey
+                //å¦‚æœå­—å…¸é‡Œå·²ç»æœ‰è¿™ä¸ªkey
                 if (sceneRouteDict.ContainsKey(key))
                 {
                     continue;
                 }
-                //Èç¹û×ÖµäÀïÃ»ÓĞÕâ¸ökey,¾Í°ÑkeyºÍÆäÆ¥ÅäµÄÂ·¾¶¼Óµ½×ÖµäÖĞ
+                //å¦‚æœå­—å…¸é‡Œæ²¡æœ‰è¿™ä¸ªkey,å°±æŠŠkeyå’Œå…¶åŒ¹é…çš„è·¯å¾„åŠ åˆ°å­—å…¸ä¸­
                 else
                 {
                     sceneRouteDict.Add(key, route);
@@ -60,10 +60,10 @@ public class NPCManager : Singleton<NPCManager> //µ÷ÓÃÔÚNPCManager¶ÔÏóÉÏ
         }
     }
     /// <summary>
-    /// ´Ó¿ç³¡¾°×ÖµäÖĞ²éÕÒ²¢»ñÈ¡Á½¸ö³¡¾°Ö®¼äµÄÂ·¾¶
+    /// ä»è·¨åœºæ™¯å­—å…¸ä¸­æŸ¥æ‰¾å¹¶è·å–ä¸¤ä¸ªåœºæ™¯ä¹‹é—´çš„è·¯å¾„
     /// </summary>
-    /// <param name="fromSceneName">ÆğÊ¼³¡¾°</param>
-    /// <param name="gotoSceneName">Ä¿±ê³¡¾°</param>
+    /// <param name="fromSceneName">èµ·å§‹åœºæ™¯</param>
+    /// <param name="gotoSceneName">ç›®æ ‡åœºæ™¯</param>
     /// <returns></returns>
     public SceneRoute GetSceneRoute(string fromSceneName,string gotoSceneName)
     {

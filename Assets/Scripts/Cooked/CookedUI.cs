@@ -1,4 +1,4 @@
-using MFarm.Inventory;
+ï»¿using MFarm.Inventory;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -6,26 +6,26 @@ using UnityEngine;
 using UnityEngine.UI;
 namespace MFarm.Cooked 
 {
-    public class CookedUI :Singleton<CookedUI> //µ÷ÓÃÔÚCookedCanvasÉÏ
+    public class CookedUI :Singleton<CookedUI> //è°ƒç”¨åœ¨CookedCanvasä¸Š
     {
         public GameObject cookedPanel;
-        //Ê³²ÄSlotUIÔ¤ÖÆÌå
+        //é£ŸæSlotUIé¢„åˆ¶ä½“
         public SlotUI ingredientSlotUI;
-        //µ±Ç°ÒÔÉú³ÉµÄÊ³²ÄSlotUIÔ¤ÖÆÌå
+        //å½“å‰ä»¥ç”Ÿæˆçš„é£ŸæSlotUIé¢„åˆ¶ä½“
         public List<SlotUI> currentIngredientSlotUIs;
         public Transform ingredientHolder;
         public Animator makeButtonAnim;
         public Button makeButton;
-        //µ±Ç°Ñ¡ÔñµÄ²ËëÈ
+        //å½“å‰é€‰æ‹©çš„èœè‚´
         public CookedDetails currentRecipeDetails;
         public Button quitButton;
         public GameObject chooseRecipeTip;
-        //»¬¶¯ÌØĞ§²ËëÈImage
+        //æ»‘åŠ¨ç‰¹æ•ˆèœè‚´Image
         public GameObject tweenRecipeImage;
         public Transform tweenRecipeParent;
         [HideInInspector] public Sprite recipeSprite;
         public Vector3 tweenInitPos;
-        [Header("Ê³²ÄÏÔÊ¾Î»ÖÃ¶ÓÁĞ")]
+        [Header("é£Ÿææ˜¾ç¤ºä½ç½®é˜Ÿåˆ—")]
         public GameObject ingredientStartPos;
         public List<Vector2> currentingredientToGoPosList = new List<Vector2>();
         public List<Vector2> ingredientToGoPosList1 = new List<Vector2>();
@@ -56,7 +56,7 @@ namespace MFarm.Cooked
             makeButtonAnim.gameObject.SetActive(false);
             InventoryManager.Instance.anyBagOpened = true;
             currentIngredientSlotUIs = new List<SlotUI>();
-            //Çå¿ÕÊ³²ÄÀ¸ÏÂµÄ×ÓÎïÌå
+            //æ¸…ç©ºé£Ÿææ ä¸‹çš„å­ç‰©ä½“
             for (int i = 0; i < ingredientHolder.childCount; i++)
             {
                 Destroy(ingredientHolder.GetChild(i).gameObject);
@@ -65,20 +65,20 @@ namespace MFarm.Cooked
 
         }
         /// <summary>
-        /// ÏÔÊ¾ËùĞèÊ³²Ä
+        /// æ˜¾ç¤ºæ‰€éœ€é£Ÿæ
         /// </summary>
         public void ShowIngredientSlotUI(InventoryItem[] Ingredients)
         {
             currentIngredientSlotUIs.Clear();
             chooseRecipeTip.SetActive(false);
-            //Çå¿ÕÊ³²ÄÀ¸ÏÂµÄ×ÓÎïÌå
+            //æ¸…ç©ºé£Ÿææ ä¸‹çš„å­ç‰©ä½“
             for (int i = 0; i < ingredientHolder.childCount; i++)
             {
                 Destroy(ingredientHolder.GetChild(i).gameObject);
             }
             GenerateTweenIngredientImage(Ingredients);
             MakeTweenIngredientImage();
-            //¸ù¾İÊ³²ÄÊÇ·ñ×ã¹»ÇÒ±³°ü»¹ÓĞ¿ÕÎ»À´Æô¶¯ÖÆ×÷°´Å¥
+            //æ ¹æ®é£Ÿææ˜¯å¦è¶³å¤Ÿä¸”èƒŒåŒ…è¿˜æœ‰ç©ºä½æ¥å¯åŠ¨åˆ¶ä½œæŒ‰é’®
             if (InventoryManager.Instance.CheckIngredients(currentRecipeDetails.ID) && InventoryManager.Instance.CheckBagCapacity())
             {
                 makeButtonAnim.gameObject.SetActive(true);
@@ -89,25 +89,25 @@ namespace MFarm.Cooked
             }
         }
         /// <summary>
-        /// ÖÆ×÷²ËëÈ
+        /// åˆ¶ä½œèœè‚´
         /// </summary>
         public void MakeRecipe()
         {
             GenerateTweenRecipeImage();
             makeButtonAnim.SetTrigger("active");
             InventoryManager.Instance.AddRewardItem(currentRecipeDetails.ID, 1);
-            //¼õÈ¥Íæ¼Ò±³°üÖĞµÄÊ³²Ä
+            //å‡å»ç©å®¶èƒŒåŒ…ä¸­çš„é£Ÿæ
             foreach (var resource in currentRecipeDetails.cookResource)
             {
                 InventoryManager.Instance.RemoveItem(resource.itemID, resource.itemAmount);
             }
-            //¸üĞÂ×ÜÊıÁ¿
+            //æ›´æ–°æ€»æ•°é‡
             foreach (SlotUI currentIngredientSlotUI in currentIngredientSlotUIs)
             {
                 currentIngredientSlotUI.GetComponent<Animator>().SetTrigger("shake");
                 int ingredientAllAmount = InventoryManager.Instance.playerBag.GetItemAllAmount(currentIngredientSlotUI.itemDetails.itemID);
                 currentIngredientSlotUI.UpdateSlot(currentIngredientSlotUI.itemDetails, currentIngredientSlotUI.itemAmount, true, ingredientAllAmount);
-                //ÊıÁ¿×ÖÌå±äºì
+                //æ•°é‡å­—ä½“å˜çº¢
                 if (currentIngredientSlotUI.itemAmount > ingredientAllAmount)
                 {
                     currentIngredientSlotUI.SetRedAmountText();
@@ -117,7 +117,7 @@ namespace MFarm.Cooked
                     currentIngredientSlotUI.RecoverOriginTextColor();
                 }
             }
-            //¸ù¾İÊ³²ÄÊÇ·ñ×ã¹»ÇÒ±³°ü»¹ÓĞ¿ÕÎ»À´Æô¶¯ÖÆ×÷°´Å¥
+            //æ ¹æ®é£Ÿææ˜¯å¦è¶³å¤Ÿä¸”èƒŒåŒ…è¿˜æœ‰ç©ºä½æ¥å¯åŠ¨åˆ¶ä½œæŒ‰é’®
             if (InventoryManager.Instance.CheckIngredients(currentRecipeDetails.ID) && InventoryManager.Instance.CheckBagCapacity())
             {
                 makeButtonAnim.gameObject.SetActive(true);
@@ -129,20 +129,20 @@ namespace MFarm.Cooked
 
         }
         /// <summary>
-        /// Éú³É²¢»¬¶¯²ËëÈµ½Íæ¼Ò±³°üUI
+        /// ç”Ÿæˆå¹¶æ»‘åŠ¨èœè‚´åˆ°ç©å®¶èƒŒåŒ…UI
         /// </summary>
         public void GenerateTweenRecipeImage()
         {
             GameObject recipeImage = Instantiate(tweenRecipeImage, Vector3.zero, Quaternion.identity, tweenRecipeParent);
             recipeImage.GetComponent<Image>().sprite = recipeSprite;
-            //ÄÃµ½Ïà¶ÔÓÚtweenRecipeParent PanelµÄ¾Ö²¿×ø±ê
+            //æ‹¿åˆ°ç›¸å¯¹äºtweenRecipeParent Panelçš„å±€éƒ¨åæ ‡
             var recipeImageRectTranform = recipeImage.GetComponent<RectTransform>();
             recipeImageRectTranform.anchoredPosition = tweenRecipeParent.InverseTransformPoint(tweenInitPos);
             Vector3 OriginPos = new Vector3(Random.Range(recipeImageRectTranform.anchoredPosition.x - 20, recipeImageRectTranform.anchoredPosition.x + 20), (Random.Range(recipeImageRectTranform.anchoredPosition.y - 20, recipeImageRectTranform.anchoredPosition.y + 20)));
             recipeImage.GetComponent<CoinTween>().PlayTween(0f, OriginPos);
         }
         /// <summary>
-        /// ÏÔÊ¾Ê³²ÄImage
+        /// æ˜¾ç¤ºé£ŸæImage
         /// </summary>
         /// <param name="Ingredients"></param>
         public void GenerateTweenIngredientImage(InventoryItem[] Ingredients)
@@ -169,7 +169,7 @@ namespace MFarm.Cooked
                 var ingredientSlot = Instantiate(ingredientSlotUI, ingredientStartPos.transform.position, Quaternion.identity, ingredientHolder);
                 int ingredientAllAmount = InventoryManager.Instance.playerBag.GetItemAllAmount(ingredientsItem.itemID);
                 ingredientSlot.UpdateSlot(ingredientsItem, Ingredients[i].itemAmount, true, ingredientAllAmount);
-                //ÊıÁ¿×ÖÌå±äºì
+                //æ•°é‡å­—ä½“å˜çº¢
                 if (ingredientSlot.itemAmount > ingredientAllAmount)
                 {
                     ingredientSlot.SetRedAmountText();
@@ -182,7 +182,7 @@ namespace MFarm.Cooked
             }
         }
         /// <summary>
-        /// Ê³²ÄImageÒÆ¶¯ÏòÊ³²Ä¶ÔÓ¦Î»ÖÃ
+        /// é£ŸæImageç§»åŠ¨å‘é£Ÿæå¯¹åº”ä½ç½®
         /// </summary>
         private void MakeTweenIngredientImage()
         {
@@ -195,7 +195,7 @@ namespace MFarm.Cooked
             }
         }
         /// <summary>
-        /// ¹Ø±ÕÅëâ¿UI
+        /// å…³é—­çƒ¹é¥ªUI
         /// </summary>
         public void QuitCookedUI()
         {

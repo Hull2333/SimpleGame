@@ -1,11 +1,11 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SellHaveItemTip : MonoBehaviour //µ÷ÓÃÔÚSellTipImageÔ¤ÖÆÌåµÄImage¶ÔÏóÉÏ
+public class SellHaveItemTip : MonoBehaviour //è°ƒç”¨åœ¨SellTipImageé¢„åˆ¶ä½“çš„Imageå¯¹è±¡ä¸Š
 {
     /// <summary>
-    /// µ÷ÓÃÔÚ¶¯»­×îºóÒ»Ö¡£¬"»¹ÓĞ¶«Î÷Ã»Âôµô"¶¯»­
+    /// è°ƒç”¨åœ¨åŠ¨ç”»æœ€åä¸€å¸§ï¼Œ"è¿˜æœ‰ä¸œè¥¿æ²¡å–æ‰"åŠ¨ç”»
     /// </summary>
    public void SellHaveItemTipAnim()
     {

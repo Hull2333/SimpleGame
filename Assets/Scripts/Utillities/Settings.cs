@@ -1,57 +1,57 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Settings //²»ĞèÒªµ÷ÓÃÔÚÈÎºÎÎïÌåÉÏ
+public class Settings //ä¸éœ€è¦è°ƒç”¨åœ¨ä»»ä½•ç‰©ä½“ä¸Š
 {
-    //ÉèÖÃÎïÌåÑÕÉ«±ä»¯·ù¶È,Ô½Ğ¡±ä»¯·ù¶ÈÔ½´ó
+    //è®¾ç½®ç‰©ä½“é¢œè‰²å˜åŒ–å¹…åº¦,è¶Šå°å˜åŒ–å¹…åº¦è¶Šå¤§
     public const float itemFadeDuration = 0.35f;
-    //ÎïÌåÍ¸Ã÷¶È
+    //ç‰©ä½“é€æ˜åº¦
     public const float targetAlpha = 0.45f;
-    //ÓÎÏ·1sµÄÊ±¼ä£¬ÖµÔ½Ğ¡Ô½¿ì
+    //æ¸¸æˆ1sçš„æ—¶é—´ï¼Œå€¼è¶Šå°è¶Šå¿«
     public const float secondThreshold = 0.1f;
-    //Ê±¼äÏà¹Ø
+    //æ—¶é—´ç›¸å…³
     public const int secondHold = 59;
     public const int minuteHold = 59;
     public const int hourHold = 23;
     public const int dayHold = 28;
     public const int seasonHold = 3;
-    //¼ÓÔØ½çÃæ¸¡ÏÖµÄÊ±¼ä
+    //åŠ è½½ç•Œé¢æµ®ç°çš„æ—¶é—´
     public const float fadeDuration = 1.5f;
-    //NPCÍø¸ñÒÆ¶¯
+    //NPCç½‘æ ¼ç§»åŠ¨
     public const float gridCellSize = 1;
     public const float gridCellDiagonalSize = 1.41f;
     //20*20 20/1
     public const float pixelSize = 0.05f;
-    //¶¯»­Ö´ĞĞµÈ´ıÊ±¼ä
+    //åŠ¨ç”»æ‰§è¡Œç­‰å¾…æ—¶é—´
     public const float animationBreakTime = 5f;
-    //×î´óÍø¸ñ³ß´ç
+    //æœ€å¤§ç½‘æ ¼å°ºå¯¸
     public const int maxGridSize = 9999;
 
-    //µÆ¹â
-    //µÆ¹â±ä»¯µÄÊ±¼ä
+    //ç¯å…‰
+    //ç¯å…‰å˜åŒ–çš„æ—¶é—´
     public const float lightChangeDuration = 25f;
-    //ÔçÉÏºÍÍíÉÏµÄÊ±¼ä´Á
+    //æ—©ä¸Šå’Œæ™šä¸Šçš„æ—¶é—´æˆ³
     public static TimeSpan morningTime = new TimeSpan(5, 0, 0);
     public static TimeSpan nightTime = new TimeSpan(19, 0, 0);
-    //Ö÷½Ç³õÊ¼×ø±ê
+    //ä¸»è§’åˆå§‹åæ ‡
     public static Vector3 playerStartPos = new Vector3(10f,-10f,0);
-    //³õÊ¼½ğ¶î
+    //åˆå§‹é‡‘é¢
     public const int playerStartMoney = 10000;
-    //×½Óã½ø¶È
+    //æ‰é±¼è¿›åº¦
     public const float fishCatchProgress = 3f;
-    //Óã¹³Å×ÎïÏßÖĞµã±ÈÀı
+    //é±¼é’©æŠ›ç‰©çº¿ä¸­ç‚¹æ¯”ä¾‹
     public const float fishParabolaPercent = 0.4f;
-    //Óã¹³Å×ÎïÏßÆ«ÒÆÁ¿
+    //é±¼é’©æŠ›ç‰©çº¿åç§»é‡
     public const float fishaParabolaOffsetY = -4f;
-    //ÓãÏßµÄÖĞµã±ÈÀı
+    //é±¼çº¿çš„ä¸­ç‚¹æ¯”ä¾‹
     public const float fishLinePercent = 0.2f;
-    //ÓãÏßµÄÆ«ÒÆÁ¿
+    //é±¼çº¿çš„åç§»é‡
     public const float fishLineOffsetY = 0.5f;
-    //Êó±ê³¤°´±¶ÂÊ
+    //é¼ æ ‡é•¿æŒ‰å€ç‡
     public const float downPower = 0.8f;
-    //Êó±êĞîÁ¦Ê±¼ä
+    //é¼ æ ‡è“„åŠ›æ—¶é—´
     public const float mouseDownHoldTime = 5f;
     
     

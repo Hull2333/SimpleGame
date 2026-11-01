@@ -1,14 +1,14 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
 using System.IO;
 namespace MFarm.Save
 {
-    public class SaveLoadManager : Singleton<SaveLoadManager>    //µ÷ÓÃÔÚSaveLoadManager¶ÔÏóÉÏ
+    public class SaveLoadManager : Singleton<SaveLoadManager>    //è°ƒç”¨åœ¨SaveLoadManagerå¯¹è±¡ä¸Š
     {
         private List<ISaveable> saveableList = new List<ISaveable>();
-        //ÈıÌõ´æµµ²Ëµ¥
+        //ä¸‰æ¡å­˜æ¡£èœå•
         public List<DataSlot> dataSlots = new List<DataSlot>(new DataSlot[3]);
 
         private string jsonFolder;
@@ -26,7 +26,7 @@ namespace MFarm.Save
         private void OnEnable()
         {
             EventHandler.StartNewGameEvent += OnStartNewGameEvent;
-            //ÓÎÏ·½áÊøÊ±µÄÊÂ¼ş
+            //æ¸¸æˆç»“æŸæ—¶çš„äº‹ä»¶
             EventHandler.EndGameEvent += OnEndGameEvent;
         }
 
@@ -57,13 +57,13 @@ namespace MFarm.Save
         private void OnEndGameEvent()
         {
             Debug.Log("Save");
-            //±£´æµ±Ç°ÓÎÏ·½ø¶È
+            //ä¿å­˜å½“å‰æ¸¸æˆè¿›åº¦
             Save(currentDataIndex);
         }
 
 
         /// <summary>
-        /// ½«´æµµĞÅÏ¢Ìí¼Óµ½ISaveable½Ó¿ÚÁĞ±íÖĞ
+        /// å°†å­˜æ¡£ä¿¡æ¯æ·»åŠ åˆ°ISaveableæ¥å£åˆ—è¡¨ä¸­
         /// </summary>
         /// <param name="saveable"></param>
         public void RegisterSaveable(ISaveable saveable)
@@ -74,11 +74,11 @@ namespace MFarm.Save
             }
         }
         /// <summary>
-        /// ¶ÁÈ¡ÓÎÏ·½ø¶ÈÓ³Éäµ½SaveSlotUIÉÏ
+        /// è¯»å–æ¸¸æˆè¿›åº¦æ˜ å°„åˆ°SaveSlotUIä¸Š
         /// </summary>
         private void ReadSaveData()
         {
-            //ÅĞ¶Ï´æµµÄ¿Â¼ÊÇ·ñ´æÔÚ
+            //åˆ¤æ–­å­˜æ¡£ç›®å½•æ˜¯å¦å­˜åœ¨
             if (Directory.Exists(jsonFolder))
             {
                 for(int i = 0; i < dataSlots.Count; i++)
@@ -94,24 +94,24 @@ namespace MFarm.Save
             }
         }
         /// <summary>
-        /// ½«ËùÓĞManager·µ»ØµÄSaveData´æÈë,ÒÔ¼°ÈıÌõ½ø¶È´æµµ
+        /// å°†æ‰€æœ‰Managerè¿”å›çš„SaveDataå­˜å…¥,ä»¥åŠä¸‰æ¡è¿›åº¦å­˜æ¡£
         /// </summary>
         /// <param name="index"></param>
         private void Save(int index)
         {
             DataSlot data = new DataSlot();
-            //½«ËùÓĞManager·µ»ØµÄSaveDataÓëGUID¶¼´æ½øSaveSlotÖĞ
+            //å°†æ‰€æœ‰Managerè¿”å›çš„SaveDataä¸GUIDéƒ½å­˜è¿›SaveSlotä¸­
             foreach (var saveable in saveableList)
             {
                 data.dataDict.Add(saveable.GUID, saveable.GenerateSaveData());
             }
 
             dataSlots[index] = data;
-            //´æµµÎÄ¼ş
+            //å­˜æ¡£æ–‡ä»¶
             var resultPath = jsonFolder + "data" + index + ".sav";
-            //ĞòÁĞ»¯´æµµÎÄ¼ş
+            //åºåˆ—åŒ–å­˜æ¡£æ–‡ä»¶
             var jsonData = JsonConvert.SerializeObject(dataSlots[index], Formatting.Indented);
-            //Èç¹û²»´æÔÚresultPathÂ·¾¶ÎÄ¼ş,ĞÂ´´½¨,ÓĞµÄ»°¸²¸Ç
+            //å¦‚æœä¸å­˜åœ¨resultPathè·¯å¾„æ–‡ä»¶,æ–°åˆ›å»º,æœ‰çš„è¯è¦†ç›–
             if (!File.Exists(resultPath))
             {
                 Directory.CreateDirectory(jsonFolder);
@@ -120,18 +120,18 @@ namespace MFarm.Save
             File.WriteAllText(resultPath, jsonData);
         }
         /// <summary>
-        /// ¶ÁÈ¡´æµµ
+        /// è¯»å–å­˜æ¡£
         /// </summary>
         /// <param name="index"></param>
         public void Load(int index)
         {
             currentDataIndex = index;
             var resultPath = jsonFolder + "data" + index + ".sav";
-            //¶ÁÈ¡´æµµÎÄ¼ş
+            //è¯»å–å­˜æ¡£æ–‡ä»¶
             var stringData = File.ReadAllText(resultPath);
-            //·´ĞòÁĞ»¯
+            //ååºåˆ—åŒ–
             var jsonData = JsonConvert.DeserializeObject<DataSlot>(stringData);
-            //°Ñ´æµµºÃµÄSaveData¶ÁÈ¡³öÀ´
+            //æŠŠå­˜æ¡£å¥½çš„SaveDataè¯»å–å‡ºæ¥
             foreach(var saveable in saveableList)
             {
                 saveable.RestoreData(jsonData.dataDict[saveable.GUID]);

@@ -1,17 +1,17 @@
-using System.Collections;
+ï»¿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using MFarm.Dialogue;
 using TMPro;
 
-public class DialoguaUI : MonoBehaviour //µ÷ÓÃÔÚdialogue Canvas¶ÔÏóÉÏ
+public class DialoguaUI : MonoBehaviour //è°ƒç”¨åœ¨dialogue Canvaså¯¹è±¡ä¸Š
 {
     public GameObject dialogueBox;
     public Text dialogueText;
     public Image faceRight, faceLeft;
     public TextMeshProUGUI nameRight, nameLeft;
-    //¼ÌĞø°´Å¥
+    //ç»§ç»­æŒ‰é’®
     public GameObject continueBox;
 
     private void Awake()
@@ -21,7 +21,7 @@ public class DialoguaUI : MonoBehaviour //µ÷ÓÃÔÚdialogue Canvas¶ÔÏóÉÏ
 
     private void OnEnable()
     {
-        //ÏÔÊ¾NPC¶Ô»°UI
+        //æ˜¾ç¤ºNPCå¯¹è¯UI
         EventHandler.ShowDialogueEvent += OnShowDialogueEvent;
     }
 
@@ -35,19 +35,19 @@ public class DialoguaUI : MonoBehaviour //µ÷ÓÃÔÚdialogue Canvas¶ÔÏóÉÏ
         StartCoroutine(ShowDialogue(piece));
     }
     /// <summary>
-    /// ÉèÖÃ¶Ô»°UI
+    /// è®¾ç½®å¯¹è¯UI
     /// </summary>
     /// <param name="piece"></param>
     /// <returns></returns>
     private IEnumerator ShowDialogue(DialoguePiece piece)
     {
-        //¶Ô»°UIµÄ³õÊ¼×´Ì¬
+        //å¯¹è¯UIçš„åˆå§‹çŠ¶æ€
         if(piece != null)
         {
             piece.isDone = false;
             dialogueBox.SetActive(true);
             continueBox.SetActive(false);
-            //Çå¿Õ¶Ô»°ÎÄ±¾
+            //æ¸…ç©ºå¯¹è¯æ–‡æœ¬
             dialogueText.text = string.Empty;
 
             if(piece.name != string.Empty)
@@ -67,7 +67,7 @@ public class DialoguaUI : MonoBehaviour //µ÷ÓÃÔÚdialogue Canvas¶ÔÏóÉÏ
                     nameRight.text = piece.name;
                 }
             }
-            //Èç¹ûÎ´ÉèÖÃNPCµÄÃû×ÖºÍÍ·Ïñ£¬Ôò²»ÏÔÊ¾
+            //å¦‚æœæœªè®¾ç½®NPCçš„åå­—å’Œå¤´åƒï¼Œåˆ™ä¸æ˜¾ç¤º
             else
             {
                 faceLeft.gameObject.SetActive(false);
@@ -76,10 +76,10 @@ public class DialoguaUI : MonoBehaviour //µ÷ÓÃÔÚdialogue Canvas¶ÔÏóÉÏ
                 nameRight.gameObject.SetActive(false);
             }
 
-            //piece.dialogueTextÏÔÊ¾ÄÚÈİ£¬1fÏÔÊ¾Ê±¼ä£¬WaitForCompletion()µÈºòÇ°ÃæµÄ·½·¨Ö´ĞĞÍê
+            //piece.dialogueTextæ˜¾ç¤ºå†…å®¹ï¼Œ1fæ˜¾ç¤ºæ—¶é—´ï¼ŒWaitForCompletion()ç­‰å€™å‰é¢çš„æ–¹æ³•æ‰§è¡Œå®Œ
             yield return dialogueText.DOText(piece.dialogueText, 1f).WaitForCompletion();
             piece.isDone = true;
-            //Ò»¾ä¶Î»°½áÊøºó£¬ÏÔÊ¾¼ÌĞø°´Å¥ 
+            //ä¸€å¥æ®µè¯ç»“æŸåï¼Œæ˜¾ç¤ºç»§ç»­æŒ‰é’® 
             if(piece.hasToPause && piece.isDone)
             {
                 continueBox.SetActive(true);

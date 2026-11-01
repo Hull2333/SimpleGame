@@ -1,4 +1,4 @@
-using MFarm.CropPlant;
+ï»¿using MFarm.CropPlant;
 using MFarm.Inventory;
 using MFarm.Map;
 using System.Collections;
@@ -7,33 +7,33 @@ using System.Diagnostics;
 using UnityEngine;
 
 
-public class ReapableItem : MonoBehaviour  //µ÷ÓÃÔÚµØÍ¼ÔÓ²İ¡¢µØÍ¼Ğ¡Âó¶ÔÏóÉÏ
+public class ReapableItem : MonoBehaviour  //è°ƒç”¨åœ¨åœ°å›¾æ‚è‰ã€åœ°å›¾å°éº¦å¯¹è±¡ä¸Š
 {
     public GrassAnimController grassAnim;
     private Crop crop;
-    //ÊÕ¸îºó²úÉúµÄitem
+    //æ”¶å‰²åäº§ç”Ÿçš„item
     public int produceItemID;
-    //Éú³ÉµÄ×î´ó×îĞ¡ÊıÁ¿
+    //ç”Ÿæˆçš„æœ€å¤§æœ€å°æ•°é‡
     public int minProduceNum;
     public int maxPriduceNum;
-    //Á£×ÓÌØĞ§
+    //ç²’å­ç‰¹æ•ˆ
     private ParticalEffectType WeedFullEffect;
     private ParticalEffectType WeedDisappearEffect;
     private Grid weedGrid;
-    //µ±Ç°Éú³ÉµØÍ¼ÔÓ²İµÄµØÍ¼×ø±ê
+    //å½“å‰ç”Ÿæˆåœ°å›¾æ‚è‰çš„åœ°å›¾åæ ‡
     private Vector3Int weedGridPos;
-    //ÊÕ¸î´ÎÊı
+    //æ”¶å‰²æ¬¡æ•°
     private int reapCount;
-    //ÊÇ·ñÊÇÔÓ²İ
+    //æ˜¯å¦æ˜¯æ‚è‰
     public bool isWeeds;
-    //ÔÓ²İ´ºÏÄÇï¶¬µÄÍ¼Æ¬
+    //æ‚è‰æ˜¥å¤ç§‹å†¬çš„å›¾ç‰‡
     public Sprite[] springWeedSprites;
     public Sprite[] summerWeedSprites;
     public Sprite[] AutumnWeedSprites;
     public Sprite[] winterWeedSprites;
-    //µ±Ç°¼¾½ÚµÄÔÓ²İ
+    //å½“å‰å­£èŠ‚çš„æ‚è‰
     public Season currentSeasonWeed;
-    //ÊÇ·ñÊÇ´óÔÓ²İ
+    //æ˜¯å¦æ˜¯å¤§æ‚è‰
     public bool isBigWeeds;
     public Sprite[] bigWeedSprites;
     private void Start()
@@ -42,7 +42,7 @@ public class ReapableItem : MonoBehaviour  //µ÷ÓÃÔÚµØÍ¼ÔÓ²İ¡¢µØÍ¼Ğ¡Âó¶ÔÏóÉÏ
         {
             crop = GetComponent<Crop>();
         }
-        //»ñÈ¡Óëµ±Ç°Éú³ÉµØÍ¼ÔÓ²İµÄµØÍ¼×ø±ê
+        //è·å–ä¸å½“å‰ç”Ÿæˆåœ°å›¾æ‚è‰çš„åœ°å›¾åæ ‡
         weedGrid = FindObjectOfType<Grid>();
         weedGridPos = weedGrid.WorldToCell(transform.position);
         if (!isBigWeeds)
@@ -57,18 +57,18 @@ public class ReapableItem : MonoBehaviour  //µ÷ÓÃÔÚµØÍ¼ÔÓ²İ¡¢µØÍ¼Ğ¡Âó¶ÔÏóÉÏ
     }
    
     /// <summary>
-    /// Éú³ÉÔÓ²İ¡¢Ğ¡Âó
+    /// ç”Ÿæˆæ‚è‰ã€å°éº¦
     /// </summary>
     public void SpawnItems()
     {
         reapCount --;
-        //´óÔÓ²İ²»Ö´ĞĞ¶¯»­
+        //å¤§æ‚è‰ä¸æ‰§è¡ŒåŠ¨ç”»
         if (!isBigWeeds)
         {
-            //ÅĞ¶Ï²¥·ÅÔÓ²İ»¹ÊÇĞ¡Âó¶¯»­
+            //åˆ¤æ–­æ’­æ”¾æ‚è‰è¿˜æ˜¯å°éº¦åŠ¨ç”»
             if (isWeeds)
             {
-                //ÈÃÁ­µ¶´¥ÅöÔÓ²İÒ²Ò¡»ÎÒ»ÏÂ
+                //è®©é•°åˆ€è§¦ç¢°æ‚è‰ä¹Ÿæ‘‡æ™ƒä¸€ä¸‹
                 grassAnim.PlayLeftShakeAnim();
             }
             else
@@ -79,7 +79,7 @@ public class ReapableItem : MonoBehaviour  //µ÷ÓÃÔÚµØÍ¼ÔÓ²İ¡¢µØÍ¼Ğ¡Âó¶ÔÏóÉÏ
         if (reapCount <= 0)
         {
             int amountToProduce = Random.Range(minProduceNum, maxPriduceNum);
-            //ÊÕ»ñ»ñÈ¡µÄÎïÆ·ÊıÁ¿
+            //æ”¶è·è·å–çš„ç‰©å“æ•°é‡
             for (int j = 0; j < amountToProduce; j++)
             {
                 {
@@ -90,52 +90,52 @@ public class ReapableItem : MonoBehaviour  //µ÷ÓÃÔÚµØÍ¼ÔÓ²İ¡¢µØÍ¼Ğ¡Âó¶ÔÏóÉÏ
             {
                 switch (currentSeasonWeed)
                 {
-                    case Season.´ºÌì:
+                    case Season.æ˜¥å¤©:
                         WeedFullEffect = ParticalEffectType.WeedFall_Spring;
                         WeedDisappearEffect = ParticalEffectType.WeedDisappear_Spring;
                         break;
-                    case Season.ÏÄÌì:
+                    case Season.å¤å¤©:
                         WeedFullEffect = ParticalEffectType.WeedDisappear_Summer;
                         WeedDisappearEffect = ParticalEffectType.WeedDisappear_Summer;
                         break;
-                    case Season.ÇïÌì:
+                    case Season.ç§‹å¤©:
                         WeedFullEffect = ParticalEffectType.WeedFall_Autumn;
                         WeedDisappearEffect = ParticalEffectType.WeedDisappear_Autumn;
                         break;
-                    case Season.¶¬Ìì:
+                    case Season.å†¬å¤©:
                         WeedFullEffect = ParticalEffectType.WeedFall_Winter;
                         WeedDisappearEffect = ParticalEffectType.WeedDisappear_Winter;
                         break;
                 };
-                //ÔÓ²İÁ£×ÓÌØĞ§
+                //æ‚è‰ç²’å­ç‰¹æ•ˆ
                 EventHandler.CallParticleEffectEvent(WeedFullEffect, transform.position + Vector3.up, Vector2.zero);
                 EventHandler.CallParticleEffectEvent(WeedDisappearEffect, transform.position + Vector3.up, Vector2.zero);
             }
             else
             {
-                //ÔÓ²İÁ£×ÓÌØĞ§
+                //æ‚è‰ç²’å­ç‰¹æ•ˆ
                 EventHandler.CallParticleEffectEvent(ParticalEffectType.BigWeedFallEffect, transform.position, Vector2.zero);
             }
-            //»ñÈ¡µ±Ç°Éú³ÉµØÍ¼ÔÓ²İµØ¿éµÄTileDetail
+            //è·å–å½“å‰ç”Ÿæˆåœ°å›¾æ‚è‰åœ°å—çš„TileDetail
             var currentTileDetails = GridMapManager.Instance.GetTileDetailsOnMousePosition(weedGridPos);
             if (!isBigWeeds)
             {
                 if (isWeeds)
                 {
-                    //ÔÓ²İÒÑÊÕ¸î,¿É¼ÌĞøÉú³ÉÔÓ²İ
+                    //æ‚è‰å·²æ”¶å‰²,å¯ç»§ç»­ç”Ÿæˆæ‚è‰
                     currentTileDetails.haveWeeds = -1;
                     currentTileDetails.predictHaveWeeds = -1;
                 }
                 else
                 {
-                    //Ğ¡ÂóÒÑÊÕ¸î£¬¿É¼ÌĞøÖÖÖ²
+                    //å°éº¦å·²æ”¶å‰²ï¼Œå¯ç»§ç»­ç§æ¤
                     currentTileDetails.daysSinceLastHarvest = -1;
                     currentTileDetails.seedItemID = -1;
                 }
             }
             else
             {
-                //´óÔÓ²İÒÑÊÕ¸î£¬¿É¼ÌĞø³¤³ö´óÔÓ²İ
+                //å¤§æ‚è‰å·²æ”¶å‰²ï¼Œå¯ç»§ç»­é•¿å‡ºå¤§æ‚è‰
                 currentTileDetails.haveBigWeeds = -1;
             }
             Destroy(gameObject);
@@ -143,7 +143,7 @@ public class ReapableItem : MonoBehaviour  //µ÷ÓÃÔÚµØÍ¼ÔÓ²İ¡¢µØÍ¼Ğ¡Âó¶ÔÏóÉÏ
         
     }
     /// <summary>
-    /// ÉèÖÃÔÓ²İµÄ¼¾½ÚÍ¼Æ¬
+    /// è®¾ç½®æ‚è‰çš„å­£èŠ‚å›¾ç‰‡
     /// </summary>
     public void SetWeedSprite()
     {
@@ -155,7 +155,7 @@ public class ReapableItem : MonoBehaviour  //µ÷ÓÃÔÚµØÍ¼ÔÓ²İ¡¢µØÍ¼Ğ¡Âó¶ÔÏóÉÏ
         GetComponentInChildren<SpriteRenderer>().sprite = sprites[Random.Range(0, sprites.Length)];
     }
     /// <summary>
-    /// ¸ù¾İ¼¾½ÚÀ´ÉèÖÃÔÓ²İµÄÍ¼Æ¬
+    /// æ ¹æ®å­£èŠ‚æ¥è®¾ç½®æ‚è‰çš„å›¾ç‰‡
     /// </summary>
     public void AccordingSeasonChangeWeedSprite()
     {
@@ -166,30 +166,30 @@ public class ReapableItem : MonoBehaviour  //µ÷ÓÃÔÚµØÍ¼ÔÓ²İ¡¢µØÍ¼Ğ¡Âó¶ÔÏóÉÏ
         SetWeedSprite();
     }
     /// <summary>
-    /// ÉèÖÃ´óÔÓ²İµÄÍ¼Æ¬
+    /// è®¾ç½®å¤§æ‚è‰çš„å›¾ç‰‡
     /// </summary>
     public void SetBigWeedSprite()
     {
         GetComponentInChildren<SpriteRenderer>().sprite = bigWeedSprites[Random.Range(0, bigWeedSprites.Length)];
     }
     /// <summary>
-    /// ¸ù¾İµ±Ç°¼¾½Ú·µ»Ø¶ÔÓ¦µÄÔÓ²İÍ¼Æ¬Êı×é
+    /// æ ¹æ®å½“å‰å­£èŠ‚è¿”å›å¯¹åº”çš„æ‚è‰å›¾ç‰‡æ•°ç»„
     /// </summary>
     private Sprite[] GetSeasonWeedSprites(Season season)
     {
         switch (season)
         {
-            case Season.´ºÌì: 
-                currentSeasonWeed = Season.´ºÌì; 
+            case Season.æ˜¥å¤©: 
+                currentSeasonWeed = Season.æ˜¥å¤©; 
                 return springWeedSprites;
-            case Season.ÏÄÌì:
-                currentSeasonWeed = Season.ÏÄÌì; 
+            case Season.å¤å¤©:
+                currentSeasonWeed = Season.å¤å¤©; 
                 return summerWeedSprites;
-            case Season.ÇïÌì:
-                currentSeasonWeed = Season.ÇïÌì; 
+            case Season.ç§‹å¤©:
+                currentSeasonWeed = Season.ç§‹å¤©; 
                 return AutumnWeedSprites;
-            case Season.¶¬Ìì: 
-                currentSeasonWeed = Season.¶¬Ìì; 
+            case Season.å†¬å¤©: 
+                currentSeasonWeed = Season.å†¬å¤©; 
                 return winterWeedSprites;
             default: return springWeedSprites;
         }

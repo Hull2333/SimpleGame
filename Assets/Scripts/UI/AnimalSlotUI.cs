@@ -1,4 +1,4 @@
-using MFarm.Inventory;
+锘縰sing MFarm.Inventory;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Serialization;
@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using static AnimalData_SO;
 
-public class AnimalSlotUI : MonoBehaviour //调用在AnimalShopSlot预制体上
+public class AnimalSlotUI : MonoBehaviour //璋冪敤鍦ˋnimalShopSlot棰勫埗浣撲笂
 {
     public Image spriteImage;
     public TextMeshProUGUI name;
@@ -33,7 +33,7 @@ public class AnimalSlotUI : MonoBehaviour //调用在AnimalShopSlot预制体上
         name.text = currentAnimalDetails.name;
         price.text = currentAnimalDetails.animalPrice.ToString();
         button.interactable = true;
-        //检查是否符合购买动物的条件
+        //妫�鏌ユ槸鍚︾鍚堣喘涔板姩鐗╃殑鏉′欢
         if (!itemManager.HaveBuildingCanBreeding(currentAnimalDetails.animSize))
         {
             button.interactable = false;
@@ -41,7 +41,7 @@ public class AnimalSlotUI : MonoBehaviour //调用在AnimalShopSlot预制体上
 
     }
     /// <summary>
-    /// 选择动物要放置的建筑
+    /// 閫夋嫨鍔ㄧ墿瑕佹斁缃殑寤虹瓚
     /// </summary>
     private void SelectAnimalBuilding()
     {

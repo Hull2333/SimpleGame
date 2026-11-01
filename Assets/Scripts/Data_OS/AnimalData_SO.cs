@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 [CreateAssetMenu(fileName = "AnimalDataList_SO", menuName = "Animal/AnimalDataList_SO")]
@@ -6,7 +6,7 @@ public class AnimalData_SO : ScriptableObject
 {
     public List<AnimalDetails> animDetailsList = new List<AnimalDetails>();
     /// <summary>
-    /// ����ID��ȡ������Ϣ
+    /// 根据ID获取动物信息
     /// </summary>
     /// <param name="animalID"></param>
     /// <returns></returns>
@@ -17,7 +17,7 @@ public class AnimalData_SO : ScriptableObject
     [System.Serializable]
     public class AnimalDetails
     {
-        //����ID����С�����֡�ͼƬ���۸񡢼�ֵ�����̼�ֵ��Ԥ����
+        //动物ID、大小、名字、图片、价格、价值、幼崽价值、预制体
         public int animalID;
         public int growthDay;
         public AnimalSizeType animSize;
@@ -26,7 +26,7 @@ public class AnimalData_SO : ScriptableObject
         public int animalPrice;
         public int animalValue;
         public int animalBabyValue;
-        //ס�ĳ�������
+        //住的场景名字
         public string coopName;
         public GameObject animalPrefab;
     }

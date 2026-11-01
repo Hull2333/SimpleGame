@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 [CreateAssetMenu(fileName = "InventoryBag_SO", menuName = "Inventory/InventoryBag_SO")]
@@ -7,16 +7,16 @@ public class InventoryBag_SO : ScriptableObject
 
     public List<InventoryItem> itemList;
     /// <summary>
-    /// Í¨¹ıID²éÕÒ±³°üÊÇ·ñÓĞ¸ÃIDÎïÆ·
+    /// é€šè¿‡IDæŸ¥æ‰¾èƒŒåŒ…æ˜¯å¦æœ‰è¯¥IDç‰©å“
     /// </summary>
-    /// <param name="ID">Ğè²éÕÒµÄÎïÆ·ID</param>
+    /// <param name="ID">éœ€æŸ¥æ‰¾çš„ç‰©å“ID</param>
     /// <returns></returns>
     public InventoryItem GetInventoryItem(int ID)
     {
         return itemList.Find(i => i.itemID == ID);
     }
     /// <summary>
-    /// »ñÈ¡¸ÃÎïÆ·ÔÚÍæ¼Ò±³°üÖĞµÄ×ÜÊıÁ¿
+    /// è·å–è¯¥ç‰©å“åœ¨ç©å®¶èƒŒåŒ…ä¸­çš„æ€»æ•°é‡
     /// </summary>
     /// <param name="ID"></param>
     /// <returns></returns>

@@ -1,4 +1,4 @@
-
+Ôªø
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -17,7 +17,7 @@ public class ChaseState : IState
     }
     public void OnUpdate()
     {
-        //µ–»À ‹…À
+        //Êïå‰∫∫Âèó‰º§
         if (parameter.isHurted)
         {
             manager.TransitionState(EnemyStateType.Hurted);
@@ -28,14 +28,14 @@ public class ChaseState : IState
         {
             if (Vector2.Distance(parameter.playerTransform.position, parameter.parentPos.position) < 10f)
             {
-                // ”“∞ƒ⁄”–Player£¨ø™ º“‘◊∑ª˜ÀŸ∂»≥ÂœÚPlayer
+                //ËßÜÈáéÂÜÖÊúâPlayerÔºåÂºÄÂßã‰ª•ËøΩÂáªÈÄüÂ∫¶ÂÜ≤ÂêëPlayer
                 if (manager.ShoutNoticeRay())
                 {
                     manager.transform.position = Vector2.MoveTowards(manager.transform.position, parameter.target.position, parameter.chaseSpeed * Time.deltaTime);
                     parameter.animator.SetBool("isMoving", parameter.isMoving);
                     parameter.animator.SetFloat("MoveX", parameter.moveX);
                     parameter.animator.SetFloat("MoveY", parameter.moveY);
-                    //ÕÊº“Ω¯»Îµ–»Àπ•ª˜∑∂Œß ±£¨µ–»Àø™ ºπ•ª˜
+                    //Áé©ÂÆ∂ËøõÂÖ•Êïå‰∫∫ÊîªÂáªËåÉÂõ¥Êó∂ÔºåÊïå‰∫∫ÂºÄÂßãÊîªÂáª
                     if (Vector2.Distance(manager.transform.position, parameter.target.position) <= parameter.attackArea)
                     {
                         manager.TransitionState(EnemyStateType.Attack);
@@ -47,7 +47,7 @@ public class ChaseState : IState
                     manager.TransitionState(EnemyStateType.Idle);
                 }
             }
-            //≥¨≥ˆ◊∑ª˜∑∂Œß
+            //Ë∂ÖÂá∫ËøΩÂáªËåÉÂõ¥
             else
             {
                 parameter.target = null;

@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 namespace MFarm.AStar
@@ -9,7 +9,7 @@ namespace MFarm.AStar
         public int hour;
         public int minute;
         public int second;
-        //ÍßÆ¬×ø±ê
+        //ç“¦ç‰‡åæ ‡
         public Vector2Int gridCoordinate;
     }
 

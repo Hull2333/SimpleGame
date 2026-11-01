@@ -1,4 +1,4 @@
-
+ï»¿
 using MFarm.Inventory;
 using MFarm.Map;
 using MFarm.Save;
@@ -15,9 +15,9 @@ using MFarm.AStar;
 using System.Linq;
 using DG.Tweening;
 using MFarm.Transition;
-public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
+public class PlayerController : MonoBehaviour, ISaveable  //è°ƒç”¨åœ¨Playerå¯¹è±¡ä¸Š
 {
-    [Header("Íæ¼ÒÊôĞÔ")]
+    [Header("ç©å®¶å±æ€§")]
     public string playerName;
     public float speed;
     public float tiredSpeed;
@@ -26,13 +26,13 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
     public float maxStmina;
     private int defenceValue;
     [HideInInspector] public float currentStmina;
-    //½£·ÀÓùºÍ´¦¾öCD
+    //å‰‘é˜²å¾¡å’Œå¤„å†³CD
     private float swordDefenceCD = 1f;
     public Collider2D playerCollider;
     public PlayerAttack playerAttack;
-    [Header("Íæ¼ÒµÈ¼¶")]
-    //ÖÖÖ²¡¢ÑøÖ³¡¢µöÓã¡¢Õ½¶·¡¢Ì½Ë÷
-    //µÈ¼¶¡¢×î´ó¾­ÑéÖµ¡¢µ±Ç°¾­ÑéÖµ
+    [Header("ç©å®¶ç­‰çº§")]
+    //ç§æ¤ã€å…»æ®–ã€é’“é±¼ã€æˆ˜æ–—ã€æ¢ç´¢
+    //ç­‰çº§ã€æœ€å¤§ç»éªŒå€¼ã€å½“å‰ç»éªŒå€¼
     [HideInInspector] public int plantingSkill;
     [HideInInspector] public int plantingMaxEXP;
     [HideInInspector] public int plantingCurrentEXP;
@@ -49,148 +49,148 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
     [HideInInspector] public int exploreMaxEXP;
     [HideInInspector] public int exploreCurrentEXP;
     [Header("-------------------------------------------------------")]
-    [Header("ÊÜ»÷²ÎÊı")]
+    [Header("å—å‡»å‚æ•°")]
     private bool invulnerable;
     public float invulnerableDuration;
-    //ÊÜ»÷µÄÑÕÉ«±ä»¯
+    //å—å‡»çš„é¢œè‰²å˜åŒ–
     private SpriteRenderer[] sr;
     private Color originalColor;
     public Rigidbody2D rb;
-    //ÊÜ»÷ºóÍËµÄ¾àÀë¡¢Ê±¼ä¡¢ÒÆ¶¯³Ì¶È
+    //å—å‡»åé€€çš„è·ç¦»ã€æ—¶é—´ã€ç§»åŠ¨ç¨‹åº¦
     private float knockbackDistance = 1f;
     private float knockbackDuration = 0.3f;
     public AnimationCurve knockbackCurve;
     [HideInInspector] public bool isKnocking = false;
     [SerializeField] private GameObject damageNumPrefab;
-    [Header("ÒÆ¶¯Ïà¹Ø")]
-    //»ñÈ¡Íæ¼ÒÊäÈëµÄÒÆ¶¯
+    [Header("ç§»åŠ¨ç›¸å…³")]
+    //è·å–ç©å®¶è¾“å…¥çš„ç§»åŠ¨
     private float inputX;
     private float inputY;
-    //»ñÈ¡Íæ¼ÒÊäÈëµÄÒÆ¶¯·½Ïò
+    //è·å–ç©å®¶è¾“å…¥çš„ç§»åŠ¨æ–¹å‘
     private Vector2 movementInput;
-    //Íæ¼ÒÊÇ·ñÕıÔÚÒÆ¶¯
+    //ç©å®¶æ˜¯å¦æ­£åœ¨ç§»åŠ¨
     [HideInInspector] public bool isMoving;
     [HideInInspector] public bool inputDisable;
     // Ignore new tool clicks while a tool animation is playing, so the action does not restart midway
     private bool isUsingTool;
-    //¶¯»­Ê¹ÓÃ¹¤¾ßÃæ³¯·½Ïò
+    //åŠ¨ç”»ä½¿ç”¨å·¥å…·é¢æœæ–¹å‘
     private float mouseX;
     private float mouseY;
-    //»ñÈ¡¸Ã¶ÔÏóµÄGUID
+    //è·å–è¯¥å¯¹è±¡çš„GUID
     public string GUID => GetComponent<DataGUID>().guid;
-    //ÈËÎïÃæ³¯·½Ïò
+    //äººç‰©é¢æœæ–¹å‘
     private bool faceUp, faceDown, faceLeft, faceRight;
-    // Íæ¼Òµ±Ç°Ãæ³¯·½Ïò£¨¹©µöÓãµÈÍâ²¿Âß¼­¶ÁÈ¡£©
+    // ç©å®¶å½“å‰é¢æœæ–¹å‘ï¼ˆä¾›é’“é±¼ç­‰å¤–éƒ¨é€»è¾‘è¯»å–ï¼‰
     public Vector2 FaceDirection => faceUp ? Vector2.up : faceDown ? Vector2.down : faceLeft ? Vector2.left : Vector2.right;
     public GameObject cursorManager;
     private CursorManager cM;
-    //Íæ¼Ò¶¯×÷×é
+    //ç©å®¶åŠ¨ä½œç»„
     public GameObject[] playerAnimatorGroup;
-    //»ñÈ¡PlayerÉÏËùÓĞµÄAnimator
+    //è·å–Playerä¸Šæ‰€æœ‰çš„Animator
     [HideInInspector] public List<Animator> animators = new List<Animator>();
-    [Header("µöÓãÏµÍ³")]
-    //Óã¹³Éú³ÉÎ»ÖÃºÍÂäµã¡¢Óã¹³Å×ÎïÏßÖĞµã¡¢ÓãÏßÖĞµã
+    [Header("é’“é±¼ç³»ç»Ÿ")]
+    //é±¼é’©ç”Ÿæˆä½ç½®å’Œè½ç‚¹ã€é±¼é’©æŠ›ç‰©çº¿ä¸­ç‚¹ã€é±¼çº¿ä¸­ç‚¹
     public Transform baitAppearPos;
     private Vector3 baitEndPos;
     private Vector3 baitParabolaMidPos;
     private Vector3 fishlineMidPos;
-    //ÊÇ·ñÔÚÅ×¸ÍÖĞ
+    //æ˜¯å¦åœ¨æŠ›ç«¿ä¸­
     public bool isBait = false;
-    //Óã¹³ËùÔÚÍßÆ¬
+    //é±¼é’©æ‰€åœ¨ç“¦ç‰‡
     private Grid baitGrid;
-    //µöÓãÖĞ
+    //é’“é±¼ä¸­
     private bool isFishing;
-    //µöÓã¸ĞÌ¾ºÅ
+    //é’“é±¼æ„Ÿå¹å·
     public GameObject exclamatonMark;
     public bool canCatchFish = false;
     private bool exclamationEnable;
-    //µöÓãËæ»úÊ±¼ä
+    //é’“é±¼éšæœºæ—¶é—´
     private float fishingRandomTime;
-    //µöÓã¼ÆÊ±Æ÷
+    //é’“é±¼è®¡æ—¶å™¨
     private float currentFishingTime;
-    //µöÓãĞ¡ÓÎÏ·
+    //é’“é±¼å°æ¸¸æˆ
     public GameObject fishBg;
     private int randomFishIndex;
-    //ÊÇ·ñÕıÔÚµöÓãÓÎÏ·
+    //æ˜¯å¦æ­£åœ¨é’“é±¼æ¸¸æˆ
     private bool isFishingGame;
     public GameObject readyText;
-    [Header("ÓãÓëÅ×ÎïÏß")]
+    [Header("é±¼ä¸æŠ›ç‰©çº¿")]
     private GameObject fish;
-    //ÊÇ·ñÕıÔÚÊÕÓã
+    //æ˜¯å¦æ­£åœ¨æ”¶é±¼
     public bool fishMove = false;
-    //ÊÇ·ñÏÔÊ¾ÓãÏß
+    //æ˜¯å¦æ˜¾ç¤ºé±¼çº¿
     private bool isFishLine = false;
-    //ÓãÏß
+    //é±¼çº¿
     public LineRenderer fishLine;
-    //ĞîÁ¦Ìõ»­²¼
+    //è“„åŠ›æ¡ç”»å¸ƒ
     public GameObject fishPowerProcessCanvas;
-    //Êó±ê³¤°´Ê±¼ä
+    //é¼ æ ‡é•¿æŒ‰æ—¶é—´
     public float mouseDownTimer;
-    //Êó±ê³¤°´Ê±¼äÊÇ·ñÔö¼Ó
+    //é¼ æ ‡é•¿æŒ‰æ—¶é—´æ˜¯å¦å¢åŠ 
     private bool isMouseDownTimerIncrease;
-    //Êó±êĞîÁ¦Ìõ
+    //é¼ æ ‡è“„åŠ›æ¡
     public UnityEngine.UI.Image mouseDownProcess;
-    //Óã¹³ÓÎÏ·¶ÔÏó
+    //é±¼é’©æ¸¸æˆå¯¹è±¡
     public GameObject baitGameObject;
-    //Óã¹³Å×³öËÙ¶È
+    //é±¼é’©æŠ›å‡ºé€Ÿåº¦
     public float baitSpeed;
-    //Óã¹³Å×ÎïÏßÂ·¾¶µãÁĞ±í
+    //é±¼é’©æŠ›ç‰©çº¿è·¯å¾„ç‚¹åˆ—è¡¨
     private List<Vector3> baitParabolaPointList = new List<Vector3>();
-    //ÓãµÄÅ×ÎïÏßÂ·¾¶µÄÁĞ±í
+    //é±¼çš„æŠ›ç‰©çº¿è·¯å¾„çš„åˆ—è¡¨
     private List<Vector3> fishParabolaPointList = new List<Vector3>();
-    //Óã¹³Å×ÎïÏßµÄ³¤¶È
+    //é±¼é’©æŠ›ç‰©çº¿çš„é•¿åº¦
     public float totalBaitParabolaLength;
-    //ÓãµÄÅ×ÎïÏß³¤¶È
+    //é±¼çš„æŠ›ç‰©çº¿é•¿åº¦
     private float totalFishParabolaLength;
-    //µ±Ç°Óã¹³ÒÑÅ×³öµÄ³¤¶È
+    //å½“å‰é±¼é’©å·²æŠ›å‡ºçš„é•¿åº¦
     private float currentBaitParabolaLength = 0;
-    //µ±Ç°ÓãÒÑÅ×³öµÄ³¤¶È
+    //å½“å‰é±¼å·²æŠ›å‡ºçš„é•¿åº¦
     private float currentFishParabolaLength = 0;
-    //µ±Ç°Óã¹³µ½´ïµÄÂ·¾¶µã
+    //å½“å‰é±¼é’©åˆ°è¾¾çš„è·¯å¾„ç‚¹
     public int baitParabolaPointIndex = 0;
-    //µ±Ç°Óãµ½´ïµÄÂ·¾¶µÄ
+    //å½“å‰é±¼åˆ°è¾¾çš„è·¯å¾„çš„
     private int fishParabolaPintIndex = 0;
-    //Óã¹³Î»ÖÃ
+    //é±¼é’©ä½ç½®
     private Vector3 baitPos;
-    //ÓãµÄÎ»ÖÃ
+    //é±¼çš„ä½ç½®
     private Vector3 fishPos;
-    //Óã¹³ÒÆ¶¯·½Ïò
+    //é±¼é’©ç§»åŠ¨æ–¹å‘
     private Vector3 baitDir;
-    //ÓãµÄ·½Ïò
+    //é±¼çš„æ–¹å‘
     private Vector3 fishDir;
-    //´ÓÅ×¸Í¿ªÊ¼¼ÆÊ±
+    //ä»æŠ›ç«¿å¼€å§‹è®¡æ—¶
     public float baitInSkyTime;
-    //ÓãÔÚ¿ÕÖĞÊ±¿ªÊ¼¼ÆÊ±
+    //é±¼åœ¨ç©ºä¸­æ—¶å¼€å§‹è®¡æ—¶
     public float fishInSkyTime;
-    //Óã¹³Å×³öÊ±µÄĞı×ª½Ç¶È
+    //é±¼é’©æŠ›å‡ºæ—¶çš„æ—‹è½¬è§’åº¦
     public AnimationCurve baitRotationCurve;
-    //Éú³ÉµÄÓã
+    //ç”Ÿæˆçš„é±¼
     public GameObject fishPrefab;
-    //ÓãµÄÍ¼Æ¬
+    //é±¼çš„å›¾ç‰‡
     public GameObject fishItem;
-    //Éú³ÉÓãµÄĞÅÏ¢
+    //ç”Ÿæˆé±¼çš„ä¿¡æ¯
     private ItemDetails fishDetails;
-    //ÓÎÏ·Ê±¼äÊÇ·ñÍ£Ö¹×´Ì¬
+    //æ¸¸æˆæ—¶é—´æ˜¯å¦åœæ­¢çŠ¶æ€
     private bool isGameTimePause = false;
-    [Header("Âı¶¯×÷ÉèÖÃ")]
+    [Header("æ…¢åŠ¨ä½œè®¾ç½®")]
     public float normalTimeScale = 1f;
     public float slowMotionTimeScale = 0.1f;
     public float transtionDuration = 0.5f;
     public float currentTransitionTime;
     public bool isSlowMotionTime;
-    //·ÀÓùÅö×²ÌØĞ§
+    //é˜²å¾¡ç¢°æ’ç‰¹æ•ˆ
     public GameObject[] defenceEffects;
     public int effectIndex;
-    //ÕıÔÚ½øĞĞNPCÊÂ¼ş
+    //æ­£åœ¨è¿›è¡ŒNPCäº‹ä»¶
     public bool isNpcEvent;
-    //NPC¿ªÊ¼Ê±µÄÎ»ÖÃ
+    //NPCå¼€å§‹æ—¶çš„ä½ç½®
     private Vector2 npcEventOriginPos;
-    //×øÒÎ×ÓÏà¹Ø
-    // ×øÒÎ×ÓÇ°µÄÎ»ÖÃ
+    //åæ¤…å­ç›¸å…³
+    // åæ¤…å­å‰çš„ä½ç½®
     private Vector3 sitOriginPos;  
     private bool isSittingOnChair;
     private Chair currentChair;
-    // ÕıÔÚ»¡ÏßÒÆ¶¯ÖĞ
+    // æ­£åœ¨å¼§çº¿ç§»åŠ¨ä¸­
     private bool isSittingInProgress;  
     public void Awake()
     {
@@ -200,10 +200,10 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
             animators.Add(playerAnim.GetComponent<Animator>());
         }
         rb = GetComponent<Rigidbody2D>();
-        //»ñÈ¡ËùÓĞ×ÓÎïÌåÏÂµÄAnimator×é¼ş
+        //è·å–æ‰€æœ‰å­ç‰©ä½“ä¸‹çš„Animatorç»„ä»¶
         inputDisable = true;
         cM = cursorManager.GetComponent<CursorManager>();
-        //»ñÈ¡ËùÓĞ×ÓÎïÌåÏÂµÄSpriteRenderer×é¼ş
+        //è·å–æ‰€æœ‰å­ç‰©ä½“ä¸‹çš„SpriteRendererç»„ä»¶
         sr = GetComponentsInChildren<SpriteRenderer>();
     }
 
@@ -213,7 +213,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         currentHealth = maxHealth;
         currentStmina = maxStmina;
         ISaveable saveable = this;
-        //Ö´ĞĞISaveable½Ó¿ÚµÄ·½·¨
+        //æ‰§è¡ŒISaveableæ¥å£çš„æ–¹æ³•
         saveable.RegisterSaveable();
 
     }
@@ -225,11 +225,11 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         }
         else
         {
-            //½ûÖ¹¶ÔÍæ¼Ò²Ù×÷Ê±Íæ¼ÒÍ£Ö¹ÒÆ¶¯
+            //ç¦æ­¢å¯¹ç©å®¶æ“ä½œæ—¶ç©å®¶åœæ­¢ç§»åŠ¨
             isMoving = false;
         }
         SwitchAnimation();
-        //Ö´ĞĞÂı¶¯×÷
+        //æ‰§è¡Œæ…¢åŠ¨ä½œ
         if (isSlowMotionTime)
         {
             if(currentTransitionTime < transtionDuration)
@@ -254,10 +254,10 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
 
             //ThrowBait();
         }
-        //µÈ´ıÓãÉÏ¹³ÖĞ
+        //ç­‰å¾…é±¼ä¸Šé’©ä¸­
         if (isFishing)
         {
-            //µöÓãÖĞÇÒ²»ÔÚµöÓãÓÎÏ·Ê±µã»÷Êó±êÓÒ¼ü¿ÉÖĞ¶ÏµöÓã
+            //é’“é±¼ä¸­ä¸”ä¸åœ¨é’“é±¼æ¸¸æˆæ—¶ç‚¹å‡»é¼ æ ‡å³é”®å¯ä¸­æ–­é’“é±¼
             //if (Input.GetMouseButtonDown(1) && !isFishingGame)
             //{
             //    ExitFishing();
@@ -268,7 +268,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
             }
             StartFishGame();
         }
-        //È·ÈÏÓæ»ñºó»Ö¸´Õ¾Á¢×´Ì¬
+        //ç¡®è®¤æ¸”è·åæ¢å¤ç«™ç«‹çŠ¶æ€
         if (isGameTimePause && Input.anyKeyDown)
         {
             foreach (var anim in animators)
@@ -303,10 +303,10 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         }
         if (isFishLine)
         {
-            //ËæÊ±»ñÈ¡ÓãÏßÖĞµã
+            //éšæ—¶è·å–é±¼çº¿ä¸­ç‚¹
             fishlineMidPos = GetMidPoint(baitAppearPos.position, baitGameObject.transform.position, Settings.fishLinePercent, Settings.fishLineOffsetY);
             //fishLine.positionCount = 50;
-            //»æÖÆÓãÏß
+            //ç»˜åˆ¶é±¼çº¿
             for (int i = 0; i < 50; i++)
             {
                 Vector3 point = CalculateBezierPoint(baitAppearPos.position, fishlineMidPos, baitGameObject.transform.position, (i / 50.0f));
@@ -325,9 +325,9 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         EventHandler.MouseHoldEvent += OnMouseHoldEvent;
         EventHandler.MouseUpEvent += OnMouseUpEvent;
         EventHandler.UpdateGameStateEvent += OnUpdateGameStateEvent;
-        //¿ªÊ¼ĞÂÓÎÏ·ÊÂ¼ş
+        //å¼€å§‹æ–°æ¸¸æˆäº‹ä»¶
         EventHandler.StartNewGameEvent += OnStartNewGameEvent;
-        //½áÊøÓÎÏ·µÄÊÂ¼ş
+        //ç»“æŸæ¸¸æˆçš„äº‹ä»¶
         EventHandler.EndGameEvent += OnEndGameEvent;
         EventHandler.PlayerDecreaseStminaEvent += OnPlayerDecreaseStminaEvent;
         EventHandler.PlayerDecreaseHealthEvent += OnPlayerDecreaseHealthEvent;
@@ -382,7 +382,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
 
     private void OnMouseClickedEvent(Vector3 mouseWorldPos, ItemDetails itemDetails)
     {
-        //TODO:Ö´ĞĞ¶¯»­
+        //TODO:æ‰§è¡ŒåŠ¨ç”»
         if (itemDetails.itemType != ItemType.Seed && itemDetails.itemType != ItemType.Commodity && itemDetails.itemType != ItemType.Furniture && itemDetails.itemType != ItemType.FishingRod && itemDetails.itemType != ItemType.Cooked)
         {
             // A tool animation is still playing: drop this click until the current one finishes
@@ -390,10 +390,10 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
             {
                 return;
             }
-            //ÅĞ¶ÏÊ¹ÓÃ¹¤¾ßÊ±Ãæ³¯·½Ïò
+            //åˆ¤æ–­ä½¿ç”¨å·¥å…·æ—¶é¢æœæ–¹å‘
             mouseX = mouseWorldPos.x - transform.position.x;
             mouseY = mouseWorldPos.y - (transform.position.y + 0.85f);
-            //Abs¾ø¶ÔÖµÅĞ¶Ï£¬µ±XÖá·½ÏòÉÏµÄ²îÒì´óÓÚYÖáÉÏµÄ²îÒì£¬ÓÅÏÈÅĞ¶ÏXÖáÉÏµÄ·½Ïò,·´Ö®£¬ÓÅÏÈÅĞ¶ÏYÖá·½Ïò
+            //Absç»å¯¹å€¼åˆ¤æ–­ï¼Œå½“Xè½´æ–¹å‘ä¸Šçš„å·®å¼‚å¤§äºYè½´ä¸Šçš„å·®å¼‚ï¼Œä¼˜å…ˆåˆ¤æ–­Xè½´ä¸Šçš„æ–¹å‘,åä¹‹ï¼Œä¼˜å…ˆåˆ¤æ–­Yè½´æ–¹å‘
             if (MathF.Abs(mouseX) > MathF.Abs(mouseY))
             {
                 mouseY = 0;
@@ -404,7 +404,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
             }
             StartCoroutine(UseToolRoutine(mouseWorldPos, itemDetails));
         }
-        //²»ÊÇ¹¤¾ß¾ÍÖ±½ÓÖ´ĞĞ
+        //ä¸æ˜¯å·¥å…·å°±ç›´æ¥æ‰§è¡Œ
         else
         {
             EventHandler.CallExecuteActionAfterAnimation(mouseWorldPos, itemDetails);
@@ -412,21 +412,21 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
     }
 
     /// <summary>
-    /// ³¤°´Êó±ê×ó¼üÖ´ĞĞ¶¯»­ºÍ²Ù×÷
+    /// é•¿æŒ‰é¼ æ ‡å·¦é”®æ‰§è¡ŒåŠ¨ç”»å’Œæ“ä½œ
     /// </summary>
     /// <param name="mouseWorldPos"></param>
     /// <param name="itemDetails"></param>
     private void OnMouseHoldEvent(Vector3 mouseWorldPos, ItemDetails itemDetails)
     {
-        //³¤°´Ê±²»ÈÃÒÆ¶¯
+        //é•¿æŒ‰æ—¶ä¸è®©ç§»åŠ¨
         inputDisable = true;
         
         if (itemDetails.itemType == ItemType.FishingRod)
         {
-            //ÅĞ¶ÏÊ¹ÓÃ¹¤¾ßÊ±Ãæ³¯·½Ïò
+            //åˆ¤æ–­ä½¿ç”¨å·¥å…·æ—¶é¢æœæ–¹å‘
             mouseX = mouseWorldPos.x - transform.position.x;
             mouseY = mouseWorldPos.y - (transform.position.y + 0.85f);
-            //Abs¾ø¶ÔÖµÅĞ¶Ï£¬µ±XÖá·½ÏòÉÏµÄ²îÒì´óÓÚYÖáÉÏµÄ²îÒì£¬ÓÅÏÈÅĞ¶ÏXÖáÉÏµÄ·½Ïò,·´Ö®£¬ÓÅÏÈÅĞ¶ÏYÖá·½Ïò
+            //Absç»å¯¹å€¼åˆ¤æ–­ï¼Œå½“Xè½´æ–¹å‘ä¸Šçš„å·®å¼‚å¤§äºYè½´ä¸Šçš„å·®å¼‚ï¼Œä¼˜å…ˆåˆ¤æ–­Xè½´ä¸Šçš„æ–¹å‘,åä¹‹ï¼Œä¼˜å…ˆåˆ¤æ–­Yè½´æ–¹å‘
             if (MathF.Abs(mouseX) > MathF.Abs(mouseY))
             {
                 mouseY = 0;
@@ -438,7 +438,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
             fishPowerProcessCanvas.SetActive(true);
             PlayerFaceDirection();
             StartCoroutine(UseToolHoldRoutine());
-            //¿ØÖÆÊó±êĞîÁ¦Ê±¼äÔÚÒ»¶¨·¶Î§ÄÚ
+            //æ§åˆ¶é¼ æ ‡è“„åŠ›æ—¶é—´åœ¨ä¸€å®šèŒƒå›´å†…
             if (isMouseDownTimerIncrease)
             {
                 mouseDownTimer += 5f * Time.deltaTime;
@@ -471,14 +471,14 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         cM.fishingEventDisable = true;
         isMouseDownTimerIncrease = true;
         fishPowerProcessCanvas.SetActive(false);
-        //Óã¸ÍÅ×³ö¶¯×÷
+        //é±¼ç«¿æŠ›å‡ºåŠ¨ä½œ
         foreach (var anim in animators)
         {
             anim.SetTrigger("Tool2");
         }
-        //ÏÔÊ¾ÓãÏß
+        //æ˜¾ç¤ºé±¼çº¿
         fishLine.gameObject.SetActive(true);
-        //¸ù¾İÃæ³¯·½ÏòÉèÖÃÓã¹³Âäµã
+        //æ ¹æ®é¢æœæ–¹å‘è®¾ç½®é±¼é’©è½ç‚¹
         if (faceDown)
         {
             baitEndPos = new Vector3(transform.position.x, transform.position.y - mouseDownTimer * Settings.downPower);
@@ -495,7 +495,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         {
             baitEndPos = new Vector3(transform.position.x, transform.position.y + mouseDownTimer * Settings.downPower);
         }
-        //»ñÈ¡Óã¹³Å×ÎïÏßÖĞµã
+        //è·å–é±¼é’©æŠ›ç‰©çº¿ä¸­ç‚¹
         baitParabolaMidPos = GetMidPoint(baitAppearPos.position, baitEndPos, Settings.fishParabolaPercent, Settings.fishaParabolaOffsetY);
         baitParabolaPointList.Clear();
         AddParabolaPointList(baitAppearPos.position, baitParabolaMidPos, baitEndPos, baitParabolaPointList);
@@ -505,23 +505,23 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         baitParabolaPointIndex = 0;
         isBait = true;
         mouseDownTimer = 0;
-        //¸ù¾İ×°±¸µÄÓã¶üÀ´¼õÉÙµöÓãµÈ´ıµÄÊ±¼ä
+        //æ ¹æ®è£…å¤‡çš„é±¼é¥µæ¥å‡å°‘é’“é±¼ç­‰å¾…çš„æ—¶é—´
         if (InventoryUI.Instance.baitItemSlot.itemDetails != null)
         {
             var decreaseTime = InventoryUI.Instance.baitItemSlot.itemDetails.decreaseFishingTime;
-            //ÓãÉÏ¹³µÄËæ»úÊ±¼ä
+            //é±¼ä¸Šé’©çš„éšæœºæ—¶é—´
             fishingRandomTime = UnityEngine.Random.Range(3f - decreaseTime, 8f - decreaseTime);
         }
         else
         {
-            //ÓãÉÏ¹³µÄËæ»úÊ±¼ä
+            //é±¼ä¸Šé’©çš„éšæœºæ—¶é—´
             fishingRandomTime = UnityEngine.Random.Range(3f, 8f);
         }
        
     }
 
     /// <summary>
-    /// ¸ù¾İÓÎÏ·×´Ì¬À´ÏŞÖÆÍæ¼Ò
+    /// æ ¹æ®æ¸¸æˆçŠ¶æ€æ¥é™åˆ¶ç©å®¶
     /// </summary>
     /// <param name="gameState"></param>
     private void OnUpdateGameStateEvent(GameState gameState)
@@ -545,7 +545,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
     }
     private void OnDisplayCollectItemSprite(int ID)
     {
-        //²¥·ÅÍæ¼ÒÊÕ»ñ¶¯»­
+        //æ’­æ”¾ç©å®¶æ”¶è·åŠ¨ç”»
         foreach (var anim in animators)
         {
             anim.SetTrigger("isCollect");
@@ -555,7 +555,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
 
 
     /// <summary>
-    /// Ö´ĞĞÈËÎïÊ¹ÓÃ¹¤¾ßÊ±µÄ¶¯»­
+    /// æ‰§è¡Œäººç‰©ä½¿ç”¨å·¥å…·æ—¶çš„åŠ¨ç”»
     /// </summary>
     /// <param name="mouseWorldPos"></param>
     /// <param name="itemDetails"></param>
@@ -565,26 +565,26 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         isUsingTool = true;
         cM.cursorEnable = false;
         inputDisable = true;
-        //È·±£ÉÏÃæµÄ´úÂëÖ´ĞĞÍêÔÚÖ´ĞĞÏÂÃæµÄ´úÂë
+        //ç¡®ä¿ä¸Šé¢çš„ä»£ç æ‰§è¡Œå®Œåœ¨æ‰§è¡Œä¸‹é¢çš„ä»£ç 
         yield return null;
         foreach (var anim in animators)
         {
             anim.SetTrigger("useTool");
-            //½«Êó±êµã»÷ÊÀ½ç×ø±êÒ²´«¸ø½ÇÉ«£¬ÈÃ½ÇÉ«µÄÉíÌå¸÷¸ö¶¯»­Ò²ËæÖ®×ª¶¯µ½¶ÔÓ¦µÄÃæ³¯Î»ÖÃ
+            //å°†é¼ æ ‡ç‚¹å‡»ä¸–ç•Œåæ ‡ä¹Ÿä¼ ç»™è§’è‰²ï¼Œè®©è§’è‰²çš„èº«ä½“å„ä¸ªåŠ¨ç”»ä¹Ÿéšä¹‹è½¬åŠ¨åˆ°å¯¹åº”çš„é¢æœä½ç½®
             anim.SetFloat("InputX", mouseX);
             anim.SetFloat("InputY", mouseY);
         }
-        //¸ù¾İ³úÍ·³úµ½µØÉÏµÄ¶¯»­Ê±¿ÌÀ´¾ö¶¨Ê±¼ä
+        //æ ¹æ®é”„å¤´é”„åˆ°åœ°ä¸Šçš„åŠ¨ç”»æ—¶åˆ»æ¥å†³å®šæ—¶é—´
         yield return new WaitForSeconds(0.2f);
         EventHandler.CallExecuteActionAfterAnimation(mouseWorldPos, itemDetails);
         yield return new WaitForSeconds(0.5f);
-        //¹¤¾ßÊ¹ÓÃ¶¯»­½áÊøºó»Ö¸´Î´Ê¹ÓÃ¹¤¾ß×´Ì¬
+        //å·¥å…·ä½¿ç”¨åŠ¨ç”»ç»“æŸåæ¢å¤æœªä½¿ç”¨å·¥å…·çŠ¶æ€
         inputDisable = false;
         cM.cursorEnable = true;
         isUsingTool = false;
     }
     /// <summary>
-    /// ³¤°´Êó±ê×ó¼ü´¥·¢µÄ¶¯×÷
+    /// é•¿æŒ‰é¼ æ ‡å·¦é”®è§¦å‘çš„åŠ¨ä½œ
     /// </summary>
     /// <returns></returns>
     private IEnumerator UseToolHoldRoutine()
@@ -593,13 +593,13 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         foreach (var anim in animators)
         {
             anim.SetTrigger("useTool");
-            //½«Êó±êµã»÷ÊÀ½ç×ø±êÒ²´«¸ø½ÇÉ«£¬ÈÃ½ÇÉ«µÄÉíÌå¸÷¸ö¶¯»­Ò²ËæÖ®×ª¶¯µ½¶ÔÓ¦µÄÃæ³¯Î»ÖÃ
+            //å°†é¼ æ ‡ç‚¹å‡»ä¸–ç•Œåæ ‡ä¹Ÿä¼ ç»™è§’è‰²ï¼Œè®©è§’è‰²çš„èº«ä½“å„ä¸ªåŠ¨ç”»ä¹Ÿéšä¹‹è½¬åŠ¨åˆ°å¯¹åº”çš„é¢æœä½ç½®
             anim.SetFloat("InputX", mouseX);
             anim.SetFloat("InputY", mouseY);
         }
     }
     /// <summary>
-    /// Êó±êµã»÷ºóµÈ²¥·Å¶¯»­½áÊøºó²Å¿ÉÒÔÔÙµã»÷
+    /// é¼ æ ‡ç‚¹å‡»åç­‰æ’­æ”¾åŠ¨ç”»ç»“æŸåæ‰å¯ä»¥å†ç‚¹å‡»
     /// </summary>
     /// <returns></returns>
     private IEnumerator WaitTime()
@@ -609,7 +609,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         cM.cursorEnable = true;
     }
     /// <summary>
-    /// »ñÈ¡Óã¹³Å×ÎïÏßÖĞµã
+    /// è·å–é±¼é’©æŠ›ç‰©çº¿ä¸­ç‚¹
     /// </summary>
     /// <param name="start"></param>
     /// <param name="end"></param>
@@ -624,12 +624,12 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
 
     }
     /// <summary>
-    /// »ñÈ¡Ò»ÌõÅ×ÎïÏßÏß
+    /// è·å–ä¸€æ¡æŠ›ç‰©çº¿çº¿
     /// </summary>
-    /// <param name="p0">ÆğÊ¼µã</param>
-    /// <param name="p1">ÖĞµã</param>
-    /// <param name="p2">Âäµã</param>
-    /// <param name="t">ÏßµÄÍäÇú±ÈÀı</param>
+    /// <param name="p0">èµ·å§‹ç‚¹</param>
+    /// <param name="p1">ä¸­ç‚¹</param>
+    /// <param name="p2">è½ç‚¹</param>
+    /// <param name="t">çº¿çš„å¼¯æ›²æ¯”ä¾‹</param>
     /// <returns></returns>
     public Vector3 CalculateBezierPoint(Vector3 p0, Vector3 p1, Vector3 p2, float t)
     {
@@ -638,30 +638,30 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         return Vector3.Lerp(p0p1, p1p2, t);
     }
     /// <summary>
-    /// Ìí¼ÓÅ×ÎïÏßÉÏµÄµãµ½Å×ÎïÏßÁĞ±íÖĞ
+    /// æ·»åŠ æŠ›ç‰©çº¿ä¸Šçš„ç‚¹åˆ°æŠ›ç‰©çº¿åˆ—è¡¨ä¸­
     /// </summary>
     /// <param name="start"></param>
     /// <param name="mid"></param>
     /// <param name="end"></param>
-    /// <param name="parabolaPointList">Å×ÎïÏßµãÁĞ±í</param>
+    /// <param name="parabolaPointList">æŠ›ç‰©çº¿ç‚¹åˆ—è¡¨</param>
     public void AddParabolaPointList(Vector3 start, Vector3 mid, Vector3 end, List<Vector3> parabolaPointList)
     {
         for (int i = 0; i < 50; i++)
         {
-            //°Ñ»ñµÃµÄÅ×ÎïÏßµÄµãÌí¼Óµ½Å×ÎïÏßÁĞ±í
+            //æŠŠè·å¾—çš„æŠ›ç‰©çº¿çš„ç‚¹æ·»åŠ åˆ°æŠ›ç‰©çº¿åˆ—è¡¨
             Vector3 point = CalculateBezierPoint(start, mid, end, (i / 50.0f));
             parabolaPointList.Add(point);
         }
     }
     /// <summary>
-    /// »ñÈ¡Å×ÎïÏß×Ü³¤¶È
+    /// è·å–æŠ›ç‰©çº¿æ€»é•¿åº¦
     /// </summary>
     /// <param name="parabolaPointList"></param>
     /// <returns></returns>
     public float GetTotalParabolaLength(List<Vector3> parabolaPointList)
     {
         float ParabolaLength = 0;
-        // »ñÈ¡ÒÑÌí¼ÓºÃµÄÅ×ÎïÏß³¤¶È
+        // è·å–å·²æ·»åŠ å¥½çš„æŠ›ç‰©çº¿é•¿åº¦
         for (int i = 1; i < parabolaPointList.Count; i++)
         {
             ParabolaLength += (parabolaPointList[i] - parabolaPointList[i - 1]).magnitude;
@@ -669,7 +669,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         return ParabolaLength;
     }
     /// <summary>
-    /// ÀûÓÃÇúÏßÔË¶¯À´¿ØÖÆÎïÌåÑ¡×°
+    /// åˆ©ç”¨æ›²çº¿è¿åŠ¨æ¥æ§åˆ¶ç‰©ä½“é€‰è£…
     /// </summary>
     /// <param name="curve"></param>
     /// <param name="thisGameObject"></param>
@@ -682,7 +682,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
 
     }
     /// <summary>
-    /// Óã¹³ÑØ×ÅÅ×ÎïÒÆ¶¯
+    /// é±¼é’©æ²¿ç€æŠ›ç‰©ç§»åŠ¨
     /// </summary>
     public void BaitMoveAlongTheParabola()
     {
@@ -707,28 +707,28 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
                 }
             }
             baitGameObject.transform.position = baitPos;
-            //Óã¹³Å×³öÊ±Ğı×ª
+            //é±¼é’©æŠ›å‡ºæ—¶æ—‹è½¬
             StartCoroutine(RotationCurve(baitRotationCurve, baitGameObject));
 
         }
-        //Óã¹³µ½´ïÂäµã
+        //é±¼é’©åˆ°è¾¾è½ç‚¹
         else
         {
             BaitGetPosition(baitPos);
         }
     }
     /// <summary>
-    /// Óã¹³´ïµ½Âäµã
+    /// é±¼é’©è¾¾åˆ°è½ç‚¹
     /// </summary>
-    /// <param name="baitPos">Óã¹³µ±Ç°Î»ÖÃ</param>
+    /// <param name="baitPos">é±¼é’©å½“å‰ä½ç½®</param>
     private void BaitGetPosition(Vector3 baitPos)
     {
-        //½«µ±Ç°Óã¹³×ø±ê×ª»¯Îªµ±Ç°µØÍ¼µÄVector3Int Tile×ø±ê
+        //å°†å½“å‰é±¼é’©åæ ‡è½¬åŒ–ä¸ºå½“å‰åœ°å›¾çš„Vector3Int Tileåæ ‡
         Vector3Int baitGridPos = baitGrid.WorldToCell(baitPos);
         TileDetails baitTile = GridMapManager.Instance.GetTileDetailsOnMousePosition(baitGridPos);
         if (baitTile != null)
         {
-            //ÂäµãÎª¿ÉµöÓãÍßÆ¬
+            //è½ç‚¹ä¸ºå¯é’“é±¼ç“¦ç‰‡
             if (baitTile.canLaterFishing || baitTile.canSeaFishing)
             {
                 if (baitTile.canLaterFishing)
@@ -740,9 +740,9 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
                     RollFishGetID(InventoryManager.Instance.seaFishList);
                 }
                 isBait = false;
-                //²¥·ÅË®»¨Á£×ÓĞ§¹û
+                //æ’­æ”¾æ°´èŠ±ç²’å­æ•ˆæœ
                 EventHandler.CallParticleEffectEvent(ParticalEffectType.WaterEffect01, baitPos, Vector2.up);
-                //²¥·ÅÍæ¼ÒFishingIdle¶¯»­
+                //æ’­æ”¾ç©å®¶FishingIdleåŠ¨ç”»
                 foreach (var anim in animators)
                 {
                     anim.SetTrigger("Idle2");
@@ -751,7 +751,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
                 exclamationEnable = true;
 
             }
-            //ÈôÓã¹³Âäµã²»¿ÉµöÓã
+            //è‹¥é±¼é’©è½ç‚¹ä¸å¯é’“é±¼
             if (!baitTile.canLaterFishing && !baitTile.canSeaFishing)
             {
 
@@ -759,36 +759,36 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
                 isBait = false;
                 fishLine.gameObject.SetActive(false);
                 EventHandler.CallControlPlayerBagOpen(true);
-                //»Ö¸´ÒÆ¶¯ºÍÕ¾Á¢¶¯»­
+                //æ¢å¤ç§»åŠ¨å’Œç«™ç«‹åŠ¨ç”»
                 foreach (var anim in animators)
                 {
                     anim.SetTrigger("toIdle");
                 }
                 inputDisable = false;
-                //¹Ø±ÕÓã¹³
+                //å…³é—­é±¼é’©
                 baitGameObject.SetActive(false);
                 EventHandler.CallUpdateGameStateEvent(GameState.Gameplay);
             }
         }
-        //ÈôÓã¹³ÂäµãµÄTileDetailÎª¿Õ
+        //è‹¥é±¼é’©è½ç‚¹çš„TileDetailä¸ºç©º
         else
         {
             cM.fishingEventDisable = false;
             isBait = false;
             fishLine.gameObject.SetActive(false);
-            //»Ö¸´ÒÆ¶¯ºÍÕ¾Á¢¶¯»­
+            //æ¢å¤ç§»åŠ¨å’Œç«™ç«‹åŠ¨ç”»
             foreach (var anim in animators)
             {
                 anim.SetTrigger("toIdle");
             }
             inputDisable = false;
-            //¹Ø±ÕÓã¹³
+            //å…³é—­é±¼é’©
             baitGameObject.SetActive(false);
 
         }
     }
     /// <summary>
-    /// ÓĞÓãÉÏ¹³
+    /// æœ‰é±¼ä¸Šé’©
     /// </summary>
     private void PlayerFishing()
     {
@@ -796,23 +796,23 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         if (currentFishingTime > fishingRandomTime)
         {
             currentFishingTime = 0;
-            //¸ù¾İ×°±¸µÄÓã¶üÀ´¼õÉÙµöÓãµÈ´ıµÄÊ±¼ä
+            //æ ¹æ®è£…å¤‡çš„é±¼é¥µæ¥å‡å°‘é’“é±¼ç­‰å¾…çš„æ—¶é—´
             if (InventoryUI.Instance.baitItemSlot.itemDetails != null)
             {
                 var decreaseTime = InventoryUI.Instance.baitItemSlot.itemDetails.decreaseFishingTime;
-                //ÓãÉÏ¹³µÄËæ»úÊ±¼ä
+                //é±¼ä¸Šé’©çš„éšæœºæ—¶é—´
                 fishingRandomTime = UnityEngine.Random.Range(3f - decreaseTime, 8f - decreaseTime);
             }
             else
             {
-                //ÓãÉÏ¹³µÄËæ»úÊ±¼ä
+                //é±¼ä¸Šé’©çš„éšæœºæ—¶é—´
                 fishingRandomTime = UnityEngine.Random.Range(3f, 8f);
             }
-            //ÏÔÊ¾¸ĞÌ¾ºÅ
+            //æ˜¾ç¤ºæ„Ÿå¹å·
             exclamatonMark.SetActive(true);
-            //²¥·ÅÓã¹³¶¯»­
+            //æ’­æ”¾é±¼é’©åŠ¨ç”»
             baitGameObject.GetComponent<Animator>().SetTrigger("baitShake");
-            //²¥·ÅÍæ¼ÒÉÏ¹³¶¯»­
+            //æ’­æ”¾ç©å®¶ä¸Šé’©åŠ¨ç”»
             foreach (var anim in animators)
             {
                 anim.SetTrigger("Bait");
@@ -820,7 +820,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         }
     }
     /// <summary>
-    /// Ëæ»ú»ñÈ¡Óæ»ñµÄĞÅÏ¢
+    /// éšæœºè·å–æ¸”è·çš„ä¿¡æ¯
     /// </summary>
     /// <param name="canFishingList"></param>
     private void RollFishGetID(List<ItemDetails> canFishingList)
@@ -830,12 +830,12 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
 
         for (int i = 0; i < canFishingList.Count; i++)
         {
-            //ÓĞµÄÓãÃ»Ğ´Ï²»¶µÄÓã¶ü£¬ÄÇ¾Í×°±¸ÈçºÎÒ»ÖÖÓã¶ü»òÕß²»×°±¸Óã¶ü¶¼¿ÉÒÔµöµ½
+            //æœ‰çš„é±¼æ²¡å†™å–œæ¬¢çš„é±¼é¥µï¼Œé‚£å°±è£…å¤‡å¦‚ä½•ä¸€ç§é±¼é¥µæˆ–è€…ä¸è£…å¤‡é±¼é¥µéƒ½å¯ä»¥é’“åˆ°
             if (canFishingList[i].likeBaits.Length == 0)
             {
                 temporaryFishList.Add(canFishingList[i]);
             }
-            //ÓĞµÄÓãĞ´ÁËÏ²»¶µÄÓã¶ü£¬ÄÇ¾Í±ØĞëÓÃËüÆäÖĞÏ²»¶µÄÒ»ÖÖÓã¶ü²Å¿ÉÒÔµöµ½
+            //æœ‰çš„é±¼å†™äº†å–œæ¬¢çš„é±¼é¥µï¼Œé‚£å°±å¿…é¡»ç”¨å®ƒå…¶ä¸­å–œæ¬¢çš„ä¸€ç§é±¼é¥µæ‰å¯ä»¥é’“åˆ°
             else
             {
                 for (int b = 0; b < canFishingList[i].likeBaits.Length; b++)
@@ -855,29 +855,29 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         fishDetails = temporaryFishList[randomFishIndex];
     }
     /// <summary>
-    /// ¿ªÊ¼µöÓãÓÎÏ·»òÊÇÍË³öµöÓã
+    /// å¼€å§‹é’“é±¼æ¸¸æˆæˆ–æ˜¯é€€å‡ºé’“é±¼
     /// </summary>
     private void StartFishGame()
     {
 
         if (Input.GetKey(KeyCode.Space) && !isFishingGame)
         {
-            //¼õÉÙµ±Ç°Ê¹ÓÃµÄÓã¶üÊıÁ¿
+            //å‡å°‘å½“å‰ä½¿ç”¨çš„é±¼é¥µæ•°é‡
             if(InventoryUI.Instance.baitItemSlot.itemDetails != null)
             {
                 InventoryManager.Instance.RemoveItem(InventoryUI.Instance.baitItemSlot.itemDetails.itemID, 1);
             }
-            //ÔÚ³öÏÖ¸ĞÌ¾ºÅÊ±°´ÏÂ¿Õ¸ñ´¥·¢×¥Óã
+            //åœ¨å‡ºç°æ„Ÿå¹å·æ—¶æŒ‰ä¸‹ç©ºæ ¼è§¦å‘æŠ“é±¼
             if (canCatchFish)
             {
-                //²¥·ÅÓã¹³¶¯»­
+                //æ’­æ”¾é±¼é’©åŠ¨ç”»
                 baitGameObject.GetComponent<Animator>().SetTrigger("bait");
                 isFishingGame = true;
                 EventHandler.CallUpdateGameStateEvent(GameState.Pause);
                 StartCoroutine(WaitForReadyTextPlay());
                 exclamationEnable = false;
             }
-            //ÈôÃ»³öÏÖ¸ĞÌ¾ºÅÊ±°´ÏÂ¿Õ¸ñ¾Í¹Ø±ÕµöÓã
+            //è‹¥æ²¡å‡ºç°æ„Ÿå¹å·æ—¶æŒ‰ä¸‹ç©ºæ ¼å°±å…³é—­é’“é±¼
             else
             {
                 ExitFishing();
@@ -885,7 +885,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         }
     }
     /// <summary>
-    /// µÈ´ıµöÓã×¼±¸¶¯»­²¥·ÅÍê
+    /// ç­‰å¾…é’“é±¼å‡†å¤‡åŠ¨ç”»æ’­æ”¾å®Œ
     /// </summary>
     /// <returns></returns>
     private IEnumerator WaitForReadyTextPlay()
@@ -893,17 +893,17 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         readyText.SetActive(true);
         yield return new WaitForSeconds(1f);
         readyText.SetActive(false);
-        //²¥·ÅÍæ¼ÒÀ­Óã¶¯»­
+        //æ’­æ”¾ç©å®¶æ‹‰é±¼åŠ¨ç”»
         foreach (var anim in animators)
         {
             anim.SetTrigger("Tool3");
         }
-        //¿ªÆôµöÓãĞ¡ÓÎÏ·
+        //å¼€å¯é’“é±¼å°æ¸¸æˆ
         fishBg.SetActive(true);
 
     }
     /// <summary>
-    /// Íê³ÉµöÓãÓÎÏ·
+    /// å®Œæˆé’“é±¼æ¸¸æˆ
     /// </summary>
     public void FinishFishGame()
     {
@@ -911,20 +911,20 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         fishLine.enabled = false;
         isFishLine = false;
         isFishingGame = false;
-        //¹Ø±ÕÓã¹³¶ÔÏó
+        //å…³é—­é±¼é’©å¯¹è±¡
         baitGameObject.SetActive(false);
         isFishing = false;
-        //²¥·ÅÍæ¼Ò½ÓÓã¶¯»­
+        //æ’­æ”¾ç©å®¶æ¥é±¼åŠ¨ç”»
         foreach (var anim in animators)
         {
             anim.SetTrigger("Tool4");
         }
-        //Éú³ÉÓãitem
+        //ç”Ÿæˆé±¼item
         fishPrefab.GetComponent<Item>().itemID = fishDetails.itemID;
         var fishItems = Instantiate(fishPrefab, baitGameObject.transform.position, Quaternion.identity);
         fishItems.GetComponent<CircleCollider2D>().enabled = false;
         fish = fishItems;
-        ////»ñÈ¡ÓãµÄĞÅÏ¢²¢Éú³É
+        ////è·å–é±¼çš„ä¿¡æ¯å¹¶ç”Ÿæˆ
         //if (isLaterFishing)
         //{
         //    //fishDetails = InventoryManager.Instance.GetFishDetails(randomFishIndex, true);
@@ -939,7 +939,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         //    var fishItems = Instantiate(fishPrefab, baitGameObject.transform.position, Quaternion.identity);
         //    fish = fishItems;
         //}
-        //»ñÈ¡ÓãÅ×ÎïÏßµÄÖĞµã²¢½«ÓãµÄÅ×ÎïÏßµãÌí¼Óµ½Å×ÎïÏßµãÁĞ±íÖĞ
+        //è·å–é±¼æŠ›ç‰©çº¿çš„ä¸­ç‚¹å¹¶å°†é±¼çš„æŠ›ç‰©çº¿ç‚¹æ·»åŠ åˆ°æŠ›ç‰©çº¿ç‚¹åˆ—è¡¨ä¸­
         Vector3 fishParabolaMidPos = GetMidPoint(baitGameObject.transform.position, new Vector3(transform.position.x, transform.position.y + 1f), Settings.fishParabolaPercent, Settings.fishaParabolaOffsetY);
         fishParabolaPointList.Clear();
         AddParabolaPointList(baitGameObject.transform.position, fishParabolaMidPos, new Vector3(transform.position.x, transform.position.y + 1f), fishParabolaPointList);
@@ -950,7 +950,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         fishMove = true;
     }
     /// <summary>
-    /// ÓãÑØ×ÅÅ×ÎïÏßÒÆ¶¯µ½Íæ¼ÒÉíÉÏ
+    /// é±¼æ²¿ç€æŠ›ç‰©çº¿ç§»åŠ¨åˆ°ç©å®¶èº«ä¸Š
     /// </summary>
     private void FishMoveToPlayer()
     {
@@ -980,12 +980,12 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
     }
 
     /// <summary>
-    /// ÏÔÊ¾Óæ»ñ¶¯×÷
+    /// æ˜¾ç¤ºæ¸”è·åŠ¨ä½œ
     /// </summary>
     /// <returns></returns>
     private IEnumerator ShowFishGetAnimation()
     {
-        //²¥·ÅÊÕÓã¶¯»­
+        //æ’­æ”¾æ”¶é±¼åŠ¨ç”»
         foreach (var anim in animators)
         {
             anim.SetBool("Tool5",true);
@@ -998,7 +998,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
 
     }
     /// <summary>
-    /// ÍË³öµöÓã
+    /// é€€å‡ºé’“é±¼
     /// </summary>
     public void ExitFishing()
     {
@@ -1008,7 +1008,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         isFishLine = false;
         currentFishingTime = 0;
         EventHandler.CallControlPlayerBagOpen(true);
-        //»Ö¸´ÒÆ¶¯ºÍÕ¾Á¢¶¯»­
+        //æ¢å¤ç§»åŠ¨å’Œç«™ç«‹åŠ¨ç”»
         foreach (var anim in animators)
         {
             anim.SetTrigger("toIdle");
@@ -1016,66 +1016,66 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         StartCoroutine(WaitTime());
         inputDisable = false;
         fishLine.enabled = false;
-        //¹Ø±ÕÓã¹³¶ÔÏó
+        //å…³é—­é±¼é’©å¯¹è±¡
         baitGameObject.SetActive(false);
         cM.fishingEventDisable = false;
     }
     private void OnBeforeSceneUnloadEvent()
     {
-        //ÇĞ»»³¡¾°Ê±½ûÖ¹¶ÔÍæ¼ÒµÄ²Ù×÷
+        //åˆ‡æ¢åœºæ™¯æ—¶ç¦æ­¢å¯¹ç©å®¶çš„æ“ä½œ
         inputDisable = true;
     }
     private void OnAfterSceneLoadedEvent()
     {
         baitGrid = FindObjectOfType<Grid>();
-        //ÇĞ»»³¡¾°ºó»Ö¸´¶ÔÍæ¼ÒµÄ²Ù×÷
+        //åˆ‡æ¢åœºæ™¯åæ¢å¤å¯¹ç©å®¶çš„æ“ä½œ
         inputDisable = false;
     }
 
-    //Íæ¼ÒÒÑµ¯³ö¹ıË¯¾õÃæ°å£¬ĞèÒªÏÈÀë¿ªSleepBoxºó²ÅÔÊĞíÔÙ´Îµ¯³ö
+    //ç©å®¶å·²å¼¹å‡ºè¿‡ç¡è§‰é¢æ¿ï¼Œéœ€è¦å…ˆç¦»å¼€SleepBoxåæ‰å…è®¸å†æ¬¡å¼¹å‡º
     private bool canShowSleepPanel = true;
-    //´¥·¢Ë¯¾õµÄSleepBoxÎ»ÖÃ£¬Ë¯¾õÊ±°ÑÍæ¼ÒÇ¿ÖÆÒÆ¶¯µ½¸ÃÎ»ÖÃ
+    //è§¦å‘ç¡è§‰çš„SleepBoxä½ç½®ï¼Œç¡è§‰æ—¶æŠŠç©å®¶å¼ºåˆ¶ç§»åŠ¨åˆ°è¯¥ä½ç½®
     private Vector3 sleepBoxPos;
-    private bool settleUIReady;   // ½áËã¸ñÊÇ·ñÒÑÈ«²¿Éú³ÉÍê±Ï
-    private bool settleUIHidden;   // ½áËã½çÃæÊÇ·ñÒÑ¹Ø±ÕÍê±Ï
+    private bool settleUIReady;   // ç»“ç®—æ ¼æ˜¯å¦å·²å…¨éƒ¨ç”Ÿæˆå®Œæ¯•
+    private bool settleUIHidden;   // ç»“ç®—ç•Œé¢æ˜¯å¦å·²å…³é—­å®Œæ¯•
     /// <summary>
-    /// Íæ¼ÒÅöµ½TagÎªSleepBoxµÄ´¥·¢Æ÷£¬ÇÒÓë´¥·¢Æ÷ËùÔÚÎïÌåµÄXÖáÏà²î²»µ½0.1fÊ±£¬Í¨ÖªUIManager´ò¿ªË¯¾õÃæ°å
+    /// ç©å®¶ç¢°åˆ°Tagä¸ºSleepBoxçš„è§¦å‘å™¨ï¼Œä¸”ä¸è§¦å‘å™¨æ‰€åœ¨ç‰©ä½“çš„Xè½´ç›¸å·®ä¸åˆ°0.1fæ—¶ï¼Œé€šçŸ¥UIManageræ‰“å¼€ç¡è§‰é¢æ¿
     /// </summary>
     private void OnTriggerStay2D(Collider2D other)
     {
         if (canShowSleepPanel && other.CompareTag("SleepBox") && (Mathf.Abs(transform.position.x - other.transform.position.x) < 0.1f))
         {
-            //±ê¼ÇÎªÒÑµ¯³ö£¬±ÜÃâÃæ°å¹Ø±ÕºóÁ¢¿ÌÖØ¸´µ¯³ö
+            //æ ‡è®°ä¸ºå·²å¼¹å‡ºï¼Œé¿å…é¢æ¿å…³é—­åç«‹åˆ»é‡å¤å¼¹å‡º
             canShowSleepPanel = false;
             sleepBoxPos = other.transform.position;
-            //Í¨ÖªUIManager´ò¿ªË¯¾õÃæ°å
+            //é€šçŸ¥UIManageræ‰“å¼€ç¡è§‰é¢æ¿
             EventHandler.CallOpenSleepPanelEvent();
         }
     }
     private void OnTriggerExit2D(Collider2D other)
     {
-        //Àë¿ªSleepBoxºóÖØÖÃ±ê¼Ç£¬ÏÂÒ»´Î½øÈëÊ±²ÅÄÜÔÙ´Îµ¯³ö
+        //ç¦»å¼€SleepBoxåé‡ç½®æ ‡è®°ï¼Œä¸‹ä¸€æ¬¡è¿›å…¥æ—¶æ‰èƒ½å†æ¬¡å¼¹å‡º
         if (other.CompareTag("SleepBox"))
         {
             canShowSleepPanel = true;
         }
     }
     /// <summary>
-    /// Ë¯¾õÃæ°åµã»÷¡°ÊÇ¡±ºóÓÉUIManagerÅÉ·¢£¬¿ªÊ¼Ë¯¾õÁ÷³Ì
+    /// ç¡è§‰é¢æ¿ç‚¹å‡»â€œæ˜¯â€åç”±UIManageræ´¾å‘ï¼Œå¼€å§‹ç¡è§‰æµç¨‹
     /// </summary>
     private void OnSleepEvent()
     {
         StartCoroutine(SleepRoutine());
     }
     /// <summary>
-    /// ½áËã¸ñÈ«²¿Éú³ÉÍê±Ï£¬ÔÊĞíÍæ¼Òµã»÷¼ÌĞøË¯¾õÁ÷³Ì
+    /// ç»“ç®—æ ¼å…¨éƒ¨ç”Ÿæˆå®Œæ¯•ï¼Œå…è®¸ç©å®¶ç‚¹å‡»ç»§ç»­ç¡è§‰æµç¨‹
     /// </summary>
     private void OnSettleUIGenerateDoneEvent()
     {
         settleUIReady = true;
     }
     /// <summary>
-    /// ½áËã½çÃæ¹Ø±Õ¶¯»­²¥·ÅÍê±Ï£¬ÔÊĞíË¯¾õÁ÷³Ì¼ÌĞø
+    /// ç»“ç®—ç•Œé¢å…³é—­åŠ¨ç”»æ’­æ”¾å®Œæ¯•ï¼Œå…è®¸ç¡è§‰æµç¨‹ç»§ç»­
     /// </summary>
     private void OnSettleUIHideDoneEvent()
     {
@@ -1083,33 +1083,33 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
     }
 
     /// <summary>
-    /// Ë¯¾õÁ÷³Ì£ºË²ÒÆµ½SleepBox¡¢²¥·ÅË¯¾õ¶¯»­¡¢ÑÛ¿ô¹ı³¡¸²¸ÇºóÍÆ½øµ½ÏÂÒ»Ìì£¬ÔÙÕ¹¿ªÑÛ¿ô¹ı³¡»Ö¸´ÊÓÒ°
+    /// ç¡è§‰æµç¨‹ï¼šç¬ç§»åˆ°SleepBoxã€æ’­æ”¾ç¡è§‰åŠ¨ç”»ã€çœ¼çœ¶è¿‡åœºè¦†ç›–åæ¨è¿›åˆ°ä¸‹ä¸€å¤©ï¼Œå†å±•å¼€çœ¼çœ¶è¿‡åœºæ¢å¤è§†é‡
     /// </summary>
     /// <returns></returns>
     private IEnumerator SleepRoutine()
     {
-        //°ÑÍæ¼ÒÎ»ÖÃÇ¿ÖÆÉèÖÃÎª´¥·¢Ë¯¾õµÄSleepBoxÎ»ÖÃ
+        //æŠŠç©å®¶ä½ç½®å¼ºåˆ¶è®¾ç½®ä¸ºè§¦å‘ç¡è§‰çš„SleepBoxä½ç½®
         transform.position = sleepBoxPos;
         inputDisable = true;
-        //Ë¯¾õ½áÊøºó»Øµ½IdleÊ±³¯ÏÂ(0,-1)
+        //ç¡è§‰ç»“æŸåå›åˆ°Idleæ—¶æœä¸‹(0,-1)
         mouseX = 0;
         mouseY = -1;
         PlayerFaceDirection();
-        //Ë¯¾õÆÚ¼äÔİÍ£ÓÎÏ·Ê±ÖÓ²¢ÆÁ±Îµã»÷£¬±ÜÃâË¯¾õÍ¾ÖĞ±»´ò¶Ï
+        //ç¡è§‰æœŸé—´æš‚åœæ¸¸æˆæ—¶é’Ÿå¹¶å±è”½ç‚¹å‡»ï¼Œé¿å…ç¡è§‰é€”ä¸­è¢«æ‰“æ–­
         EventHandler.CallUpdateGameStateEvent(GameState.Pause);
         foreach (var anim in animators)
         {
-            //Idle·½ÏòÓÉInputX/InputYÇı¶¯£¬SwitchAnimationÖ»ÔÚisMovingÊ±Ğ´ÕâÁ½¸ö²ÎÊı£¬ÕâÀïÖ±½ÓĞ´ÈëAnimator
+            //Idleæ–¹å‘ç”±InputX/InputYé©±åŠ¨ï¼ŒSwitchAnimationåªåœ¨isMovingæ—¶å†™è¿™ä¸¤ä¸ªå‚æ•°ï¼Œè¿™é‡Œç›´æ¥å†™å…¥Animator
             anim.SetFloat("InputX", 0f);
             anim.SetFloat("InputY", -1f);
             anim.Play("Sleep");
         }
-        //²¥·ÅË¯¾õ¶¯»­2sºó¿ªÊ¼ÑÛ¿ô¹ı³¡
+        //æ’­æ”¾ç¡è§‰åŠ¨ç”»2såå¼€å§‹çœ¼çœ¶è¿‡åœº
         yield return new WaitForSeconds(1f);
         // Eye curtain close: the lids fight up and down like a sleepy eye, then it closes to black
         yield return TransitionManager.Instance.PlayEyeClose();
-        // Ä»²¼ºÏÉÏºóÏÈÏÔÊ¾Âô³µ½áËã½çÃæ£¬µÈÍæ¼Ò×ó¼üµã»÷ÔÙ¹Ø±Õ
-        // ÏÈ¸´Î»±êÖ¾£¬ÔÙÏÔÊ¾½áËã½çÃæ£¬µÈ´ı½áËã¸ñÈ«²¿Éú³É
+        // å¹•å¸ƒåˆä¸Šåå…ˆæ˜¾ç¤ºå–è½¦ç»“ç®—ç•Œé¢ï¼Œç­‰ç©å®¶å·¦é”®ç‚¹å‡»å†å…³é—­
+        // å…ˆå¤ä½æ ‡å¿—ï¼Œå†æ˜¾ç¤ºç»“ç®—ç•Œé¢ï¼Œç­‰å¾…ç»“ç®—æ ¼å…¨éƒ¨ç”Ÿæˆ
         settleUIReady = false;
         EventHandler.CallShowSettleUIEvent();
         while (!settleUIReady)
@@ -1120,18 +1120,18 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         {
             yield return null;
         }
-        // ²¥·Å¹Ø±Õ¶¯»­²¢µÈ´ı¶¯»­½áÊø£¬ÔÙ¼ÌĞø½áËã
+        // æ’­æ”¾å…³é—­åŠ¨ç”»å¹¶ç­‰å¾…åŠ¨ç”»ç»“æŸï¼Œå†ç»§ç»­ç»“ç®—
         settleUIHidden = false;
         EventHandler.CallHideSettleUIEvent();
         while (!settleUIHidden)
         {
             yield return null;
         }
-        // ¹Ø±Õ½áËã½çÃæºó½áËãÂô³µÎïÆ·µÄ½ğÇ®
+        // å…³é—­ç»“ç®—ç•Œé¢åç»“ç®—å–è½¦ç‰©å“çš„é‡‘é’±
         InventoryManager.Instance.SettleSellCarItems();
-        //ÍÆ½øµ½ÏÂÒ»Ìì£¬Ê±¼äÀ´µ½´ÎÈÕ7:00
+        //æ¨è¿›åˆ°ä¸‹ä¸€å¤©ï¼Œæ—¶é—´æ¥åˆ°æ¬¡æ—¥7:00
         TimeManager.Instance.NextDay();
-        // Ë¯¾õ¶È¹ıÒ»Ìì£º½áËãÂô³µ¸ñ×ÓÀïµÄÎïÆ·²¢Çå¿Õ
+        // ç¡è§‰åº¦è¿‡ä¸€å¤©ï¼šç»“ç®—å–è½¦æ ¼å­é‡Œçš„ç‰©å“å¹¶æ¸…ç©º
         TimeManager.Instance.gameHour = 7;
         TimeManager.Instance.gameMinute = 0;
         TimeManager.Instance.gameSecond = 0;
@@ -1139,19 +1139,19 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         EventHandler.CallGameDateEvemnt(TimeManager.Instance.gameHour, TimeManager.Instance.gameDay, TimeManager.Instance.gameMonth, TimeManager.Instance.gameYear, TimeManager.Instance.gameSeason);
         // Eye curtain open: open to a medium size, wobble up and down, then open the whole screen
         yield return TransitionManager.Instance.PlayEyeOpen();
-        //»Ö¸´Íæ¼Ò²Ù×÷
+        //æ¢å¤ç©å®¶æ“ä½œ
         inputDisable = false;
         EventHandler.CallUpdateGameStateEvent(GameState.Gameplay);
     }
     private void OnMoveToPosition(Vector3 targetPosition)
     {
-        //½«Íæ¼ÒÎ»ÖÃÉèÖÃÎªtargetPositionÎ»ÖÃ
+        //å°†ç©å®¶ä½ç½®è®¾ç½®ä¸ºtargetPositionä½ç½®
         transform.position = targetPosition;
     }
 
     private void OnStartNewGameEvent(int obj)
     {
-        //³õÊ¼»¯Íæ¼Ò¸÷ÏîµÈ¼¶ºÍ¾­Ñé
+        //åˆå§‹åŒ–ç©å®¶å„é¡¹ç­‰çº§å’Œç»éªŒ
         plantingSkill = 1;
         plantingMaxEXP = 100;
         plantingCurrentEXP = 0;
@@ -1242,7 +1242,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
 
     }
     /// <summary>
-    /// ²¥·Å»ñÈ¡ÖØÒªµÀ¾ß¶¯»­
+    /// æ’­æ”¾è·å–é‡è¦é“å…·åŠ¨ç”»
     /// </summary>
     /// <param name="itemName"></param>
     private void OnRecerveItemEvent(ItemDetails item)
@@ -1258,43 +1258,43 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
     {
         EventHandler.CallUpdateGameStateEvent(GameState.Pause);
         EventHandler.CallControlPlayerBagOpen(false);
-        //²¥·ÅÍæ¼Ò³Ô¶«Î÷¶¯»­
+        //æ’­æ”¾ç©å®¶åƒä¸œè¥¿åŠ¨ç”»
         foreach (var anim in animators)
         {
             anim.SetTrigger("isEat");
         }
     }
     /// <summary>
-    /// ¼à²âÍæ¼ÒµÄÒÆ¶¯ÊäÈë
+    /// ç›‘æµ‹ç©å®¶çš„ç§»åŠ¨è¾“å…¥
     /// </summary>
     private void PlayerInput()
     {
-        //inputXºÍinputYµÄÖµÖ»»áÊÇ-1¡¢0¡¢1
+        //inputXå’ŒinputYçš„å€¼åªä¼šæ˜¯-1ã€0ã€1
         inputX = Input.GetAxisRaw("Horizontal");
         inputY = Input.GetAxisRaw("Vertical");
-        //Ê¹Íæ¼ÒµÄĞ±·½ÏòÒÆ¶¯ËÙ¶È²»Òª±ÈÖ±·½ÏòµÄËÙ¶È¿ì
+        //ä½¿ç©å®¶çš„æ–œæ–¹å‘ç§»åŠ¨é€Ÿåº¦ä¸è¦æ¯”ç›´æ–¹å‘çš„é€Ÿåº¦å¿«
         if (inputX != 0 && inputY != 0)
         {
             inputX = inputX * 0.6f;
             inputY = inputY * 0.6f;
         }
-        //¸Ä±äÍæ¼ÒËÙ¶È,GetKey°´×¡°´¼ü
+        //æ”¹å˜ç©å®¶é€Ÿåº¦,GetKeyæŒ‰ä½æŒ‰é”®
         if (Input.GetKey(KeyCode.LeftShift))
         {
             inputX = inputX * 0.4f;
             inputY = inputY * 0.4f;
         }
-        //Í¨¹ıÍæ¼ÒÊäÈëÀ´ÒÆ¶¯½ÇÉ«
+        //é€šè¿‡ç©å®¶è¾“å…¥æ¥ç§»åŠ¨è§’è‰²
         movementInput = new Vector2(inputX, inputY);
-        //¸ù¾İÍæ¼ÒÊÇ·ñÊäÈëÒÆ¶¯Ö¸ÁîÀ´¾ö¶¨isMovingµÄboolÖµ
+        //æ ¹æ®ç©å®¶æ˜¯å¦è¾“å…¥ç§»åŠ¨æŒ‡ä»¤æ¥å†³å®šisMovingçš„boolå€¼
         isMoving = movementInput != Vector2.zero;
     }
     /// <summary>
-    /// Í¨¹ıÍæ¼ÒÒÆ¶¯µÄÊäÈëÊ±½ÇÉ«¶¯ÆğÀ´
+    /// é€šè¿‡ç©å®¶ç§»åŠ¨çš„è¾“å…¥æ—¶è§’è‰²åŠ¨èµ·æ¥
     /// </summary>
     private void Movement()
     {
-        //µ±ÌåÁ¦ÖµĞ¡ÓÚµÈÓÚ0Ê±£¬ËÙ¶È¼õÂı
+        //å½“ä½“åŠ›å€¼å°äºç­‰äº0æ—¶ï¼Œé€Ÿåº¦å‡æ…¢
         if (currentStmina <= 0)
         {
             rb.MovePosition(rb.position + movementInput * tiredSpeed * Time.deltaTime);
@@ -1305,19 +1305,19 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         }
     }
     /// <summary>
-    /// ÊµÏÖÍæ¼ÒÒÆ¶¯ºÍÕ¾Á¢µÄ¶¯»­ÇĞ»»
+    /// å®ç°ç©å®¶ç§»åŠ¨å’Œç«™ç«‹çš„åŠ¨ç”»åˆ‡æ¢
     /// </summary>
     private void SwitchAnimation()
     {
         foreach (var anim in animators)
         {
-            //¸ù¾İÍæ¼ÒÊÇ·ñÒÆ¶¯À´²¥·ÅÕ¾Á¢»òÕßÅÜ¶¯¶¯»­
+            //æ ¹æ®ç©å®¶æ˜¯å¦ç§»åŠ¨æ¥æ’­æ”¾ç«™ç«‹æˆ–è€…è·‘åŠ¨åŠ¨ç”»
             anim.SetBool("isMoving", isMoving);
             anim.SetFloat("mouseX", mouseX);
             anim.SetFloat("mouseY", mouseY);
             if (isMoving)
             {
-                //Èç¹ûÍæ¼ÒÔÚÒÆ¶¯ÖĞ£¬ÔÙ¸ù¾İÒÆ¶¯ËÙ¶ÈÀ´²¥·Å×ßÂ·»òÅÜ¶¯¶¯»­
+                //å¦‚æœç©å®¶åœ¨ç§»åŠ¨ä¸­ï¼Œå†æ ¹æ®ç§»åŠ¨é€Ÿåº¦æ¥æ’­æ”¾èµ°è·¯æˆ–è·‘åŠ¨åŠ¨ç”»
                 anim.SetFloat("InputX", inputX);
                 anim.SetFloat("InputY", inputY);
             }
@@ -1326,11 +1326,11 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
 
     }
     /// <summary>
-    /// ¼ì²âÍæ¼Ò´ËÊ±Ãæ³¯·½Ïò
+    /// æ£€æµ‹ç©å®¶æ­¤æ—¶é¢æœæ–¹å‘
     /// </summary>
     public void PlayerFaceDirection()
     {
-        //ÈËÎï³¯ÓÒ
+        //äººç‰©æœå³
         if (mouseX > 0)
         {
             faceLeft = false;
@@ -1339,7 +1339,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
             faceUp = false;
 
         }
-        //ÈËÎï³¯×ó
+        //äººç‰©æœå·¦
         if (mouseX < 0)
         {
             faceLeft = true;
@@ -1348,7 +1348,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
             faceUp = false;
 
         }
-        //ÈËÎï³¯ÉÏ
+        //äººç‰©æœä¸Š
         if (mouseX == 0 && mouseY > 0)
         {
             faceLeft = false;
@@ -1357,7 +1357,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
             faceUp = true;
 
         }
-        //ÈËÎï³¯ÏÂ
+        //äººç‰©æœä¸‹
         if (mouseX == 0 && mouseY < 0)
         {
             faceLeft = false;
@@ -1369,24 +1369,24 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
 
     }
     /// <summary>
-    /// Íæ¼ÒÊÜÉË
+    /// ç©å®¶å—ä¼¤
     /// </summary>
-    /// <param name="damage">µĞÈËÉËº¦</param>
+    /// <param name="damage">æ•Œäººä¼¤å®³</param>
     public void PlayerHurted(int damage, float depleteStmina, Transform emenyPos)
     {
-        //¼ì²âÍæ¼Òµ±Ç°ÊÇ·ñÎªÎŞµĞ
+        //æ£€æµ‹ç©å®¶å½“å‰æ˜¯å¦ä¸ºæ— æ•Œ
         if (invulnerable)
         {
             return;
         }
-        //¸ù¾İÍæ¼Ò×ÔÉíµÄ·ÀÓùÁ¦À´¿Û³ıÉúÃüÖµ
+        //æ ¹æ®ç©å®¶è‡ªèº«çš„é˜²å¾¡åŠ›æ¥æ‰£é™¤ç”Ÿå‘½å€¼
         int realDamage = damage - defenceValue;
         if (realDamage <= 0)
         {
             realDamage = 1;
         }
         currentHealth -= realDamage;
-        //ÏûºÄÌåÁ¦Öµ
+        //æ¶ˆè€—ä½“åŠ›å€¼
         EventHandler.CallPlayerDecreaseStminaEvent(depleteStmina);
         if (damage > 0)
         {
@@ -1394,12 +1394,12 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
             FlashColorAndKnockBack(emenyPos,Color.red);
             ShowDamageNumOfPlayer(emenyPos.position, realDamage);
         }
-        //Íæ¼ÒËÀÍö
+        //ç©å®¶æ­»äº¡
         if (currentHealth <= 0)
         {
             currentHealth = 0;
             inputDisable = true;
-            Debug.Log("ÑªÁ¿ÎªÁã£¡£¡");
+            Debug.Log("è¡€é‡ä¸ºé›¶ï¼ï¼");
         }
         if (currentHealth >= maxHealth)
         {
@@ -1412,7 +1412,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         StartCoroutine(InvulnerableCoroutine());
     }
     /// <summary>
-    /// ÎŞµĞ×´Ì¬ÇĞ»»
+    /// æ— æ•ŒçŠ¶æ€åˆ‡æ¢
     /// </summary>
     /// <returns></returns>
     private IEnumerator InvulnerableCoroutine()
@@ -1422,7 +1422,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         invulnerable = false;
     }
     /// <summary>
-    /// Íæ¼ÒÊÜ»÷ÌØĞ§ºÍºóÍË
+    /// ç©å®¶å—å‡»ç‰¹æ•ˆå’Œåé€€
     /// </summary>
     private void FlashColorAndKnockBack(Transform enemy,Color playerColor)
     {
@@ -1437,7 +1437,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
 
     }
     /// <summary>
-    /// Íæ¼ÒÊÜ»÷ºóÍË
+    /// ç©å®¶å—å‡»åé€€
     /// </summary>
     private void PlayerHurdKnockback(Vector3 emenyPos)
     {
@@ -1445,7 +1445,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         StartCoroutine(KnockbackRoutine(knockbackDirection));
     }
     /// <summary>
-    /// Íæ¼ÒÊÜ»÷ºóÍËĞ­³Ì
+    /// ç©å®¶å—å‡»åé€€åç¨‹
     /// </summary>
     /// <param name="direction"></param>
     /// <returns></returns>
@@ -1471,7 +1471,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         //yield return new WaitForSeconds(knockbackDuration);
     }
     /// <summary>
-    /// »Ö¸´Íæ¼ÒÔ­À´ÑÕÉ«
+    /// æ¢å¤ç©å®¶åŸæ¥é¢œè‰²
     /// </summary>
     /// <param name="sprite"></param>
     /// <param name="originalColor"></param>
@@ -1482,14 +1482,14 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         sprite.color = originalColor;
     }
     /// <summary>
-    /// ÏÔÊ¾ÊÜÉËÉËº¦
+    /// æ˜¾ç¤ºå—ä¼¤ä¼¤å®³
     /// </summary>
     /// <param name="emenyPos"></param>
     private void ShowDamageNumOfPlayer(Vector3 emenyPos, int damage)
     {
         var damageNum = Instantiate(damageNumPrefab, transform.position, Quaternion.identity, transform);
         damageNum.GetComponent<DamageNum>().SetDamageNumText(damage);
-        //¸ù¾İÓëÍæ¼ÒµÄÎ»ÖÃÀ´²¥·Å¶ÔÓ¦µÄÉËº¦Êı×Ö¶¯»­
+        //æ ¹æ®ä¸ç©å®¶çš„ä½ç½®æ¥æ’­æ”¾å¯¹åº”çš„ä¼¤å®³æ•°å­—åŠ¨ç”»
         if (MathF.Abs(transform.position.x - emenyPos.x) > 0.2f)
         {
             if (transform.position.x < emenyPos.x)
@@ -1507,9 +1507,9 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         }
     }
     /// <summary>
-    /// ¿Û³ıÍæ¼ÒÆ£ÀÍÖµ
+    /// æ‰£é™¤ç©å®¶ç–²åŠ³å€¼
     /// </summary>
-    /// <param name="value">¿Û³ıÖµ</param>
+    /// <param name="value">æ‰£é™¤å€¼</param>
     /// <exception cref="NotImplementedException"></exception>
     private void OnPlayerDecreaseStminaEvent(float value)
     {
@@ -1536,16 +1536,16 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         }
     }
     /// <summary>
-    /// Íæ¼Ò·ÀÓù
+    /// ç©å®¶é˜²å¾¡
     /// </summary>
     public IEnumerator PlayerDefence(Vector3 mouseWorldPos)
     {
         inputDisable = true;
         cM.cursorEnable = false;
-        //ÅĞ¶ÏÊ¹ÓÃ¹¤¾ßÊ±Ãæ³¯·½Ïò
+        //åˆ¤æ–­ä½¿ç”¨å·¥å…·æ—¶é¢æœæ–¹å‘
         mouseX = mouseWorldPos.x - transform.position.x;
         mouseY = mouseWorldPos.y - (transform.position.y + 0.85f);
-        //Abs¾ø¶ÔÖµÅĞ¶Ï£¬µ±XÖá·½ÏòÉÏµÄ²îÒì´óÓÚYÖáÉÏµÄ²îÒì£¬ÓÅÏÈÅĞ¶ÏXÖáÉÏµÄ·½Ïò,·´Ö®£¬ÓÅÏÈÅĞ¶ÏYÖá·½Ïò
+        //Absç»å¯¹å€¼åˆ¤æ–­ï¼Œå½“Xè½´æ–¹å‘ä¸Šçš„å·®å¼‚å¤§äºYè½´ä¸Šçš„å·®å¼‚ï¼Œä¼˜å…ˆåˆ¤æ–­Xè½´ä¸Šçš„æ–¹å‘,åä¹‹ï¼Œä¼˜å…ˆåˆ¤æ–­Yè½´æ–¹å‘
         if (MathF.Abs(mouseX) > MathF.Abs(mouseY))
         {
             mouseY = 0;
@@ -1554,10 +1554,10 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         {
             mouseX = 0;
         }
-        //Ö´ĞĞ·ÀÓù¶¯×÷
+        //æ‰§è¡Œé˜²å¾¡åŠ¨ä½œ
         foreach (var anim in animators)
         {
-            //½«Êó±êµã»÷ÊÀ½ç×ø±êÒ²´«¸ø½ÇÉ«£¬ÈÃ½ÇÉ«µÄÉíÌå¸÷¸ö¶¯»­Ò²ËæÖ®×ª¶¯µ½¶ÔÓ¦µÄÃæ³¯Î»ÖÃ
+            //å°†é¼ æ ‡ç‚¹å‡»ä¸–ç•Œåæ ‡ä¹Ÿä¼ ç»™è§’è‰²ï¼Œè®©è§’è‰²çš„èº«ä½“å„ä¸ªåŠ¨ç”»ä¹Ÿéšä¹‹è½¬åŠ¨åˆ°å¯¹åº”çš„é¢æœä½ç½®
             anim.SetFloat("InputX", mouseX);
             anim.SetFloat("InputY", mouseY);
             anim.SetTrigger("Tool2");
@@ -1567,7 +1567,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         cM.cursorEnable = true;
     }
     /// <summary>
-    /// Íæ¼Ò´¦¾ö
+    /// ç©å®¶å¤„å†³
     /// </summary>
     /// <returns></returns>
     public IEnumerator PlayerExecution()
@@ -1582,7 +1582,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         cM.cursorEnable = true;
     }
     /// <summary>
-    /// ²¥·Å·ÀÓù³É¹¦¶¯»­
+    /// æ’­æ”¾é˜²å¾¡æˆåŠŸåŠ¨ç”»
     /// </summary>
     public void PlayDefenceGetAnim(Transform enemy)
     {
@@ -1600,7 +1600,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         }
     }
     /// <summary>
-    /// ²¥·Å·ÀÓù³É¹¦ÌØĞ§
+    /// æ’­æ”¾é˜²å¾¡æˆåŠŸç‰¹æ•ˆ
     /// </summary>
     /// <param name="point"></param>
     public void PlayDefenceEffect(Vector2 point)
@@ -1610,7 +1610,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         defenceEffects[effectIndex].gameObject.transform.position = point;
     }
     /// <summary>
-    /// ¿ØÖÆÍæ¼ÒÒÆ¶¯µ½Ö¸¶¨Î»ÖÃ
+    /// æ§åˆ¶ç©å®¶ç§»åŠ¨åˆ°æŒ‡å®šä½ç½®
     /// </summary>
     /// <param name="targetPos"></param>
     /// <param name="speed"></param>
@@ -1620,13 +1620,13 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         if (!isSittingOnChair)
         {
             inputDisable = true;
-            // A* Ñ°Â·
+            // A* å¯»è·¯
             string sceneName = SceneManager.GetActiveScene().name;
             var grid = FindObjectOfType<Grid>();
             Vector3Int currentGridPos = grid.WorldToCell(transform.position);
             Vector3Int targetGridPos = grid.WorldToCell(new Vector3(targetPos.x, targetPos.y, 0));
             Vector2 dir = Vector2.down;
-            // ¹¹½¨Â·¾¶
+            // æ„å»ºè·¯å¾„
             Stack<MovementStep> pathStack = new Stack<MovementStep>();
             AStar.Instance.buildPath(sceneName, (Vector2Int)currentGridPos, (Vector2Int)targetGridPos, pathStack);
 
@@ -1636,20 +1636,20 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
                 yield break;
             }
 
-            // Stack ¶¥²¿ÊÇÆğµã¡¢µ×²¿ÊÇÖÕµã£¬ÄæĞòÈ¡³öµÃµ½ Æğµã¡úÖÕµã µÄÂ·¾¶ÁĞ±í
+            // Stack é¡¶éƒ¨æ˜¯èµ·ç‚¹ã€åº•éƒ¨æ˜¯ç»ˆç‚¹ï¼Œé€†åºå–å‡ºå¾—åˆ° èµ·ç‚¹â†’ç»ˆç‚¹ çš„è·¯å¾„åˆ—è¡¨
             List<Vector2Int> path = new List<Vector2Int>();
             while (pathStack.Count > 0)
             {
                 path.Add(pathStack.Pop().gridCoordinate);
             }
 
-            // ÑØÂ·¾¶Öğ¸ñÒÆ¶¯£¨Ìø¹ıÆğµã i=0£©
+            // æ²¿è·¯å¾„é€æ ¼ç§»åŠ¨ï¼ˆè·³è¿‡èµ·ç‚¹ i=0ï¼‰
             for (int i = 1; i < path.Count; i++)
             {
                 Vector3 worldPos = grid.CellToWorld(new Vector3Int(path[i].x, path[i].y, 0));
                 worldPos = new Vector3(worldPos.x + Settings.gridCellSize / 2, worldPos.y + Settings.gridCellSize / 2, 0);
                 Vector2 stepTarget = new Vector2(worldPos.x, worldPos.y);
-                // ¼ì²éÄ¿±êÎ»ÖÃÊÇ·ñÓĞÃÅ
+                // æ£€æŸ¥ç›®æ ‡ä½ç½®æ˜¯å¦æœ‰é—¨
                 Door door = FindObjectsByType<Door>(FindObjectsSortMode.None)
          .OrderBy(d => Vector2.Distance(d.transform.position, stepTarget))
          .FirstOrDefault(d => Vector2.Distance(d.transform.position, stepTarget) < 0.7f);
@@ -1675,7 +1675,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
                     yield return null;
                 }
             }
-            //Èç¹ûµ½´ïÄ¿±êµãÒª×øÏÂ¾ÍÕÒÒÎ×Ó×ø
+            //å¦‚æœåˆ°è¾¾ç›®æ ‡ç‚¹è¦åä¸‹å°±æ‰¾æ¤…å­å
             if (isSit)
             {
                 currentChair = FindObjectsByType<Chair>(FindObjectsSortMode.None)
@@ -1684,7 +1684,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
                 if (currentChair != null)
                     SitOnChair(currentChair);
             }
-            // µ½´ïÖÕµã£¬Í£Ö¹ÒÆ¶¯¶¯»­
+            // åˆ°è¾¾ç»ˆç‚¹ï¼Œåœæ­¢ç§»åŠ¨åŠ¨ç”»
             foreach (var anim in animators)
             {
                 anim.SetBool("isMoving", false);
@@ -1695,7 +1695,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         
     }
     /// <summary>
-    /// ×øÒÎ×Ó
+    /// åæ¤…å­
     /// </summary>
     /// <param name="chairPos"></param>
     /// <param name="sitFaceDir"></param>
@@ -1710,7 +1710,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         StartCoroutine(SitArcMove(chair));
     }
     /// <summary>
-    /// Àë¿ªÒÎ×Ó
+    /// ç¦»å¼€æ¤…å­
     /// </summary>
     public void LeaveChair()
     {
@@ -1724,7 +1724,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
 
         Vector3 targetPos = new Vector2(chair.transform.position.x, chair.transform.position.y - 0.15f );
         Vector3 mid = (transform.position + targetPos) / 2f + Vector3.up * 0.5f;
-        // ÊÖ¶¯Éú³É±´Èû¶ûÂ·¾¶µã
+        // æ‰‹åŠ¨ç”Ÿæˆè´å¡å°”è·¯å¾„ç‚¹
         List<Vector3> points = new List<Vector3>();
         for (int i = 0; i <= 30; i++)
         {
@@ -1784,25 +1784,25 @@ public class PlayerController : MonoBehaviour, ISaveable  //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         isSittingInProgress = false;
     }
     /// <summary>
-    /// ±£´æSaveData
+    /// ä¿å­˜SaveData
     /// </summary>
     /// <returns></returns>
     public GameSaveData GenerateSaveData()
     {
         GameSaveData saveData = new GameSaveData();
-        //´æµµµ±Ç°Íæ¼ÒµØÍ¼×ø±ê
+        //å­˜æ¡£å½“å‰ç©å®¶åœ°å›¾åæ ‡
         saveData.characterPosDict = new Dictionary<string, SerializableVector3>();
         saveData.characterPosDict.Add(this.name, new SerializableVector3(transform.position));
-        //ÔÙ°Ñ´æµµºÃµÄSaveData·µ»Ø
+        //å†æŠŠå­˜æ¡£å¥½çš„SaveDataè¿”å›
         return saveData;
     }
     /// <summary>
-    /// ¶ÁÈ¡´æ´¢ºÃµÄSaveData
+    /// è¯»å–å­˜å‚¨å¥½çš„SaveData
     /// </summary>
     /// <param name="saveData"></param>
     public void RestoreData(GameSaveData saveData)
     {
-        //ÔÙ½«ÉÏÃæ´æ´¢ºÃµÄsaveDataÖĞµÄÍæ¼Ò×ø±êÄÃ³öÀ´
+        //å†å°†ä¸Šé¢å­˜å‚¨å¥½çš„saveDataä¸­çš„ç©å®¶åæ ‡æ‹¿å‡ºæ¥
         var targetPosition = saveData.characterPosDict[this.name].ToVector3();
 
         transform.position = targetPosition;

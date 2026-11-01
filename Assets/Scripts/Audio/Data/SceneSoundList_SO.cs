@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 [CreateAssetMenu(fileName = "SceneSoundList_SO",menuName = ("Sound/SceneSoundList"))]
@@ -6,7 +6,7 @@ public class SceneSoundList_SO : ScriptableObject
 {
     public List<SceneSoundItem> sceneSoundList;
     /// <summary>
-    /// ²éÕÒ»ñÈ¡³¡¾°ÒôÀÖ
+    /// æŸ¥æ‰¾è·å–åœºæ™¯éŸ³ä¹
     /// </summary>
     /// <param name="name"></param>
     /// <returns></returns>
@@ -19,8 +19,8 @@ public class SceneSoundList_SO : ScriptableObject
 public class SceneSoundItem
 {
     [SceneName] public string sceneName;
-    //³¡¾°ËùÔÚ·ÕÎ§
+    //åœºæ™¯æ‰€åœ¨æ°›å›´
     public SoundName ambient;
-    //³¡¾°ÒôÀÖ
+    //åœºæ™¯éŸ³ä¹
     public SoundName music;
 }

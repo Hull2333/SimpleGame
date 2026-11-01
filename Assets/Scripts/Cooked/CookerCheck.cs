@@ -1,12 +1,12 @@
-using System.Collections;
+锘縰sing System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CookerCheck : MonoBehaviour   //调用在烹饪家具对象上
+public class CookerCheck : MonoBehaviour   //璋冪敤鍦ㄧ児楗鍏峰璞′笂
 {
-    //进入到可烹饪范围
+    //杩涘叆鍒板彲鐑归オ鑼冨洿
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))

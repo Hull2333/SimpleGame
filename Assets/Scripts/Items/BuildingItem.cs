@@ -1,26 +1,26 @@
-using MFarm.Map;
+ï»¿using MFarm.Map;
 using MFarm.Transition;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BuildingItem : MonoBehaviour //µ÷ÓÃÔÚ¿É½¨Ôì½¨ÖşÔ¤ÖÆÌåÉÏ
+public class BuildingItem : MonoBehaviour //è°ƒç”¨åœ¨å¯å»ºé€ å»ºç­‘é¢„åˆ¶ä½“ä¸Š
 {
     public int buildID;
     public SpriteRenderer spriteRenderer;
-    //½ÓÊÜµÄ¶¯Îï³ß´ç
+    //æ¥å—çš„åŠ¨ç‰©å°ºå¯¸
     public AnimalSizeType acceptSize;
-    //Ëæ»úµÄ½¨ÖşÊ¶±ğÂë,ÓÃÓÚºÍÆä½¨ÖşÏÂµÄ¶¯Îï°ó¶¨
+    //éšæœºçš„å»ºç­‘è¯†åˆ«ç ,ç”¨äºå’Œå…¶å»ºç­‘ä¸‹çš„åŠ¨ç‰©ç»‘å®š
     public int buildCodeID;
-    //½¨ÖşĞòºÅ
+    //å»ºç­‘åºå·
     public int buildIndex;
     private BoxCollider2D collider2D => gameObject.transform.GetChild(0).GetComponent<BoxCollider2D>();
-    [Header("½¨Ôì½×¶Î")]
+    [Header("å»ºé€ é˜¶æ®µ")]
     public int[] buildingDays;
     public Sprite[] buildSprite;
-    //µ±Ç°ÒÑ½¨ÔìÌìÊı
+    //å½“å‰å·²å»ºé€ å¤©æ•°
      public int currentBuildingDay;
-    //×Ü½¨ÔìÌìÊı
+    //æ€»å»ºé€ å¤©æ•°
     public int totalBuildingDays
     {
         get
@@ -33,14 +33,14 @@ public class BuildingItem : MonoBehaviour //µ÷ÓÃÔÚ¿É½¨Ôì½¨ÖşÔ¤ÖÆÌåÉÏ
             return amount;
         }
     }
-    //Î´·ÅÖÃ
+    //æœªæ”¾ç½®
     public bool isSet = false;
-    //ÒÑ½¨³É
+    //å·²å»ºæˆ
     public bool isDone;
     public Collider2D animalArea;
-    //½¨Öş¼ıÍ·Í¼Æ¬
+    //å»ºç­‘ç®­å¤´å›¾ç‰‡
     public GameObject arrowIcon;
-    [Header("ĞÂ½¨³¡¾°Ïà¹Ø")]
+    [Header("æ–°å»ºåœºæ™¯ç›¸å…³")]
     public Teleport entrance;
     private void OnEnable()
     {
@@ -83,9 +83,9 @@ public class BuildingItem : MonoBehaviour //µ÷ÓÃÔÚ¿É½¨Ôì½¨ÖşÔ¤ÖÆÌåÉÏ
         collider2D.enabled = active;
     }
     /// <summary>
-    /// ¿ªÊ¼½¨Ôì
+    /// å¼€å§‹å»ºé€ 
     /// </summary>
-    /// <param name="isFirstDay">ÊÇ·ñÊÇ¸Õ¿ªÊ¼½¨Ôì</param>
+    /// <param name="isFirstDay">æ˜¯å¦æ˜¯åˆšå¼€å§‹å»ºé€ </param>
     public void Building(bool isFirstDay)
     {
         if (!isFirstDay)
@@ -107,7 +107,7 @@ public class BuildingItem : MonoBehaviour //µ÷ÓÃÔÚ¿É½¨Ôì½¨ÖşÔ¤ÖÆÌåÉÏ
             }
             allDay -= buildingDays[i];
         }
-        //¸ü¸Ä½¨ÖşµÄÍ¼Æ¬
+        //æ›´æ”¹å»ºç­‘çš„å›¾ç‰‡
         spriteRenderer.sprite = buildSprite[currentStage];
         if (currentBuildingDay >= totalBuildingDays && !isDone)
         {

@@ -1,4 +1,4 @@
-using System.Collections;
+锘縰sing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 [CreateAssetMenu(fileName = "BluPrintDataList_SO",menuName = "Inventory/BluPrintDataList_SO")]
@@ -20,21 +20,21 @@ public class BluPrintData_SO : ScriptableObject
 [System.Serializable]
 public class BluPrintDetails
 {
-    //图纸ID
+    //鍥剧焊ID
     public int ID;
     public InventoryItem[] resourceItem = new InventoryItem[4];
-    //建造物品的Prefab
+    //寤洪�犵墿鍝佺殑Prefab
     public GameObject buildPrefab;
 }
 [System.Serializable]
 public class BuildingDetails 
 {
     public string buildName;
-    //建筑ID
+    //寤虹瓚ID
     public int ID;
     public Sprite buildSprite;
     public InventoryItem[] resourceItem = new InventoryItem[4];
-    //建造物品的Prefab
+    //寤洪�犵墿鍝佺殑Prefab
     public GameObject buildPrefab;
 }
 

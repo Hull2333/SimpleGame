@@ -1,7 +1,7 @@
-using Cinemachine;
+锘縰sing Cinemachine;
 using UnityEngine;
 
-public class SwitchBoundary : MonoBehaviour //调用在Virtual Camera对象摄像机上
+public class SwitchBoundary : MonoBehaviour //璋冪敤鍦╒irtual Camera瀵硅薄鎽勫儚鏈轰笂
 {
 
     private void OnEnable()
@@ -14,14 +14,14 @@ public class SwitchBoundary : MonoBehaviour //调用在Virtual Camera对象摄像机上
         EventHandler.AfterSceneLoadedEvent -= SwitchConfinerShape;
     }
     /// <summary>
-    /// 加载场景之后把找到摄像机边界
+    /// 鍔犺浇鍦烘櫙涔嬪悗鎶婃壘鍒版憚鍍忔満杈圭晫
     /// </summary>
     private void SwitchConfinerShape()
     {
         Collider2D polygonCollider2D = GameObject.FindGameObjectWithTag("BoundaryConfiner").GetComponent<PolygonCollider2D>();
         CinemachineConfiner confiner = GetComponent<CinemachineConfiner>();
         confiner.m_BoundingShape2D = polygonCollider2D;
-        //在切换新场景时，需要先把源场景的边界缓存清除才可以更新新场景的边界
+        //鍦ㄥ垏鎹㈡柊鍦烘櫙鏃讹紝闇�瑕佸厛鎶婃簮鍦烘櫙鐨勮竟鐣岀紦瀛樻竻闄ゆ墠鍙互鏇存柊鏂板満鏅殑杈圭晫
         confiner.InvalidatePathCache();
     }
 }

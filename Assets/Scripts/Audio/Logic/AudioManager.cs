@@ -1,39 +1,39 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 
-public class AudioManager : Singleton<AudioManager>   //µ÷ÓÃÔÚAudioManager¶ÔÏóÉÏ
+public class AudioManager : Singleton<AudioManager>   //è°ƒç”¨åœ¨AudioManagerå¯¹è±¡ä¸Š
 {
-    [Header("ÒôÀÖÊı¾İ¿â")]
+    [Header("éŸ³ä¹æ•°æ®åº“")]
     public SoundDetailsList_SO soundDetailsData;
     public SceneSoundList_SO sceneSoundData;
     [Header("Audio Source")]
     public AudioSource ambientSource;
     public AudioSource gameSource;
-    //±³¾°ÒôÀÖ¿ªÊ¼²¥·ÅÊ±¼ä
+    //èƒŒæ™¯éŸ³ä¹å¼€å§‹æ’­æ”¾æ—¶é—´
     public float MusicStartSecond => Random.Range(2.5f, 5f);
-    //ÉùÃ÷Ğ­³Ì
+    //å£°æ˜åç¨‹
     private Coroutine soundRoutine;
     [Header("Audio Mixer")]
     public AudioMixer audioMixer;
     [Header("Snapshots")]
-    //Æ½Ê±ÉùÒô´óĞ¡
+    //å¹³æ—¶å£°éŸ³å¤§å°
     public AudioMixerSnapshot normalSnapshot;
-    //Ö»ÓĞ»·¾³ÒôĞ§
+    //åªæœ‰ç¯å¢ƒéŸ³æ•ˆ
     public AudioMixerSnapshot ambientSnapshot;
-    //¾²Òô
+    //é™éŸ³
     public AudioMixerSnapshot muteSnapshot;
-    //±³¾°ÒôÀÖ×ª»»Ê±¼ä
+    //èƒŒæ™¯éŸ³ä¹è½¬æ¢æ—¶é—´
     private float musicTransitionSecond = 8f;
 
     private void OnEnable()
     {
         EventHandler.AfterSceneLoadedEvent += OnAfterSceneLoadedEvent;
-        //Íæ¼Ò¶¯×÷ÒôĞ§ÊÂ¼ş
+        //ç©å®¶åŠ¨ä½œéŸ³æ•ˆäº‹ä»¶
         EventHandler.PlaySoundEvent += OnPlaySoundEvent;
-        //ÓÎÏ·½áÊøµÄÊÂ¼ş
+        //æ¸¸æˆç»“æŸçš„äº‹ä»¶
         EventHandler.EndGameEvent += OnEndGameEvent;
     }
     private void OnDisable()
@@ -48,13 +48,13 @@ public class AudioManager : Singleton<AudioManager>   //µ÷ÓÃÔÚAudioManager¶ÔÏóÉÏ
         var soundDetails = soundDetailsData.GetSoundDetails(soundName);
         if(soundDetails != null)
         {
-            //ºô½ĞÒôĞ§²¥·ÅÊÂ¼ş
+            //å‘¼å«éŸ³æ•ˆæ’­æ”¾äº‹ä»¶
             EventHandler.CallInitSoundEffect(soundDetails);
         }
     }
 
     /// <summary>
-    /// ÄÃµ½ÓÎÏ·µÄÒôÆµ
+    /// æ‹¿åˆ°æ¸¸æˆçš„éŸ³é¢‘
     /// </summary>
     private void OnAfterSceneLoadedEvent()
     {
@@ -81,11 +81,11 @@ public class AudioManager : Singleton<AudioManager>   //µ÷ÓÃÔÚAudioManager¶ÔÏóÉÏ
         {
             StopCoroutine(soundRoutine);
         }
-        //¾²Òô
+        //é™éŸ³
         muteSnapshot.TransitionTo(1f);
     }
     /// <summary>
-    /// ÇĞ»»³¡¾°ÊÇÏÈ²¥·Å»·¾³ÒôĞ§£¬¾­¹ıËæ»úµÄÊ±¼äºó¿ªÊ¼²¥·Å±³¾°ÒôÀÖ
+    /// åˆ‡æ¢åœºæ™¯æ˜¯å…ˆæ’­æ”¾ç¯å¢ƒéŸ³æ•ˆï¼Œç»è¿‡éšæœºçš„æ—¶é—´åå¼€å§‹æ’­æ”¾èƒŒæ™¯éŸ³ä¹
     /// </summary>
     /// <param name="music"></param>
     /// <param name="ambient"></param>
@@ -100,7 +100,7 @@ public class AudioManager : Singleton<AudioManager>   //µ÷ÓÃÔÚAudioManager¶ÔÏóÉÏ
         }
     }
     /// <summary>
-    /// ²¥·Å±³¾°ÒôÀÖ
+    /// æ’­æ”¾èƒŒæ™¯éŸ³ä¹
     /// </summary>
     /// <param name="soundDetails"></param>
     private void PlayMusicClip(SoundDetails soundDetails,float transitionTime)
@@ -111,11 +111,11 @@ public class AudioManager : Singleton<AudioManager>   //µ÷ÓÃÔÚAudioManager¶ÔÏóÉÏ
         {
             gameSource.Play();
         }
-        //±³¾°ÒôÀÖÔÚtransitionTimeÊ±¼äÄÚ´ïµ½normalSnapshot¿ìÕÕµÄÒôÁ¿
+        //èƒŒæ™¯éŸ³ä¹åœ¨transitionTimeæ—¶é—´å†…è¾¾åˆ°normalSnapshotå¿«ç…§çš„éŸ³é‡
         normalSnapshot.TransitionTo(transitionTime);
     }
     /// <summary>
-    /// ²¥·Å»·¾³ÒôĞ§
+    /// æ’­æ”¾ç¯å¢ƒéŸ³æ•ˆ
     /// </summary>
     /// <param name="soundDetails"></param>
     private void PlayAmbientClip(SoundDetails soundDetails,float transitionTime)
@@ -126,11 +126,11 @@ public class AudioManager : Singleton<AudioManager>   //µ÷ÓÃÔÚAudioManager¶ÔÏóÉÏ
         {
             ambientSource.Play();
         }
-        //±³¾°ÒôÀÖÔÚtransitionTimeÊ±¼äÄÚ´ïµ½ambientSnapshot¿ìÕÕµÄÒôÁ¿
+        //èƒŒæ™¯éŸ³ä¹åœ¨transitionTimeæ—¶é—´å†…è¾¾åˆ°ambientSnapshotå¿«ç…§çš„éŸ³é‡
         ambientSnapshot.TransitionTo(transitionTime);
     }
     /// <summary>
-    /// ½«Audio MixerµÄ·Ö±´Öµ-80~20µ÷ÕûÎª0~1
+    /// å°†Audio Mixerçš„åˆ†è´å€¼-80~20è°ƒæ•´ä¸º0~1
     /// </summary>
     /// <param name="amount"></param>
     /// <returns></returns>
@@ -139,7 +139,7 @@ public class AudioManager : Singleton<AudioManager>   //µ÷ÓÃÔÚAudioManager¶ÔÏóÉÏ
         return (amount * 100 - 80);
     }
     /// <summary>
-    /// ½«ÔİÍ£²Ëµ¥µÄÒôÀÖSliderÓëAudioMixer°ó¶¨
+    /// å°†æš‚åœèœå•çš„éŸ³ä¹Sliderä¸AudioMixerç»‘å®š
     /// </summary>
     /// <param name="value"></param>
     public void SetMasterVolume(float value)

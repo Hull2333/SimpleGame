@@ -1,10 +1,10 @@
-using DG.Tweening;
+ï»¿using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 namespace MFarm.Inventory
 {
-    public class ItemPickUp : MonoBehaviour //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
+    public class ItemPickUp : MonoBehaviour //è°ƒç”¨åœ¨Playerå¯¹è±¡ä¸Š
     {
         private Item item;       
         private void Start()
@@ -22,11 +22,11 @@ namespace MFarm.Inventory
                 {
                     if (InventoryManager.Instance.CanAddItem(item.itemDetails.itemID))
                     {
-                        //¸øÊ°È¡ÌáÊ¾ÎïÆ·¸³ÖµID£¬Í¼Æ¬£¬ÊıÁ¿
+                        //ç»™æ‹¾å–æç¤ºç‰©å“èµ‹å€¼IDï¼Œå›¾ç‰‡ï¼Œæ•°é‡
                         var itemTip = new GetItemTip { itemID = item.itemDetails.itemID, itemIcon = item.itemDetails.itemIcon, tipAmount = 1 };
-                        //Ê°È¡ÎïÆ·ÌáÊ¾
+                        //æ‹¾å–ç‰©å“æç¤º
                         EventHandler.CallGetItemTipEvent(item.itemDetails);
-                        //²¥·ÅÊ°È¡ÒôĞ§
+                        //æ’­æ”¾æ‹¾å–éŸ³æ•ˆ
                         EventHandler.CallPlaySoundEvent(SoundName.Pickup);
                     }
                 }

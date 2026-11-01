@@ -1,21 +1,21 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 namespace MFarm.Inventory
 {
-    public class Box : MonoBehaviour    //µ÷ÓÃÔÚ×Ô¼º½¨ÔìµÄBOXÔ¤ÖÆÌåÉÏ
+    public class Box : MonoBehaviour    //è°ƒç”¨åœ¨è‡ªå·±å»ºé€ çš„BOXé¢„åˆ¶ä½“ä¸Š
     {
-        //¿ÕµÄboxÊı¾İ
+        //ç©ºçš„boxæ•°æ®
         public InventoryBag_SO boxBagTemplate;
         public InventoryBag_SO boxBagData;
         public GameObject mouseIcon;
         private bool canOpen = false;
-        //Ïä×ÓÊÇ·ñÒÑ¾­´ò¿ª
+        //ç®±å­æ˜¯å¦å·²ç»æ‰“å¼€
         private bool isOpen;
-        //Ïä×Ó±àºÅ
+        //ç®±å­ç¼–å·
         public int index;
 
-        //OnEnable,¸ÃÎïÆ·´´½¨Ò»´Î»áÖ´ĞĞÒ»´ÎºÍ³¡¾°Ë¢ĞÂÊ±Ò²»áÖ´ĞĞÒ»´Î
+        //OnEnable,è¯¥ç‰©å“åˆ›å»ºä¸€æ¬¡ä¼šæ‰§è¡Œä¸€æ¬¡å’Œåœºæ™¯åˆ·æ–°æ—¶ä¹Ÿä¼šæ‰§è¡Œä¸€æ¬¡
         private void OnEnable()
         {
             if(boxBagData == null)
@@ -44,39 +44,39 @@ namespace MFarm.Inventory
 
         private void Update()
         {
-            //Íæ¼Ò½øÈëÏä×Ó»¥¶¯·¶Î§ÇÒµã»÷Êó±êÓÒ¼ü´ò¿ªÏä×Ó
+            //ç©å®¶è¿›å…¥ç®±å­äº’åŠ¨èŒƒå›´ä¸”ç‚¹å‡»é¼ æ ‡å³é”®æ‰“å¼€ç®±å­
             if (!isOpen && canOpen && Input.GetMouseButtonDown(1))
             {
-                //´ò¿ªÏä×Ó
+                //æ‰“å¼€ç®±å­
                 EventHandler.CallBaseBagOpenEvent(SlotType.Box, boxBagData);
                 isOpen = true;
             }
             if(!canOpen && isOpen)
             {
-                //¹Ø±ÕÏä×Ó
+                //å…³é—­ç®±å­
                 EventHandler.CallBaseBagCloseEvent(SlotType.Box, boxBagData);
                 isOpen= false;
             }
             if(isOpen && Input.GetKeyDown(KeyCode.Escape))
             {
-                //¹Ø±ÕÏä×Ó
+                //å…³é—­ç®±å­
                 EventHandler.CallBaseBagCloseEvent(SlotType.Box, boxBagData);
                 isOpen = false;
             }
         }
         /// <summary>
-        /// ³õÊ¼»¯Ïä×Ó±àºÅ
+        /// åˆå§‹åŒ–ç®±å­ç¼–å·
         /// </summary>
         public void InitBox(int boxIndex)
         {
             index = boxIndex;
             var key = this.name + index;
-            //ÓÎÏ·ÖĞÒÑÓĞµÄÏä×Ó
+            //æ¸¸æˆä¸­å·²æœ‰çš„ç®±å­
             if (InventoryManager.Instance.GetBoxDataList(key) != null)
             {
                 boxBagData.itemList = InventoryManager.Instance.GetBoxDataList(key);
             }
-            //ĞÂ½¨Ïä×Ó
+            //æ–°å»ºç®±å­
             else
             {
                 InventoryManager.Instance.AddBoxDataDict(this);

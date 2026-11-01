@@ -1,16 +1,16 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Door : MonoBehaviour //µ÷ÓÃÔÚ³¡¾°ÖĞÒ»°ãÊ±Îİ×ÓÄÚµÄDoor¶ÔÏóÉÏ
+public class Door : MonoBehaviour //è°ƒç”¨åœ¨åœºæ™¯ä¸­ä¸€èˆ¬æ—¶å±‹å­å†…çš„Doorå¯¹è±¡ä¸Š
 {
     private CursorManager cursorManager;
     public Animator anim;
     public bool isOpened = false;
     private bool canOpened = true;
-    //¹ØÃÅ¼ÆÊ±Æ÷
+    //å…³é—¨è®¡æ—¶å™¨
     private float closeDelay = 3f;
-    //¼ì²âÍæ¼ÒÊÇ·ñÔÚÃÅ¸½¼ş
+    //æ£€æµ‹ç©å®¶æ˜¯å¦åœ¨é—¨é™„ä»¶
     public bool playerInRange;
     private void Start()
     {
@@ -28,7 +28,7 @@ public class Door : MonoBehaviour //µ÷ÓÃÔÚ³¡¾°ÖĞÒ»°ãÊ±Îİ×ÓÄÚµÄDoor¶ÔÏóÉÏ
         }
     }
     /// <summary>
-    /// Íæ¼ÒÀë¿ªÃÅµÄ¼ì²â·¶Î§
+    /// ç©å®¶ç¦»å¼€é—¨çš„æ£€æµ‹èŒƒå›´
     /// </summary>
     /// <param name="other"></param>
     private void OnTriggerExit2D(Collider2D other)
@@ -42,7 +42,7 @@ public class Door : MonoBehaviour //µ÷ÓÃÔÚ³¡¾°ÖĞÒ»°ãÊ±Îİ×ÓÄÚµÄDoor¶ÔÏóÉÏ
         isOpened = !isOpened;
         anim.SetBool("isOpened", isOpened);
         StartCoroutine(WaitForDoorAnim());
-        // ÃÅ±»´ò¿ªÊ±£¬Æô¶¯×Ô¶¯¹Ø±Õ¼ÆÊ±Æ÷
+        // é—¨è¢«æ‰“å¼€æ—¶ï¼Œå¯åŠ¨è‡ªåŠ¨å…³é—­è®¡æ—¶å™¨
         if (isOpened)
             StartCoroutine(AutoCloseDoor());
     }
@@ -53,13 +53,13 @@ public class Door : MonoBehaviour //µ÷ÓÃÔÚ³¡¾°ÖĞÒ»°ãÊ±Îİ×ÓÄÚµÄDoor¶ÔÏóÉÏ
 
     }
     /// <summary>
-    /// ×Ô¶¯¹ØÃÅ
+    /// è‡ªåŠ¨å…³é—¨
     /// </summary>
     /// <returns></returns>
     private IEnumerator AutoCloseDoor()
     {
         yield return new WaitForSeconds(closeDelay);
-        // È·ÈÏÃÅ»¹Ã»±»ÊÖ¶¯¹Ø±Õ
+        // ç¡®è®¤é—¨è¿˜æ²¡è¢«æ‰‹åŠ¨å…³é—­
         if (isOpened && !playerInRange)
         {
             isOpened = false;

@@ -1,4 +1,4 @@
-using System.Collections;
+锘縰sing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -7,16 +7,16 @@ namespace MFarm.Dialogue
     [System.Serializable]
     public class DialoguePiece
     {
-        [Header("对话详情")]
+        [Header("瀵硅瘽璇︽儏")]
         public Sprite faceImage;
         public bool onLeft;
         public string name;
         [TextArea]
         public string dialogueText;
         public bool hasToPause;
-        //当前这句对话是否播放结束
+        //褰撳墠杩欏彞瀵硅瘽鏄惁鎾斁缁撴潫
         [HideInInspector]public bool isDone;
-        //对话后需要发生的事件
+        //瀵硅瘽鍚庨渶瑕佸彂鐢熺殑浜嬩欢
         public UnityEvent afterTalkEvent;
     }
 }

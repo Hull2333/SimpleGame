@@ -1,8 +1,8 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DefenceEffect : MonoBehaviour //µ÷ÓÃÔÚDefenceEffect01¶ÔÏóÉÏ
+public class DefenceEffect : MonoBehaviour //è°ƒç”¨åœ¨DefenceEffect01å¯¹è±¡ä¸Š
 {
     private AnimatorStateInfo info;
     private void Update()

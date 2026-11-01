@@ -1,4 +1,4 @@
-
+ï»¿
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -7,14 +7,14 @@ public class NPCEventData_SO : ScriptableObject
 {
     public List<NPCEvent> NPCEventList;
     /// <summary>
-    /// »ñÈ¡NPCºÃ¸ĞÊÂ¼ş
+    /// è·å–NPCå¥½æ„Ÿäº‹ä»¶
     /// </summary>
     /// <param name="frendliness"></param>
     public NPCEvent GetfriendlinessEvent(float frendliness,string currentScene)
     {
         foreach (var events in NPCEventList)
         {
-            //µ±Ç°³¡¾°ºÍºÃ¸Ğ¶È¶¼·ûºÏ·¢ÉúÌõ¼ş£¬¾Í·µ»Ø¶ÔÓ¦µÄNPCÊÂ¼ş
+            //å½“å‰åœºæ™¯å’Œå¥½æ„Ÿåº¦éƒ½ç¬¦åˆå‘ç”Ÿæ¡ä»¶ï¼Œå°±è¿”å›å¯¹åº”çš„NPCäº‹ä»¶
             if (!events.isHappened && frendliness >= events.friendliness)
             {
                 if (events.startScene == currentScene && events.startScene == SceneManager.GetActiveScene().name && TimeManager.Instance.gameHour >= events.eventStartHour && TimeManager.Instance.gameHour <= events.eventEndHour)

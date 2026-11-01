@@ -1,8 +1,8 @@
-
+ï»¿
 public interface IState
 {
 
-    //×´Ì¬µÄ½øÈë£¬³ÖĞø£¬ÍË³ö
+    //çŠ¶æ€çš„è¿›å…¥ï¼ŒæŒç»­ï¼Œé€€å‡º
     void OnEnter();
 
     void OnUpdate();

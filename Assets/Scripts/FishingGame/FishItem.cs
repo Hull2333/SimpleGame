@@ -1,8 +1,8 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FishItem : MonoBehaviour //µ÷ÓÃÔÚFishItem¶ÔÏóÉÏ
+public class FishItem : MonoBehaviour //è°ƒç”¨åœ¨FishItemå¯¹è±¡ä¸Š
 {
     private ParticleSystem dropletEffect;
 

@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -25,13 +25,13 @@ public class AttackState : IState
         {
             manager.TransitionState(EnemyStateType.Fainting);
         }
-        //µÐÈËÊÜÉË
+        //æ•Œäººå—ä¼¤
         if (parameter.isHurted)
         {
             manager.TransitionState(EnemyStateType.Hurted);
         }
         info = parameter.animator.GetCurrentAnimatorStateInfo(0);
-        //¹¥»÷¶¯»­²¥·ÅÍêÔÙ´Î½øÈë×·»÷×´Ì¬»¹ÊÇ¼ÌÐø¹¥»÷
+        //æ”»å‡»åŠ¨ç”»æ’­æ”¾å®Œå†æ¬¡è¿›å…¥è¿½å‡»çŠ¶æ€è¿˜æ˜¯ç»§ç»­æ”»å‡»
         //if (info.normalizedTime >= 0.95f)
         //{
         //    if (Vector2.Distance(manager.transform.position, parameter.target.position) <= parameter.attackArea)
@@ -43,10 +43,10 @@ public class AttackState : IState
         //        manager.TransitionState(EnemyStateType.Chase);
         //    }
         //}
-        //ÔÚ¹¥»÷·¶Î§ÄÚ
+        //åœ¨æ”»å‡»èŒƒå›´å†…
         if(Vector2.Distance(manager.transform.position, parameter.target.position) <= parameter.attackArea)
         {
-            //¹¥»÷²»ÔÚCDÖÐ
+            //æ”»å‡»ä¸åœ¨CDä¸­
             if(parameter.inAttackCD == false)
             {
                 manager.SetFaceDirection(parameter.target);
@@ -57,7 +57,7 @@ public class AttackState : IState
             }
            
         }
-        //ÔÚ¹¥»÷·¶Î§Íâ
+        //åœ¨æ”»å‡»èŒƒå›´å¤–
         else if(info.normalizedTime >= 0.95f)
         {
             manager.TransitionState(EnemyStateType.Chase);

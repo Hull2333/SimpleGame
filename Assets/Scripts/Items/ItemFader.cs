@@ -1,8 +1,8 @@
-using DG.Tweening;
+ï»¿using DG.Tweening;
 using UnityEngine;
-//È·±£¸Ã¶ÔÏóÒ»¶¨ÓĞSpriteRenderer×é¼ş,Ã»ÓĞ»á×Ô¶¯Ìí¼Ó
+//ç¡®ä¿è¯¥å¯¹è±¡ä¸€å®šæœ‰SpriteRendererç»„ä»¶,æ²¡æœ‰ä¼šè‡ªåŠ¨æ·»åŠ 
 [RequireComponent(typeof(SpriteRenderer))]
-public class ItemFader : MonoBehaviour  //µ÷ÓÃÔÚTree1¶ÔÏóÉÏ
+public class ItemFader : MonoBehaviour  //è°ƒç”¨åœ¨Tree1å¯¹è±¡ä¸Š
 {
     private SpriteRenderer spriteRenderer;
 
@@ -11,16 +11,16 @@ public class ItemFader : MonoBehaviour  //µ÷ÓÃÔÚTree1¶ÔÏóÉÏ
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
     /// <summary>
-    /// Öğ½¥»Ö¸´ÑÕÉ«
+    /// é€æ¸æ¢å¤é¢œè‰²
     /// </summary>
     public void FadeIn()    
     {
         Color targetColor = new Color(1, 1, 1, 1);
-        //ÔÚSettings.fadeDurationÆÚ¼äÑÕÉ«Öğ½¥±ä³ÉtargetColor
+        //åœ¨Settings.fadeDurationæœŸé—´é¢œè‰²é€æ¸å˜æˆtargetColor
         spriteRenderer.DOColor(targetColor, Settings.itemFadeDuration);
     }
     /// <summary>
-    ///  Öğ½¥°ëÍ¸Ã÷
+    ///  é€æ¸åŠé€æ˜
     /// </summary>
     public void FadeOut()   
     {

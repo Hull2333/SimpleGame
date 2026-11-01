@@ -1,9 +1,9 @@
-#if UNITY_EDITOR
+ï»¿#if UNITY_EDITOR
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-//½«³¡¾°ÊôĞÔÒÔ¹ö¶¯ÁĞ±íµÄ·½Ê½²é¿´ºÍÑ¡Ôñ
+//å°†åœºæ™¯å±æ€§ä»¥æ»šåŠ¨åˆ—è¡¨çš„æ–¹å¼æŸ¥çœ‹å’Œé€‰æ‹©
 [CustomPropertyDrawer(typeof(SceneNameAttribute))]
 public class SceneNameDrawer : PropertyDrawer
 {
@@ -21,7 +21,7 @@ public class SceneNameDrawer : PropertyDrawer
             GetSceneNameArray(property);
         }
         int oldIndex = sceneIndex;
-        //Éú³É³¡¾°¹ö¶¯ÁĞ±í
+        //ç”Ÿæˆåœºæ™¯æ»šåŠ¨åˆ—è¡¨
         sceneIndex = EditorGUI.Popup(position, label, sceneIndex, sceneNames);
         if (oldIndex != sceneIndex)
         {

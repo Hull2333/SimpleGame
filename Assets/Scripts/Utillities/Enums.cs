@@ -1,4 +1,4 @@
-public enum ItemType
+﻿public enum ItemType
 {
     //种子，商品，家具
     Seed,Commodity,Furniture,Cooked,Laterfish,Seafish,

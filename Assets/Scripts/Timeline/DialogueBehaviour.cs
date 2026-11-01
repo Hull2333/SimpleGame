@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Playables;
@@ -14,30 +14,30 @@ public class DialogueBehaviour : PlayableBehaviour
         director = (playable.GetGraph().GetResolver() as PlayableDirector);
     }
     /// <summary>
-    /// µ±¿ªÊ¼²¥·ÅDialogueBehaviourÆ¬¶Î
+    /// å½“å¼€å§‹æ’­æ”¾DialogueBehaviourç‰‡æ®µ
     /// </summary>
     /// <param name="playable"></param>
     /// <param name="info"></param>
     public override void OnBehaviourPlay(Playable playable, FrameData info)
     {
-        //ºô½ĞÆô¶¯Dialogue UI
+        //å‘¼å«å¯åŠ¨Dialogue UI
         EventHandler.CallShowDialogueEvent(dialoguePiece);
         if(Application.isPlaying)
         {
             if(dialoguePiece.hasToPause)
             {
-                //ÔİÍ£Timeline
+                //æš‚åœTimeline
                 TimelineManager.Instance.PauseTimeline(director);
             }
             else
             {
-                //¹Ø±Õ¾çÇé¶Ô»°
+                //å…³é—­å‰§æƒ…å¯¹è¯
                 EventHandler.CallShowDialogueEvent(null);
             }
         }
     }
     /// <summary>
-    /// ÔÚTimeline²¥·ÅÆÚ¼äÃ¿Ö¡Ö´ĞĞ
+    /// åœ¨Timelineæ’­æ”¾æœŸé—´æ¯å¸§æ‰§è¡Œ
     /// </summary>
     /// <param name="playable"></param>
     /// <param name="info"></param>
@@ -50,7 +50,7 @@ public class DialogueBehaviour : PlayableBehaviour
         }
     }
     /// <summary>
-    /// TimelineµÄ¶Ô»°½áÊøºó¹Ø±Õ¶Ô»°UI,OnBehaviourPauseËùÓĞDialogueClip½áÊøºóÖ´ĞĞÒ»´Î
+    /// Timelineçš„å¯¹è¯ç»“æŸåå…³é—­å¯¹è¯UI,OnBehaviourPauseæ‰€æœ‰DialogueClipç»“æŸåæ‰§è¡Œä¸€æ¬¡
     /// </summary>
     /// <param name="playable"></param>
     /// <param name="info"></param>
@@ -59,7 +59,7 @@ public class DialogueBehaviour : PlayableBehaviour
         EventHandler.CallShowDialogueEvent(null);
     }
     /// <summary>
-    /// Playable²¥·ÅÊ±ÔİÍ£Ê±¼ä£¬½ûÖ¹ÈËÎïÒÆ¶¯
+    /// Playableæ’­æ”¾æ—¶æš‚åœæ—¶é—´ï¼Œç¦æ­¢äººç‰©ç§»åŠ¨
     /// </summary>
     /// <param name="playable"></param>
     public override void OnGraphStart(Playable playable)
@@ -67,7 +67,7 @@ public class DialogueBehaviour : PlayableBehaviour
         EventHandler.CallUpdateGameStateEvent(GameState.Pause);
     }
     /// <summary>
-    /// Playable²¥·ÅÍêºó»Ö¸´Ê±¼äºÍÈËÎïÒÆ¶¯
+    /// Playableæ’­æ”¾å®Œåæ¢å¤æ—¶é—´å’Œäººç‰©ç§»åŠ¨
     /// </summary>
     /// <param name="playable"></param>
     public override void OnGraphStop(Playable playable)

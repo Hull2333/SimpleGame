@@ -1,15 +1,15 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 namespace MFarm.Task 
 {
-    public class TaskUpdate : MonoBehaviour //µ÷ÓÃÔÚPlayerTaskPanel UIÉÏ
+    public class TaskUpdate : MonoBehaviour //è°ƒç”¨åœ¨PlayerTaskPanel UIä¸Š
     {
-        //ÎŞÈÎÎñÌáÊ¾UI
+        //æ— ä»»åŠ¡æç¤ºUI
         public GameObject noTaskTip;
         /// <summary>
-        /// Ã¿´Î¿ªÆôÍæ¼ÒÈÎÎñÃæ°åÊ±Æô¶¯Ò»´Î
+        /// æ¯æ¬¡å¼€å¯ç©å®¶ä»»åŠ¡é¢æ¿æ—¶å¯åŠ¨ä¸€æ¬¡
         /// </summary>
         public void OnEnable()
         {
@@ -25,7 +25,7 @@ namespace MFarm.Task
             
         }
         /// <summary>
-        /// Çå¿ÕÍæ¼ÒÈÎÎñÃæ°åµÄËùÒÔÈÎÎñImage
+        /// æ¸…ç©ºç©å®¶ä»»åŠ¡é¢æ¿çš„æ‰€ä»¥ä»»åŠ¡Image
         /// </summary>
         //private void RemoveAllChildrenInPlayerTaskPanel()
         //{

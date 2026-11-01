@@ -1,7 +1,7 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 
-public class FishingGameManager : Singleton<FishingGameManager> //µ÷ÓÃÔÚFishBg¶ÔÏóÉÏ,¹ÜÀíµöÓãÓÎÏ·µÄ½øĞĞ
+public class FishingGameManager : Singleton<FishingGameManager> //è°ƒç”¨åœ¨FishBgå¯¹è±¡ä¸Š,ç®¡ç†é’“é±¼æ¸¸æˆçš„è¿›è¡Œ
 {
     public Animator rodAnim;
     public Animator smallFishAnim;
@@ -9,37 +9,37 @@ public class FishingGameManager : Singleton<FishingGameManager> //µ÷ÓÃÔÚFishBg¶Ô
     public GameObject smallFish;
     private PlayerController playerController;
     public GameObject clickMouseTip;
-    [Header("Á¬½ÓÏß²ÎÊı")]
-    //Óã¸ÍºÍĞ¡ÓãµÄÁ¬½ÓÏß
+    [Header("è¿æ¥çº¿å‚æ•°")]
+    //é±¼ç«¿å’Œå°é±¼çš„è¿æ¥çº¿
     public LineRenderer line;
     public Transform rodPos;
     public Transform smallFishPos;
-    //Á¬½ÓÏßµÄÖĞµã
+    //è¿æ¥çº¿çš„ä¸­ç‚¹
     private Vector3 lineMidPos;
-    [Header("ÆäËû")]
+    [Header("å…¶ä»–")]
     public Image fishProgress;
     [HideInInspector] public float currentFishProgress;
     public Rigidbody2D smallFishRD;
-    //Ğ¡ÓãÒ»¿ªÊ¼µÄÎ»ÖÃ
+    //å°é±¼ä¸€å¼€å§‹çš„ä½ç½®
     public Transform smallFishStartPos;
-    //×óÓÒ±ß½çµã
+    //å·¦å³è¾¹ç•Œç‚¹
     public Transform LeftEdgePos;
     public Transform RightEdgePos;
-    //µöÓã½ø¶ÈÌõUI
+    //é’“é±¼è¿›åº¦æ¡UI
     public GameObject fishProgressCanvas;
 
-    [Header("ĞÂµöÓãÓÎÏ·")]
-    //ÓãÌÓÍÑÁÙ½çÏß
+    [Header("æ–°é’“é±¼æ¸¸æˆ")]
+    //é±¼é€ƒè„±ä¸´ç•Œçº¿
     public GameObject fishAwayLine;
     public void OnEnable()
     {
         fishProgressCanvas.SetActive(true);
         playerController = GetComponentInParent<PlayerController>();
-        // ÓãÌÓÍÑÁÙ½çÏß£º·Åµ½Íæ¼ÒµöÓã·½ÏòÇ°·½3¸ñ´¦
+        // é±¼é€ƒè„±ä¸´ç•Œçº¿ï¼šæ”¾åˆ°ç©å®¶é’“é±¼æ–¹å‘å‰æ–¹3æ ¼å¤„
         fishAwayLine.SetActive(true);
         Vector2 fishingDir = playerController.FaceDirection;
         fishAwayLine.transform.position = (Vector2)playerController.transform.position + fishingDir * (3f * Settings.gridCellSize);
-        // ÊúÏßÔÚ×óÓÒ³¯ÏòÊ±·½ÏòÕıÈ·£¬ÉÏÏÂ³¯ÏòÊ±Ğı×ª90¶È¸ÄÎªºáÏß
+        // ç«–çº¿åœ¨å·¦å³æœå‘æ—¶æ–¹å‘æ­£ç¡®ï¼Œä¸Šä¸‹æœå‘æ—¶æ—‹è½¬90åº¦æ”¹ä¸ºæ¨ªçº¿
         fishAwayLine.transform.rotation = (fishingDir.y != 0f) ? Quaternion.Euler(0f, 0f, 90f) : Quaternion.identity;
         line.positionCount = 50;
         smallFish.transform.position = smallFishStartPos.position;
@@ -49,7 +49,7 @@ public class FishingGameManager : Singleton<FishingGameManager> //µ÷ÓÃÔÚFishBg¶Ô
     {
         fishProgress.fillAmount = currentFishProgress / Settings.fishCatchProgress;
         currentFishProgress -= 0.5f * Time.deltaTime;
-        //½ø¶ÈÌõ²ü¶¶
+        //è¿›åº¦æ¡é¢¤æŠ–
         if (currentFishProgress / Settings.fishCatchProgress < 0.3f)
         {
             prograssImageAnim.SetBool("isShaking", true);
@@ -58,7 +58,7 @@ public class FishingGameManager : Singleton<FishingGameManager> //µ÷ÓÃÔÚFishBg¶Ô
         {
             prograssImageAnim.SetBool("isShaking", false);
         }
-        //Ğ§¹û¶¯»­
+        //æ•ˆæœåŠ¨ç”»
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             rodAnim.SetBool("isClicked", true);
@@ -71,7 +71,7 @@ public class FishingGameManager : Singleton<FishingGameManager> //µ÷ÓÃÔÚFishBg¶Ô
             clickMouseTip.SetActive(true);
             smallFishAnim.SetBool("isPull", false);
         }
-        //Ê§°Ü
+        //å¤±è´¥
         if(smallFish.transform.position.x < LeftEdgePos.position.x || smallFish.transform.position.x > RightEdgePos.position.x || currentFishProgress <= 0)
         {
             fishProgressCanvas.SetActive(false);
@@ -79,7 +79,7 @@ public class FishingGameManager : Singleton<FishingGameManager> //µ÷ÓÃÔÚFishBg¶Ô
             gameObject.SetActive(false);
 
         }
-        //³É¹¦
+        //æˆåŠŸ
         if(currentFishProgress >= Settings.fishCatchProgress)
         {
             fishProgressCanvas.SetActive(false);
@@ -90,14 +90,14 @@ public class FishingGameManager : Singleton<FishingGameManager> //µ÷ÓÃÔÚFishBg¶Ô
     private void FixedUpdate()
     {
         lineMidPos = playerController.GetMidPoint(rodPos.position, smallFishPos.position, Settings.fishLinePercent, Settings.fishLineOffsetY);
-        //»æÖÆÁ¬½ÓÏß
+        //ç»˜åˆ¶è¿æ¥çº¿
         for (int i = 0; i < 50; i++)
         {
             Vector3 point = playerController.CalculateBezierPoint(rodPos.position, lineMidPos, smallFishPos.position, (i / 50.0f));
             line.SetPosition(i, point);
 
         }
-        //¸øĞ¡ÓãÊ©¼ÓÁ¦
+        //ç»™å°é±¼æ–½åŠ åŠ›
         if (Input.GetKey(KeyCode.Mouse0))
         {
             smallFishRD.AddForce(Vector2.left * (2f- Random.Range(0.5f, 1f)));

@@ -1,4 +1,4 @@
-using DG.Tweening;
+ï»¿using DG.Tweening;
 using MFarm.Save;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,16 +8,16 @@ using UnityEngine.ProBuilder;
 using UnityEngine.SceneManagement;
 namespace MFarm.Transition
 {
-    public class TransitionManager : Singleton<TransitionManager>,ISaveable  //µ÷ÓÃÔÚTransition¶ÔÏóÉÏ
+    public class TransitionManager : Singleton<TransitionManager>,ISaveable  //è°ƒç”¨åœ¨Transitionå¯¹è±¡ä¸Š
     {
-        //½«³¡¾°ÊôĞÔÒÔ¹ö¶¯ÁĞ±íµÄ·½Ê½²é¿´ºÍÑ¡Ôñ
+        //å°†åœºæ™¯å±æ€§ä»¥æ»šåŠ¨åˆ—è¡¨çš„æ–¹å¼æŸ¥çœ‹å’Œé€‰æ‹©
         //[sceneName]
-        //ÉèÖÃĞÂÓÎÏ·¿ªÊ¼Ê±Íæ¼ÒËùÔÚ³¡¾°
+        //è®¾ç½®æ–°æ¸¸æˆå¼€å§‹æ—¶ç©å®¶æ‰€åœ¨åœºæ™¯
         public string startSceneName = string.Empty;
-        //¼ÓÔØ³¡¾°µÄLoading½çÃæ
+        //åŠ è½½åœºæ™¯çš„Loadingç•Œé¢
         public CanvasGroup fadeCanvasGroup;
         private bool isFade;
-        [Header("×ª³¡Ğ§¹û")]
+        [Header("è½¬åœºæ•ˆæœ")]
         private Canvas transtionCanvas;
         public Material transtionMaterial;
         // Eye shaped curtain used by the sleep transition (MFarm/UI/EyeTransition)
@@ -28,9 +28,9 @@ namespace MFarm.Transition
         // _Zoom at which no curtain is left. The current mask needs about 2.1.
         private const float EyeOpenZoom = 2.5f;
         private Tween currentTween;
-        //½¹µã×ª³¡Í¼Æ¬ËùÔÚÃæ°å£¬ÓÃÓÚ°ÑÊÕËõ½¹µãÒÆµ½Íæ¼ÒÉíÉÏ
+        //ç„¦ç‚¹è½¬åœºå›¾ç‰‡æ‰€åœ¨é¢æ¿ï¼Œç”¨äºæŠŠæ”¶ç¼©ç„¦ç‚¹ç§»åˆ°ç©å®¶èº«ä¸Š
         private RectTransform transtionPanel;
-        //Ãæ°åÆÌÂúÆÁÄ»Ê±µÄÔ­Ê¼³ß´çºÍÃªµãÎ»ÖÃ£¬×ª³¡½áÊøºó»¹Ô­
+        //é¢æ¿é“ºæ»¡å±å¹•æ—¶çš„åŸå§‹å°ºå¯¸å’Œé”šç‚¹ä½ç½®ï¼Œè½¬åœºç»“æŸåè¿˜åŸ
         private Vector2 transtionPanelSize;
         private Vector2 transtionPanelAnchoredPosition;
         public string GUID => GetComponent<DataGUID>().guid;
@@ -38,15 +38,15 @@ namespace MFarm.Transition
         protected override void Awake()
         {
             base.Awake();
-            //ÓÎÏ·Ò»¿ªÊ¼¾Í¼ÓÔØUI´´½¨,ÒòÎªÓÎÏ·´ò°üºó£¬Ò»¿ªÊ¼Ö»¿ÉÒÔÉú³ÉÒ»¸ö³¡¾°
+            //æ¸¸æˆä¸€å¼€å§‹å°±åŠ è½½UIåˆ›å»º,å› ä¸ºæ¸¸æˆæ‰“åŒ…åï¼Œä¸€å¼€å§‹åªå¯ä»¥ç”Ÿæˆä¸€ä¸ªåœºæ™¯
             SceneManager.LoadScene("UI", LoadSceneMode.Additive);
         }
         private void OnEnable()
         {
             EventHandler.TransitionEvent += OnTransitionEvent;
-            //ĞÂÓÎÏ·¿ªÊ¼Ê±ĞèÒªÖØÖÃµÄshuju
+            //æ–°æ¸¸æˆå¼€å§‹æ—¶éœ€è¦é‡ç½®çš„shuju
             EventHandler.StartNewGameEvent += OnStartNewGameEvent;
-            //ÓÎÏ·½áÊøÊ±µÄÊÂ¼ş
+            //æ¸¸æˆç»“æŸæ—¶çš„äº‹ä»¶
             EventHandler.EndGameEvent += OnEndGameEvent;
            
         }
@@ -84,7 +84,7 @@ namespace MFarm.Transition
         }
         private void OnTransitionEvent(string sceneToGo, Vector3 positionToGo)
         {
-            //±ÜÃâÈËÎï¿ìËÙµÄÇĞ»»³¡¾°
+            //é¿å…äººç‰©å¿«é€Ÿçš„åˆ‡æ¢åœºæ™¯
             if (!isFade)
             {
                 StartCoroutine(Transition(sceneToGo, positionToGo));
@@ -103,54 +103,54 @@ namespace MFarm.Transition
 
 
         /// <summary>
-        /// ³¡¾°ÇĞ»»
+        /// åœºæ™¯åˆ‡æ¢
         /// </summary>
-        /// <param name="sceneName">ÇĞ»»µÄĞÂ³¡¾°</param>
-        /// <param name="targetPosition">´«ËÍµã</param>
+        /// <param name="sceneName">åˆ‡æ¢çš„æ–°åœºæ™¯</param>
+        /// <param name="targetPosition">ä¼ é€ç‚¹</param>
         /// <returns></returns>
         private IEnumerator Transition(string sceneName, Vector3 targetPosition)
         {
-            //¼ÓÔØ³¡¾°Ö®Ç°ËùĞèÒª×öµÄÊÂÇé
+            //åŠ è½½åœºæ™¯ä¹‹å‰æ‰€éœ€è¦åšçš„äº‹æƒ…
             EventHandler.CallBeforeSceneUnloadEvent();
-            //Loading½çÃæµÄ³öÏÖ
+            //Loadingç•Œé¢çš„å‡ºç°
             //yield return Fade(1);
             yield return PlayFadeTranstion();
             //yield return currentTween;
-            //»ñÈ¡µ±Ç°³¡¾°²¢Ğ¶ÔØ
+            //è·å–å½“å‰åœºæ™¯å¹¶å¸è½½
             yield return SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene());
-            //¼ÓÔØĞÂ³¡¾°
+            //åŠ è½½æ–°åœºæ™¯
             yield return LoadSceneSetActive(sceneName);
-            //¼ÓÔØĞÂ³¡¾°ºóÈËÎïµÄÎ»ÖÃ
+            //åŠ è½½æ–°åœºæ™¯åäººç‰©çš„ä½ç½®
             EventHandler.CallMoveToPosition(targetPosition);
-            //¼ÓÔØĞÂ³¡¾°Ö®ºóËùĞèÒª×öµÄÊÂÇé
+            //åŠ è½½æ–°åœºæ™¯ä¹‹åæ‰€éœ€è¦åšçš„äº‹æƒ…
             EventHandler.CallAfterSceneLoadedEvent();
-            //Loading½çÃæµÄÏûÊ§
+            //Loadingç•Œé¢çš„æ¶ˆå¤±
             //yield return Fade(0);
             yield return PlayOpenTranstion();
             //yield return currentTween;
         }
         /// <summary>
-        /// ¼ÓÔØ³¡¾°²¢¼¤»î£¬½ö½öÖ»ÓĞ¼¤»î¹¦ÄÜÃ»ÓĞÇĞ»»³¡¾°µÄ¹¦ÄÜ
+        /// åŠ è½½åœºæ™¯å¹¶æ¿€æ´»ï¼Œä»…ä»…åªæœ‰æ¿€æ´»åŠŸèƒ½æ²¡æœ‰åˆ‡æ¢åœºæ™¯çš„åŠŸèƒ½
         /// </summary>
-        /// <param name="sceneName">³¡¾°Ãû</param>
+        /// <param name="sceneName">åœºæ™¯å</param>
         /// <returns></returns>
         private IEnumerator LoadSceneSetActive(string sceneName)
         {
-            //LoadSceneAsync£¬Òì²½¼ÓÔØ£¬LoadSceneMode.AdditiveÔÚÔ­³¡¾°ÉÏµş¼ÓĞÂ³¡¾°sceneName
+            //LoadSceneAsyncï¼Œå¼‚æ­¥åŠ è½½ï¼ŒLoadSceneMode.Additiveåœ¨åŸåœºæ™¯ä¸Šå åŠ æ–°åœºæ™¯sceneName
             yield return SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
-            //ÔÚunityµÄ³¡¾°ÁĞ±íÖĞ»ñÈ¡ĞèÒª¼ÓÔØµÄĞÂ³¡¾°
+            //åœ¨unityçš„åœºæ™¯åˆ—è¡¨ä¸­è·å–éœ€è¦åŠ è½½çš„æ–°åœºæ™¯
             Scene newScene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
             SceneManager.SetActiveScene(newScene);
         }
         
         /// <summary>
-        /// Loading½çÃæµÄ¸¡ÏÖºÍÏûÊ§
+        /// Loadingç•Œé¢çš„æµ®ç°å’Œæ¶ˆå¤±
         /// </summary>
-        /// <param name="targetAlpha">1ÊÇºÚ£¬0ÊÇÍ¸Ã÷</param>
+        /// <param name="targetAlpha">1æ˜¯é»‘ï¼Œ0æ˜¯é€æ˜</param>
         /// <returns></returns>
         private IEnumerator Fade(float targetAlpha)
         {
-            //¿ªÊ¼³öÏÖ¼ÓÔØ½çÃæÊ¹£¬Êó±êÎŞ·¨µã»÷
+            //å¼€å§‹å‡ºç°åŠ è½½ç•Œé¢ä½¿ï¼Œé¼ æ ‡æ— æ³•ç‚¹å‡»
             isFade = true;
             foreach (Transform child in fadeCanvasGroup.transform)
                 child.gameObject.SetActive(true);
@@ -168,12 +168,12 @@ namespace MFarm.Transition
                 child.gameObject.SetActive(false);
         }
         /// <summary>
-        /// ½¹µãÊÕËõ×ª³¡
+        /// ç„¦ç‚¹æ”¶ç¼©è½¬åœº
         /// </summary>
         public IEnumerator PlayFadeTranstion()
         {
             isFade = true;
-            //ÊÕËõ½¹µã´ÓÆÁÄ»ÖĞĞÄÒÆµ½Íæ¼ÒÉíÉÏ
+            //æ”¶ç¼©ç„¦ç‚¹ä»å±å¹•ä¸­å¿ƒç§»åˆ°ç©å®¶èº«ä¸Š
             SetTranstionFocusToPlayer();
             currentTween = transtionMaterial.DOFloat(0f - transtionMaterial.GetFloat(smoothValue), transtionValue, 1f)
          .SetEase(Ease.OutQuad).OnComplete(() =>
@@ -181,11 +181,11 @@ namespace MFarm.Transition
              transtionMaterial.SetFloat(transtionValue, -0.1f);
          });
             yield return currentTween.WaitForCompletion();
-            //´ËÊ±»­ÃæÒÑÈ«ºÚ£¬»¹Ô­Ãæ°å¿´²»µ½±ä»¯
+            //æ­¤æ—¶ç”»é¢å·²å…¨é»‘ï¼Œè¿˜åŸé¢æ¿çœ‹ä¸åˆ°å˜åŒ–
             ResetTranstionPanel();
         }
         /// <summary>
-        /// °Ñ½¹µãÊÕËõµÄÖĞĞÄÒÆµ½Íæ¼ÒµÄÆÁÄ»Î»ÖÃ
+        /// æŠŠç„¦ç‚¹æ”¶ç¼©çš„ä¸­å¿ƒç§»åˆ°ç©å®¶çš„å±å¹•ä½ç½®
         /// </summary>
         private void SetTranstionFocusToPlayer()
         {
@@ -194,19 +194,19 @@ namespace MFarm.Transition
             Camera camera = transtionCanvas.worldCamera;
 
             Vector2 playerScreenPos = camera.WorldToScreenPoint(player.transform.position);
-            //Íæ¼ÒÏà¶ÔÃæ°åµ±Ç°ÖĞĞÄ(pivot)µÄ±¾µØ×ø±ê£¬pivotÔÚÖĞĞÄËùÒÔ»»Ëã½á¹û¾ÍÊÇÆ«ÒÆÁ¿
+            //ç©å®¶ç›¸å¯¹é¢æ¿å½“å‰ä¸­å¿ƒ(pivot)çš„æœ¬åœ°åæ ‡ï¼Œpivotåœ¨ä¸­å¿ƒæ‰€ä»¥æ¢ç®—ç»“æœå°±æ˜¯åç§»é‡
             Vector2 localPoint;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(transtionPanel, playerScreenPos, camera, out localPoint);
-            //Íæ¼ÒÏà¶ÔÃæ°å³õÊ¼(ÆÌÂúÆÁÄ»)Î»ÖÃµÄÆ«ÒÆ
+            //ç©å®¶ç›¸å¯¹é¢æ¿åˆå§‹(é“ºæ»¡å±å¹•)ä½ç½®çš„åç§»
             Vector2 offset = transtionPanel.anchoredPosition + localPoint - transtionPanelAnchoredPosition;
 
-            //Ãæ°åÖĞĞÄÆ«ÀëÆÁÄ»ÖĞĞÄºó£¬Òª·Å´ó²ÅÄÜ¼ÌĞø¸ÇÂúÆÁÄ»£¬·Å´óÁ¿È¡Á½¸öÖáÖĞ½Ï´óµÄÒ»¸ö
+            //é¢æ¿ä¸­å¿ƒåç¦»å±å¹•ä¸­å¿ƒåï¼Œè¦æ”¾å¤§æ‰èƒ½ç»§ç»­ç›–æ»¡å±å¹•ï¼Œæ”¾å¤§é‡å–ä¸¤ä¸ªè½´ä¸­è¾ƒå¤§çš„ä¸€ä¸ª
             float zoom = 1f + 2f * Mathf.Max(Mathf.Abs(offset.x) / transtionPanelSize.x, Mathf.Abs(offset.y) / transtionPanelSize.y);
             transtionPanel.sizeDelta = transtionPanelSize * zoom;
             transtionPanel.anchoredPosition = transtionPanelAnchoredPosition + offset;
         }
         /// <summary>
-        /// »¹Ô­×ª³¡Ãæ°åµÄ³ß´çºÍÎ»ÖÃ
+        /// è¿˜åŸè½¬åœºé¢æ¿çš„å°ºå¯¸å’Œä½ç½®
         /// </summary>
         private void ResetTranstionPanel()
         {
@@ -214,11 +214,11 @@ namespace MFarm.Transition
             transtionPanel.anchoredPosition = transtionPanelAnchoredPosition;
         }
         /// <summary>
-        /// ½¹µãÕ¹¿ª×ª³¡
+        /// ç„¦ç‚¹å±•å¼€è½¬åœº
         /// </summary>
         public IEnumerator PlayOpenTranstion()
         {
-            //Õ¹¿ª½¹µãÒ²´ÓÍæ¼ÒÉíÉÏ¿ªÊ¼£¬Õ¹¿ªÆÚ¼ä³ÖĞø¸úËæ(´ËÊ±Ïà»ú¿ÉÄÜ²Å¸Õ×·ÉÏ±»´«ËÍµÄÍæ¼Ò)
+            //å±•å¼€ç„¦ç‚¹ä¹Ÿä»ç©å®¶èº«ä¸Šå¼€å§‹ï¼Œå±•å¼€æœŸé—´æŒç»­è·Ÿéš(æ­¤æ—¶ç›¸æœºå¯èƒ½æ‰åˆšè¿½ä¸Šè¢«ä¼ é€çš„ç©å®¶)
             SetTranstionFocusToPlayer();
             currentTween = transtionMaterial.DOFloat(1f + transtionMaterial.GetFloat(smoothValue), transtionValue, 1f)
          .SetEase(Ease.OutQuad).OnUpdate(SetTranstionFocusToPlayer).OnComplete(() =>
@@ -228,7 +228,7 @@ namespace MFarm.Transition
          });
            
             yield return currentTween.WaitForCompletion();
-            //´ËÊ±»­ÃæÒÑÍ¸Ã÷£¬»¹Ô­Ãæ°å¿´²»µ½±ä»¯
+            //æ­¤æ—¶ç”»é¢å·²é€æ˜ï¼Œè¿˜åŸé¢æ¿çœ‹ä¸åˆ°å˜åŒ–
             ResetTranstionPanel();
         }
         /// <summary>
@@ -260,34 +260,34 @@ namespace MFarm.Transition
             isFade = false;
         }
         /// <summary>
-        /// ¼ÓÔØÓÎÏ·½ø¶È³¡¾°
+        /// åŠ è½½æ¸¸æˆè¿›åº¦åœºæ™¯
         /// </summary>
         /// <param name="sceneName"></param>
         /// <returns></returns>
         private IEnumerator LoadSaveDataScene(string sceneName)
         {
-            //¸ø¼ÓÔØ´æµµÒ»¸ö½¥Èë½¥³öµÄĞ§¹û
+            //ç»™åŠ è½½å­˜æ¡£ä¸€ä¸ªæ¸å…¥æ¸å‡ºçš„æ•ˆæœ
             yield return Fade(1f);
-            //ÔÚÓÎÏ·¹ı³ÌÖĞ£¬¼ÓÔØÁíÍâÓÎÏ·½ø¶È
+            //åœ¨æ¸¸æˆè¿‡ç¨‹ä¸­ï¼ŒåŠ è½½å¦å¤–æ¸¸æˆè¿›åº¦
             if(SceneManager.GetActiveScene().name != "OriginalGame")
             {
                 EventHandler.CallBeforeSceneUnloadEvent();
                 Debug.Log(SceneManager.GetActiveScene().buildIndex);
-                //Ğ¶ÔØµ±Ç°³¡¾°
+                //å¸è½½å½“å‰åœºæ™¯
                 yield return SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene().buildIndex);
             }
-            //¼ÓÔØ´æµµÀïµÄ³¡¾°
+            //åŠ è½½å­˜æ¡£é‡Œçš„åœºæ™¯
             yield return LoadSceneSetActive(sceneName);
             EventHandler.CallAfterSceneLoadedEvent();
             yield return Fade(0f);
         }
         /// <summary>
-        /// ÓÎÏ·½áÊøµÄĞ­³Ì
+        /// æ¸¸æˆç»“æŸçš„åç¨‹
         /// </summary>
         /// <returns></returns>
         private IEnumerator UnloadScene()
         {
-            //ºô½ĞµØÍ¼Ğ¶ÔØÇ°µÄÊÂ¼ş£¬ÔÙ°Ñµ±Ç°µÄ³¡¾°Ğ¶ÔØµô
+            //å‘¼å«åœ°å›¾å¸è½½å‰çš„äº‹ä»¶ï¼Œå†æŠŠå½“å‰çš„åœºæ™¯å¸è½½æ‰
             EventHandler.CallBeforeSceneUnloadEvent();
             yield return Fade(1f);
             yield return SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene().buildIndex);
@@ -304,7 +304,7 @@ namespace MFarm.Transition
 
         public void RestoreData(GameSaveData saveData)
         {
-            //¼ÓÔØÓÎÏ·½ø¶È³¡¾°
+            //åŠ è½½æ¸¸æˆè¿›åº¦åœºæ™¯
             StartCoroutine(LoadSaveDataScene(saveData.dataSceneName));
         }
     }

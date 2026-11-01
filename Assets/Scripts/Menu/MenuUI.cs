@@ -1,13 +1,13 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MenuUI : MonoBehaviour //µ÷ÓÃÔÚMenu¶ÔÏóÉÏ
+public class MenuUI : MonoBehaviour //è°ƒç”¨åœ¨Menuå¯¹è±¡ä¸Š
 {
-    //»ñÈ¡MenuµÄ¸÷ÖÖPanel
+    //è·å–Menuçš„å„ç§Panel
     public GameObject[] penels;
     /// <summary>
-    /// ¿ØÖÆMenuµÄËùÓĞPanelÏÔÊ¾
+    /// æ§åˆ¶Menuçš„æ‰€æœ‰Panelæ˜¾ç¤º
     /// </summary>
     /// <param name="index"></param>
     public void SwitchPanel(int index)
@@ -16,14 +16,14 @@ public class MenuUI : MonoBehaviour //µ÷ÓÃÔÚMenu¶ÔÏóÉÏ
         {
             if(i== 0)
             {
-                //°Ñµ±Ç°ÒªÏÔÊ¾µÄPanelÒÆ¶¯µ½×îÏÂ±ß
+                //æŠŠå½“å‰è¦æ˜¾ç¤ºçš„Panelç§»åŠ¨åˆ°æœ€ä¸‹è¾¹
                 penels[1].gameObject.SetActive(true);
 
             }
         }
     }
     /// <summary>
-    /// ÍË³öÓÎÏ·°´Å¥
+    /// é€€å‡ºæ¸¸æˆæŒ‰é’®
     /// </summary>
     public void ExitGame()
     {
@@ -31,7 +31,7 @@ public class MenuUI : MonoBehaviour //µ÷ÓÃÔÚMenu¶ÔÏóÉÏ
         Debug.Log("Exit Game");
     }
     /// <summary>
-    /// ¹Ø±Õµ±Ç°UI Panel
+    /// å…³é—­å½“å‰UI Panel
     /// </summary>
     /// <param name="index"></param>
     public void QuitCurrentPanel( int index )

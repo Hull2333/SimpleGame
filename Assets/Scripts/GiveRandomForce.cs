@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.WSA;
@@ -6,12 +6,12 @@ using UnityEngine.WSA;
 
 public class GiveRandomForce : MonoBehaviour
 {
-    //itemÅ×³öµÄ×î´óÁ¦¶È¡¢×îĞ¡Á¦¶È
+    //itemæŠ›å‡ºçš„æœ€å¤§åŠ›åº¦ã€æœ€å°åŠ›åº¦
     public float maxForce;
     public float minForce;
-    //item³öÏÖÊ±µÄyÖá
+    //itemå‡ºç°æ—¶çš„yè½´
     private float finalPosY;
-    //itemÅ×³öµÄ·½Ïò
+    //itemæŠ›å‡ºçš„æ–¹å‘
     private Vector3 forceDir;
     private Transform player;
     private Rigidbody2D rigidbody2D => transform.GetComponent<Rigidbody2D>();
@@ -26,14 +26,14 @@ public class GiveRandomForce : MonoBehaviour
     }
     public void Update()
     {
-        //µ±ItemµôÂäÖ»ÒÑÔ­Î»ÖÃyÖáÒ»ÑùÊ±¾²Ö¹
+        //å½“Itemæ‰è½åªå·²åŸä½ç½®yè½´ä¸€æ ·æ—¶é™æ­¢
         if ( transform.position.y < finalPosY  )
         {
             rigidbody2D.gravityScale = 0;
             rigidbody2D.velocity = Vector2.zero;
             
         }
-        //ItemÕÒµ½PLayer¿ªÊ¼ÍùPlayerÒÆ¶¯
+        //Itemæ‰¾åˆ°PLayerå¼€å§‹å¾€Playerç§»åŠ¨
         if (player != null)
         {
             transform.position = Vector2.MoveTowards(transform.position, player.transform.position, 5f * Time.deltaTime);
@@ -43,16 +43,16 @@ public class GiveRandomForce : MonoBehaviour
     private void GiveItemForce()
     {
         //forceDir = Random.insideUnitCircle/2;
-        //Ëæ»ú·½Ïò
+        //éšæœºæ–¹å‘
         forceDir = new Vector2(Random.Range(-0.5f, 0.5f), Random.Range(0, 1f));
-        //ÏòÁ¿»¯
+        //å‘é‡åŒ–
         forceDir.Normalize();
-        //Ê©¼Ó·½ÏòºÍËæ»úµÄÁ¦
+        //æ–½åŠ æ–¹å‘å’Œéšæœºçš„åŠ›
         rigidbody2D.AddForce(forceDir * Random.Range(minForce, maxForce), ForceMode2D.Impulse);
         
     }
     /// <summary>
-    /// PLayer½øÈëÎïÌåÎü¸½·¶Î§
+    /// PLayerè¿›å…¥ç‰©ä½“å¸é™„èŒƒå›´
     /// </summary>
     /// <param name="other"></param>
     private void OnTriggerEnter2D(Collider2D other)

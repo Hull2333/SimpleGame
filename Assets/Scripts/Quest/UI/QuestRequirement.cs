@@ -1,9 +1,9 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-public class QuestRequirement : MonoBehaviour //µ÷ÓÃÔÚQuestRequirementÔ¤ÖÆÌåÉÏ
+public class QuestRequirement : MonoBehaviour //è°ƒç”¨åœ¨QuestRequirementé¢„åˆ¶ä½“ä¸Š
 {
     private Text requireName;
     private Text progressNumber;
@@ -15,7 +15,7 @@ public class QuestRequirement : MonoBehaviour //µ÷ÓÃÔÚQuestRequirementÔ¤ÖÆÌåÉÏ
         originColor = requireName.color;
     }
     /// <summary>
-    /// ÉèÖÃÈÎÎñËùĞèÎïÆ·µÄÃû×ÖºÍÊıÁ¿
+    /// è®¾ç½®ä»»åŠ¡æ‰€éœ€ç‰©å“çš„åå­—å’Œæ•°é‡
     /// </summary>
     /// <param name="name"></param>
     /// <param name="amount"></param>
@@ -24,13 +24,13 @@ public class QuestRequirement : MonoBehaviour //µ÷ÓÃÔÚQuestRequirementÔ¤ÖÆÌåÉÏ
     {
         requireName.text = name;
         progressNumber.text = currentAmount.ToString() + " / " + amount.ToString();
-        //ÈÎÎñÎïÆ·¹»ÊıºóÏÔÊ¾ÂÌÉ«
+        //ä»»åŠ¡ç‰©å“å¤Ÿæ•°åæ˜¾ç¤ºç»¿è‰²
         if(currentAmount >= amount)
         {
             requireName.color = new Color(0.645f, 0.914f, 0.263f, 1f);
             progressNumber.color = new Color(0.645f, 0.914f, 0.263f, 1f);
         }
-        //»Øµ½³õÊ¼ÑÕÉ«
+        //å›åˆ°åˆå§‹é¢œè‰²
         else
         {
             requireName.color = originColor;
@@ -38,7 +38,7 @@ public class QuestRequirement : MonoBehaviour //µ÷ÓÃÔÚQuestRequirementÔ¤ÖÆÌåÉÏ
         }
     }
     /// <summary>
-    /// ÈÎÎñÍê³ÉºóµÄÈÎÎñÏÔÊ¾
+    /// ä»»åŠ¡å®Œæˆåçš„ä»»åŠ¡æ˜¾ç¤º
     /// </summary>
     /// <param name="name"></param>
     /// <param name="isFinished"></param>
@@ -47,7 +47,7 @@ public class QuestRequirement : MonoBehaviour //µ÷ÓÃÔÚQuestRequirementÔ¤ÖÆÌåÉÏ
         if (isFinished)
         {
             requireName.text = name;
-            progressNumber.text = "Íê³É";
+            progressNumber.text = "å®Œæˆ";
             requireName.color = Color.gray;
             progressNumber.color = Color.gray;
         }

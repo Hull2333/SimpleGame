@@ -1,18 +1,18 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using MFarm.Transition;
 namespace MFarm.Save
 {
     /// <summary>
-    /// ÓÎÏ·´æµµ£¬stringÊÇGUID£¬GameSaveData¸Ã´æµµµÄËùÓĞÄÚÈİ
+    /// æ¸¸æˆå­˜æ¡£ï¼Œstringæ˜¯GUIDï¼ŒGameSaveDataè¯¥å­˜æ¡£çš„æ‰€æœ‰å†…å®¹
     /// </summary>
     public class DataSlot
     {
         public Dictionary<string,GameSaveData> dataDict = new Dictionary<string,GameSaveData>();
-        #region ÓÃÀ´UIÏÔÊ¾½ø¶ÈÏêÇé
+        #region ç”¨æ¥UIæ˜¾ç¤ºè¿›åº¦è¯¦æƒ…
         /// <summary>
-        /// ½ø¶È´æµµµÄÊ±¼äÏÔÊ¾
+        /// è¿›åº¦å­˜æ¡£çš„æ—¶é—´æ˜¾ç¤º
         /// </summary>
         public string DataTime
         {
@@ -23,7 +23,7 @@ namespace MFarm.Save
                 if (dataDict.ContainsKey(key))
                 {
                     var timeData = dataDict[key];
-                    return timeData.timeDict["gameYear"] + "Äê/" + (Season)timeData.timeDict["gameSeason"] + "/" + timeData.timeDict["gameMonth"] + "ÔÂ/" + timeData.timeDict["gameDay"] + "ÈÕ/";
+                    return timeData.timeDict["gameYear"] + "å¹´/" + (Season)timeData.timeDict["gameSeason"] + "/" + timeData.timeDict["gameMonth"] + "æœˆ/" + timeData.timeDict["gameDay"] + "æ—¥/";
 
                 }
                 else
@@ -33,7 +33,7 @@ namespace MFarm.Save
             }
         }
         /// <summary>
-        /// ½ø¶È´æµµµÄ³¡¾°ÏÔÊ¾
+        /// è¿›åº¦å­˜æ¡£çš„åœºæ™¯æ˜¾ç¤º
         /// </summary>
         public string DataScene
         {
@@ -45,9 +45,9 @@ namespace MFarm.Save
                     var transitionData = dataDict[key];
                     return transitionData.dataSceneName switch
                     {
-                        "1.Field" => "¼ÒÔ°",
-                        "2.house" => "¼Ò",
-                        "3.Market" => "Çà²İÎ÷Ğ¡µÀ",
+                        "1.Field" => "å®¶å›­",
+                        "2.house" => "å®¶",
+                        "3.Market" => "é’è‰è¥¿å°é“",
                         _ => string.Empty
                     };
                 }

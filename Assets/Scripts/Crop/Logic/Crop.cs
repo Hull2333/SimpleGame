@@ -1,23 +1,23 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 namespace MFarm.CropPlant
 {
-    public class Crop : MonoBehaviour   //µ÷ÓÃÔÚCropBaseÔ¤ÖÆÌåÉÏ
+    public class Crop : MonoBehaviour   //è°ƒç”¨åœ¨CropBaseé¢„åˆ¶ä½“ä¸Š
     {
         public CropDetails cropDetails;
-        //ÊÕ¸î¹¤¾ßÊ¹ÓÃ´ÎÊıµÄ¼ÆÊ±Æ÷
+        //æ”¶å‰²å·¥å…·ä½¿ç”¨æ¬¡æ•°çš„è®¡æ—¶å™¨
         private int harvestActionCount;
         public TileDetails tileDetails;
         public BoxCollider2D collider2D;
-        //ÅĞ¶ÏÊÇ·ñ¿ÉÒÔÊÕ¸î
+        //åˆ¤æ–­æ˜¯å¦å¯ä»¥æ”¶å‰²
         public bool canHarvest => tileDetails.growthDays >= cropDetails.totalGrowthDays;
         private Animator anim;
         private Transform playerPosition => FindObjectOfType<PlayerController>().transform;
         public Animator selfAnim;
         /// <summary>
-        /// ¹¤¾ßÊÕ»ñ³¡¾°ÖĞÎïÌåµÄ·½·¨ 
+        /// å·¥å…·æ”¶è·åœºæ™¯ä¸­ç‰©ä½“çš„æ–¹æ³• 
         /// </summary>
         /// <param name="tool"></param>
         /// <param name="tile"></param>
@@ -30,14 +30,14 @@ namespace MFarm.CropPlant
                 return;
             }
             anim = GetComponentInChildren<Animator>();
-            //µã»÷¼ÆÊ±Æ÷
+            //ç‚¹å‡»è®¡æ—¶å™¨
             if (harvestActionCount < requireActionCount)
             {
                 harvestActionCount ++;
-                //ÅĞ¶ÏÊÇ·ñÓĞ¶¯»­£¬Ê÷Ä¾
+                //åˆ¤æ–­æ˜¯å¦æœ‰åŠ¨ç”»ï¼Œæ ‘æœ¨
                 if(anim != null && cropDetails.hasAnimation)
                 {
-                    //ÅĞ¶ÏÊ÷Ä¾µ¹ÏÂµÄ·½Ïò¶¯»­
+                    //åˆ¤æ–­æ ‘æœ¨å€’ä¸‹çš„æ–¹å‘åŠ¨ç”»
                     if(playerPosition.position.x < transform.position.x)
                     {
                         anim.SetTrigger("RotateRight");
@@ -48,13 +48,13 @@ namespace MFarm.CropPlant
                     }
                 }
 
-                //TODO:²¥·ÅÁ£×ÓĞ§¹û
+                //TODO:æ’­æ”¾ç²’å­æ•ˆæœ
                 if(cropDetails.hasParticalEffect)
                 {
                     EventHandler.CallParticleEffectEvent(cropDetails.effectType, transform.position + cropDetails.effectPos , Vector2.zero);
                 }
                 
-                //TODO:²¥·ÅÉùÒô
+                //TODO:æ’­æ”¾å£°éŸ³
                 if(cropDetails.soundEffect != SoundName.none)
                 {
                     EventHandler.CallPlaySoundEvent(cropDetails.soundEffect);
@@ -64,7 +64,7 @@ namespace MFarm.CropPlant
             {
                 if (cropDetails.generateAtPlayerPosition || !cropDetails.hasAnimation)
                 {
-                    //Éú³ÉÅ©×÷Îï
+                    //ç”Ÿæˆå†œä½œç‰©
                     SpawnHarvestItems();
                 }
                 else if(cropDetails.hasAnimation) 
@@ -77,32 +77,32 @@ namespace MFarm.CropPlant
                     {
                         anim.SetTrigger("FallLeft");
                     }
-                    //²¥·ÅÊ÷µ¹ÏÂµÄÒôĞ§
+                    //æ’­æ”¾æ ‘å€’ä¸‹çš„éŸ³æ•ˆ
                     EventHandler.CallPlaySoundEvent(SoundName.TreeFalling);
                     StartCoroutine(HarvestAfterAnimation());
                 }
             }
         }
         /// <summary>
-        /// ÔÚÊ÷¿³µ¹¶¯»­Ö®ºóÖ´ĞĞ
+        /// åœ¨æ ‘ç å€’åŠ¨ç”»ä¹‹åæ‰§è¡Œ
         /// </summary>
         /// <returns></returns>
         private IEnumerator HarvestAfterAnimation()
         {
-            //µ±Î´²¥·ÅAnimatorÖĞµÄ¶¼Ò»¸öÍ¼²ãµÄEnd¶¯»­Ê±£¬Ò»Ö±Ñ­»·Õâ¸öwhile
+            //å½“æœªæ’­æ”¾Animatorä¸­çš„éƒ½ä¸€ä¸ªå›¾å±‚çš„EndåŠ¨ç”»æ—¶ï¼Œä¸€ç›´å¾ªç¯è¿™ä¸ªwhile
             while (!anim.GetCurrentAnimatorStateInfo(0).IsName("End"))
             {
                 yield return null;
             }
             SpawnHarvestItems();
-            //×ª»»ĞÂÎïÌå
+            //è½¬æ¢æ–°ç‰©ä½“
             if (cropDetails.transferItemID > 0)
             {
                 CreateTransferCrop();
             }
         }
         /// <summary>
-        /// Ê÷Ä¾¿³µ¹ºó×ª»»ÎªÄ¾×®
+        /// æ ‘æœ¨ç å€’åè½¬æ¢ä¸ºæœ¨æ¡©
         /// </summary>
         private void CreateTransferCrop()
         {
@@ -113,17 +113,17 @@ namespace MFarm.CropPlant
             EventHandler.CallRefreshCurrentMap();
         }
         /// <summary>
-        /// Éú³ÉÊÕ»ñµÄÅ©×÷Îï,»òÕß¸÷ÖÖ²ÄÁÏ
+        /// ç”Ÿæˆæ”¶è·çš„å†œä½œç‰©,æˆ–è€…å„ç§ææ–™
         /// </summary>
         public void SpawnHarvestItems()
         {
-            //¶¨ÒåÒ»¸öÊÕ»ñµÄÊıÁ¿
+            //å®šä¹‰ä¸€ä¸ªæ”¶è·çš„æ•°é‡
             int amountToProduce;
             for (int i = 0;i<cropDetails.producedItemID.Length;i++)
             {
                 if (i == 0) 
                 {
-                    //Èç¹û×îĞ¡ºÍ×î´óÉú³ÉÊıÏàµÈ£¬ÔòÊÕ»ñÊıÁ¿µÈÓÚ×îĞ¡Öµ
+                    //å¦‚æœæœ€å°å’Œæœ€å¤§ç”Ÿæˆæ•°ç›¸ç­‰ï¼Œåˆ™æ”¶è·æ•°é‡ç­‰äºæœ€å°å€¼
                     if (cropDetails.producedMinAmount[i] == cropDetails.producedMaxAmount[i])
                     {
                         amountToProduce = cropDetails.producedMinAmount[i];
@@ -143,7 +143,7 @@ namespace MFarm.CropPlant
                     }
                 }
                 
-                //ÊÕ»ñ»ñÈ¡µÄÎïÆ·ÊıÁ¿
+                //æ”¶è·è·å–çš„ç‰©å“æ•°é‡
                 for (int j = 0;  j < amountToProduce; j++)
                 {
                     EventHandler.CallInstantiateItemInScene(cropDetails.producedItemID[i], transform.position);
@@ -151,12 +151,12 @@ namespace MFarm.CropPlant
                     //{
                     //    EventHandler.CallHarvestAtPlayerPosition(cropDetails.producedItemID[0]);
                     //}
-                    //ÔÚµØÍ¼ÉÏÉú³ÉÎïÆ·
+                    //åœ¨åœ°å›¾ä¸Šç”Ÿæˆç‰©å“
                     //else
                     //{
-                        //²ÎÕÕÍæ¼ÒÎ»ÖÃÅĞ¶ÏÎïÆ·Éú³ÉµÄ·½Ïò
+                        //å‚ç…§ç©å®¶ä½ç½®åˆ¤æ–­ç‰©å“ç”Ÿæˆçš„æ–¹å‘
                         //var dirX = transform.position.x > playerPosition.position.x ? 1 : -1;
-                        //ÎïÆ·µôÂäÉú³ÉÎ»ÖÃµÄ·¶Î§
+                        //ç‰©å“æ‰è½ç”Ÿæˆä½ç½®çš„èŒƒå›´
                         //var spawnPos = new Vector3(transform.position.x + Random.Range(dirX, cropDetails.spawnRadius.x * dirX), transform.position.y + Random.Range(-cropDetails.spawnRadius.y, cropDetails.spawnRadius.y), 0);
                         
                         //EventHandler.CallInstantiateItemInScene(cropDetails.producedItemID[i],transform.position);
@@ -166,19 +166,19 @@ namespace MFarm.CropPlant
             if (tileDetails != null)
             {
                 tileDetails.daysSinceLastHarvest ++;
-                //ÅĞ¶ÏÊÇ·ñ¿ÉÒÔÖØ¸´Éú³¤
+                //åˆ¤æ–­æ˜¯å¦å¯ä»¥é‡å¤ç”Ÿé•¿
                 if (cropDetails.daysToRegrow > 0 && tileDetails.daysSinceLastHarvest < cropDetails.regrowTimes)
                 {
                     tileDetails.growthDays = cropDetails.totalGrowthDays - cropDetails.daysToRegrow;
-                    //Ë¢ĞÂÖÖ×Ó
+                    //åˆ·æ–°ç§å­
                     EventHandler.CallRefreshCurrentMap();
                 }
-                //²»¿ÉÖØ¸´Éú³¤
+                //ä¸å¯é‡å¤ç”Ÿé•¿
                 else
                 {
                     tileDetails.daysSinceLastHarvest = -1;
                     tileDetails.seedItemID = -1;
-                    //FIXME:×Ô¼ºÉè¼Æ
+                    //FIXME:è‡ªå·±è®¾è®¡
                     //tileDetails.daysSinceDug = -1;
                 }
 
@@ -194,14 +194,14 @@ namespace MFarm.CropPlant
                 return;
             }
             anim = GetComponentInChildren<Animator>();
-            //µã»÷¼ÆÊ±Æ÷
+            //ç‚¹å‡»è®¡æ—¶å™¨
             if (harvestActionCount < requireActionCount)
             {
                 harvestActionCount++;
-                //ÅĞ¶ÏÊÇ·ñÓĞ¶¯»­£¬Ê÷Ä¾
+                //åˆ¤æ–­æ˜¯å¦æœ‰åŠ¨ç”»ï¼Œæ ‘æœ¨
                 if (anim != null && cropDetails.hasAnimation)
                 {
-                    //ÅĞ¶ÏÊ÷Ä¾µ¹ÏÂµÄ·½Ïò¶¯»­
+                    //åˆ¤æ–­æ ‘æœ¨å€’ä¸‹çš„æ–¹å‘åŠ¨ç”»
                     if (playerPosition.position.x < transform.position.x)
                     {
                         anim.SetTrigger("RotateRight");
@@ -212,13 +212,13 @@ namespace MFarm.CropPlant
                     }
                 }
 
-                //TODO:²¥·ÅÁ£×ÓĞ§¹û
+                //TODO:æ’­æ”¾ç²’å­æ•ˆæœ
                 if (cropDetails.hasParticalEffect)
                 {
                     EventHandler.CallParticleEffectEvent(cropDetails.effectType, transform.position + cropDetails.effectPos, Vector2.zero);
                 }
 
-                //TODO:²¥·ÅÉùÒô
+                //TODO:æ’­æ”¾å£°éŸ³
                 if (cropDetails.soundEffect != SoundName.none)
                 {
                     EventHandler.CallPlaySoundEvent(cropDetails.soundEffect);
@@ -228,7 +228,7 @@ namespace MFarm.CropPlant
             {
                 if (cropDetails.generateAtPlayerPosition || !cropDetails.hasAnimation)
                 {
-                    //Éú³ÉÅ©×÷Îï
+                    //ç”Ÿæˆå†œä½œç‰©
                     SpawnHarvestItems();
                 }
                 else if (cropDetails.hasAnimation)
@@ -241,32 +241,32 @@ namespace MFarm.CropPlant
                     {
                         anim.SetTrigger("FallLeft");
                     }
-                    //²¥·ÅÊ÷µ¹ÏÂµÄÒôĞ§
+                    //æ’­æ”¾æ ‘å€’ä¸‹çš„éŸ³æ•ˆ
                     EventHandler.CallPlaySoundEvent(SoundName.TreeFalling);
                     StartCoroutine(HarvestAfterAnimation());
                 }
             }
         }
         /// <summary>
-        /// ÊÕ»ñÅ©×÷Îï
+        /// æ”¶è·å†œä½œç‰©
         /// </summary>
         public void ProcessCropAction()
         {
-            //TODO:²¥·ÅÁ£×ÓĞ§¹û
+            //TODO:æ’­æ”¾ç²’å­æ•ˆæœ
             if (cropDetails.hasParticalEffect)
             {
                 EventHandler.CallParticleEffectEvent(cropDetails.effectType, transform.position + cropDetails.effectPos, Vector2.zero);
             }
-            //TODO:²¥·ÅÉùÒô
+            //TODO:æ’­æ”¾å£°éŸ³
             if (cropDetails.soundEffect != SoundName.none)
             {
                 EventHandler.CallPlaySoundEvent(cropDetails.soundEffect);
             }
-            //Éú³ÉÅ©×÷Îï
+            //ç”Ÿæˆå†œä½œç‰©
             SpawnHarvestItems();
             //if (cropDetails.generateAtPlayerPosition || !cropDetails.hasAnimation)
             //{
-            //    //Éú³ÉÅ©×÷Îï
+            //    //ç”Ÿæˆå†œä½œç‰©
             //    SpawnHarvestItems();
             //}
             //else if (cropDetails.hasAnimation)
@@ -279,7 +279,7 @@ namespace MFarm.CropPlant
             //    {
             //        anim.SetTrigger("FallLeft");
             //    }
-            //    //²¥·ÅÊ÷µ¹ÏÂµÄÒôĞ§
+            //    //æ’­æ”¾æ ‘å€’ä¸‹çš„éŸ³æ•ˆ
             //    EventHandler.CallPlaySoundEvent(SoundName.TreeFalling);
             //    StartCoroutine(HarvestAfterAnimation());
             //}

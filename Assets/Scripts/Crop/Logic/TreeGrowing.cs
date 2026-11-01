@@ -1,14 +1,14 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TreeGrowing : MonoBehaviour //µ÷ÓÃÔÚÊ÷Ô¤ÖÆÌåÉÏ
+public class TreeGrowing : MonoBehaviour //è°ƒç”¨åœ¨æ ‘é¢„åˆ¶ä½“ä¸Š
 {
-    //ÒÑÉú³¤µÄÌìÊı
+    //å·²ç”Ÿé•¿çš„å¤©æ•°
     public int growthDays;
     public int to2ndDay, to3rdDay;
     public Transform first, second, third;
-    //Ê÷ÊÇ·ñ¿ÉÒÔÉú³¤
+    //æ ‘æ˜¯å¦å¯ä»¥ç”Ÿé•¿
     public bool isTreeGrow = true;
     private void Awake()
     {
@@ -37,7 +37,7 @@ public class TreeGrowing : MonoBehaviour //µ÷ÓÃÔÚÊ÷Ô¤ÖÆÌåÉÏ
     }
        
     /// <summary>
-    /// ³õÊ¼»¯Ê÷Ä¾Éú³¤ÌìÊı
+    /// åˆå§‹åŒ–æ ‘æœ¨ç”Ÿé•¿å¤©æ•°
     /// </summary>
     public void InitTreeGrowDay()
     {
@@ -46,7 +46,7 @@ public class TreeGrowing : MonoBehaviour //µ÷ÓÃÔÚÊ÷Ô¤ÖÆÌåÉÏ
         TreeStartGrowing();
     }
     /// <summary>
-    /// Ê÷Ä¾Éú³¤
+    /// æ ‘æœ¨ç”Ÿé•¿
     /// </summary>
     public void TreeStartGrowing()
     {

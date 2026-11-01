@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -20,7 +20,7 @@ public class HurtedState : IState
         if(parameter.target != null)
         {
             manager.Knockback(parameter.target.position);
-            //µĞÈËÊÜÉËÌØĞ§
+            //æ•Œäººå—ä¼¤ç‰¹æ•ˆ
             EventHandler.CallParticleEffectEvent(ParticalEffectType.EnemyHit01, manager.transform.position , manager.transform.position - parameter.playerTransform.position);
         }
         
@@ -28,7 +28,7 @@ public class HurtedState : IState
     public void OnUpdate()
     {
 
-        //ÑªÁ¿¹é0Ê±ËÀÍö£¬·ñÔòÒ»±»¹¥»÷¾Í¿ªÊ¼×·»÷Íæ¼Ò
+        //è¡€é‡å½’0æ—¶æ­»äº¡ï¼Œå¦åˆ™ä¸€è¢«æ”»å‡»å°±å¼€å§‹è¿½å‡»ç©å®¶
         if (parameter.health <= 0)
         {
             manager.TransitionState(EnemyStateType.Death);

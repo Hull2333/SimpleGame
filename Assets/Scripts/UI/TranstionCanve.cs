@@ -1,4 +1,4 @@
-using DG.Tweening;
+ï»¿using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
@@ -7,6 +7,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
-public class TranstionCanve : MonoBehaviour //µ÷ÓÃÔÚTranstionCanvas¶ÔÏóÉÏ
+public class TranstionCanve : MonoBehaviour //è°ƒç”¨åœ¨TranstionCanvaså¯¹è±¡ä¸Š
 {
 }

@@ -1,17 +1,17 @@
-using MFarm.Inventory;
+ï»¿using MFarm.Inventory;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class QuestUI : Singleton<QuestUI> //µ÷ÓÃÔÚInventoryUIÉÏ
+public class QuestUI : Singleton<QuestUI> //è°ƒç”¨åœ¨InventoryUIä¸Š
 {
     [Header("Elements")]
     public GameObject questPanel;
     [Header("Quest Name")]
-    //ÈÎÎñ°´Å¥ÁĞ±í
+    //ä»»åŠ¡æŒ‰é’®åˆ—è¡¨
     public RectTransform[] questListTransforms;
-    //ÈÎÎñĞÅÏ¢°´Å¥
+    //ä»»åŠ¡ä¿¡æ¯æŒ‰é’®
     public QuestNameButton questNameButton;
     private QuestNameButton currentQuestNameButton;
     private int currentQuestPageIndex;
@@ -19,7 +19,7 @@ public class QuestUI : Singleton<QuestUI> //µ÷ÓÃÔÚInventoryUIÉÏ
     public Text currentPageText;
     public Text maxPageText;
     public GameObject noThingToDo;
-    //ÈÎÎñÉÏÏÂÒ³
+    //ä»»åŠ¡ä¸Šä¸‹é¡µ
     public Button questPreviousPage, questNextPage;
     [Header("Text Content")]
     public GameObject questRightPanel;
@@ -30,16 +30,16 @@ public class QuestUI : Singleton<QuestUI> //µ÷ÓÃÔÚInventoryUIÉÏ
     [Header("Reward Panel")]
     public RectTransform rewardTransform;
     public SlotUI rewardSlotUI;
-    [Header("ÈÎÎñÌìÊı")]
+    [Header("ä»»åŠ¡å¤©æ•°")]
     public Text questDay;
    /// <summary>
-   /// Éú³É²¢ÏÔÊ¾Íæ¼ÒÈÎÎñ°´Å¥ÁĞ±í
+   /// ç”Ÿæˆå¹¶æ˜¾ç¤ºç©å®¶ä»»åŠ¡æŒ‰é’®åˆ—è¡¨
    /// </summary>
     public void SetUpQuestList()
     {
-        //Çå¿ÕÈÎÎñÏêÏ¸ĞÅÏ¢ÎÄ±¾
+        //æ¸…ç©ºä»»åŠ¡è¯¦ç»†ä¿¡æ¯æ–‡æœ¬
         questContentText.text = string.Empty;
-        //Çå¿ÕÈÎÎñÃæ°å×ó±ßµÄÈÎÎñ°´Å¥
+        //æ¸…ç©ºä»»åŠ¡é¢æ¿å·¦è¾¹çš„ä»»åŠ¡æŒ‰é’®
         foreach (Transform questListTransform in questListTransforms)
         {
             foreach (Transform item in questListTransform)
@@ -47,17 +47,17 @@ public class QuestUI : Singleton<QuestUI> //µ÷ÓÃÔÚInventoryUIÉÏ
                 Destroy(item.gameObject);
             }
         }
-        //Çå¿ÕÈÎÎñÃæ°åÓÒ²àµÄ½±ÀøSlot
+        //æ¸…ç©ºä»»åŠ¡é¢æ¿å³ä¾§çš„å¥–åŠ±Slot
         foreach(Transform item in rewardTransform)
         {
             Destroy(item.gameObject);
         }
-        //Çå¿ÕÈÎÎñÃæ°åÓÒ²àµÄÈÎÎñ½ø³Ì
+        //æ¸…ç©ºä»»åŠ¡é¢æ¿å³ä¾§çš„ä»»åŠ¡è¿›ç¨‹
         foreach (Transform item in requireTransform)
         {
             Destroy(item.gameObject);
         }
-        //µ±Ã»ÓĞ½ÓÊÜÈÎÎñÊ±
+        //å½“æ²¡æœ‰æ¥å—ä»»åŠ¡æ—¶
         if(QuestManager.Instance.tasks.Count <= 0)
         {
             noThingToDo.SetActive(true);
@@ -80,7 +80,7 @@ public class QuestUI : Singleton<QuestUI> //µ÷ÓÃÔÚInventoryUIÉÏ
             maxQuestPageIndex = 2;
         }
         maxPageText.text ="/  " + (maxQuestPageIndex + 1).ToString();
-        //¸ù¾İquestListTransformÏÂ×ÓÎïÌåµÄÊıÁ¿À´ÖØĞÂÉú³ÉĞÂµÄÒÑ½ÓÊÜÈÎÎñ°´Å¥
+        //æ ¹æ®questListTransformä¸‹å­ç‰©ä½“çš„æ•°é‡æ¥é‡æ–°ç”Ÿæˆæ–°çš„å·²æ¥å—ä»»åŠ¡æŒ‰é’®
         foreach (var task in QuestManager.Instance.tasks)
         {
             if (questListTransforms[0].childCount <= 5)
@@ -109,7 +109,7 @@ public class QuestUI : Singleton<QuestUI> //µ÷ÓÃÔÚInventoryUIÉÏ
         
     }
     /// <summary>
-    /// ÉèÖÃÏÔÊ¾µ±Ç°ÈÎÎñµÄËùĞèÎïÆ·
+    /// è®¾ç½®æ˜¾ç¤ºå½“å‰ä»»åŠ¡çš„æ‰€éœ€ç‰©å“
     /// </summary>
     /// <param name="questData"></param>
     public void SetUpRequireList(QuestData_OS questData)
@@ -118,11 +118,11 @@ public class QuestUI : Singleton<QuestUI> //µ÷ÓÃÔÚInventoryUIÉÏ
         {
             Destroy(item.gameObject);
         }
-        //µ±Ç°ÈÎÎñµÄÃ¿Ò»¸öËùĞèÎïÆ·
+        //å½“å‰ä»»åŠ¡çš„æ¯ä¸€ä¸ªæ‰€éœ€ç‰©å“
         foreach(var require in questData.questRequires)
         {
             var q = Instantiate(requirement, requireTransform);
-            //ÏÔÊ¾ËùĞèÎïÆ·Ãû³Æ
+            //æ˜¾ç¤ºæ‰€éœ€ç‰©å“åç§°
             string itemName = InventoryManager.Instance.GetItemDetails(require.ItemID).itemName;
             if (questData.isFinshed)
             {
@@ -133,7 +133,7 @@ public class QuestUI : Singleton<QuestUI> //µ÷ÓÃÔÚInventoryUIÉÏ
 
     }
     /// <summary>
-    /// ÏÔÊ¾ÈÎÎñ½±ÀøÎïÆ·
+    /// æ˜¾ç¤ºä»»åŠ¡å¥–åŠ±ç‰©å“
     /// </summary>
     /// <param name="ID"></param>
     /// <param name="amount"></param>
@@ -145,13 +145,13 @@ public class QuestUI : Singleton<QuestUI> //µ÷ÓÃÔÚInventoryUIÉÏ
         item.GetComponent<Button>().interactable = false;
     }
     /// <summary>
-    /// ÏÔÊ¾µ±Ç°ÈÎÎñµÄÌìÊı
+    /// æ˜¾ç¤ºå½“å‰ä»»åŠ¡çš„å¤©æ•°
     /// </summary>
     /// <param name="questData"></param>
     public void SetUpQuestDay(QuestData_OS questData)
     {
-        questDay.text = questData.currentQuestDay.ToString() + " Ìì";
-        //µ±ÌìÊı²»×ã2ÌìÊ±£¬ÏÔÊ¾ºìÉ«
+        questDay.text = questData.currentQuestDay.ToString() + " å¤©";
+        //å½“å¤©æ•°ä¸è¶³2å¤©æ—¶ï¼Œæ˜¾ç¤ºçº¢è‰²
         if (questData.currentQuestDay <= 2)
         {
             questDay.color = new Color(0.915f, 0.263f, 0.263f, 1f);
@@ -164,7 +164,7 @@ public class QuestUI : Singleton<QuestUI> //µ÷ÓÃÔÚInventoryUIÉÏ
         }
     }
     /// <summary>
-    /// ¿ØÖÆÈÎÎñÉÏÏÂÒ³¿ª¹Ø
+    /// æ§åˆ¶ä»»åŠ¡ä¸Šä¸‹é¡µå¼€å…³
     /// </summary>
     private void SwitchQuestPageButton()
     {
@@ -187,7 +187,7 @@ public class QuestUI : Singleton<QuestUI> //µ÷ÓÃÔÚInventoryUIÉÏ
         currentPageText.text = (currentQuestPageIndex + 1).ToString();
     }
     /// <summary>
-    /// µã»÷ÈÎÎñÁĞ±íÉÏÒ»Ò³°´Å¥
+    /// ç‚¹å‡»ä»»åŠ¡åˆ—è¡¨ä¸Šä¸€é¡µæŒ‰é’®
     /// </summary>
     public void ClickQuestPreviousPageButton()
     {
@@ -197,7 +197,7 @@ public class QuestUI : Singleton<QuestUI> //µ÷ÓÃÔÚInventoryUIÉÏ
         SwitchQuestPageButton();
     }
     /// <summary>
-    /// µã»÷ÈÎÎñÁĞ±íÏÂÒ»Ò³°´Å¥
+    /// ç‚¹å‡»ä»»åŠ¡åˆ—è¡¨ä¸‹ä¸€é¡µæŒ‰é’®
     /// </summary>
     public void ClickQuestNextPageButton()
     {
@@ -207,7 +207,7 @@ public class QuestUI : Singleton<QuestUI> //µ÷ÓÃÔÚInventoryUIÉÏ
         SwitchQuestPageButton();
     }
     /// <summary>
-    ///  ÖØÖÃÈÎÎñÁĞ±íÒ³Êı
+    ///  é‡ç½®ä»»åŠ¡åˆ—è¡¨é¡µæ•°
     /// </summary>
     public void ResetQuestListPage()
     {

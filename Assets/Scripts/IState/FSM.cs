@@ -1,34 +1,34 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
 using MFarm.CropPlant;
 /// <summary>
-/// µĞÈË¸÷ÖÖÊôĞÔ
+/// æ•Œäººå„ç§å±æ€§
 /// </summary>
 [Serializable]
 public class Parameter
 {
-    [Header("µĞÈËÊôĞÔ")]
+    [Header("æ•Œäººå±æ€§")]
     public int health;
     public float moveSpeed;
     public float chaseSpeed;
     public float idleTime;
-    [Header("Ñ²Âßµã")]
-    //Ñ²Âßµã
+    [Header("å·¡é€»ç‚¹")]
+    //å·¡é€»ç‚¹
     public Transform[] patrolPoints;
-    //ÊÇ·ñÔ­µØ·µ»ØÑ²Âß
+    //æ˜¯å¦åŸåœ°è¿”å›å·¡é€»
     [HideInInspector] public bool isBack = false;
-    [Header("×·»÷Ïà¹Ø")]
+    [Header("è¿½å‡»ç›¸å…³")]
      public Transform parentPos;
     [HideInInspector] public CircleCollider2D chaseArae;
-    //ÉäÏß×èµ²Í¼²ã
+    //å°„çº¿é˜»æŒ¡å›¾å±‚
     public LayerMask obstacleLayer;
-    //×·»÷Ä¿±ê
+    //è¿½å‡»ç›®æ ‡
     [HideInInspector] public Transform playerTransform;
      public Transform target;
     [HideInInspector] public Animator animator;
-    //µĞÈË¶Ô×ÅÄ¿±ê·½Ïò
+    //æ•Œäººå¯¹ç€ç›®æ ‡æ–¹å‘
     [HideInInspector] public float moveX;
     [HideInInspector] public float moveY;
     [HideInInspector] public float faceX;
@@ -36,50 +36,50 @@ public class Parameter
     [HideInInspector] public bool isMoving;
     [HideInInspector] public bool isHurted;
     [HideInInspector] public bool isDeath;
-    [Header("¹¥»÷Ïà¹Ø")]
-    //ĞèÒª¹¥»÷Ä¿±êËùÔÚµÄÍ¼²ã,¹¥»÷·¶Î§
+    [Header("æ”»å‡»ç›¸å…³")]
+    //éœ€è¦æ”»å‡»ç›®æ ‡æ‰€åœ¨çš„å›¾å±‚,æ”»å‡»èŒƒå›´
     public int enemyDamage;
     [HideInInspector] public float attackArea = 0.8f;
-    //¸÷Àà¹¥»÷¿ò
+    //å„ç±»æ”»å‡»æ¡†
     public Collider2D[] attackBox;
-    //¹¥»÷ÀäÈ´
+    //æ”»å‡»å†·å´
     [HideInInspector] public float attackCD;
     [HideInInspector] public bool inAttackCD = false;
-    //ÊÇ·ñÑ£ÔÎ
+    //æ˜¯å¦çœ©æ™•
     public bool isFainting;
-    [Header("ÊÜ»÷Ïà¹Ø")]
+    [Header("å—å‡»ç›¸å…³")]
     [HideInInspector] public SpriteRenderer spriteRenderer;
-    //µĞÈËÊÇ·ñ´¦ÓÚ»÷ÍË¡¢»÷ÍËµÄÁ¦¡¢»÷ÍË³ÖĞøÊ±¼ä
+    //æ•Œäººæ˜¯å¦å¤„äºå‡»é€€ã€å‡»é€€çš„åŠ›ã€å‡»é€€æŒç»­æ—¶é—´
     [HideInInspector] public bool isKnockback;
     [HideInInspector] public float knockbackForce;
     [HideInInspector] public float knockbackDuration = 0.3f;
     [HideInInspector] public Rigidbody2D rigidbody2D;
-    //µĞÈËÅö×²Ìå
+    //æ•Œäººç¢°æ’ä½“
     [HideInInspector] public Collider2D collider2D;
-    //ÉËº¦Êı×Ö¶ÔÏóÔ¤ÖÆÌå
+    //ä¼¤å®³æ•°å­—å¯¹è±¡é¢„åˆ¶ä½“
     public GameObject damageNumPrefab;
-    [Header("Õ½ÀûÆ·")]
+    [Header("æˆ˜åˆ©å“")]
     public int[] enemyProduceItemID;
-    //Éú³ÉµÄ×î´ó×îĞ¡ÊıÁ¿ºÍÈ·¶¨Éú³ÉÊıÁ¿
+    //ç”Ÿæˆçš„æœ€å¤§æœ€å°æ•°é‡å’Œç¡®å®šç”Ÿæˆæ•°é‡
     public int[] minProduceNum;
     public int[] maxPriduceNum;
     public int randomPriduceNum;
 }
-//ÓĞÏŞ×´Ì¬»ú£¬Ö±½ÓÌí¼Óµ½Enemy01¶ÔÏóÉÏ
+//æœ‰é™çŠ¶æ€æœºï¼Œç›´æ¥æ·»åŠ åˆ°Enemy01å¯¹è±¡ä¸Š
 public class FSM : MonoBehaviour
 {
     public Parameter parameter;
     private IState currentState;
-    //×Öµä£¬¼ü£¬Öµ¶Ô¼¯ºÏ£¬Í¨¹ıÇ°ÃæµÄ¼ü£¬»ñµÃºóÃæµÄÖµvalue
+    //å­—å…¸ï¼Œé”®ï¼Œå€¼å¯¹é›†åˆï¼Œé€šè¿‡å‰é¢çš„é”®ï¼Œè·å¾—åé¢çš„å€¼value
     private Dictionary<EnemyStateType,IState> states = new Dictionary<EnemyStateType,IState>();
     public ReapItem reapItem;
-    //µĞÈËÉÁ°×ºó¼õÈõËÙ¶È
+    //æ•Œäººé—ªç™½åå‡å¼±é€Ÿåº¦
     private float blinkDecaySpeed = 5f;
-    //µĞÈË²ÄÖÊ
+    //æ•Œäººæè´¨
     private Material material;
-    //°×É«³Ì¶È
+    //ç™½è‰²ç¨‹åº¦
     private float blinkFactor;
-    //ÊÇ·ñÔÚÉÁ°×
+    //æ˜¯å¦åœ¨é—ªç™½
     public bool isBlink;
     private GameState gameState;
 
@@ -92,7 +92,7 @@ public class FSM : MonoBehaviour
         EventHandler.UpdateGameStateEvent -= OnUpdateGameStateEvent;
     }
     /// <summary>
-    /// È·±£Ö»ÓĞÔÚÓÎÏ·½øĞĞµÄÇé¿öÏÂµĞÈË²Å¿ÉÒÔ°´ÕÕ×´Ì¬»úÖ´ĞĞ½Å±¾
+    /// ç¡®ä¿åªæœ‰åœ¨æ¸¸æˆè¿›è¡Œçš„æƒ…å†µä¸‹æ•Œäººæ‰å¯ä»¥æŒ‰ç…§çŠ¶æ€æœºæ‰§è¡Œè„šæœ¬
     /// </summary>
     /// <param name="state"></param>
     private void OnUpdateGameStateEvent(GameState state)
@@ -111,8 +111,8 @@ public class FSM : MonoBehaviour
     }
     private void Start()
     {
-        //TODO:¸øµĞÈËÌí¼ÓĞÂ×´Ì¬Ò²Òª¸ø×ÖµäÌí¼Ó
-        //×ÖµästatesÖĞÌí¼ÓµĞÈËIdle×´Ì¬£¬¼üÎªEnemyStateType.Idle£¬ÖµÎªIdleState()·½·¨
+        //TODO:ç»™æ•Œäººæ·»åŠ æ–°çŠ¶æ€ä¹Ÿè¦ç»™å­—å…¸æ·»åŠ 
+        //å­—å…¸statesä¸­æ·»åŠ æ•ŒäººIdleçŠ¶æ€ï¼Œé”®ä¸ºEnemyStateType.Idleï¼Œå€¼ä¸ºIdleState()æ–¹æ³•
         states.Add(EnemyStateType.Idle,new IdleState(this));
         states.Add(EnemyStateType.Patrol, new PatrolState(this));
         states.Add(EnemyStateType.Chase, new ChaseState(this));
@@ -120,7 +120,7 @@ public class FSM : MonoBehaviour
         states.Add(EnemyStateType.Hurted, new HurtedState(this));
         states.Add(EnemyStateType.Death, new DeathState(this));
         states.Add(EnemyStateType.Fainting, new FaintingState(this));
-        //ÉèÖÃ³õÊ¼×´Ì¬ÎªIdle
+        //è®¾ç½®åˆå§‹çŠ¶æ€ä¸ºIdle
         TransitionState(EnemyStateType.Idle);
     }
 
@@ -134,7 +134,7 @@ public class FSM : MonoBehaviour
             case GameState.Pause:
                 break;
         }
-        //ÉÁ°×½¥Èõ
+        //é—ªç™½æ¸å¼±
         if (isBlink)
         {
             if (blinkFactor <= 0f)
@@ -156,7 +156,7 @@ public class FSM : MonoBehaviour
         {
             case GameState.Gameplay:
                 currentState.OnFixUpdate();
-                //¹¥»÷CD¼ÆÊ±
+                //æ”»å‡»CDè®¡æ—¶
                 if (parameter.inAttackCD)
                 {
                     parameter.attackCD += Time.fixedDeltaTime;
@@ -174,7 +174,7 @@ public class FSM : MonoBehaviour
        
     }
     /// <summary>
-    /// Íæ¼Ò½øÈë×·»÷·¶Î§
+    /// ç©å®¶è¿›å…¥è¿½å‡»èŒƒå›´
     /// </summary>
     /// <param name="other"></param>
    public void FindPlayer(Transform player)
@@ -183,24 +183,24 @@ public class FSM : MonoBehaviour
         parameter.chaseArae.enabled = false;
     }
     /// <summary>
-    /// ¶ÔÍæ¼Ò·¢Éä²ì¾õÉäÏß,ÅĞ¶ÏÊÇ·ñ·¢ÏÖÍæ¼Ò
+    /// å¯¹ç©å®¶å‘å°„å¯Ÿè§‰å°„çº¿,åˆ¤æ–­æ˜¯å¦å‘ç°ç©å®¶
     /// </summary>
     public bool ShoutNoticeRay()
     {
         
         Vector2 direction = (parameter.target.position - transform.position).normalized;
         float distance = Vector2.Distance(transform.position, parameter.target.position);
-        //·¢ÉäÉäÏß
+        //å‘å°„å°„çº¿
         RaycastHit2D hit = Physics2D.Raycast(
             transform.position,
             direction,
             distance,
             parameter.obstacleLayer
             );
-        //¿ÉÊÓ»¯ÉäÏß
+        //å¯è§†åŒ–å°„çº¿
         Debug.DrawRay(transform.position, direction * distance,
                  hit.collider != null ? Color.red : Color.green);
-        //±»ÕÏ°­ÎïÕÚµ²
+        //è¢«éšœç¢ç‰©é®æŒ¡
         if (hit.collider != null)
         {
             return false;
@@ -211,22 +211,22 @@ public class FSM : MonoBehaviour
         }
     }
     /// <summary>
-    /// ÇĞ»»×´Ì¬
+    /// åˆ‡æ¢çŠ¶æ€
     /// </summary>
     /// <param name="type"></param>
     public void TransitionState(EnemyStateType type)
     {
-        //ÍË³öµ±Ç°×´Ì¬
+        //é€€å‡ºå½“å‰çŠ¶æ€
         if(currentState != null)
         {
             currentState.OnExit();
         }
-        //¸ÄÎªÇĞ»»ºóµÄ×´Ì¬
+        //æ”¹ä¸ºåˆ‡æ¢åçš„çŠ¶æ€
         currentState = states[type];
         currentState.OnEnter();
     }
     /// <summary>
-    /// ÉèÖÃµĞÈË¶Ô×ÅÄ¿±êµÄ·½Ïò
+    /// è®¾ç½®æ•Œäººå¯¹ç€ç›®æ ‡çš„æ–¹å‘
     /// </summary>
     /// <param name="target"></param>
     public void SetFaceDirection(Transform target)
@@ -251,7 +251,7 @@ public class FSM : MonoBehaviour
         }        
     }
     /// <summary>
-    /// ¹¥»÷ÃüÖĞÍæ¼Ò
+    /// æ”»å‡»å‘½ä¸­ç©å®¶
     /// </summary>
     /// <param name="player"></param>
     public void AttackPlayer(Collider2D player)
@@ -260,7 +260,7 @@ public class FSM : MonoBehaviour
 
     }
     /// <summary>
-    /// ¼¤»î¶ÔÓ¦¹¥»÷¿ò²¢¿ªÊ¼¼ì²â¹¥»÷¶ÔÏó¡¢µ÷ÓÃÔÚµĞÈË¹¥»÷¶¯»­Ö¡ÉÏ
+    /// æ¿€æ´»å¯¹åº”æ”»å‡»æ¡†å¹¶å¼€å§‹æ£€æµ‹æ”»å‡»å¯¹è±¡ã€è°ƒç”¨åœ¨æ•Œäººæ”»å‡»åŠ¨ç”»å¸§ä¸Š
     /// </summary>
     /// <param name="boxIndex"></param>
     public void SetUpAttackBox(int boxIndex)
@@ -268,7 +268,7 @@ public class FSM : MonoBehaviour
         parameter.attackBox[boxIndex].enabled = true;
     }
     /// <summary>
-    /// ¹Ø±Õ¹¥»÷¿ò¡¢µ÷ÓÃÔÚµĞÈË¹¥»÷¶¯»­Ö¡ÉÏ
+    /// å…³é—­æ”»å‡»æ¡†ã€è°ƒç”¨åœ¨æ•Œäººæ”»å‡»åŠ¨ç”»å¸§ä¸Š
     /// </summary>
     public void SetDownAttackBox()
     {
@@ -278,15 +278,15 @@ public class FSM : MonoBehaviour
         }
     }
     /// <summary>
-    /// ¸Ã·½·¨Îª¹Ù·½·½·¨£¬¿ÉÒÔÔÚÆÁÄ»ÉÏ»æÖÆÍ¼Ïñ
+    /// è¯¥æ–¹æ³•ä¸ºå®˜æ–¹æ–¹æ³•ï¼Œå¯ä»¥åœ¨å±å¹•ä¸Šç»˜åˆ¶å›¾åƒ
     /// </summary>
     //private void OnDrawGizmos()
     //{
-    //    //»æÖÆÒ»¸ö¿ÕĞÄÔ²attackPointÔ²ĞÄ£¬attackArea°ë¾¶
+    //    //ç»˜åˆ¶ä¸€ä¸ªç©ºå¿ƒåœ†attackPointåœ†å¿ƒï¼ŒattackAreaåŠå¾„
     //    Gizmos.DrawWireSphere(parameter.attackPoint.position, parameter.attackArea);
     //}
     /// <summary>
-    /// µĞÈËÊÜÉË
+    /// æ•Œäººå—ä¼¤
     /// </summary>
     public void EnemyHurted(int damage,float attackForce)
     {
@@ -310,7 +310,7 @@ public class FSM : MonoBehaviour
         parameter.isHurted = true;
     }
     /// <summary>
-    /// ¿ªÊ¼ÉÁ°×
+    /// å¼€å§‹é—ªç™½
     /// </summary>
     public void ApplyBlinkFactor()
     {
@@ -321,7 +321,7 @@ public class FSM : MonoBehaviour
         }
     }
     /// <summary>
-    /// ³õÊ¼»¯ÉÁ°×²ÎÊı
+    /// åˆå§‹åŒ–é—ªç™½å‚æ•°
     /// </summary>
     public void Blink()
     {
@@ -329,7 +329,7 @@ public class FSM : MonoBehaviour
         ApplyBlinkFactor();
     }
     /// <summary>
-    /// ÏÔÊ¾ÉËº¦Êı×Ö
+    /// æ˜¾ç¤ºä¼¤å®³æ•°å­—
     /// </summary>
     public void ShowDanageNumOfEmeny(int damage,bool isPowerful)
     {
@@ -337,7 +337,7 @@ public class FSM : MonoBehaviour
         var damageNum = Instantiate(parameter.damageNumPrefab,transform.position, Quaternion.identity,transform);
         damageNum.GetComponent<DamageNum>().SetDamageNumText(damage);
         damageNum.GetComponent<DamageNum>().SetDamageNumColor(isPowerful);
-        //¸ù¾İÓëÍæ¼ÒµÄÎ»ÖÃÀ´²¥·Å¶ÔÓ¦µÄÉËº¦Êı×Ö¶¯»­
+        //æ ¹æ®ä¸ç©å®¶çš„ä½ç½®æ¥æ’­æ”¾å¯¹åº”çš„ä¼¤å®³æ•°å­—åŠ¨ç”»
         if (MathF.Abs(transform.position.x - parameter.playerTransform.position.x) > 0.2f)
         {
             if (transform.position.x < parameter.playerTransform.position.x)
@@ -356,7 +356,7 @@ public class FSM : MonoBehaviour
         
     }
     /// <summary>
-    /// µĞÈË±»»÷ÍË
+    /// æ•Œäººè¢«å‡»é€€
     /// </summary>
     /// <param name="pos"></param>
     public void Knockback(Vector3 pos)
@@ -372,14 +372,14 @@ public class FSM : MonoBehaviour
         parameter.rigidbody2D.mass = 500;
     }
     /// <summary>
-    /// ÔÚËÀÍö¶¯»­×îºóÒ»Ö¡Ö´ĞĞÏú»ÙµĞÈË¶ÔÏó²¢Éú³ÉµÀ¾ß
+    /// åœ¨æ­»äº¡åŠ¨ç”»æœ€åä¸€å¸§æ‰§è¡Œé”€æ¯æ•Œäººå¯¹è±¡å¹¶ç”Ÿæˆé“å…·
     /// </summary>
     public void EnemyDestroy()
     {
         Destroy(this.gameObject);
         //reapItem = GetComponent<ReapItem>();
         //reapItem.SpawnHarvestItems();
-        //Éú³É¶ÔÓ¦µÄ³É¹ûºÍÊıÁ¿
+        //ç”Ÿæˆå¯¹åº”çš„æˆæœå’Œæ•°é‡
         for (int i = 0; i < parameter.enemyProduceItemID.Length; i++)
         {
             if (parameter.minProduceNum[i] < parameter.maxPriduceNum[i])

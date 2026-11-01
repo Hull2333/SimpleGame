@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -6,30 +6,30 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 namespace MFarm.Inventory
 {
-    //IPointerClickHandler µã»÷ÊÂ¼şµÄ½Ó¿Ú;IBeginDragHandler,IDragHandler,IEndDragHandler ·Ö±ğÊÇÎïÆ·¿ªÊ¼ÍÏ×§£¬ÍÏ×§¹ı³Ì£¬ÍÏ×§½áÊøµÄ½Ó¿Ú·½·¨
-    public class SlotUI : MonoBehaviour,IPointerClickHandler,IBeginDragHandler,IDragHandler,IEndDragHandler //µ÷ÓÃÔÚÔ¤ÖÆÌåSlot_BagÉÏ
+    //IPointerClickHandler ç‚¹å‡»äº‹ä»¶çš„æ¥å£;IBeginDragHandler,IDragHandler,IEndDragHandler åˆ†åˆ«æ˜¯ç‰©å“å¼€å§‹æ‹–æ‹½ï¼Œæ‹–æ‹½è¿‡ç¨‹ï¼Œæ‹–æ‹½ç»“æŸçš„æ¥å£æ–¹æ³•
+    public class SlotUI : MonoBehaviour,IPointerClickHandler,IBeginDragHandler,IDragHandler,IEndDragHandler //è°ƒç”¨åœ¨é¢„åˆ¶ä½“Slot_Bagä¸Š
     {
-        [Header("×é¼ş»ñÈ¡")]
+        [Header("ç»„ä»¶è·å–")]
         [SerializeField] private Image slotImage;
         [SerializeField] private TextMeshProUGUI amountText;
         [SerializeField] private Button button;
-        //ÉÌµêSlotĞèÒªµÄÃû×ÖºÍµ¥¼Û
+        //å•†åº—Slotéœ€è¦çš„åå­—å’Œå•ä»·
         [SerializeField] private TextMeshProUGUI itemName;
         [SerializeField] private TextMeshProUGUI itemPrice;
         [SerializeField] private GameObject slider;
-        //°ÑÉùÃ÷Ö±½Ó¸³ÖµµÄÒ»ÖÖ·½·¨
+        //æŠŠå£°æ˜ç›´æ¥èµ‹å€¼çš„ä¸€ç§æ–¹æ³•
         public InventoryUI inventoryUI => GetComponentInParent<InventoryUI>();
-        [Header("¸ñ×ÓÀàĞÍ")]
+        [Header("æ ¼å­ç±»å‹")]
         public SlotType slotType;
         public bool isSelected;
         public ItemDetails itemDetails;
         public int itemAmount;
-        //Ã¿¸ö±³°ü¸ñ×ÓµÄĞòºÅ
+        //æ¯ä¸ªèƒŒåŒ…æ ¼å­çš„åºå·
         public int slotIndex;
         public Image slotHighlight;
         public int currentAmount;
         private CursorManager cursorManager;
-        //×ÖÌåÔ­À´µÄÑÕÉ«
+        //å­—ä½“åŸæ¥çš„é¢œè‰²
         public Color originColor;
         public InventoryLocation Location
         {
@@ -49,7 +49,7 @@ namespace MFarm.Inventory
        
 
         /// <summary>
-        /// ÓÎÏ·¿ªÊ¼Ê±£¬±³°üÎª¿Õ
+        /// æ¸¸æˆå¼€å§‹æ—¶ï¼ŒèƒŒåŒ…ä¸ºç©º
         /// </summary>
         private void Start()
         {
@@ -63,15 +63,15 @@ namespace MFarm.Inventory
           
         }
         /// <summary>
-        /// ¸üĞÂ¸ñ×ÓºÍĞÅÏ¢
+        /// æ›´æ–°æ ¼å­å’Œä¿¡æ¯
         /// </summary>
         /// <param name="item"></param>
         /// <param name="amount"></param>
-        /// <param name="showAllAmount">ÊÇ·ñĞèÒªÏÔÊ¾×ÜÊıÁ¿£¬²»ĞèÒªallAmountÌî"0"</param>
-        /// <param name="allAmount">ÎïÆ·µÄ×ÜÊıÁ¿</param>
+        /// <param name="showAllAmount">æ˜¯å¦éœ€è¦æ˜¾ç¤ºæ€»æ•°é‡ï¼Œä¸éœ€è¦allAmountå¡«"0"</param>
+        /// <param name="allAmount">ç‰©å“çš„æ€»æ•°é‡</param>
         public void UpdateSlot(ItemDetails item, int amount , bool showAllAmount , int allAmount)
         {
-            //²»ÏÔÊ¾Îª¸ºÊıµÄ½±Àø£¬ÒòÎªÕâÊÇÒª¼õÈ¥±³°üÄÚµÄËùĞèÎïÆ·
+            //ä¸æ˜¾ç¤ºä¸ºè´Ÿæ•°çš„å¥–åŠ±ï¼Œå› ä¸ºè¿™æ˜¯è¦å‡å»èƒŒåŒ…å†…çš„æ‰€éœ€ç‰©å“
             if (slotType == SlotType.Reward && amount < 0)
             {
                 gameObject.transform.GetChild(0).gameObject.SetActive(false);
@@ -83,7 +83,7 @@ namespace MFarm.Inventory
             
             itemDetails = item;
             slotImage.sprite = item.itemIcon;
-            //ÉèÖÃitemÔÚÍæ¼Ò±³°üÖĞµÄÍ¼Æ¬ÏÔÊ¾±ÈÀı
+            //è®¾ç½®itemåœ¨ç©å®¶èƒŒåŒ…ä¸­çš„å›¾ç‰‡æ˜¾ç¤ºæ¯”ä¾‹
             if(slotType != SlotType.Ingredient && slotType != SlotType.Shop)
             {
                 if (item.scale == SpriteScale.Normal)
@@ -100,7 +100,7 @@ namespace MFarm.Inventory
             }
            
             itemAmount = amount;
-            //ÏÔÊ¾×ÜÊıÁ¿ºÍ²»ÏÔÊ¾×ÜÊıÁ¿
+            //æ˜¾ç¤ºæ€»æ•°é‡å’Œä¸æ˜¾ç¤ºæ€»æ•°é‡
             if (showAllAmount)
             {
                 amountText.text = amount.ToString() + "/" + allAmount.ToString();
@@ -119,25 +119,25 @@ namespace MFarm.Inventory
         }
 
         /// <summary>
-        /// Ê±¿ÌË¢ĞÂ±³°üÖĞµÄ¿Õ¸ñ×Ó
+        /// æ—¶åˆ»åˆ·æ–°èƒŒåŒ…ä¸­çš„ç©ºæ ¼å­
         /// </summary>
         public void UpdateEmptySlot()
         {
-            //µ±¿Õ¸ñ×Ó±»Ñ¡ÖĞÊ±È¡ÏûÑ¡ÖĞºÍ¸ßÁÁ
+            //å½“ç©ºæ ¼å­è¢«é€‰ä¸­æ—¶å–æ¶ˆé€‰ä¸­å’Œé«˜äº®
             if (isSelected)
             {
                 isSelected = false;
                 inventoryUI.UpdateSlotHighlight(-1);
                 EventHandler.CallItemSelectEvent(itemDetails,isSelected);
             }
-            //¿Õ¸ñ×ÓµÄÎïÆ·ĞÅÏ¢¡¢Image¡¢ÎÄ±¾¡¢Ñ¡È¡¶¼È¡Ïû
+            //ç©ºæ ¼å­çš„ç‰©å“ä¿¡æ¯ã€Imageã€æ–‡æœ¬ã€é€‰å–éƒ½å–æ¶ˆ
             itemDetails = null;
             slotImage.enabled = false;
             amountText.text = string.Empty;
             button.interactable = false;
         }
         /// <summary>
-        /// ÉèÖÃÊıÁ¿Text±äºì
+        /// è®¾ç½®æ•°é‡Textå˜çº¢
         /// </summary>
         public void SetRedAmountText()
         {
@@ -145,7 +145,7 @@ namespace MFarm.Inventory
             amountText.color = Color.gray;
         }
         /// <summary>
-        /// »Ö¸´Ô­À´µÄ×ÖÌåÑÕÉ«
+        /// æ¢å¤åŸæ¥çš„å­—ä½“é¢œè‰²
         /// </summary>
         public void RecoverOriginTextColor()
         {
@@ -153,25 +153,25 @@ namespace MFarm.Inventory
             amountText.color = originColor;
         }
         /// <summary>
-        /// µã»÷SlotÊ±
+        /// ç‚¹å‡»Slotæ—¶
         /// </summary>
         /// <param name="eventData"></param>
         public void OnPointerClick(PointerEventData eventData)
         {
             EventHandler.CallSlotUISelectIndexEvent(slotIndex);
-            //Èç¹ûÎïÆ·²»´æÔÚ»òÕßÍæ¼Ò±³°üÎŞ·¨´ò¿ªÊ±²»ÈÃµãÑ¡
+            //å¦‚æœç‰©å“ä¸å­˜åœ¨æˆ–è€…ç©å®¶èƒŒåŒ…æ— æ³•æ‰“å¼€æ—¶ä¸è®©ç‚¹é€‰
             if (itemDetails == null || !InventoryUI.Instance.canOpenBag || slotType == SlotType.Ingredient || slotType == SlotType.Reward) return;
            
-            // Íæ¼Ò±³°üÄÚµÄÎïÆ·Ö»ÓĞ×ó¼üµã»÷²Å»á±»Ñ¡ÖĞ£¬ÓÒ¼üÖ»Ö´ĞĞ¿ì½İÒÆ¶¯
+            // ç©å®¶èƒŒåŒ…å†…çš„ç‰©å“åªæœ‰å·¦é”®ç‚¹å‡»æ‰ä¼šè¢«é€‰ä¸­ï¼Œå³é”®åªæ‰§è¡Œå¿«æ·ç§»åŠ¨
             if (slotType != SlotType.Bag || eventData.button == PointerEventData.InputButton.Left)
             {
                 isSelected = !isSelected;
             
                 inventoryUI.UpdateSlotHighlight(slotIndex);
-                //Ö»ÓĞµã»÷µÄÍæ¼Ò±³°üÄÚµÄÎïÆ·£¬²ÅÊµÏÖÎïÆ·Í¼Æ¬³öÏÖÔÚÍ·¶¥
+                //åªæœ‰ç‚¹å‡»çš„ç©å®¶èƒŒåŒ…å†…çš„ç‰©å“ï¼Œæ‰å®ç°ç‰©å“å›¾ç‰‡å‡ºç°åœ¨å¤´é¡¶
                 if(slotType == SlotType.Bag)
                 {
-                    //ÔÚInventoryManagerÉÏÄÃµ½µ±Ç°Ñ¡È¡µÄÎïÆ·ĞÅÏ¢
+                    //åœ¨InventoryManagerä¸Šæ‹¿åˆ°å½“å‰é€‰å–çš„ç‰©å“ä¿¡æ¯
                     InventoryManager.Instance.currentSelectedItem = itemDetails;
                     if (!isSelected)
                     {
@@ -180,34 +180,34 @@ namespace MFarm.Inventory
                     EventHandler.CallItemSelectEvent(itemDetails,isSelected);
                 }
             }
-            //×ó¼üµã»÷µÄÊ±ÉÌµê¸ñ×Ó
+            //å·¦é”®ç‚¹å‡»çš„æ—¶å•†åº—æ ¼å­
             if (Location == InventoryLocation.Shop)
             {
                 if (inventoryUI.GetEmptySellBoxIndex(itemDetails.itemID, InventoryManager.Instance.playerBag.itemList, Location) >= 0)
                 {
                     int playerbagIndex = inventoryUI.GetEmptySellBoxIndex(itemDetails.itemID, InventoryManager.Instance.playerBag.itemList, Location);
-                    //´ò¿ª½»Ò×Ñ¡ÔñÎïÆ·UI
+                    //æ‰“å¼€äº¤æ˜“é€‰æ‹©ç‰©å“UI
                     EventHandler.CallShowTradeUI(itemDetails, false, itemAmount, slotIndex, playerbagIndex, Location, InventoryLocation.Player, false);
                 }
                 return;
             }
-            //ÓÒ¼üµã»÷Slot
+            //å³é”®ç‚¹å‡»Slot
             if (eventData.button == PointerEventData.InputButton.Right)
             {
-                // ÓÒ¼ü´©´÷£ºÖ»ÓĞ½ö´ò¿ªÍæ¼Ò±³°üÊ±£¬×°±¸/×°ÊÎÆ·¿ÉÒÔÖ±½Ó´©ÉÏ£¬ÒÑÓĞ×°±¸ÔòÌæ»»
+                // å³é”®ç©¿æˆ´ï¼šåªæœ‰ä»…æ‰“å¼€ç©å®¶èƒŒåŒ…æ—¶ï¼Œè£…å¤‡/è£…é¥°å“å¯ä»¥ç›´æ¥ç©¿ä¸Šï¼Œå·²æœ‰è£…å¤‡åˆ™æ›¿æ¢
                 if (TryEquipByRightClick())
                 {
                     return;
                 }
-                // ÓÒ¼üÍÑÏÂ£ºÓÒ¼üµã×°±¸¸ñÀïµÄ×°±¸£¬·Å»ØÍæ¼Ò±³°üµÄ¿Õ¸ñ
+                // å³é”®è„±ä¸‹ï¼šå³é”®ç‚¹è£…å¤‡æ ¼é‡Œçš„è£…å¤‡ï¼Œæ”¾å›ç©å®¶èƒŒåŒ…çš„ç©ºæ ¼
                 if (TryUnequipByRightClick())
                 {
                     return;
                 }
-                // Âô³µÃæ°å´ò¿ªÊ±£¬ÓÒ¼ü°ÑÕû×éÎïÆ·ËÍ½øÂô³µ¸ñ×Ó
+                // å–è½¦é¢æ¿æ‰“å¼€æ—¶ï¼Œå³é”®æŠŠæ•´ç»„ç‰©å“é€è¿›å–è½¦æ ¼å­
                 if (Location == InventoryLocation.Player && InventoryUI.Instance.IsSellCarBoxOpened)
                 {
-                    // Ö»ÔÊĞíÖ¸¶¨ÀàĞÍµÄÎïÆ·ËÍ½øÂô³µ¸ñ×Ó
+                    // åªå…è®¸æŒ‡å®šç±»å‹çš„ç‰©å“é€è¿›å–è½¦æ ¼å­
                     if (!IsSellCarMovable(itemDetails))
                     {
                         return;
@@ -219,7 +219,7 @@ namespace MFarm.Inventory
                     }
                     return;
                 }
-                // Âô³µÃæ°å´ò¿ªÊ±£¬ÓÒ¼ü°ÑÂô³µ¸ñ×ÓÀïµÄÕû×éÎïÆ·ÊÕ»Ø±³°ü
+                // å–è½¦é¢æ¿æ‰“å¼€æ—¶ï¼Œå³é”®æŠŠå–è½¦æ ¼å­é‡Œçš„æ•´ç»„ç‰©å“æ”¶å›èƒŒåŒ…
                 if (Location == InventoryLocation.SellCar && InventoryUI.Instance.IsSellCarBoxOpened)
                 {
                     int bagIndex = inventoryUI.GetEmptySellBoxIndex(itemDetails.itemID, InventoryManager.Instance.playerBag.itemList, InventoryLocation.SellCar);
@@ -229,10 +229,10 @@ namespace MFarm.Inventory
                     }
                     return;
                 }
-                //ÔÚÉÌµê´ò¿ªÊ±
+                //åœ¨å•†åº—æ‰“å¼€æ—¶
                 if (InventoryManager.Instance.isSellState)
                 {
-                    //ÓÒ¼üµã»÷µÄÊÇ±³°ü¸ñ
+                    //å³é”®ç‚¹å‡»çš„æ˜¯èƒŒåŒ…æ ¼
                     if (Location == InventoryLocation.Player)
                     {
                         if (inventoryUI.GetEmptySellBoxIndex(itemDetails.itemID, InventoryManager.Instance.sellBoxBag.itemList, Location) >= 0)
@@ -241,7 +241,7 @@ namespace MFarm.Inventory
                         }
                         return;
                     }
-                    //ÓÒ¼üµã»÷µÄÊÇ³öÊÛÏä¸ñ×Ó
+                    //å³é”®ç‚¹å‡»çš„æ˜¯å‡ºå”®ç®±æ ¼å­
                     if (Location == InventoryLocation.SellBox)
                     {
 
@@ -255,19 +255,19 @@ namespace MFarm.Inventory
             }
         }
         /// <summary>
-        /// ÎïÆ·¿ªÊ¼ÍÏ×§
+        /// ç‰©å“å¼€å§‹æ‹–æ‹½
         /// </summary>
         /// <param name="eventData"></param>
         public void OnBeginDrag(PointerEventData eventData)
         {
 
-            // ÓÒ¼üÈÎºÎÇé¿öÏÂ¶¼²»ÔÊĞíÍÏ¶¯ÎïÆ·£¬Ö»ÓĞ×ó¼ü¿ÉÒÔÍÏ×§
+            // å³é”®ä»»ä½•æƒ…å†µä¸‹éƒ½ä¸å…è®¸æ‹–åŠ¨ç‰©å“ï¼Œåªæœ‰å·¦é”®å¯ä»¥æ‹–æ‹½
             if (eventData.button != PointerEventData.InputButton.Left)
             {
                 return;
             }
             EventHandler.CallControlPlayerBagOpen(false);
-            //¿Õ¸ñ×Ó²»¿ÉÒÔÍÏ×§ºÍÈÎÎñÀ¸µÄ½±ÀøÎïÆ·Ò²²»¿ÉÒÔÍÏ×§
+            //ç©ºæ ¼å­ä¸å¯ä»¥æ‹–æ‹½å’Œä»»åŠ¡æ çš„å¥–åŠ±ç‰©å“ä¹Ÿä¸å¯ä»¥æ‹–æ‹½
             if (itemDetails != null &&itemDetails.itemID != 0 && slotType != SlotType.Reward && slotType != SlotType.Shop && slotType != SlotType.Ingredient)
             {
                 if (Input.GetKey(KeyCode.LeftControl) && slotType == SlotType.Bag && itemAmount > 1) 
@@ -283,16 +283,16 @@ namespace MFarm.Inventory
                         itemAmount = itemAmount / 2;
                         currentAmount = itemAmount;
                     }
-                    //Í¬Ê±Ë¢ĞÂÒ»ÏÂÍæ¼Ò±³°ü
+                    //åŒæ—¶åˆ·æ–°ä¸€ä¸‹ç©å®¶èƒŒåŒ…
                     amountText.text = currentAmount.ToString();
                 }
-                //¹Ø±ÕÊó±êImage
+                //å…³é—­é¼ æ ‡Image
                 cursorManager.cursorImage.enabled = false;
                 inventoryUI.dragItem.enabled = true;
                 inventoryUI.dragItemAmount.enabled = true;
                 inventoryUI.dragItem.sprite = slotImage.sprite;
                 inventoryUI.dragItemAmount.text = itemAmount.ToString();
-                //×Ô´øµÄ·½·¨£¬Ê¹ÍÏ³öÀ´µÄdragItemÍ¼Æ¬³ß´çÎªÄãÌáÇ°ÉèÖÃºÃµÄ³ß´ç
+                //è‡ªå¸¦çš„æ–¹æ³•ï¼Œä½¿æ‹–å‡ºæ¥çš„dragItemå›¾ç‰‡å°ºå¯¸ä¸ºä½ æå‰è®¾ç½®å¥½çš„å°ºå¯¸
                 if (itemDetails.scale == SpriteScale.Normal)
                 {
                     inventoryUI.dragItem.rectTransform.sizeDelta = new Vector2(32f, 32f);
@@ -311,28 +311,28 @@ namespace MFarm.Inventory
           
         }
         /// <summary>
-        /// ÍÏ×§¹ı³Ì
+        /// æ‹–æ‹½è¿‡ç¨‹
         /// </summary>
         /// <param name="eventData"></param>
         /// <exception cref="System.NotImplementedException"></exception>
         public void OnDrag(PointerEventData eventData)
         {   
-            // ÓÒ¼üÈÎºÎÇé¿öÏÂ¶¼²»ÔÊĞíÍÏ¶¯ÎïÆ·£¬Ö»ÓĞ×ó¼ü¿ÉÒÔÍÏ×§
+            // å³é”®ä»»ä½•æƒ…å†µä¸‹éƒ½ä¸å…è®¸æ‹–åŠ¨ç‰©å“ï¼Œåªæœ‰å·¦é”®å¯ä»¥æ‹–æ‹½
             if (eventData.button != PointerEventData.InputButton.Left)
             {
                 return;
             }
-            //ÍÏ×§¹ı³ÌÖĞÍÏ×§ÎïÌåÎ»ÖÃËæÊó±êÒÆ¶¯
+            //æ‹–æ‹½è¿‡ç¨‹ä¸­æ‹–æ‹½ç‰©ä½“ä½ç½®éšé¼ æ ‡ç§»åŠ¨
             inventoryUI.dragItem.transform.position = Input.mousePosition;
         }
         /// <summary>
-        /// ÍÏ×§½áÊø
+        /// æ‹–æ‹½ç»“æŸ
         /// </summary>
         /// <param name="eventData"></param>
         public void OnEndDrag(PointerEventData eventData)
         {
           
-            // ÓÒ¼üÈÎºÎÇé¿öÏÂ¶¼²»ÔÊĞíÍÏ¶¯ÎïÆ·£¬Ö»ÓĞ×ó¼ü¿ÉÒÔÍÏ×§
+            // å³é”®ä»»ä½•æƒ…å†µä¸‹éƒ½ä¸å…è®¸æ‹–åŠ¨ç‰©å“ï¼Œåªæœ‰å·¦é”®å¯ä»¥æ‹–æ‹½
             if (eventData.button != PointerEventData.InputButton.Left)
             {
                 return;
@@ -344,10 +344,10 @@ namespace MFarm.Inventory
             if (itemDetails != null)
             {
                
-                //È·±£ÍÏ×§µ½µÄµØ·½²»ÊÇ¿ÕµÄ
+                //ç¡®ä¿æ‹–æ‹½åˆ°çš„åœ°æ–¹ä¸æ˜¯ç©ºçš„
                 if (eventData.pointerCurrentRaycast.gameObject != null)
                 {
-                    //ÇÒÍÏ×§µÄµØ·½±ØĞëÓĞSlotUI½Å±¾×é¼ş£¬¼´Bag_Slot
+                    //ä¸”æ‹–æ‹½çš„åœ°æ–¹å¿…é¡»æœ‰SlotUIè„šæœ¬ç»„ä»¶ï¼Œå³Bag_Slot
                     if (eventData.pointerCurrentRaycast.gameObject.GetComponent<SlotUI>() == null)
                     {
                         itemAmount += currentAmount;
@@ -355,20 +355,20 @@ namespace MFarm.Inventory
                         EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, InventoryManager.Instance.playerBag.itemList, 0);
                         return;
                     }
-                    //ÄÃµ½ÍÏ×§Ä¿µÄµãµÄ×é¼şºÍslotĞòºÅ
+                    //æ‹¿åˆ°æ‹–æ‹½ç›®çš„ç‚¹çš„ç»„ä»¶å’Œslotåºå·
                     var targetSlot = eventData.pointerCurrentRaycast.gameObject.GetComponent<SlotUI>();
                     int targetIndex = targetSlot.slotIndex;
-                    //´Ó±³°ü¸ñÍÏ³ö
+                    //ä»èƒŒåŒ…æ ¼æ‹–å‡º
                     if (slotType == SlotType.Bag)
                     {
                        
-                        //ÍÏµ½±³°ü¸ñ
+                        //æ‹–åˆ°èƒŒåŒ…æ ¼
                         if (targetSlot.slotType == slotType)
                         {
                             InventoryManager.Instance.Swapitem(slotIndex, targetIndex, itemAmount,currentAmount);
                             return;
                         }
-                        //´ÓÍæ¼Ò±³°üÍÏ×§µ½×°±¸(Í·)ÉÏ
+                        //ä»ç©å®¶èƒŒåŒ…æ‹–æ‹½åˆ°è£…å¤‡(å¤´)ä¸Š
                         if (targetSlot.slotType == SlotType.Equipment_Head)
                         {
                             if (itemDetails.itemType == ItemType.Equipment_Head)
@@ -382,7 +382,7 @@ namespace MFarm.Inventory
                                 return;
                             }
                         }
-                        //´ÓÍæ¼Ò±³°üÍÏ×§µ½×°±¸(ÉíÌå)ÉÏ
+                        //ä»ç©å®¶èƒŒåŒ…æ‹–æ‹½åˆ°è£…å¤‡(èº«ä½“)ä¸Š
                         if (targetSlot.slotType == SlotType.Equipment_Body)
                         {
                             if (itemDetails.itemType == ItemType.Equipment_Body)
@@ -396,10 +396,10 @@ namespace MFarm.Inventory
                                 return;
                             }
                         }
-                        // ´Ó±³°ü°Ñ×°ÊÎÆ·ÍÏµ½×°ÊÎÆ·¸ñ×Ó
+                        // ä»èƒŒåŒ…æŠŠè£…é¥°å“æ‹–åˆ°è£…é¥°å“æ ¼å­
                         if (targetSlot.slotType == SlotType.Equipment_Decoration)
                         {
-                            // Ö»ÓĞ×°ÊÎÆ·ÀàĞÍµÄÎïÆ·²ÅÄÜ·ÅÈë
+                            // åªæœ‰è£…é¥°å“ç±»å‹çš„ç‰©å“æ‰èƒ½æ”¾å…¥
                             if (itemDetails.itemType == ItemType.Decoration)
                             {
                                 InventoryManager.Instance.Swapitem(slotIndex, targetIndex, 1, 0);
@@ -410,19 +410,19 @@ namespace MFarm.Inventory
                                 return;
                             }
                         }
-                        //ÍÏµ½³öÊÛÏä
+                        //æ‹–åˆ°å‡ºå”®ç®±
                         if(targetSlot.slotType == SlotType.SellBox)
                         {
                             if (InventoryManager.Instance.isHalfAmount)
                             {
-                                //Í¬Ê±Ë¢ĞÂÒ»ÏÂÍæ¼Ò±³°ü
+                                //åŒæ—¶åˆ·æ–°ä¸€ä¸‹ç©å®¶èƒŒåŒ…
                                 EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, InventoryManager.Instance.playerBag.itemList,0);
                                 InventoryManager.Instance.isHalfAmount = false;
                                 return;
                             }
                             else
                             {
-                                //ÊıÁ¿Ö»ÓĞÒ»¸ö¾ÍÖ±½Ó¼Óµ½³öÊÛÏä
+                                //æ•°é‡åªæœ‰ä¸€ä¸ªå°±ç›´æ¥åŠ åˆ°å‡ºå”®ç®±
                                 if (itemAmount == 1)
                                 {
                                     InventoryManager.Instance.SwapItem(Location, slotIndex, targetSlot.Location, targetSlot.slotIndex, false, 1);
@@ -430,22 +430,22 @@ namespace MFarm.Inventory
                                 else
                                 {
                                     InventoryManager.Instance.isHalfAmount = false;
-                                    //´ò¿ª½»Ò×Ñ¡ÔñÎïÆ·UI
+                                    //æ‰“å¼€äº¤æ˜“é€‰æ‹©ç‰©å“UI
                                     EventHandler.CallShowTradeUI(itemDetails, true, itemAmount, slotIndex, targetIndex, Location, targetSlot.Location, true);
                                 }
                             }
                         }
-                        // ÍÏµ½Âô³µ¸ñ×Ó£ºÕû×éÎïÆ·ÒÆ¹ıÈ¥£¬ÊÛÂôÂß¼­Ôİ²»´¦Àí
+                        // æ‹–åˆ°å–è½¦æ ¼å­ï¼šæ•´ç»„ç‰©å“ç§»è¿‡å»ï¼Œå”®å–é€»è¾‘æš‚ä¸å¤„ç†
                         if (targetSlot.slotType == SlotType.SellCar)
                         {
                             if (InventoryManager.Instance.isHalfAmount)
                             {
-                                // °ë·ÖÍÏ×§²»Ö§³ÖÍÏ½øÂô³µ¸ñ×Ó£¬Ö±½ÓË¢ĞÂ±³°ü¸´Ô­
+                                // åŠåˆ†æ‹–æ‹½ä¸æ”¯æŒæ‹–è¿›å–è½¦æ ¼å­ï¼Œç›´æ¥åˆ·æ–°èƒŒåŒ…å¤åŸ
                                 InventoryManager.Instance.isHalfAmount = false;
                                 EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, InventoryManager.Instance.playerBag.itemList, 0);
                                 return;
                             }
-                            // Ö»ÔÊĞíÖ¸¶¨ÀàĞÍµÄÎïÆ·ËÍ½øÂô³µ¸ñ×Ó
+                            // åªå…è®¸æŒ‡å®šç±»å‹çš„ç‰©å“é€è¿›å–è½¦æ ¼å­
                             if (!IsSellCarMovable(itemDetails))
                             {
                                 return;
@@ -453,7 +453,7 @@ namespace MFarm.Inventory
                             InventoryManager.Instance.SwapItem(Location, slotIndex, targetSlot.Location, targetIndex, false, itemAmount);
                             return;
                         }
-                        //ÍÏµ½ÉÌµê
+                        //æ‹–åˆ°å•†åº—
                         if(targetSlot.slotType == SlotType.Shop)
                         {
                             itemAmount += currentAmount;
@@ -461,7 +461,7 @@ namespace MFarm.Inventory
                             EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, InventoryManager.Instance.playerBag.itemList, 0);
                             return;
                         }
-                        //ÍÏµ½Óã¶ü
+                        //æ‹–åˆ°é±¼é¥µ
                         if(targetSlot.slotType == SlotType.Bait)
                         {
                             if (itemDetails.isBait)
@@ -477,15 +477,15 @@ namespace MFarm.Inventory
                         inventoryUI.UpdatePlayerDefenseNum();
                         return;
                     }
-                    //´Ó³öÊÛÏäÍÏ³ö
+                    //ä»å‡ºå”®ç®±æ‹–å‡º
                     if (slotType == SlotType.SellBox)
                     {
-                        //ÍÏµ½Íæ¼Ò±³°üÖĞ
+                        //æ‹–åˆ°ç©å®¶èƒŒåŒ…ä¸­
                         if (targetSlot.slotType == SlotType.Bag)
                         {
                             InventoryManager.Instance.SwapItem(Location, slotIndex, targetSlot.Location, targetSlot.slotIndex,false,0);
                         }
-                        //ÍÏµ½³öÊÛÏäÖĞ
+                        //æ‹–åˆ°å‡ºå”®ç®±ä¸­
                         if (targetSlot.slotType == slotType)
                         {
                             InventoryManager.Instance.SwapSellBoxItem(slotIndex, targetIndex);
@@ -493,12 +493,12 @@ namespace MFarm.Inventory
                         return;
                         
                     }
-                    // ´ÓÂô³µ¸ñ×ÓÍÏ³ö£ºÍÏ»Ø±³°ü£¬»òÔÚÂô³µ¸ñ×ÓÖ®¼ä½»»»
+                    // ä»å–è½¦æ ¼å­æ‹–å‡ºï¼šæ‹–å›èƒŒåŒ…ï¼Œæˆ–åœ¨å–è½¦æ ¼å­ä¹‹é—´äº¤æ¢
                     if (slotType == SlotType.SellCar)
                     {
                         if (targetSlot.slotType == SlotType.Bag || targetSlot.slotType == SlotType.SellCar)
                         {
-                            // ÍÏ»ØÂô³µ¸ñ×ÓµÄÍ¬Ò»¸ñÊ±Ö±½ÓºöÂÔ£¬±ÜÃâÊıÁ¿·­±¶
+                            // æ‹–å›å–è½¦æ ¼å­çš„åŒä¸€æ ¼æ—¶ç›´æ¥å¿½ç•¥ï¼Œé¿å…æ•°é‡ç¿»å€
                             if (targetSlot.slotType == SlotType.SellCar && slotIndex == targetIndex)
                             {
                                 return;
@@ -507,24 +507,24 @@ namespace MFarm.Inventory
                         }
                         return;
                     }
-                    //´ÓÍ·×°±¸À¸ÍÏ³ö
+                    //ä»å¤´è£…å¤‡æ æ‹–å‡º
                     if (slotType == SlotType.Equipment_Head)
                     {
                         
-                        //²»¿ÉÒÔ´ÓÍ·²¿Î»ÖÃÍÏ×§µ½ÉíÌåÎ»ÖÃ£¬·´Ö®ÒàÈ»
+                        //ä¸å¯ä»¥ä»å¤´éƒ¨ä½ç½®æ‹–æ‹½åˆ°èº«ä½“ä½ç½®ï¼Œåä¹‹äº¦ç„¶
                         if (targetSlot.slotType == SlotType.Equipment_Body)
                         {
                             return;
                         }
-                        //ÍÏµ½±³°üÖĞ
+                        //æ‹–åˆ°èƒŒåŒ…ä¸­
                         if(targetSlot.slotType == SlotType.Bag)
                         {
-                            // ±³°ü¸ñ±ØĞëÎª¿Õ£¬»òÕß×°ÓĞÍ·²¿×°±¸£¬ÆäËûÀàĞÍÒ»ÂÉ²»½»»»
+                            // èƒŒåŒ…æ ¼å¿…é¡»ä¸ºç©ºï¼Œæˆ–è€…è£…æœ‰å¤´éƒ¨è£…å¤‡ï¼Œå…¶ä»–ç±»å‹ä¸€å¾‹ä¸äº¤æ¢
                             if (targetSlot.itemDetails != null && targetSlot.itemDetails.itemType != ItemType.Equipment_Head)
                             {
                                 return;
                             }
-                            // ±³°ü¸ñÀïÓĞÍ·²¿×°±¸Ê±£¬½»»»ºóÍ·¸ñ»á»»³ÉËü£¬ĞèÒªË¢ĞÂ½ÇÉ«Íâ¹Û
+                            // èƒŒåŒ…æ ¼é‡Œæœ‰å¤´éƒ¨è£…å¤‡æ—¶ï¼Œäº¤æ¢åå¤´æ ¼ä¼šæ¢æˆå®ƒï¼Œéœ€è¦åˆ·æ–°è§’è‰²å¤–è§‚
                             if (targetSlot.itemDetails != null)
                             {
                                 inventoryUI.SetEquipImage(targetSlot.itemDetails, this);
@@ -538,24 +538,24 @@ namespace MFarm.Inventory
                         inventoryUI.UpdatePlayerDefenseNum();
                         return;
                     }
-                    //´ÓÉíÌå×°±¸ÍÏ³ö
+                    //ä»èº«ä½“è£…å¤‡æ‹–å‡º
                     if (slotType == SlotType.Equipment_Body)
                     {
 
-                        //²»¿ÉÒÔ´ÓÉíÌåÎ»ÖÃÍÏ×§µ½Í·²¿Î»ÖÃ£¬·´Ö®ÒàÈ»
+                        //ä¸å¯ä»¥ä»èº«ä½“ä½ç½®æ‹–æ‹½åˆ°å¤´éƒ¨ä½ç½®ï¼Œåä¹‹äº¦ç„¶
                         if (targetSlot.slotType == SlotType.Equipment_Head)
                         {
                             return;
                         }
-                        //ÍÏµ½±³°üÖĞ
+                        //æ‹–åˆ°èƒŒåŒ…ä¸­
                         if (targetSlot.slotType == SlotType.Bag)
                         {
-                            // ±³°ü¸ñ±ØĞëÎª¿Õ£¬»òÕß×°ÓĞÉíÌå×°±¸£¬ÆäËûÀàĞÍÒ»ÂÉ²»½»»»
+                            // èƒŒåŒ…æ ¼å¿…é¡»ä¸ºç©ºï¼Œæˆ–è€…è£…æœ‰èº«ä½“è£…å¤‡ï¼Œå…¶ä»–ç±»å‹ä¸€å¾‹ä¸äº¤æ¢
                             if (targetSlot.itemDetails != null && targetSlot.itemDetails.itemType != ItemType.Equipment_Body)
                             {
                                 return;
                             }
-                            // ±³°ü¸ñÀïÓĞÉíÌå×°±¸Ê±£¬½»»»ºóÉíÌå¸ñ»á»»³ÉËü£¬ĞèÒªË¢ĞÂ½ÇÉ«Íâ¹Û
+                            // èƒŒåŒ…æ ¼é‡Œæœ‰èº«ä½“è£…å¤‡æ—¶ï¼Œäº¤æ¢åèº«ä½“æ ¼ä¼šæ¢æˆå®ƒï¼Œéœ€è¦åˆ·æ–°è§’è‰²å¤–è§‚
                             if (targetSlot.itemDetails != null)
                             {
                                 inventoryUI.SetEquipImage(targetSlot.itemDetails, this);
@@ -569,15 +569,15 @@ namespace MFarm.Inventory
                         inventoryUI.UpdatePlayerDefenseNum();
                         return;
                     }
-                    //´Ó×°ÊÎÆ·¸ñ×ÓÍÏ³ö
+                    //ä»è£…é¥°å“æ ¼å­æ‹–å‡º
                     if (slotType == SlotType.Equipment_Decoration)
                     {
-                        // Ö»ÔÊĞí·Å»Ø±³°ü£¬ÆäËû¸ñ×ÓÒ»ÂÉ²»½ÓÊÕ
+                        // åªå…è®¸æ”¾å›èƒŒåŒ…ï¼Œå…¶ä»–æ ¼å­ä¸€å¾‹ä¸æ¥æ”¶
                         if (targetSlot.slotType != SlotType.Bag)
                         {
                             return;
                         }
-                        // ±³°ü¸ñÒÑÓĞÎïÆ·Ê±£¬Ö»ÓĞ×°ÊÎÆ·²ÅÄÜÓëËü½»»»
+                        // èƒŒåŒ…æ ¼å·²æœ‰ç‰©å“æ—¶ï¼Œåªæœ‰è£…é¥°å“æ‰èƒ½ä¸å®ƒäº¤æ¢
                         if (targetSlot.itemDetails != null && targetSlot.itemDetails.itemType != ItemType.Decoration)
                         {
                             return;
@@ -585,10 +585,10 @@ namespace MFarm.Inventory
                         InventoryManager.Instance.Swapitem(slotIndex, targetIndex, 1, 0);
                         return;
                     }
-                    //´ÓÓã¶ü¸ñÖĞÍÏ³ö
+                    //ä»é±¼é¥µæ ¼ä¸­æ‹–å‡º
                     if (slotType == SlotType.Bait)
                     {
-                        //Ö»¿ÉÒÔÍÏµ½Íæ¼Ò±³°ü
+                        //åªå¯ä»¥æ‹–åˆ°ç©å®¶èƒŒåŒ…
                         if(targetSlot.slotType == SlotType.Bag)
                         {
                             if (targetSlot.itemDetails != null)
@@ -603,7 +603,7 @@ namespace MFarm.Inventory
                                 }
                                 return;
                             }
-                            //¶Ô·½¸ñ×ÓÎª¿Õ
+                            //å¯¹æ–¹æ ¼å­ä¸ºç©º
                             else
                             {
                                 InventoryManager.Instance.Swapitem(slotIndex, targetIndex, itemAmount, currentAmount);
@@ -615,23 +615,23 @@ namespace MFarm.Inventory
                             return;
                         }
                     }
-                    //¿ç±³°ü½»»»ÎïÆ·Êı¾İ
+                    //è·¨èƒŒåŒ…äº¤æ¢ç‰©å“æ•°æ®
                     if (slotType != SlotType.Shop && targetSlot.slotType != SlotType.Shop && slotType != targetSlot.slotType)
                     {
                         
                         InventoryManager.Instance.SwapItem(Location, slotIndex, targetSlot.Location, targetSlot.slotIndex,false, 0);
                     }
 
-                    //È¡ÏûËùÓĞ¸ßÁÁÏÔÊ¾£¬ÒòÎªSlotĞòºÅ²»¿ÉÄÜÎª-1
+                    //å–æ¶ˆæ‰€æœ‰é«˜äº®æ˜¾ç¤ºï¼Œå› ä¸ºSlotåºå·ä¸å¯èƒ½ä¸º-1
                     inventoryUI.UpdateSlotHighlight(-1);
                 }
-                //¼ì²âÍÏ×§µ½µØÉÏ 
+                //æ£€æµ‹æ‹–æ‹½åˆ°åœ°ä¸Š 
                 else if(!InventoryManager.Instance.anyBagOpened)
                 {
-                    //ÇÒÎïÆ·¿ÉÒÔ¶ªÆú
+                    //ä¸”ç‰©å“å¯ä»¥ä¸¢å¼ƒ
                     if (itemDetails.canDropped)
                     {
-                        //½«Êó±ê×ø±ê×ª»»ÎªÊÀ½çµØÍ¼×ø±ê
+                        //å°†é¼ æ ‡åæ ‡è½¬æ¢ä¸ºä¸–ç•Œåœ°å›¾åæ ‡
                         var pos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.position.z));
                         EventHandler.CallInstantiateItemInScene(itemDetails.itemID, pos);
                     }
@@ -640,7 +640,7 @@ namespace MFarm.Inventory
            
         }
         /// <summary>
-        /// ÅĞ¶Ï¸ÃÎïÆ·ÊÇ·ñÔÊĞíÔÚ±³°üºÍÂô³µ¸ñ×ÓÖ®¼äÒÆ¶¯
+        /// åˆ¤æ–­è¯¥ç‰©å“æ˜¯å¦å…è®¸åœ¨èƒŒåŒ…å’Œå–è½¦æ ¼å­ä¹‹é—´ç§»åŠ¨
         /// </summary>
         private bool IsSellCarMovable(ItemDetails item)
         {
@@ -660,16 +660,16 @@ namespace MFarm.Inventory
         }
 
         /// <summary>
-        /// ÓÒ¼ü´©´÷£ºÖ»ÓĞ½ö´ò¿ªÍæ¼Ò±³°üÊ±ÉúĞ§£¬×°±¸/×°ÊÎÆ·Ö±½Ó´©µ½¶ÔÓ¦×°±¸¸ñ£¬ÒÑÓĞ×°±¸ÔòÌæ»»
+        /// å³é”®ç©¿æˆ´ï¼šåªæœ‰ä»…æ‰“å¼€ç©å®¶èƒŒåŒ…æ—¶ç”Ÿæ•ˆï¼Œè£…å¤‡/è£…é¥°å“ç›´æ¥ç©¿åˆ°å¯¹åº”è£…å¤‡æ ¼ï¼Œå·²æœ‰è£…å¤‡åˆ™æ›¿æ¢
         /// </summary>
         private bool TryEquipByRightClick()
         {
-            // Ö»´¦ÀíÍæ¼Ò±³°ü¸ñÀïµÄÎïÆ·
+            // åªå¤„ç†ç©å®¶èƒŒåŒ…æ ¼é‡Œçš„ç‰©å“
             if (Location != InventoryLocation.Player || slotType != SlotType.Bag || itemDetails == null)
             {
                 return false;
             }
-            // ÉÌµê¡¢³öÊÛ¡¢Âô³µµÈ½çÃæÍ¬Ê±´ò¿ªÊ±²»¿ÉÒÔÓÒ¼ü´©´÷
+            // å•†åº—ã€å‡ºå”®ã€å–è½¦ç­‰ç•Œé¢åŒæ—¶æ‰“å¼€æ—¶ä¸å¯ä»¥å³é”®ç©¿æˆ´
             if (!inventoryUI.IsOnlyPlayerBagOpened)
             {
                 return false;
@@ -694,19 +694,19 @@ namespace MFarm.Inventory
             {
                 return false;
             }
-            // ÉíÉÏÒÑ¾­ÊÇÍ¬Ò»¼ş×°±¸Ê±²»´¦Àí
+            // èº«ä¸Šå·²ç»æ˜¯åŒä¸€ä»¶è£…å¤‡æ—¶ä¸å¤„ç†
             if (equipSlot.itemDetails != null && equipSlot.itemDetails.itemID == itemDetails.itemID)
             {
                 return false;
             }
-            // Í·/Éí×°±¸ÏÈË¢ĞÂÔ¤ÀÀÍâ¹Û£¨Swapitem Ë¢ĞÂ½çÃæÊ±»á°Ñ±³°ü¸ñµÄ itemDetails ÖÃ¿Õ£©
+            // å¤´/èº«è£…å¤‡å…ˆåˆ·æ–°é¢„è§ˆå¤–è§‚ï¼ˆSwapitem åˆ·æ–°ç•Œé¢æ—¶ä¼šæŠŠèƒŒåŒ…æ ¼çš„ itemDetails ç½®ç©ºï¼‰
             if (targetType == SlotType.Equipment_Head || targetType == SlotType.Equipment_Body)
             {
                 inventoryUI.SetEquipImage(itemDetails, equipSlot);
             }
-            // ½»»»Á½¸ñÊı¾İ£º×°±¸¸ñÎª¿ÕÖ±½Ó´©ÉÏ£¬ÒÑÓĞ×°±¸Ôò¾É×°±¸»Øµ½¸Õ²Åµã»÷µÄ±³°ü¸ñ
+            // äº¤æ¢ä¸¤æ ¼æ•°æ®ï¼šè£…å¤‡æ ¼ä¸ºç©ºç›´æ¥ç©¿ä¸Šï¼Œå·²æœ‰è£…å¤‡åˆ™æ—§è£…å¤‡å›åˆ°åˆšæ‰ç‚¹å‡»çš„èƒŒåŒ…æ ¼
             InventoryManager.Instance.Swapitem(slotIndex, equipSlot.slotIndex, 1, 0);
-            // Ë¢ĞÂ·ÀÓùÁ¦£¨¶ÁÈ¡½»»»ºóµÄ×°±¸¸ñÊı¾İ£©
+            // åˆ·æ–°é˜²å¾¡åŠ›ï¼ˆè¯»å–äº¤æ¢åçš„è£…å¤‡æ ¼æ•°æ®ï¼‰
             if (targetType == SlotType.Equipment_Head || targetType == SlotType.Equipment_Body)
             {
                 inventoryUI.UpdatePlayerDefenseNum();
@@ -715,7 +715,7 @@ namespace MFarm.Inventory
         }
 
         /// <summary>
-        /// ÔÚÍæ¼Ò±³°üËùÓĞ¸ñ×ÓÖĞ²éÕÒÖ¸¶¨ÀàĞÍµÄ×°±¸¸ñ
+        /// åœ¨ç©å®¶èƒŒåŒ…æ‰€æœ‰æ ¼å­ä¸­æŸ¥æ‰¾æŒ‡å®šç±»å‹çš„è£…å¤‡æ ¼
         /// </summary>
         private SlotUI FindEquipSlot(SlotType targetType)
         {
@@ -734,11 +734,11 @@ namespace MFarm.Inventory
         }
 
         /// <summary>
-        /// ÓÒ¼üÍÑÏÂ×°±¸£ºÖ»ÓĞ½ö´ò¿ªÍæ¼Ò±³°üÊ±ÉúĞ§£¬×°±¸·Å»Ø±³°ü¿Õ¸ñ£¬Ã»ÓĞ¿Õ¸ñÔò²»×öÈÎºÎÊÂ
+        /// å³é”®è„±ä¸‹è£…å¤‡ï¼šåªæœ‰ä»…æ‰“å¼€ç©å®¶èƒŒåŒ…æ—¶ç”Ÿæ•ˆï¼Œè£…å¤‡æ”¾å›èƒŒåŒ…ç©ºæ ¼ï¼Œæ²¡æœ‰ç©ºæ ¼åˆ™ä¸åšä»»ä½•äº‹
         /// </summary>
         private bool TryUnequipByRightClick()
         {
-            // Ö»´¦ÀíÍæ¼ÒÉíÉÏµÄÈı¸ö×°±¸¸ñ
+            // åªå¤„ç†ç©å®¶èº«ä¸Šçš„ä¸‰ä¸ªè£…å¤‡æ ¼
             if (Location != InventoryLocation.Player || itemDetails == null)
             {
                 return false;
@@ -747,20 +747,20 @@ namespace MFarm.Inventory
             {
                 return false;
             }
-            // ÉÌµê¡¢³öÊÛ¡¢Âô³µµÈ½çÃæÍ¬Ê±´ò¿ªÊ±²»¿ÉÒÔÍÑÏÂ
+            // å•†åº—ã€å‡ºå”®ã€å–è½¦ç­‰ç•Œé¢åŒæ—¶æ‰“å¼€æ—¶ä¸å¯ä»¥è„±ä¸‹
             if (!inventoryUI.IsOnlyPlayerBagOpened)
             {
                 return false;
             }
-            // ±³°üÃ»ÓĞ¿Õ¸ñ¾ÍÊ²Ã´Ò²²»×ö
+            // èƒŒåŒ…æ²¡æœ‰ç©ºæ ¼å°±ä»€ä¹ˆä¹Ÿä¸åš
             int emptyIndex = FindEmptyBagIndex();
             if (emptyIndex < 0)
             {
                 return false;
             }
-            // ×°±¸´Ó×°±¸¸ñÒÆ¶¯µ½±³°ü¿Õ¸ñ
+            // è£…å¤‡ä»è£…å¤‡æ ¼ç§»åŠ¨åˆ°èƒŒåŒ…ç©ºæ ¼
             InventoryManager.Instance.Swapitem(slotIndex, emptyIndex, 1, 0);
-            // Í·/Éí×°±¸ÍÑÏÂºó»Ö¸´Ä¬ÈÏÍâ¹Û²¢Ë¢ĞÂ·ÀÓùÁ¦
+            // å¤´/èº«è£…å¤‡è„±ä¸‹åæ¢å¤é»˜è®¤å¤–è§‚å¹¶åˆ·æ–°é˜²å¾¡åŠ›
             if (slotType == SlotType.Equipment_Head || slotType == SlotType.Equipment_Body)
             {
                 inventoryUI.ResetEquipImage(slotType);
@@ -770,7 +770,7 @@ namespace MFarm.Inventory
         }
 
         /// <summary>
-        /// ²éÕÒÍæ¼Ò±³°ü¸ñÖĞµÚÒ»¸ö¿Õ¸ñµÄÏÂ±ê£¬Ã»ÓĞ¿Õ¸ñ·µ»Ø -1
+        /// æŸ¥æ‰¾ç©å®¶èƒŒåŒ…æ ¼ä¸­ç¬¬ä¸€ä¸ªç©ºæ ¼çš„ä¸‹æ ‡ï¼Œæ²¡æœ‰ç©ºæ ¼è¿”å› -1
         /// </summary>
         private int FindEmptyBagIndex()
         {

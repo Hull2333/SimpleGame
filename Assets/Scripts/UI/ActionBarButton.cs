@@ -1,15 +1,15 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 namespace MFarm.Inventory
 {
     [RequireComponent(typeof(SlotUI))]
-    public class ActionBarButton : MonoBehaviour    //µ÷ÓÃÔÚSlot_BagÓÎÏ·¶ÔÏó²»ÊÇÔ¤ÖÆÌåÉÏ
+    public class ActionBarButton : MonoBehaviour    //è°ƒç”¨åœ¨Slot_Bagæ¸¸æˆå¯¹è±¡ä¸æ˜¯é¢„åˆ¶ä½“ä¸Š
     {
-        //¼üÅÌ°´Å¥1-0
+        //é”®ç›˜æŒ‰é’®1-0
         public KeyCode key;
         private SlotUI slotUI;
-        //ÊÇ·ñ¼ì²â°´¼üÊäÈë
+        //æ˜¯å¦æ£€æµ‹æŒ‰é”®è¾“å…¥
         private bool canUse;
 
         private void Awake()
@@ -27,7 +27,7 @@ namespace MFarm.Inventory
             EventHandler.UpdateGameStateEvent -= OnUpdateGameStateEvent;
         }
         /// <summary>
-        /// µ±´ò¿ª½»Ò×½çÃæÊ±£¬½ûÖ¹¼ì²â°´¼üÊäÈë
+        /// å½“æ‰“å¼€äº¤æ˜“ç•Œé¢æ—¶ï¼Œç¦æ­¢æ£€æµ‹æŒ‰é”®è¾“å…¥
         /// </summary>
         /// <param name="gameState"></param>
         private void OnUpdateGameStateEvent(GameState gameState)

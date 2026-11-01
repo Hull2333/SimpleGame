@@ -1,12 +1,12 @@
-using DG.Tweening.Core.Easing;
+ï»¿using DG.Tweening.Core.Easing;
 using System.Collections;
 using System.Data.Common;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class ItemInterActive : MonoBehaviour    //µ÷ÓÃÔÚĞèÒª½Ó´¥¶ø»Î¶¯µÄ³¡¾°ÉÏ£¬ÁĞÈçÔÓ²İ
+public class ItemInterActive : MonoBehaviour    //è°ƒç”¨åœ¨éœ€è¦æ¥è§¦è€Œæ™ƒåŠ¨çš„åœºæ™¯ä¸Šï¼Œåˆ—å¦‚æ‚è‰
 {
-    //ÊÇ·ñÕıÔÚ»Î¶¯
+    //æ˜¯å¦æ­£åœ¨æ™ƒåŠ¨
     private bool isAnimating;
     private WaitForSeconds pause = new WaitForSeconds(0.04f);
     private Animator anim;
@@ -44,7 +44,7 @@ public class ItemInterActive : MonoBehaviour    //µ÷ÓÃÔÚĞèÒª½Ó´¥¶ø»Î¶¯µÄ³¡¾°ÉÏ£¬
         isAnimating = false;
     }
     /// <summary>
-    /// ²¥·ÅÏú»Ù¶¯»­²¢Ïú»Ù
+    /// æ’­æ”¾é”€æ¯åŠ¨ç”»å¹¶é”€æ¯
     /// </summary>
     public void PlayBreakAnim()
     {
@@ -53,7 +53,7 @@ public class ItemInterActive : MonoBehaviour    //µ÷ÓÃÔÚĞèÒª½Ó´¥¶ø»Î¶¯µÄ³¡¾°ÉÏ£¬
         
     }
     /// <summary>
-    /// µÈ´ıÏú»Ù¶¯»­²¥·ÅÍêºóÏú»Ù
+    /// ç­‰å¾…é”€æ¯åŠ¨ç”»æ’­æ”¾å®Œåé”€æ¯
     /// </summary>
     /// <returns></returns>
     private IEnumerator WaitAnimDone()

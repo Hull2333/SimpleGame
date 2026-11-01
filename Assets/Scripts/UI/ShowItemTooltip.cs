@@ -1,15 +1,15 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.EventSystems;
 namespace MFarm.Inventory
 {
     [RequireComponent(typeof(SlotUI))]
-    //IPointerEnterHandler,IPointerExitHandler Êó±ê»¬½øºÍ»¬³öµÄ½Ó¿Ú·½·¨
-    public class ShowItemTooltip : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerMoveHandler   //µ÷ÓÃÔÚÔ¤ÖÆÌåSlot_BagÉÏ
+    //IPointerEnterHandler,IPointerExitHandler é¼ æ ‡æ»‘è¿›å’Œæ»‘å‡ºçš„æ¥å£æ–¹æ³•
+    public class ShowItemTooltip : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerMoveHandler   //è°ƒç”¨åœ¨é¢„åˆ¶ä½“Slot_Bagä¸Š
     {
         private SlotUI slotUI;
         private float mouseToScreenDistant;
         /// <summary>
-        /// Êó±ê»¬½øÍæ¼Ò±³°ü¸ñÊ±
+        /// é¼ æ ‡æ»‘è¿›ç©å®¶èƒŒåŒ…æ ¼æ—¶
         /// </summary>
         /// <param name="eventData"></param>
         public void OnPointerEnter(PointerEventData eventData)
@@ -18,13 +18,13 @@ namespace MFarm.Inventory
             {
                 InventoryUI.Instance.itemTooltip.gameObject.SetActive(true);
                 InventoryUI.Instance.itemTooltip.SetupTooltip(slotUI.itemDetails, slotUI.slotType);
-                //ÅĞ¶ÏÈç¹ûµÀ¾ßÀàĞÍÎªFurniture,ÏÔÊ¾¶îÍâ²ÄÁÏĞèÇóUI
+                //åˆ¤æ–­å¦‚æœé“å…·ç±»å‹ä¸ºFurniture,æ˜¾ç¤ºé¢å¤–ææ–™éœ€æ±‚UI
                 //if (slotUI.itemDetails.itemType == ItemType.Furniture)
                 //{
                 //    InventoryUI.Instance.itemTooltip.resourcePanel.SetActive(true) ;
                 //    InventoryUI.Instance.itemTooltip.SetupResourcePanel(slotUI.itemDetails.getItemID);
                 //}
-                //ÀàĞÍ²»ÊÇFurniture¾Í¹Ø±Õ²ÄÁÏĞèÇó
+                //ç±»å‹ä¸æ˜¯Furnitureå°±å…³é—­ææ–™éœ€æ±‚
                 //else
                 //{
                 //    InventoryUI.Instance.itemTooltip.resourcePanel.SetActive(false);
@@ -36,7 +36,7 @@ namespace MFarm.Inventory
             }
         }
         /// <summary>
-        /// Êó±ê»®³ö±³°ü¸ñÊ±
+        /// é¼ æ ‡åˆ’å‡ºèƒŒåŒ…æ ¼æ—¶
         /// </summary>
         /// <param name="eventData"></param>
         public void OnPointerExit(PointerEventData eventData)
@@ -44,21 +44,21 @@ namespace MFarm.Inventory
             InventoryUI.Instance.itemTooltip.gameObject.SetActive(false);
         }
         /// <summary>
-        /// Êó±ê³ÖĞøÔÚ±³°ü¸ñÊ±
+        /// é¼ æ ‡æŒç»­åœ¨èƒŒåŒ…æ ¼æ—¶
         /// </summary>
         /// <param name="eventData"></param>
         public void OnPointerMove(PointerEventData eventData)
         {
             float distanceToTop = Screen.height - Input.mousePosition.y;
             RectTransform tooltipRect = InventoryUI.Instance.itemTooltip.GetComponent<RectTransform>();
-            // Ö±½ÓÊ¹ÓÃÊó±êÆÁÄ»×ø±ê£¬Screen Space - Overlay ÏÂ¾ÍÊÇÆÁÄ»¿Õ¼ä
+            // ç›´æ¥ä½¿ç”¨é¼ æ ‡å±å¹•åæ ‡ï¼ŒScreen Space - Overlay ä¸‹å°±æ˜¯å±å¹•ç©ºé—´
             Vector3 pos = Input.mousePosition;
-            // ÎïÆ·½éÉÜÔÚÆÁÄ»ÏÂ·½Ê±£¬ÏÔÊ¾ÔÚÎïÆ·ÉÏ·½
+            // ç‰©å“ä»‹ç»åœ¨å±å¹•ä¸‹æ–¹æ—¶ï¼Œæ˜¾ç¤ºåœ¨ç‰©å“ä¸Šæ–¹
             if (distanceToTop <= 300f)
             {
                 tooltipRect.pivot = new Vector2(1.1f, 1.1f);
             }
-            // ÎïÆ·½éÉÜÔÚÆÁÄ»ÉÏ·½Ê±£¬ÏÔÊ¾ÔÚÎïÆ·ÏÂ·½
+            // ç‰©å“ä»‹ç»åœ¨å±å¹•ä¸Šæ–¹æ—¶ï¼Œæ˜¾ç¤ºåœ¨ç‰©å“ä¸‹æ–¹
             else
             {
                 tooltipRect.pivot = new Vector2(-0.1f, -0.1f);

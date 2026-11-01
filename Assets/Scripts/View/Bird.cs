@@ -1,8 +1,8 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Bird : MonoBehaviour //µ÷ÓÃÔÚ³¡¾°µÄBird¶ÔÏóÉÏ
+public class Bird : MonoBehaviour //è°ƒç”¨åœ¨åœºæ™¯çš„Birdå¯¹è±¡ä¸Š
 {
     public Animator anim;
     private float speed = 1f;
@@ -99,7 +99,7 @@ public class Bird : MonoBehaviour //µ÷ÓÃÔÚ³¡¾°µÄBird¶ÔÏóÉÏ
             EventHandler.CallParticleEffectEvent(effectType, transform.position,Vector2.zero);
             isMove = false;
             isFly = true;
-            //ÔÚÍæ¼Ò×ó±ß
+            //åœ¨çŽ©å®¶å·¦è¾¹
             if(other.transform.parent.position.x > transform.position.x)
             {
                 faceX = -1;

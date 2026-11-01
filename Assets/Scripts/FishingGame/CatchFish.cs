@@ -1,8 +1,8 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CatchFish : MonoBehaviour //µ÷ÓÃÔÚCatch¶ÔÏóÉÏ
+public class CatchFish : MonoBehaviour //è°ƒç”¨åœ¨Catchå¯¹è±¡ä¸Š
 {
     private void OnTriggerStay2D(Collider2D other)
     {

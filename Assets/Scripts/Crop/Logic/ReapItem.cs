@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 namespace MFarm.CropPlant
@@ -8,7 +8,7 @@ namespace MFarm.CropPlant
         private CropDetails cropDetails;
         private Transform playerPosition => FindObjectOfType<PlayerController>().transform;
         /// <summary>
-        /// »ñÈ¡CropĞÅÏ¢
+        /// è·å–Cropä¿¡æ¯
         /// </summary>
         /// <param name="ID"></param>
         public void InitCropData(int ID)
@@ -16,18 +16,18 @@ namespace MFarm.CropPlant
             cropDetails = CropManager.Instance.GetCropDetails(ID);
         }
         /// <summary>
-        /// Éú³É¹ûÊµ
+        /// ç”Ÿæˆæœå®
         /// </summary>
         public void SpawnHarvestItems()
         {
             
-            //¶¨ÒåÒ»¸öÊÕ»ñµÄÊıÁ¿
+            //å®šä¹‰ä¸€ä¸ªæ”¶è·çš„æ•°é‡
             int amountToProduce;
             for (int i = 0; i < cropDetails.producedItemID.Length; i++)
             {
                 if (i == 0)
                 {
-                    //Èç¹û×îĞ¡ºÍ×î´óÉú³ÉÊıÏàµÈ£¬ÔòÊÕ»ñÊıÁ¿µÈÓÚ×îĞ¡Öµ
+                    //å¦‚æœæœ€å°å’Œæœ€å¤§ç”Ÿæˆæ•°ç›¸ç­‰ï¼Œåˆ™æ”¶è·æ•°é‡ç­‰äºæœ€å°å€¼
                     if (cropDetails.producedMinAmount[i] == cropDetails.producedMaxAmount[i])
                     {
                         amountToProduce = cropDetails.producedMinAmount[i];
@@ -37,7 +37,7 @@ namespace MFarm.CropPlant
                         amountToProduce = Random.Range(cropDetails.producedMinAmount[i], cropDetails.producedMaxAmount[i] + 1);
                     }
                 }
-                //µÚ¶şÖÖÕ½ÀûÆ·ÓĞ¸ÅÂÊÉú³É
+                //ç¬¬äºŒç§æˆ˜åˆ©å“æœ‰æ¦‚ç‡ç”Ÿæˆ
                 else
                 {
                     amountToProduce = Random.Range(cropDetails.producedMinAmount[i], cropDetails.producedMaxAmount[i] + 1);
@@ -46,19 +46,19 @@ namespace MFarm.CropPlant
                         amountToProduce = 0;
                     }
                 }
-                //ÊÕ»ñ»ñÈ¡µÄÎïÆ·ÊıÁ¿
+                //æ”¶è·è·å–çš„ç‰©å“æ•°é‡
                 for (int j = 0; j < amountToProduce; j++)
                 {
                     if (cropDetails.generateAtPlayerPosition)
                     {
                         EventHandler.CallHarvestAtPlayerPosition(cropDetails.producedItemID[i]);
                     }
-                    //ÔÚµØÍ¼ÉÏÉú³ÉÎïÆ·
+                    //åœ¨åœ°å›¾ä¸Šç”Ÿæˆç‰©å“
                     else
                     {
-                        //²ÎÕÕÍæ¼ÒÎ»ÖÃÅĞ¶ÏÎïÆ·Éú³ÉµÄ·½Ïò
+                        //å‚ç…§ç©å®¶ä½ç½®åˆ¤æ–­ç‰©å“ç”Ÿæˆçš„æ–¹å‘
                         var dirX = transform.position.x > playerPosition.position.x ? 1 : -1;
-                        //ÎïÆ·µôÂäÉú³ÉÎ»ÖÃµÄ·¶Î§
+                        //ç‰©å“æ‰è½ç”Ÿæˆä½ç½®çš„èŒƒå›´
                         var spawnPos = new Vector3(transform.position.x + Random.Range(dirX, cropDetails.spawnRadius.x * dirX), transform.position.y + Random.Range(-cropDetails.spawnRadius.y, cropDetails.spawnRadius.y), 0);
                         EventHandler.CallInstantiateItemInScene(cropDetails.producedItemID[i], spawnPos);
                     }

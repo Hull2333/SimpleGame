@@ -1,4 +1,4 @@
-using MFarm.CropPlant;
+ï»¿using MFarm.CropPlant;
 using MFarm.Inventory;
 using MFarm.Save;
 using System.Collections;
@@ -15,11 +15,11 @@ using UnityEngine.WSA;
 using Sprite = UnityEngine.Sprite;
 namespace MFarm.Map
 {
-    //Singletonµ¥ÀıÄ£Ê½£¬¾ÍËãÇĞ»»³¡¾°Ò²²»»á¸Ä±äÀïÃæµÄ½Å±¾
-    public class GridMapManager : Singleton<GridMapManager>,ISaveable//µ÷ÓÃÔÚGridMapManager¶ÔÏóÉÏ
+    //Singletonå•ä¾‹æ¨¡å¼ï¼Œå°±ç®—åˆ‡æ¢åœºæ™¯ä¹Ÿä¸ä¼šæ”¹å˜é‡Œé¢çš„è„šæœ¬
+    public class GridMapManager : Singleton<GridMapManager>,ISaveable//è°ƒç”¨åœ¨GridMapManagerå¯¹è±¡ä¸Š
     {
         private Transform playerTransform => FindObjectOfType<PlayerController>().transform;
-        [Header("ÖÖµØÍßÆ¬ÇĞ»»ĞÅÏ¢")]
+        [Header("ç§åœ°ç“¦ç‰‡åˆ‡æ¢ä¿¡æ¯")]
         public RuleTile digTile;
         public RuleTile diaWinterTile;
         public RuleTile waterTile;
@@ -28,50 +28,50 @@ namespace MFarm.Map
         private Tilemap digTilemap;
         private Tilemap waterTilemap;
         private Tilemap valueMap;
-        //¸ÃTileÊÇ·ñ¿ÉÒÔ¸Ä±äÎª¸ûµØTile
+        //è¯¥Tileæ˜¯å¦å¯ä»¥æ”¹å˜ä¸ºè€•åœ°Tile
         public bool canSetTile;
-        [Header("µØÍ¼ĞÅÏ¢")]
+        [Header("åœ°å›¾ä¿¡æ¯")]
         public List<MapData_SO> mapDataList;
-        //¸ù¾İµØÍ¼Ãû+Tile×ø±ê×÷Îª¹Ø¼ü×Ö¼ÓÈëµ½×ÖµäÖĞ
+        //æ ¹æ®åœ°å›¾å+Tileåæ ‡ä½œä¸ºå…³é”®å­—åŠ å…¥åˆ°å­—å…¸ä¸­
         public Dictionary<string,TileDetails> tileDetailsDict = new Dictionary<string,TileDetails>();
-        //string³¡¾°Ãû³Æ£¬boolÊÇ·ñÎªµÚÒ»´Î¼ÓÔØ
+        //stringåœºæ™¯åç§°ï¼Œboolæ˜¯å¦ä¸ºç¬¬ä¸€æ¬¡åŠ è½½
         public Dictionary<string,bool> firstLoadDict = new Dictionary<string,bool>();
-        //±¾´ÎÓÎÍæ¾­¹ıµÄÌìÊı£¬ÓÃÓÚ¼ÆËã¸÷³¡¾°´í¹ıÁË¶àÉÙÌìµÄËæ»ú×ÊÔ´Éú³É
+        //æœ¬æ¬¡æ¸¸ç©ç»è¿‡çš„å¤©æ•°ï¼Œç”¨äºè®¡ç®—å„åœºæ™¯é”™è¿‡äº†å¤šå°‘å¤©çš„éšæœºèµ„æºç”Ÿæˆ
         private int elapsedDays;
-        //¼ÇÂ¼Ã¿¸ö³¡¾°×î½üÒ»´ÎÉú³ÉËæ»ú×ÊÔ´Ê±¾­¹ıµÄÌìÊı
+        //è®°å½•æ¯ä¸ªåœºæ™¯æœ€è¿‘ä¸€æ¬¡ç”Ÿæˆéšæœºèµ„æºæ—¶ç»è¿‡çš„å¤©æ•°
         private Dictionary<string,int> sceneLastGenDayDict = new Dictionary<string,int>();
         private Grid currentGrid;
         private Season currentSeason;
-        [Header("¿ÉÊÕ¸î³¡¾°")]
-        //µ±Ç°³¡¾°
+        [Header("å¯æ”¶å‰²åœºæ™¯")]
+        //å½“å‰åœºæ™¯
         private MapData_SO currentSceneMap;
-        //ÔÓ²İÔ¤ÖÆÌå
+        //æ‚è‰é¢„åˆ¶ä½“
         public GameObject weedPrefab;
         private TileDetails aroundWeedsTileDetail,aroundBigRockTileDetail,aroundTreeTileDetail;
         public GameObject bigWeedPrefab;
-        //Ê¯¿óÔ¤ÖÆÌå
+        //çŸ³çŸ¿é¢„åˆ¶ä½“
         public GameObject[] rocksPrefabs;
-        //Ê¯¿óÔ¤ÖÆÌåĞòºÅ
+        //çŸ³çŸ¿é¢„åˆ¶ä½“åºå·
         private int rocksNumber;
-        //Ê÷Ô¤ÖÆÌå
+        //æ ‘é¢„åˆ¶ä½“
         public GameObject[] treePrefab;
         private int treesNumber;
-        //´óÊ¯¿óÔ¤ÖÆÌå
+        //å¤§çŸ³çŸ¿é¢„åˆ¶ä½“
         public GameObject bigRockPrefab;
-        //¿ÉÇÃ»÷¡¢¿É¿³·¥Í¼²ã
+        //å¯æ•²å‡»ã€å¯ç ä¼å›¾å±‚
         public LayerMask knockableLayer,axeableLayer;
-        //¿ÉÊÕ»ñÎïÅö×²Ìå
+        //å¯æ”¶è·ç‰©ç¢°æ’ä½“
         public Collider2D ableCollider;
-        //¿ÉÅü¿³Ô¤ÖÆÌå
+        //å¯åŠˆç é¢„åˆ¶ä½“
         public GameObject[] chopItemPrefabs;
         public string GUID => GetComponent<DataGUID>().guid;
         public bool canGetPlayerPos;
-        [Header("³öÏÖ´«ËÍµã")]
-        //´«ËÍµã
+        [Header("å‡ºç°ä¼ é€ç‚¹")]
+        //ä¼ é€ç‚¹
         public GameObject teleportPos;
-        //´«ËÍµã³öÏÖĞèÒªµÄµãÊı
+        //ä¼ é€ç‚¹å‡ºç°éœ€è¦çš„ç‚¹æ•°
         private int needPoint = 2;
-        [Header("¼Ò¾ßºÍ½¨Öş")]
+        [Header("å®¶å…·å’Œå»ºç­‘")]
         private BluPrintDetails bluPrintDetails;
         private BuildingDetails buildingDetails;
         private Transform bluPrintParent;
@@ -83,7 +83,7 @@ namespace MFarm.Map
            
             foreach (var mapData in mapDataList)
             {
-                //ÓÎÏ·Ò»¿ªÊ¼£¬ËùÓĞ³¡¾°¶¼ÊÇµÚÒ»´Î¼ÓÔØ
+                //æ¸¸æˆä¸€å¼€å§‹ï¼Œæ‰€æœ‰åœºæ™¯éƒ½æ˜¯ç¬¬ä¸€æ¬¡åŠ è½½
                 firstLoadDict.Add(mapData.sceneName, true);
                 InitTileDetailsDict(mapData);
             }
@@ -121,11 +121,11 @@ namespace MFarm.Map
             waterTilemap = GameObject.FindGameObjectWithTag("Water").GetComponent<Tilemap>();
             valueMap = GameObject.FindGameObjectWithTag("ValueTile").GetComponent<Tilemap>();
             canGetPlayerPos = true;
-            //½øÈë³¡¾°Ê±Í¬²½µ±Ç°¼¾½Ú£¬·ñÔò¶¬¼¾ÖØĞÂ½øÈë³¡¾°ºó¸ûµØÈÔ°´ÆÕÍ¨Í¼¿éÏÔÊ¾
+            //è¿›å…¥åœºæ™¯æ—¶åŒæ­¥å½“å‰å­£èŠ‚ï¼Œå¦åˆ™å†¬å­£é‡æ–°è¿›å…¥åœºæ™¯åè€•åœ°ä»æŒ‰æ™®é€šå›¾å—æ˜¾ç¤º
             currentSeason = TimeManager.Instance.gameSeason;
             if (firstLoadDict[SceneManager.GetActiveScene().name])
             {
-                //Ô¤ÏÈÉú³ÉCrop,ÔÙ°ÑµÚÒ»´Î¼ÓÔØ¸ÄÎªfalse
+                //é¢„å…ˆç”ŸæˆCrop,å†æŠŠç¬¬ä¸€æ¬¡åŠ è½½æ”¹ä¸ºfalse
                 EventHandler.CallGenerateCropEvent();
                 firstLoadDict[SceneManager.GetActiveScene().name] = false;
             }
@@ -134,15 +134,15 @@ namespace MFarm.Map
             OnRefreshCurrentMap();
         }
         /// <summary>
-        /// °´¸Ã³¡¾°´í¹ıµÄÊ±¼ä²¹Éú³ÉËæ»ú×ÊÔ´£¬×î¶à²¹ÖÀ7´Î
-        /// ÑÓºóÒ»Ö¡Ö´ĞĞ£¬È·±£ÔÚItemManager°´¿ìÕÕÖØ½¨Íê³¡¾°×ÊÔ´Ö®ºóÔÙ²¹Éú³É£¬±ÜÃâ¸ÕÉú³ÉµÄÎï¼ş±»Ïú»Ù
+        /// æŒ‰è¯¥åœºæ™¯é”™è¿‡çš„æ—¶é—´è¡¥ç”Ÿæˆéšæœºèµ„æºï¼Œæœ€å¤šè¡¥æ·7æ¬¡
+        /// å»¶åä¸€å¸§æ‰§è¡Œï¼Œç¡®ä¿åœ¨ItemManageræŒ‰å¿«ç…§é‡å»ºå®Œåœºæ™¯èµ„æºä¹‹åå†è¡¥ç”Ÿæˆï¼Œé¿å…åˆšç”Ÿæˆçš„ç‰©ä»¶è¢«é”€æ¯
         /// </summary>
         private IEnumerator CatchUpGenerateRandomInterView()
         {
             yield return new WaitForEndOfFrame();
             string sceneName = SceneManager.GetActiveScene().name;
             int lastGenDay;
-            //ÒÑÉú³É¹ıÔò²¹ÖÀ´í¹ıµÄÌìÊı£¬Î´Éú³É¹ıÖÁÉÙÖÀÒ»´Î
+            //å·²ç”Ÿæˆè¿‡åˆ™è¡¥æ·é”™è¿‡çš„å¤©æ•°ï¼Œæœªç”Ÿæˆè¿‡è‡³å°‘æ·ä¸€æ¬¡
             int missedDays = sceneLastGenDayDict.TryGetValue(sceneName, out lastGenDay)
                 ? Mathf.Clamp(elapsedDays - lastGenDay, 0, 7)
                 : 1;
@@ -153,24 +153,24 @@ namespace MFarm.Map
             sceneLastGenDayDict[sceneName] = elapsedDays;
         }
         /// <summary>
-        /// Ã¿ÌìÖ´ĞĞÒ»´Î
+        /// æ¯å¤©æ‰§è¡Œä¸€æ¬¡
         /// </summary>
         /// <param name="day"></param>
         /// <param name="season"></param>
         private void OnGameDayEvent(int day, Season season, Weekday weekday)
         {
-            //¹ıÌì¼ÆÊıÆ÷¼ÓÒ»£¬¹©¸÷³¡¾°²¹Éú³ÉËæ»ú×ÊÔ´Ê±¼ÆËã´í¹ıµÄÌìÊı
+            //è¿‡å¤©è®¡æ•°å™¨åŠ ä¸€ï¼Œä¾›å„åœºæ™¯è¡¥ç”Ÿæˆéšæœºèµ„æºæ—¶è®¡ç®—é”™è¿‡çš„å¤©æ•°
             elapsedDays++;
      
             currentSeason = season;
             foreach(var tile in tileDetailsDict)
             {
-                //Èç¹ûÒÑ¾­ÖÖÁËÖÖ×ÓÇÒ½½Ë®ÄÇÃ´ÖÖ×ÓµÄ³É³¤ÌìÊıÔö¼Ó
+                //å¦‚æœå·²ç»ç§äº†ç§å­ä¸”æµ‡æ°´é‚£ä¹ˆç§å­çš„æˆé•¿å¤©æ•°å¢åŠ 
                 if (tile.Value.seedItemID != -1 && tile.Value.daysSinceWatered > -1)
                 {
                     tile.Value.growthDays++;
                 }
-                //½½¹ıË®µÄÍßÆ¬¹ıÁËÒ»ÌìĞèÒª¼ÌĞø½½Ë®
+                //æµ‡è¿‡æ°´çš„ç“¦ç‰‡è¿‡äº†ä¸€å¤©éœ€è¦ç»§ç»­æµ‡æ°´
                 if (tile.Value.daysSinceWatered > -1)
                 {
                     tile.Value.daysSinceWatered = -1;
@@ -179,7 +179,7 @@ namespace MFarm.Map
                 {
                     tile.Value.daysSinceDug++;
                 }
-                //ÍÚ¹ıµÄ¿Ó³¬¹ıÁ½ÌìÇÒÃ¿ÖÖ¶«Î÷¾ÍÏû³ı
+                //æŒ–è¿‡çš„å‘è¶…è¿‡ä¸¤å¤©ä¸”æ¯ç§ä¸œè¥¿å°±æ¶ˆé™¤
                 if(tile.Value.daysSinceDug > 2 && tile.Value.seedItemID == -1)
                 {
                     tile.Value.daysSinceDug = -1;
@@ -188,15 +188,15 @@ namespace MFarm.Map
                 }
                
             }
-            //ÓêÌìºÍÀ×ÓêÌì×Ô¶¯¸øËùÓĞÒÑ¸ûÖÖµÄ¿Ó½½Ë®
+            //é›¨å¤©å’Œé›·é›¨å¤©è‡ªåŠ¨ç»™æ‰€æœ‰å·²è€•ç§çš„å‘æµ‡æ°´
             RainWaterTiles();
             RandomGenerateInterView();
             sceneLastGenDayDict[SceneManager.GetActiveScene().name] = elapsedDays;
             OnRefreshCurrentMap();
-            //Ã¿ÈÕ¸üĞÂÓãÀà»ñÈ¡ÁĞ±í
+            //æ¯æ—¥æ›´æ–°é±¼ç±»è·å–åˆ—è¡¨
             switch(currentSeason)
             {
-                case Season.´ºÌì:
+                case Season.æ˜¥å¤©:
                     EventHandler.CallFishListInSpriteDayFreshEvent(InventoryManager.fishList);
                     break;
             }
@@ -208,7 +208,7 @@ namespace MFarm.Map
             {
                 TileProperty appearTilePos;
                 TileDetails appearTile;
-                //Ëæ»úÑ­»·´«ËÍµãµÄÎ»ÖÃ£¬Ö±µ½Ëæ»úÑ­»·³öºÏÊÊµÄÎ»ÖÃ¾ÍÉú³É´«ËÍµã
+                //éšæœºå¾ªç¯ä¼ é€ç‚¹çš„ä½ç½®ï¼Œç›´åˆ°éšæœºå¾ªç¯å‡ºåˆé€‚çš„ä½ç½®å°±ç”Ÿæˆä¼ é€ç‚¹
                 do
                 {
                     appearTilePos = currentSceneMap.tilePropertyes[Random.Range(0, currentSceneMap.tilePropertyes.Count)];
@@ -239,7 +239,7 @@ namespace MFarm.Map
             }
         }
         /// <summary>
-        /// Ã¿ÌìËæ»úÉú³ÉµØÍ¼ÉÏµÄ¿ÉÊÕ¸îÊÂÎï
+        /// æ¯å¤©éšæœºç”Ÿæˆåœ°å›¾ä¸Šçš„å¯æ”¶å‰²äº‹ç‰©
         /// </summary>
         public void RandomGenerateInterView()
         {
@@ -256,29 +256,29 @@ namespace MFarm.Map
                 var currentTile = GetTileDetails(key);
                 if (currentTile != null)
                 {
-                    //ÖÜÎ§ÔÓ²İÁĞ±í
+                    //å‘¨å›´æ‚è‰åˆ—è¡¨
                     List<TileDetails> aroundWeedsDetailsList = new List<TileDetails>();
-                    //ÒÑ¾­ÍÚ¹ı»òÕß·ÅÖÃ¶«Î÷µÄÍßÆ¬²»¿ÉÒÔÉú³É¿ÉÊÕ¸îÊÂÎï
+                    //å·²ç»æŒ–è¿‡æˆ–è€…æ”¾ç½®ä¸œè¥¿çš„ç“¦ç‰‡ä¸å¯ä»¥ç”Ÿæˆå¯æ”¶å‰²äº‹ç‰©
                     if (currentTile.daysSinceDug == -1 && currentTile.havePlace == -1)
                     {
                         if (currentTile.canWeeds)
                         {
 
-                            //»ñÈ¡¿ÉÉú³ÉÔÓ²İTileDetail
+                            //è·å–å¯ç”Ÿæˆæ‚è‰TileDetail
                             var weedsTileDetail = GetTileDetailsOnMousePosition(new Vector3Int(currentTile.gridX, currentTile.gridY));
                             if (weedsTileDetail != null)
                             {
-                                //±éÀú¿ÉÉú³ÉÔÓ²İTileµÄÖÜÎ§8¸öTileµÄÎ»ÖÃ
+                                //éå†å¯ç”Ÿæˆæ‚è‰Tileçš„å‘¨å›´8ä¸ªTileçš„ä½ç½®
                                 for (int x = weedsTileDetail.gridX - 1; x <= weedsTileDetail.gridX + 1; x++)
                                 {
                                     for (int y = weedsTileDetail.gridY - 1; y <= weedsTileDetail.gridY + 1; y++)
                                     {
-                                        //ºöÂÔ×ÔÉíµÄTile
+                                        //å¿½ç•¥è‡ªèº«çš„Tile
                                         if (x == weedsTileDetail.gridX && y == weedsTileDetail.gridY)
                                         {
                                             continue;
                                         }
-                                        //»ñÈ¡ÖÜÎ§¿ÉÖÖÖ²ÔÓ²İTileDetail
+                                        //è·å–å‘¨å›´å¯ç§æ¤æ‚è‰TileDetail
                                         aroundWeedsTileDetail = GetTileDetailsOnMousePosition(new Vector3Int(x, y));
                                         if (aroundWeedsTileDetail != null)
                                         {
@@ -289,40 +289,40 @@ namespace MFarm.Map
                                 }
                                 if (aroundWeedsDetailsList != null)
                                 {
-                                    //µ±Ç°Î»ÖÃÎ´Éú³ÉÔÓ²İ
+                                    //å½“å‰ä½ç½®æœªç”Ÿæˆæ‚è‰
                                     if (currentTile.haveWeeds == -1)
                                     {
-                                        //»ñÈ¡¿ÉÉú³ÉÔÓ²İµØ¿éµÄµØÍ¼Î»ÖÃ
+                                        //è·å–å¯ç”Ÿæˆæ‚è‰åœ°å—çš„åœ°å›¾ä½ç½®
                                         Vector3 weedsPos = new Vector2(weedsTileDetail.gridX, weedsTileDetail.gridY);
                                         int generateWeedsOdds = Random.Range(0, 101);
-                                        //µ±ÖÜÎ§Ã»ÓĞÔÓ²İÉú³É
+                                        //å½“å‘¨å›´æ²¡æœ‰æ‚è‰ç”Ÿæˆ
                                         if (IsAroundHaveWeeds(aroundWeedsDetailsList) == -1)
                                         {
-                                            //20%µÄ¸ÅÂÊÉú³ÉÔÓ²İ
+                                            //20%çš„æ¦‚ç‡ç”Ÿæˆæ‚è‰
                                             if (generateWeedsOdds <= 20)
                                             {
-                                                //Ëæ»úÉú³ÉÔÓ²İÔ¤ÖÆÌå
+                                                //éšæœºç”Ÿæˆæ‚è‰é¢„åˆ¶ä½“
                                                 var weed = Instantiate(weedPrefab, new Vector2(Random.Range(weedsPos.x - 0.5f, weedsPos.x + 0.5f), Random.Range(weedsPos.y - 0.5f, weedsPos.y + 0.5f)), Quaternion.identity);
                                                 weed.GetComponentInChildren<ReapableItem>().SetWeedSprite();
-                                                //ÒÑÉú³ÉÔÓ²İ
+                                                //å·²ç”Ÿæˆæ‚è‰
                                                 currentTile.predictHaveWeeds++;
                                             }
                                         }
-                                        //µ±ÖÜÎ§ÓĞÔÓ²İÉú³É
+                                        //å½“å‘¨å›´æœ‰æ‚è‰ç”Ÿæˆ
                                         else if (IsAroundHaveWeeds(aroundWeedsDetailsList) == 1)
                                         {
-                                            //50%µÄ¸ÅÂÊÉú³ÉÔÓ²İ
+                                            //50%çš„æ¦‚ç‡ç”Ÿæˆæ‚è‰
                                             if (generateWeedsOdds <= 50)
                                             {
-                                                //Ëæ»úÉú³ÉÔÓ²İÔ¤ÖÆÌå
+                                                //éšæœºç”Ÿæˆæ‚è‰é¢„åˆ¶ä½“
                                                 var weed = Instantiate(weedPrefab, new Vector2(Random.Range(weedsPos.x - 0.5f, weedsPos.x + 0.5f), Random.Range(weedsPos.y - 0.5f, weedsPos.y + 0.5f)), Quaternion.identity);
                                                 weed.GetComponentInChildren<ReapableItem>().SetWeedSprite();
-                                                //ÒÑÉú³ÉÔÓ²İ
+                                                //å·²ç”Ÿæˆæ‚è‰
                                                 currentTile.predictHaveWeeds++;
                                             }
                                         }
                                     }
-                                    //Ò»¸ö¿ÉÉú³ÉÔÓ²İµØ¿éÉÏ¿ÉÒÔ³¤³öÁ½¿ÃÔÓ²İ
+                                    //ä¸€ä¸ªå¯ç”Ÿæˆæ‚è‰åœ°å—ä¸Šå¯ä»¥é•¿å‡ºä¸¤æ£µæ‚è‰
                                     if (currentTile.haveWeeds == 0)
                                     {
                                         int generateOdds = Random.Range(0, 101);
@@ -336,14 +336,14 @@ namespace MFarm.Map
                                 }
                             }
                         }
-                        //Éú³ÉÊ¯¿ó
+                        //ç”ŸæˆçŸ³çŸ¿
                         if (currentTile.canRock && currentTile.haveRock == -1 && currentTile.haveWeeds == -1)
                         {
-                            // »ñÈ¡¿ÉÉú³ÉÊ¯¿óTileDetail
+                            // è·å–å¯ç”ŸæˆçŸ³çŸ¿TileDetail
                             var rocksTileDetail = GetTileDetailsOnMousePosition(new Vector3Int(currentTile.gridX, currentTile.gridY));
                             if (rocksTileDetail != null)
                             {
-                                //Ëæ»úÉú³ÉÊ¯¿óÔ¤ÖÆÌå
+                                //éšæœºç”ŸæˆçŸ³çŸ¿é¢„åˆ¶ä½“
                                 rocksNumber = Random.Range(0, 2);
                                 Instantiate(rocksPrefabs[rocksNumber], new Vector2(rocksTileDetail.gridX + 0.5f, rocksTileDetail.gridY + 0.5f), Quaternion.identity);
                                 currentTile.haveRock = 1;
@@ -351,7 +351,7 @@ namespace MFarm.Map
                             }
 
                         }
-                        //Éú³É´óÊ¯¿ó
+                        //ç”Ÿæˆå¤§çŸ³çŸ¿
                         if (currentTile.canBigRock && currentTile.haveBigRock == -1 && currentTile.haveRock == -1 && currentTile.haveWeeds == -1)
                         {
                             Instantiate(bigRockPrefab, new Vector2(currentTile.gridX + 1, currentTile.gridY + 1), Quaternion.identity);
@@ -364,14 +364,14 @@ namespace MFarm.Map
                                 }
                             }
                         }
-                        //Éú³ÉÊ÷
+                        //ç”Ÿæˆæ ‘
                         if (currentTile.canTree && currentTile.haveTree == -1 && currentTile.canBigRock && currentTile.haveBigRock == -1 && currentTile.haveRock == -1 && currentTile.haveWeeds == -1)
                         {
                             TileDetails treeTileDetail = GetTileDetailsOnMousePosition(new Vector3Int(currentTile.gridX, currentTile.gridY));
                             if (treeTileDetail != null)
                             {
                                 int generateTreesOdds = Random.Range(0, 101);
-                                //ÒÑÉú³ÉÊ÷µÄ¸½½üÁ½¸öTile·¶Î§ÄÚ²»¿ÉÔÙÉú³ÉĞÂµÄÊ÷
+                                //å·²ç”Ÿæˆæ ‘çš„é™„è¿‘ä¸¤ä¸ªTileèŒƒå›´å†…ä¸å¯å†ç”Ÿæˆæ–°çš„æ ‘
                                 if (generateTreesOdds < 2)
                                 {
                                     for (int x = treeTileDetail.gridX - 2; x <= treeTileDetail.gridX + 2; x++)
@@ -398,7 +398,7 @@ namespace MFarm.Map
                             }
 
                         }
-                        //Éú³É¿ÉÅü¿³ÎïÌå
+                        //ç”Ÿæˆå¯åŠˆç ç‰©ä½“
                         if (currentTile.canChopItem && currentTile.haveChop == -1)
                         {
                             int odds = Random.Range(0, 10);
@@ -408,9 +408,9 @@ namespace MFarm.Map
                                 currentTile.haveChop = 1;
                             }
                         }
-                        //Éú³É´óÔÓ²İ
-                        //´óÔÓ²İÖ»ÔÚ·Ç¶¬¼¾Éú³É
-                        if (currentSeason != Season.¶¬Ìì && currentTile.canBigWeeds && currentTile.haveBigWeeds == -1)
+                        //ç”Ÿæˆå¤§æ‚è‰
+                        //å¤§æ‚è‰åªåœ¨éå†¬å­£ç”Ÿæˆ
+                        if (currentSeason != Season.å†¬å¤© && currentTile.canBigWeeds && currentTile.haveBigWeeds == -1)
                         {
                             int odds = Random.Range(0, 10);
                             if (odds > 5)
@@ -434,7 +434,7 @@ namespace MFarm.Map
             }
         }
         /// <summary>
-        /// ÅĞ¶ÏÎ´Éú³ÉÔÓ²İµØ¿éÖÜÎ§ÊÇ·ñÓĞÔÓ²İÉú³É
+        /// åˆ¤æ–­æœªç”Ÿæˆæ‚è‰åœ°å—å‘¨å›´æ˜¯å¦æœ‰æ‚è‰ç”Ÿæˆ
         /// </summary>
         /// <param name="tileDetailsList"></param>
         /// <returns></returns>
@@ -451,29 +451,29 @@ namespace MFarm.Map
             return -1;
         }
         /// <summary>
-        /// ³õÊ¼»¯µØÍ¼×Öµä
+        /// åˆå§‹åŒ–åœ°å›¾å­—å…¸
         /// </summary>
         /// <param name="mapData"></param>
         private void InitTileDetailsDict(MapData_SO mapData)
         {
             foreach(TileProperty tileProperty in mapData.tilePropertyes)
             {
-                //Éú³É×ÖµäÖĞµÄÃ¿¸öµØÍ¼¿éµÄX,Y×ø±ê
+                //ç”Ÿæˆå­—å…¸ä¸­çš„æ¯ä¸ªåœ°å›¾å—çš„X,Yåæ ‡
                 TileDetails tileDetails = new TileDetails
                 {
                     gridX = tileProperty.tileCoordinate.x,
                     gridY = tileProperty.tileCoordinate.y
                 };
-                //ÉèÖÃ×ÖµäµÄ¹Ø¼ü×Ö¸ñÊ½
+                //è®¾ç½®å­—å…¸çš„å…³é”®å­—æ ¼å¼
                 string key = tileDetails.gridX + "X"+ tileDetails.gridY + "Y" +mapData.sceneName;
-                //Ìí¼Ó¸üĞÂµÄÍßÆ¬µ½×ÖµäÖĞ
+                //æ·»åŠ æ›´æ–°çš„ç“¦ç‰‡åˆ°å­—å…¸ä¸­
                 if(GetTileDetails(key) != null )
                 {
                     tileDetails = GetTileDetails(key);
                 }
                 switch (tileProperty.gridType)
                 {
-                    //Èç¹ûtileProperty.gridTyp=GridType.Diggable£¬ÔòtileDetails.canDig = tileProperty.boolTypeValue;
+                    //å¦‚æœtileProperty.gridTyp=GridType.Diggableï¼Œåˆ™tileDetails.canDig = tileProperty.boolTypeValue;
                     case GridType.Diggable:
                         tileDetails.canDig = tileProperty.boolTypeValue;
                         break;
@@ -511,12 +511,12 @@ namespace MFarm.Map
                         tileDetails.canBigWeeds = tileProperty.boolTypeValue;
                         break;
                 }
-                //×ÖµäÔ­ÓĞµØÍ¼¸üĞÂ
+                //å­—å…¸åŸæœ‰åœ°å›¾æ›´æ–°
                 if(GetTileDetails(key) != null)
                 {
                     tileDetailsDict[key] = tileDetails;
                 }
-                //ĞÂµØÍ¼¸üĞÂ
+                //æ–°åœ°å›¾æ›´æ–°
                 else
                 {
                     tileDetailsDict.Add(key, tileDetails);
@@ -524,9 +524,9 @@ namespace MFarm.Map
             }
         }
         /// <summary>
-        /// ¸ù¾İkey·µ»ØÍßÆ¬ĞÅÏ¢
+        /// æ ¹æ®keyè¿”å›ç“¦ç‰‡ä¿¡æ¯
         /// </summary>
-        /// <param name="key">x+y+µØÍ¼Ãû×Ö</param>
+        /// <param name="key">x+y+åœ°å›¾åå­—</param>
         /// <returns></returns>
         public TileDetails GetTileDetails(string key)
         {
@@ -539,9 +539,9 @@ namespace MFarm.Map
             return null;
         }
         /// <summary>
-        /// ¸ù¾İ×ø±ê·µ»ØÍßÆ¬ĞÅÏ¢
+        /// æ ¹æ®åæ ‡è¿”å›ç“¦ç‰‡ä¿¡æ¯
         /// </summary>
-        /// <param name="mouseGridPos">Êó±êÍø¸ñĞÅÏ¢</param>
+        /// <param name="mouseGridPos">é¼ æ ‡ç½‘æ ¼ä¿¡æ¯</param>
         /// <returns></returns>
         public TileDetails GetTileDetailsOnMousePosition(Vector3Int mouseGridPos)
         {
@@ -549,41 +549,41 @@ namespace MFarm.Map
             return GetTileDetails(key);
         }
         /// <summary>
-        /// Ö´ĞĞÊµ¼Ê¹¤¾ß¹ıÎïÆ·µÄ¹¦ÄÜ
+        /// æ‰§è¡Œå®é™…å·¥å…·è¿‡ç‰©å“çš„åŠŸèƒ½
         /// </summary>
-        /// <param name="mouseWorldPos">Êó±ê×ø±ê</param>
-        /// <param name="itemDetails">ÎïÆ·ĞÅÏ¢</param>
+        /// <param name="mouseWorldPos">é¼ æ ‡åæ ‡</param>
+        /// <param name="itemDetails">ç‰©å“ä¿¡æ¯</param>
         private void OnExecuteActionAfterAnimation(Vector3 mouseWorldPos, ItemDetails itemDetails)
         {
-            //Íæ¼ÒµÄµØÍ¼×ø±ê
+            //ç©å®¶çš„åœ°å›¾åæ ‡
             var playerGridPos = currentGrid.WorldToCell(playerTransform.position);
-            //»ñÈ¡Êó±êµÄµØÍ¼×ø±ê
+            //è·å–é¼ æ ‡çš„åœ°å›¾åæ ‡
             var mouseGridPos = currentGrid.WorldToCell(mouseWorldPos);
             var currentTile = GetTileDetailsOnMousePosition(mouseGridPos);
             if(currentTile != null)
             {
                 Crop currentCrop = GetCropObject(mouseWorldPos);
-                //WORKFOLLOW:ÎïÆ·Ê¹ÓÃµÄÊµ¼Ê¹¦ÄÜ,²»ÔÚĞèÒªÅĞ¶ÏÎïÆ·ÊÇ·ñ¾ß±¸¶ªÆú»òÆäËû¹¦ÄÜ£¬ÒòÎªÖ»ÒªÖ´ĞĞµ½ÕâÀï£¬¶¼ÊÇ·ûºÏ¶ÔÓ¦µÄ¹¦ÄÜµÄ
+                //WORKFOLLOW:ç‰©å“ä½¿ç”¨çš„å®é™…åŠŸèƒ½,ä¸åœ¨éœ€è¦åˆ¤æ–­ç‰©å“æ˜¯å¦å…·å¤‡ä¸¢å¼ƒæˆ–å…¶ä»–åŠŸèƒ½ï¼Œå› ä¸ºåªè¦æ‰§è¡Œåˆ°è¿™é‡Œï¼Œéƒ½æ˜¯ç¬¦åˆå¯¹åº”çš„åŠŸèƒ½çš„
                 switch (itemDetails.itemType)
                 {
                     case ItemType.Seed:
                         if (canSetTile)
                         {
-                            //µ±µã»÷µÄÍßÆ¬ÓĞÅ©×÷Îï³ÉÊìÊ±£¬²»ÖÖÏÂÖÖ×Ó¶øÊÇÊÕ»ñ¸ÃÅ©×÷Îï
+                            //å½“ç‚¹å‡»çš„ç“¦ç‰‡æœ‰å†œä½œç‰©æˆç†Ÿæ—¶ï¼Œä¸ç§ä¸‹ç§å­è€Œæ˜¯æ”¶è·è¯¥å†œä½œç‰©
                             if (currentCrop != null && currentCrop.canHarvest)
                             {
                                 currentCrop.ProcessCropAction();
                             }
-                            //·ñÔòÖÖÏÂµ±Ç°ÖÖ×Ó
+                            //å¦åˆ™ç§ä¸‹å½“å‰ç§å­
                             else
                             {
                                 var seedCropDetail = CropManager.Instance.GetCropDetails(itemDetails.itemID);
                                 if (CropManager.Instance.SeasonAvailable(seedCropDetail))
                                 {
                                     EventHandler.CallPlantSeedEvent(itemDetails.itemID, currentTile);
-                                    //ÖÖÏÂÖÖ×Óºó£¬±³°üÖĞµÄÖÖ×ÓÊıÁ¿¼õÒ»
+                                    //ç§ä¸‹ç§å­åï¼ŒèƒŒåŒ…ä¸­çš„ç§å­æ•°é‡å‡ä¸€
                                     EventHandler.CallDropItemEvent(itemDetails.itemID, mouseWorldPos, itemDetails.itemType);
-                                    //²¥·ÅÖÖÖ²ÒôĞ§
+                                    //æ’­æ”¾ç§æ¤éŸ³æ•ˆ
                                     EventHandler.CallPlaySoundEvent(SoundName.Plant);
                                 }
                                 else
@@ -595,7 +595,7 @@ namespace MFarm.Map
                         }
                         
                         break;
-                        //ÖÖÏÂÊ÷ÖÖ
+                        //ç§ä¸‹æ ‘ç§
                     case ItemType.TreeSeed:
                         if (canSetTile)
                         {
@@ -609,7 +609,7 @@ namespace MFarm.Map
                                 GameObject treeCropPrefab1 = Instantiate(treePrefab[1], new Vector3(currentTile.gridX + 0.5f, currentTile.gridY), Quaternion.identity);
                                 treeCropPrefab1.GetComponent<TreeGrowing>().InitTreeGrowDay();
                             }
-                            //ÒÑÖÖÏÂÊ÷ÖÖµÄTileÖÜÎ§²»¿ÉÒÔÔÙÖÖ»òÉú³ÉĞÂµÄÊ÷
+                            //å·²ç§ä¸‹æ ‘ç§çš„Tileå‘¨å›´ä¸å¯ä»¥å†ç§æˆ–ç”Ÿæˆæ–°çš„æ ‘
                             for (int x = currentTile.gridX - 2; x <= currentTile.gridX + 2; x++)
                             {
                                 for (int y = currentTile.gridY - 2; y <= currentTile.gridY + 2; y++)
@@ -622,18 +622,18 @@ namespace MFarm.Map
                                     }
                                 }
                             }
-                            //ÖÖÏÂÖÖ×Óºó£¬±³°üÖĞµÄÖÖ×ÓÊıÁ¿¼õÒ»
+                            //ç§ä¸‹ç§å­åï¼ŒèƒŒåŒ…ä¸­çš„ç§å­æ•°é‡å‡ä¸€
                             EventHandler.CallRemoveTreeSeedCount(itemDetails.itemID);
                         }
                         break;
-                    //µ±¶ªÆúÉÌÆ·ÀàĞÍµÄÎïÆ·Ê±£¬Ö±½ÓÔÚÊó±êµÄÊÀ½ç×ø±êÎ»ÖÃÉú³ÉÒ»¸ö¶ªÆúÉÌÆ·
+                    //å½“ä¸¢å¼ƒå•†å“ç±»å‹çš„ç‰©å“æ—¶ï¼Œç›´æ¥åœ¨é¼ æ ‡çš„ä¸–ç•Œåæ ‡ä½ç½®ç”Ÿæˆä¸€ä¸ªä¸¢å¼ƒå•†å“
                     case ItemType.Commodity:
-                        //Ö´ĞĞÊÕ¸î·½·¨
+                        //æ‰§è¡Œæ”¶å‰²æ–¹æ³•
                         //currentCrop.ProcessToolAction(toolDetails, currentTile);
                         
                         if (currentCrop != null && currentCrop.canHarvest)
                         {
-                            //²¥·ÅÍæ¼ÒÊÕ»ñ¶¯»­
+                            //æ’­æ”¾ç©å®¶æ”¶è·åŠ¨ç”»
                             EventHandler.CallDisplayCollectItemSprite(currentCrop.cropDetails.producedItemID[0]);
                             currentCrop.ProcessCropAction();
                         }
@@ -642,15 +642,15 @@ namespace MFarm.Map
                             EventHandler.CallDropItemEvent(itemDetails.itemID, mouseWorldPos, itemDetails.itemType);
                         }
                         break;
-                        //ÍÚ¹ıµÄÍßÆ¬¿ªÊ¼¼ÆÊ±ÍÚµÄÌìÊı£¬²»¿ÉÔÙÍÚ£¬²»¿ÉÈÓ¶«Î÷
+                        //æŒ–è¿‡çš„ç“¦ç‰‡å¼€å§‹è®¡æ—¶æŒ–çš„å¤©æ•°ï¼Œä¸å¯å†æŒ–ï¼Œä¸å¯æ‰”ä¸œè¥¿
                     case ItemType.HoeTool:
                         if(canSetTile)
                         {
                             EventHandler.CallParticleEffectEvent(ParticalEffectType.HoeEffect02, new Vector3(mouseGridPos.x+0.5f, mouseGridPos.y + 0.5f, mouseGridPos.z), Vector2.zero);
                             SetDigGround(currentTile);
                             currentTile.daysSinceDug = 0;
-                            //ÓêÌì/À×ÓêÌìÍÚ³öÀ´µÄ¿ÓÖ±½ÓÊÇÊªµÄ
-                            if ((TimeManager.Instance.currentWeather == Weather.Rainy || TimeManager.Instance.currentWeather == Weather.Thunder) && currentSeason != Season.¶¬Ìì)
+                            //é›¨å¤©/é›·é›¨å¤©æŒ–å‡ºæ¥çš„å‘ç›´æ¥æ˜¯æ¹¿çš„
+                            if ((TimeManager.Instance.currentWeather == Weather.Rainy || TimeManager.Instance.currentWeather == Weather.Thunder) && currentSeason != Season.å†¬å¤©)
                             {
                                 SetWaterGround(currentTile);
                                 currentTile.daysSinceWatered = 0;
@@ -665,7 +665,7 @@ namespace MFarm.Map
                         EventHandler.CallPlayerDecreaseStminaEvent(2);
                         EventHandler.CallParticleEffectEvent(ParticalEffectType.HoeEffect,new Vector3(mouseGridPos.x+0.5f, mouseGridPos.y+0.5f,mouseGridPos.z), Vector2.zero);
                        
-                        //ÒôĞ§
+                        //éŸ³æ•ˆ
                         break;
                     case ItemType.WaterTool:
                         if (canSetTile)
@@ -675,7 +675,7 @@ namespace MFarm.Map
                         }
                         EventHandler.CallPlayerDecreaseStminaEvent(1);
                        
-                        //ÒôĞ§
+                        //éŸ³æ•ˆ
                         break;
                     case ItemType.BreakTool:
                         if (Mathf.Abs(mouseGridPos.x - playerGridPos.x) <= itemDetails.itemUseRadius && Mathf.Abs(mouseGridPos.y - playerGridPos.y) <= itemDetails.itemUseRadius)
@@ -687,7 +687,7 @@ namespace MFarm.Map
                             }
                             else
                             {
-                                //²¥·Å³úµ½µØÉÏµÄÁ£×ÓÌØĞ§
+                                //æ’­æ”¾é”„åˆ°åœ°ä¸Šçš„ç²’å­ç‰¹æ•ˆ
                                 EventHandler.CallParticleEffectEvent(ParticalEffectType.EarthenEffect, new Vector2(mouseGridPos.x + 0.5f,mouseGridPos.y + 0.5f), Vector2.zero);
                             }
 
@@ -712,9 +712,9 @@ namespace MFarm.Map
                         break;
                         
                      case ItemType.Furniture:
-                        //ÔÚµØÍ¼ÉÏÉú³É¼Ò¾ß ItemManager
-                        //ÒÆ³ıµ±Ç°Í¼Ö½ InventoryManager
-                        //ÒÆ³ı×ÊÔ´ÎïÆ· InventoryManager
+                        //åœ¨åœ°å›¾ä¸Šç”Ÿæˆå®¶å…· ItemManager
+                        //ç§»é™¤å½“å‰å›¾çº¸ InventoryManager
+                        //ç§»é™¤èµ„æºç‰©å“ InventoryManager
                         EventHandler.CallBuildFurnitureEvent(bluPrintDetails, mouseGridPos, bluPrintParent);
                         foreach (var tile in bluPrintTileList)
                         {
@@ -726,17 +726,17 @@ namespace MFarm.Map
             }
         }
         /// <summary>
-        /// Í¨¹ıÎïÀí·½·¨ÅĞ¶ÏÊó±êµã»÷Î»ÖÃµÄÅ©×÷Îï£¬ÓÃÓÚÊÕ»ñ
+        /// é€šè¿‡ç‰©ç†æ–¹æ³•åˆ¤æ–­é¼ æ ‡ç‚¹å‡»ä½ç½®çš„å†œä½œç‰©ï¼Œç”¨äºæ”¶è·
         /// </summary>
         /// <param name="mouseWorldPos"></param>
         /// <returns></returns>
         public Crop GetCropObject(Vector3 mouseWorldPos)
         {
-            //»ñÈ¡Êó±êµã»÷Î»ÖÃµÄÖÜÎ§µÄËùÓĞÅö×²Ìå
+            //è·å–é¼ æ ‡ç‚¹å‡»ä½ç½®çš„å‘¨å›´çš„æ‰€æœ‰ç¢°æ’ä½“
             Collider2D[] colliders = Physics2D.OverlapPointAll(mouseWorldPos);
             Crop currentCrop = null;
             
-            //²¢ÇÒ»ñÈ¡Åö×²ÌåÖĞµÄCrop½Å±¾
+            //å¹¶ä¸”è·å–ç¢°æ’ä½“ä¸­çš„Cropè„šæœ¬
             for(int i =0; i < colliders.Length; i++)
             {
                 if (colliders[i].GetComponent<Crop>())
@@ -748,7 +748,7 @@ namespace MFarm.Map
             return currentCrop;
         }
         /// <summary>
-        /// Í¨¹ıÎïÀí·½·¨ÅĞ¶ÏÊó±êµã»÷Î»ÖÃµÄÎïÆ·£¬ÓÃÓÚÊÕ»ñ
+        /// é€šè¿‡ç‰©ç†æ–¹æ³•åˆ¤æ–­é¼ æ ‡ç‚¹å‡»ä½ç½®çš„ç‰©å“ï¼Œç”¨äºæ”¶è·
         /// </summary>
         /// <param name="mouseWorldPos"></param>
         /// <returns></returns>
@@ -766,9 +766,9 @@ namespace MFarm.Map
             return currentItem;
         }
         /// <summary>
-        /// Ëæ»ú»ñÈ¡Ò»¸ö¿É·Å¼Ò¾ßµÄ¿ÕÏĞÍßÆ¬£¬²¢±ê¼ÇÎªÒÑÕ¼ÓÃ
+        /// éšæœºè·å–ä¸€ä¸ªå¯æ”¾å®¶å…·çš„ç©ºé—²ç“¦ç‰‡ï¼Œå¹¶æ ‡è®°ä¸ºå·²å ç”¨
         /// </summary>
-        /// <returns>±»Ñ¡ÖĞµÄÍßÆ¬£¬Èç¹ûÃ»ÓĞ¿ÕÏĞÍßÆ¬Ôò·µ»Ønull</returns>
+        /// <returns>è¢«é€‰ä¸­çš„ç“¦ç‰‡ï¼Œå¦‚æœæ²¡æœ‰ç©ºé—²ç“¦ç‰‡åˆ™è¿”å›null</returns>
         public TileDetails GetRandomPlaceFurnitureTile(MapData_SO mapData)
         {
             List<TileDetails> availableTiles = new List<TileDetails>();
@@ -795,15 +795,15 @@ namespace MFarm.Map
             return selected;
         }
         /// <summary>
-        /// Êó±êÑ¡Ôñ·¶Î§ÄÚÊÇ·ñÓĞ¿ÉÊÕ¸îµÄ³¡¾°
+        /// é¼ æ ‡é€‰æ‹©èŒƒå›´å†…æ˜¯å¦æœ‰å¯æ”¶å‰²çš„åœºæ™¯
         /// </summary>
         /// <returns></returns>
         //public bool HaveReapableItemsInRadius(Vector3 playerPos,ItemDetails tool)
         //{
-        //    //³õÊ¼»¯ÔÓ²İÁĞ±í
+        //    //åˆå§‹åŒ–æ‚è‰åˆ—è¡¨
         //    itemsInRadius = new List<ReapItem>();
         //    Collider2D[] colliders = new Collider2D[20];
-        //    //Input.mousePosition¼ì²â×ø±êÖĞĞÄ£¬Tool.itemUseRadius¼ì²â·¶Î§£¬colliders¼ì²âÄ¿±ê
+        //    //Input.mousePositionæ£€æµ‹åæ ‡ä¸­å¿ƒï¼ŒTool.itemUseRadiusæ£€æµ‹èŒƒå›´ï¼Œcollidersæ£€æµ‹ç›®æ ‡
         //    Physics2D.OverlapCircleNonAlloc(playerPos, tool.itemUseRadius, colliders);
         //    if(colliders.Length > 0)
         //    {
@@ -819,11 +819,11 @@ namespace MFarm.Map
         //            }
         //        }
         //    }
-        //    //ÊµÊ±¼à¿ØÊó±êÖÜÎ§µÄÔÓ²İ£¬µ±Ã»ÓĞÔÓ²İÊ±£¬·½·¨Ò»Ö±ÔÚ³õÊ¼»¯ÔÓ²İÁĞ±í·µ»Øfalse£¬µ±ÓĞÔÓ²İÔÚÁĞ±íÊ±£¬·µ»Øtrue
+        //    //å®æ—¶ç›‘æ§é¼ æ ‡å‘¨å›´çš„æ‚è‰ï¼Œå½“æ²¡æœ‰æ‚è‰æ—¶ï¼Œæ–¹æ³•ä¸€ç›´åœ¨åˆå§‹åŒ–æ‚è‰åˆ—è¡¨è¿”å›falseï¼Œå½“æœ‰æ‚è‰åœ¨åˆ—è¡¨æ—¶ï¼Œè¿”å›true
         //    return itemsInRadius.Count > 0;
         //}
         /// <summary>
-        /// »ñÈ¡Êó±êÖÜÎ§¿ÉÊÕ¸î³¡¾°µÄ¶¯»­
+        /// è·å–é¼ æ ‡å‘¨å›´å¯æ”¶å‰²åœºæ™¯çš„åŠ¨ç”»
         /// </summary>
         /// <param name="mouseWorldPos"></param>
         /// <param name="tool"></param>
@@ -851,7 +851,7 @@ namespace MFarm.Map
         //    return itemsInRadius.Count > 0;
         //}
         /// <summary>
-        /// ÏÔÊ¾ÍÚ¿ÓÍßÆ¬
+        /// æ˜¾ç¤ºæŒ–å‘ç“¦ç‰‡
         /// </summary>
         /// <param name="tile"></param>
         private void SetDigGround(TileDetails tile)
@@ -859,12 +859,12 @@ namespace MFarm.Map
             Vector3Int pos = new Vector3Int(tile.gridX, tile.gridY, 0);
             if(digTilemap!=null)
             {
-                //¶¬¼¾ÏÔÊ¾¶¬¼¾¸ûµØÍ¼¿é£¬ÆäËû¼¾½ÚÏÔÊ¾ÆÕÍ¨¸ûµØ
-                digTilemap.SetTile(pos, currentSeason == Season.¶¬Ìì ? diaWinterTile : digTile);
+                //å†¬å­£æ˜¾ç¤ºå†¬å­£è€•åœ°å›¾å—ï¼Œå…¶ä»–å­£èŠ‚æ˜¾ç¤ºæ™®é€šè€•åœ°
+                digTilemap.SetTile(pos, currentSeason == Season.å†¬å¤© ? diaWinterTile : digTile);
             }
         }
         /// <summary>
-        /// ÏÔÊ¾½½Ë®ÍßÆ¬
+        /// æ˜¾ç¤ºæµ‡æ°´ç“¦ç‰‡
         /// </summary>
         /// <param name="tile"></param>
         private void SetWaterGround(TileDetails tile)
@@ -877,24 +877,24 @@ namespace MFarm.Map
         }
 
         /// <summary>
-        /// ÓêÌìºÍÀ×ÓêÌìÊ±£¬×Ô¶¯¸øËùÓĞÒÑ¾­¸û¹ıµÄ¿Ó½½Ë®
+        /// é›¨å¤©å’Œé›·é›¨å¤©æ—¶ï¼Œè‡ªåŠ¨ç»™æ‰€æœ‰å·²ç»è€•è¿‡çš„å‘æµ‡æ°´
         /// </summary>
         private void RainWaterTiles()
         {
             Weather weather = TimeManager.Instance.currentWeather;
-            //Ö»ÓĞÓêÌìºÍÀ×ÓêÌì²Å»á×Ô¶¯½½Ë®
+            //åªæœ‰é›¨å¤©å’Œé›·é›¨å¤©æ‰ä¼šè‡ªåŠ¨æµ‡æ°´
             if (weather != Weather.Rainy && weather != Weather.Thunder)
             {
                 return;
             }
-            //¶¬¼¾ÏÂÓê²»»á¸ø¸ûµØ½½Ë®
-            if (currentSeason == Season.¶¬Ìì)
+            //å†¬å­£ä¸‹é›¨ä¸ä¼šç»™è€•åœ°æµ‡æ°´
+            if (currentSeason == Season.å†¬å¤©)
             {
                 return;
             }
             foreach (var tile in tileDetailsDict)
             {
-                //Ö»´¦ÀíÒÑ¾­¸û¹ıµÄ¿Ó
+                //åªå¤„ç†å·²ç»è€•è¿‡çš„å‘
                 if (tile.Value.daysSinceDug > -1)
                 {
                     tile.Value.daysSinceWatered = 0;
@@ -904,12 +904,12 @@ namespace MFarm.Map
        
        
         /// <summary>
-        /// ´æ´¢ÍßÆ¬ÍÚ¿ÓµÄÊı¾İ
+        /// å­˜å‚¨ç“¦ç‰‡æŒ–å‘çš„æ•°æ®
         /// </summary>
         /// <param name="tileDetails"></param>
         public void UpdateTileDetails(TileDetails tileDetails)
         {
-            //»ñÈ¡ÍÚ¹ı¿ÓµÄÍßÆ¬¹Ø¼ü×Ö
+            //è·å–æŒ–è¿‡å‘çš„ç“¦ç‰‡å…³é”®å­—
             string key = tileDetails.gridX + "X" + tileDetails.gridY + "Y" + SceneManager.GetActiveScene().name;
             if(tileDetailsDict.ContainsKey(key))
             {
@@ -921,7 +921,7 @@ namespace MFarm.Map
             }
         }
         /// <summary>
-        /// Ë¢ĞÂµØÍ¼ĞÅÏ¢
+        /// åˆ·æ–°åœ°å›¾ä¿¡æ¯
         /// </summary>
         private void OnRefreshCurrentMap()
         {
@@ -933,7 +933,7 @@ namespace MFarm.Map
             {
                 waterTilemap.ClearAllTiles();
             }
-            //±éÀú³¡¾°ÖĞËùÓĞµÄ´øCrop½Å±¾µÄÎïÌå²¢É¾³ı
+            //éå†åœºæ™¯ä¸­æ‰€æœ‰çš„å¸¦Cropè„šæœ¬çš„ç‰©ä½“å¹¶åˆ é™¤
             foreach(var crop in FindObjectsOfType<Crop>())
             {
                 Destroy(crop.gameObject);
@@ -941,7 +941,7 @@ namespace MFarm.Map
             DisplayMap(SceneManager.GetActiveScene().name);
         }
         /// <summary>
-        /// ½øÈë³¡¾°ºó°Ñ´æ´¢ºÃµÄÍßÆ¬ĞÅÏ¢ÖØĞÂ¼ÓÔØ³öÀ´µ½³¡¾°ÖĞ
+        /// è¿›å…¥åœºæ™¯åæŠŠå­˜å‚¨å¥½çš„ç“¦ç‰‡ä¿¡æ¯é‡æ–°åŠ è½½å‡ºæ¥åˆ°åœºæ™¯ä¸­
         /// </summary>
         /// <param name="sceneName"></param>
         private void DisplayMap(string sceneName)
@@ -968,15 +968,15 @@ namespace MFarm.Map
             }
         }
         /// <summary>
-        /// ¸ù¾İ´«½øÀ´µÄ³¡¾°Ãû×Ö¹¹½¨Íø¸ñ·¶Î§£¬Êä³ö·¶Î§ºÍÔ­µã
+        /// æ ¹æ®ä¼ è¿›æ¥çš„åœºæ™¯åå­—æ„å»ºç½‘æ ¼èŒƒå›´ï¼Œè¾“å‡ºèŒƒå›´å’ŒåŸç‚¹
         /// </summary>
-        /// <param name="sceneName">³¡¾°Ãû×Ö</param>
-        /// <param name="gridDimensions">Íø¸ñ·¶Î§</param>
-        /// <param name="gridOrigin">µØÍ¼×óÏÂ½ÇÔ­µã</param>
-        /// <returns>ÊÇ·ñÓĞµ±Ç°³¡¾°µÄĞÅÏ¢</returns>
+        /// <param name="sceneName">åœºæ™¯åå­—</param>
+        /// <param name="gridDimensions">ç½‘æ ¼èŒƒå›´</param>
+        /// <param name="gridOrigin">åœ°å›¾å·¦ä¸‹è§’åŸç‚¹</param>
+        /// <returns>æ˜¯å¦æœ‰å½“å‰åœºæ™¯çš„ä¿¡æ¯</returns>
         public bool GetGridDimensions(string sceneName,out Vector2Int gridDimensions,out Vector2Int gridOrigin)
         {
-            //³õÊ¼»¯¸³Öµ
+            //åˆå§‹åŒ–èµ‹å€¼
             gridDimensions = Vector2Int.zero;
             gridOrigin = Vector2Int.zero;
             foreach(var mapData in mapDataList)
@@ -995,7 +995,7 @@ namespace MFarm.Map
             return false;
         }
         /// <summary>
-        /// ÏÔÊ¾¿É»¥¶¯ÍßÆ¬
+        /// æ˜¾ç¤ºå¯äº’åŠ¨ç“¦ç‰‡
         /// </summary>
         /// <param name="mouseGridPos"></param>
         public void DisplayerAvailableGround(ItemDetails toolDetails, TileDetails currentTile)
@@ -1005,30 +1005,30 @@ namespace MFarm.Map
             valueMap.gameObject.GetComponent<TilemapRenderer>().enabled = true;
             foreach (var tile in tileDetailsDict)
             {
-                //Êó±ê´ËÊ±Ñ¡ÖĞµÄTile
+                //é¼ æ ‡æ­¤æ—¶é€‰ä¸­çš„Tile
                 if (tile.Value.gridX == currentTile.gridX && tile.Value.gridY == currentTile.gridY)
                 {
      
-                    //TileÔÚ¹¤¾ßÊ¹ÓÃ·¶Î§Íâ
+                    //Tileåœ¨å·¥å…·ä½¿ç”¨èŒƒå›´å¤–
                     if (Mathf.Abs(currentTile.gridX - playerGridPos.x) > toolDetails.itemUseRadius || Mathf.Abs(currentTile.gridY - playerGridPos.y) > toolDetails.itemUseRadius)
                     {
                         canSetTile = false;
                         valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), null);
                     }
-                    //TileÔÚ¹¤¾ßÊ¹ÓÃ·¶Î§ÄÚ
+                    //Tileåœ¨å·¥å…·ä½¿ç”¨èŒƒå›´å†…
                     else
                     {
                         switch (toolDetails.itemType) 
                         {
                             case ItemType.HoeTool:
-                                //Tile¿ÉÒÔÍÚ¾ò
+                                //Tileå¯ä»¥æŒ–æ˜
                                 if (currentTile.canDig && currentTile.daysSinceDug == -1 && currentTile.haveWeeds == -1 && currentTile.haveTree == -1 && currentTile.haveBigRock == -1 && currentTile.haveRock == -1)
 
                                 {
                                     canSetTile = true;
                                     valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), availableTilemap);
                                 }
-                                //Tile²»¿ÉÒÔ±»ÍÚ¾ò
+                                //Tileä¸å¯ä»¥è¢«æŒ–æ˜
                                 else
                                 {
                                     canSetTile = false;
@@ -1036,13 +1036,13 @@ namespace MFarm.Map
                                 }
                                 break;
                             case ItemType.WaterTool:
-                                //Tile¿ÉÒÔ½½Ë®
+                                //Tileå¯ä»¥æµ‡æ°´
                                 if (currentTile.daysSinceDug > -1 && currentTile.daysSinceWatered == -1)
                                 {
                                     canSetTile = true;
                                     valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), availableTilemap);
                                 }
-                                //Tile²»¿ÉÒÔ½½Ë®
+                                //Tileä¸å¯ä»¥æµ‡æ°´
                                 else
                                 {
                                     canSetTile = false;
@@ -1077,7 +1077,7 @@ namespace MFarm.Map
                         }
                     }
                 }
-                //Êó±êÃ»Ñ¡ÖĞµÄTile
+                //é¼ æ ‡æ²¡é€‰ä¸­çš„Tile
                 else
                 {
                     valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), null);
@@ -1108,14 +1108,14 @@ namespace MFarm.Map
         }
 
         /// <summary>
-        /// ¹Ø±Õ¿É¸ûÖÖÍßÆ¬
+        /// å…³é—­å¯è€•ç§ç“¦ç‰‡
         /// </summary>
         public void QuitDigAvailableGround()
         {
             valueMap.gameObject.GetComponent<TilemapRenderer>().enabled = false;
         }
         /// <summary>
-        /// ¸ù¾İ´«½øÀ´µÄ³¡¾°Ãû»ñÈ¡¶ÔÓ¦µÄÅ©ÉáµØÍ¼Êı¾İ
+        /// æ ¹æ®ä¼ è¿›æ¥çš„åœºæ™¯åè·å–å¯¹åº”çš„å†œèˆåœ°å›¾æ•°æ®
         /// </summary>
         /// <param name="sceneName"></param>
         /// <returns></returns>

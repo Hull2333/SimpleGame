@@ -1,9 +1,9 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using static AnimalData_SO;
-public class HealthBar : Singleton<HealthBar>  //µ÷ÓÃÔÚStateBar¶ÔÏóÉÏ
+public class HealthBar : Singleton<HealthBar>  //è°ƒç”¨åœ¨StateBarå¯¹è±¡ä¸Š
 {
     public GameObject HealthBg;
     public GameObject StminaBg;
@@ -12,11 +12,11 @@ public class HealthBar : Singleton<HealthBar>  //µ÷ÓÃÔÚStateBar¶ÔÏóÉÏ
     public Image stminaImage;
     private Canvas stateCanvas => GetComponent<Canvas>();
     private PlayerController playerController => FindObjectOfType<PlayerController>();
-    //ÑªÁ¿»º³åÊ±¼ä
+    //è¡€é‡ç¼“å†²æ—¶é—´
     private float bufferTime = 0.5f;
-    //ÑªÁ¿»º³åĞ­³Ì
+    //è¡€é‡ç¼“å†²åç¨‹
     private Coroutine updateCoroutine;
-    // Íæ¼ÒÀëÉãÏñ»úÏÂ±ß½çĞ¡ÓÚ 3 Ê±£¬ÑªÌõºÍÌåÁ¦ÌõÉÏÒÆ 240
+    // ç©å®¶ç¦»æ‘„åƒæœºä¸‹è¾¹ç•Œå°äº 3 æ—¶ï¼Œè¡€æ¡å’Œä½“åŠ›æ¡ä¸Šç§» 240
     private const float bgRaiseThreshold = 3f;
     private const float bgRaiseOffset = 240f;
     private Vector2 healthBgOriginalPos;
@@ -38,7 +38,7 @@ public class HealthBar : Singleton<HealthBar>  //µ÷ÓÃÔÚStateBar¶ÔÏóÉÏ
     {
         stateCanvas.worldCamera = FindAnyObjectByType<Camera>();
         stateCanvas.sortingLayerName = "Collision";
-        // ¼ÇÂ¼ÑªÌõºÍÌåÁ¦ÌõµÄÔ­Î»ÖÃ£¬Ìù½üÉãÏñ»úÏÂ±ß½çÊ±ÉÏÒÆ£¬Àë¿ªºó¸´Ô­
+        // è®°å½•è¡€æ¡å’Œä½“åŠ›æ¡çš„åŸä½ç½®ï¼Œè´´è¿‘æ‘„åƒæœºä¸‹è¾¹ç•Œæ—¶ä¸Šç§»ï¼Œç¦»å¼€åå¤åŸ
         if (HealthBg != null)
         {
             healthBgOriginalPos = HealthBg.GetComponent<RectTransform>().anchoredPosition;
@@ -57,7 +57,7 @@ public class HealthBar : Singleton<HealthBar>  //µ÷ÓÃÔÚStateBar¶ÔÏóÉÏ
     }
 
     /// <summary>
-    /// Íæ¼ÒÀëÉãÏñ»úÏÂ±ß½çĞ¡ÓÚ 100 Ê±£¬ÑªÌõºÍÌåÁ¦ÌõÉÏÒÆ 240£¬·ñÔò»Øµ½Ô­Î»ÖÃ
+    /// ç©å®¶ç¦»æ‘„åƒæœºä¸‹è¾¹ç•Œå°äº 100 æ—¶ï¼Œè¡€æ¡å’Œä½“åŠ›æ¡ä¸Šç§» 240ï¼Œå¦åˆ™å›åˆ°åŸä½ç½®
     /// </summary>
     private void UpdateBgPosition()
     {
@@ -66,7 +66,7 @@ public class HealthBar : Singleton<HealthBar>  //µ÷ÓÃÔÚStateBar¶ÔÏóÉÏ
         {
             return;
         }
-        // ÉãÏñ»úÏÂ±ß½çµÄÊÀ½ç Y
+        // æ‘„åƒæœºä¸‹è¾¹ç•Œçš„ä¸–ç•Œ Y
         float bottomY = cam.ViewportToWorldPoint(new Vector3(0.5f, 0f)).y;
         bool nearBottom = playerController.transform.position.y - bottomY < bgRaiseThreshold;
         if (HealthBg != null)
@@ -99,12 +99,12 @@ public class HealthBar : Singleton<HealthBar>  //µ÷ÓÃÔÚStateBar¶ÔÏóÉÏ
         stminaImage.transform.parent.gameObject.SetActive(!startMode);
     }
     /// <summary>
-    /// ¸üĞÂÍæ¼ÒÑªÌõ
+    /// æ›´æ–°ç©å®¶è¡€æ¡
     /// </summary>
     public void UpdateHealthBar()
     {
         hpImage.fillAmount = playerController.currentHealth / playerController.maxHealth;
-        //±ÜÃâ³öÏÖĞ­³Ì»ìÂÒ£¬µ±ÓĞĞ­³ÌÔÚÖ´ĞĞÊ±£¬²»Ö´ĞĞ½ÓÏÂÀ´µÄĞ­³Ì
+        //é¿å…å‡ºç°åç¨‹æ··ä¹±ï¼Œå½“æœ‰åç¨‹åœ¨æ‰§è¡Œæ—¶ï¼Œä¸æ‰§è¡Œæ¥ä¸‹æ¥çš„åç¨‹
         if(updateCoroutine != null)
         {
             StopCoroutine(updateCoroutine);
@@ -117,23 +117,23 @@ public class HealthBar : Singleton<HealthBar>  //µ÷ÓÃÔÚStateBar¶ÔÏóÉÏ
         stminaImage.fillAmount = playerController.currentStmina / playerController.maxStmina;
     }
     /// <summary>
-    /// ÑªÌõ»º³åĞ§¹û
+    /// è¡€æ¡ç¼“å†²æ•ˆæœ
     /// </summary>
     /// <returns></returns>
     private IEnumerator UpdateHpBuffer()
     {
-        //»º³åÑªÁ¿
+        //ç¼“å†²è¡€é‡
         float bufferlength = bufferHpImage.fillAmount - hpImage.fillAmount;
-        //»º³å¼ÆÊ±Æ÷
+        //ç¼“å†²è®¡æ—¶å™¨
         float elapsedTime = 0f;
         if( elapsedTime < bufferTime && bufferlength != 0)
         {
             elapsedTime += Time.deltaTime;
-            //Lerp£¬ÔÚÆğµãhpImage.fillAmount + bufferlengthÓëÖÕµã hpImage.fillAmountÖ®¼ä£¬Í¨¹ı²åÖµelapsedTime / bufferTime·µ»ØÆğµã»òÖÕµã
+            //Lerpï¼Œåœ¨èµ·ç‚¹hpImage.fillAmount + bufferlengthä¸ç»ˆç‚¹ hpImage.fillAmountä¹‹é—´ï¼Œé€šè¿‡æ’å€¼elapsedTime / bufferTimeè¿”å›èµ·ç‚¹æˆ–ç»ˆç‚¹
             bufferHpImage.fillAmount = Mathf.Lerp(hpImage.fillAmount + bufferlength, hpImage.fillAmount, elapsedTime / bufferTime);
             yield return null;
         }
-        //±ÜÃâ°×É«»º³åÑªÌõ³¬¹ıµ±Ç°ÑªÌõ
+        //é¿å…ç™½è‰²ç¼“å†²è¡€æ¡è¶…è¿‡å½“å‰è¡€æ¡
         bufferHpImage.fillAmount = hpImage.fillAmount;
     }
 }

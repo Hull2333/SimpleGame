@@ -1,8 +1,8 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Furniture : MonoBehaviour  //µ÷ÓÃÔÚ¼Ò¾ßÔ¤ÖÆÌåÉÏ
+public class Furniture : MonoBehaviour  //è°ƒç”¨åœ¨å®¶å…·é¢„åˆ¶ä½“ä¸Š
 {
     public int itemID;
    

@@ -1,14 +1,14 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 [CreateAssetMenu(fileName = "MapDat_SO",menuName ="Map/MapData")]
 public class MapData_SO : ScriptableObject
 {
     [SceneName] public string sceneName;
-    [Header("µØÍ¼ĞÅÏ¢")]
+    [Header("åœ°å›¾ä¿¡æ¯")]
     public int gridWidth;
     public int gridHeight;
-    [Header("×óÏÂ½ÇÔ­µã")]
+    [Header("å·¦ä¸‹è§’åŸç‚¹")]
     public int originX;
     public int originY;
 

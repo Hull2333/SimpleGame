@@ -1,4 +1,4 @@
-
+ï»¿
 using Cinemachine;
 using MFarm.CropPlant;
 using MFarm.Inventory;
@@ -11,86 +11,86 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using static AnimalData_SO;
 
-public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
+public class CursorManager : MonoBehaviour  //è°ƒç”¨åœ¨CursorManagerå¯¹è±¡ä¸Š
 {
     public Image cursorImage;
     private RectTransform cursorCanvas;
-    //ÆäËûÍ¼±ê¸úËæ
+    //å…¶ä»–å›¾æ ‡è·Ÿéš
     private Image otherCursorImage;
-    //ÓÃÓÚÊó±ê¼ì²âµÄ±äÁ¿
+    //ç”¨äºé¼ æ ‡æ£€æµ‹çš„å˜é‡
     private Camera mainCamera;
     private Grid currentGrid;
     public Vector3 mouseWorldPos;
     private Vector3Int mouseGridPos;
     private Vector3Int playerGridPos;
     public bool cursorEnable;
-    //¿ÉÒÔÖ´ĞĞÊó±êµã»÷ºó·½·¨
+    //å¯ä»¥æ‰§è¡Œé¼ æ ‡ç‚¹å‡»åæ–¹æ³•
     private bool canExcuteMouse;
-    //Êó±êµ±Ç°Ñ¡ÔñµÄÎïÆ·
+    //é¼ æ ‡å½“å‰é€‰æ‹©çš„ç‰©å“
     public ItemDetails currentItem;
     public TileDetails currentTile;
-    //ÕÒµ½¹ÒÁËPlayerController½Å±¾µÄ¶ÔÏóÎ»ÖÃ£¬¼´Íæ¼Ò
+    //æ‰¾åˆ°æŒ‚äº†PlayerControllerè„šæœ¬çš„å¯¹è±¡ä½ç½®ï¼Œå³ç©å®¶
     private Transform playerTransform => FindObjectOfType<PlayerController>().transform;
     private PlayerController playerController;
-    //µöÓãµÄ³¤°´ºÍËÉ¿ªÊÂ¼ş²»Ö´ĞĞ
+    //é’“é±¼çš„é•¿æŒ‰å’Œæ¾å¼€äº‹ä»¶ä¸æ‰§è¡Œ
     public bool fishingEventDisable = false;
-    //½ÇÉ«±³°ü»òÉèÖÃµÈUIÊÇ·ñ¿ªÆô
+    //è§’è‰²èƒŒåŒ…æˆ–è®¾ç½®ç­‰UIæ˜¯å¦å¼€å¯
     private bool isUIOpened = false;
-    //Êó±ê¶¯»­ÁĞ±í
+    //é¼ æ ‡åŠ¨ç”»åˆ—è¡¨
     public List<CursorAnimator> cursorAnimList;
-    //Êó±ê¶¯»­
+    //é¼ æ ‡åŠ¨ç”»
     private Animator cursorAnim;
-    //µ±Ç°µÄÊó±êÀàĞÍ
+    //å½“å‰çš„é¼ æ ‡ç±»å‹
     private CursorType currentCursorType;
-    //Êó±ê¼ì²âµ½µÄÅö×²Ìå
+    //é¼ æ ‡æ£€æµ‹åˆ°çš„ç¢°æ’ä½“
     public Collider2D checkCollider;
-    //Êó±ê¼ì²é¼ì²âµÄÍ¼²ã
+    //é¼ æ ‡æ£€æŸ¥æ£€æµ‹çš„å›¾å±‚
     public LayerMask checkLayer;
     private Collider2D[] roundColliders = new Collider2D[10];
-    //¿ÉÒÔ¼ì²é»ò½»Ì¸
+    //å¯ä»¥æ£€æŸ¥æˆ–äº¤è°ˆ
     public bool canCheck;
-    //¿ÉÒÔÅÄ´ò
+    //å¯ä»¥æ‹æ‰“
     public bool canPat;
-    //¿ÉÅëâ¿
+    //å¯çƒ¹é¥ª
     private bool canCooked;
-    //ÊÇ·ñ¿ÉÒÔ¼ì²âÊó±êµÄÊÀ½ç×ø±ê
+    //æ˜¯å¦å¯ä»¥æ£€æµ‹é¼ æ ‡çš„ä¸–ç•Œåæ ‡
     public bool canDetectionMouseWorldPos;
-    //Êó±ê³¤°´µÄÊ±¼ä
+    //é¼ æ ‡é•¿æŒ‰çš„æ—¶é—´
     public float holdPressDuration;
     private GameState gameState;
-    [Header("½¨ÖşºÍ¼Ò¾ß")]
-    //½¨ÔìÄ£Ê½ÉãÏñ»úÎ»ÖÃ
+    [Header("å»ºç­‘å’Œå®¶å…·")]
+    //å»ºé€ æ¨¡å¼æ‘„åƒæœºä½ç½®
     public Transform buildModeCameraPos;
     public CinemachineVirtualCamera camera;
-    //Êó±ê´¥ÅöÉãÏñ»ú±ßÔµãĞÖµ
+    //é¼ æ ‡è§¦ç¢°æ‘„åƒæœºè¾¹ç¼˜é˜ˆå€¼
     private float cameraEdgeThreshold = 10f;
-    //µ±Ç°Îª½¨ÔìÄ£Ê½
+    //å½“å‰ä¸ºå»ºé€ æ¨¡å¼
     public bool buildMode;
-    //Ã¿¸ö³¡¾°ÖĞ·ÅÖÃ½¨ÖşºÍ¼Ò¾ßµÄÎ»ÖÃ
+    //æ¯ä¸ªåœºæ™¯ä¸­æ”¾ç½®å»ºç­‘å’Œå®¶å…·çš„ä½ç½®
     private Transform furnitureParent;
     private Transform buildingParent;
-    //µ±Ç°Ñ¡ÔñµÄ¼Ò¾ßºÍ½¨ÖşDetails
+    //å½“å‰é€‰æ‹©çš„å®¶å…·å’Œå»ºç­‘Details
     public BluPrintData_SO bluPrintData;
     public BluPrintDetails currentBluPrintDetails;
     public BuildingDetails currentBuildingDetails;
     [HideInInspector] public GameObject bluPrintPrefab;
-    //µ±Ç°ºÍÉÏÒ»Ö¡µÄ½¨ÖşÕ¼ÓÃTile
+    //å½“å‰å’Œä¸Šä¸€å¸§çš„å»ºç­‘å ç”¨Tile
     private List<TileDetails> bluPrintTileList = new List<TileDetails>();
     private List<TileDetails> lastBluPrintTileList = new List<TileDetails>();
     private Bounds lastBounds;
-    //¼ÇÂ¼Íæ¼Òµ±Ç°³¡¾°ºÍÎ»ÖÃ
+    //è®°å½•ç©å®¶å½“å‰åœºæ™¯å’Œä½ç½®
     private string currentScene;
     private Vector3 currentPlayerPos;
-    [Header("¶¯ÎïÉÌµêÏà¹Ø")]
-    //¶¯ÎïÑ¡Ôñ½¨ÖşÄ£Ê½
+    [Header("åŠ¨ç‰©å•†åº—ç›¸å…³")]
+    //åŠ¨ç‰©é€‰æ‹©å»ºç­‘æ¨¡å¼
     private bool animalSelectMode;
     private AnimalDetails currentAnimalDetails;
     private Transform animalParent;
-    //µ±Ç°µÄ½¨Öş»î¶¯·¶Î§
+    //å½“å‰çš„å»ºç­‘æ´»åŠ¨èŒƒå›´
     [SerializeField] private Collider2D currentBuildingArea;
-    //µ±Ç°µÄ»î¶¯ÇøÓò
+    //å½“å‰çš„æ´»åŠ¨åŒºåŸŸ
     [SerializeField] private int areaCode;
-    //µ±Ç°µÄ¼¤»î³¡¾°Ğ­³Ì
+    //å½“å‰çš„æ¿€æ´»åœºæ™¯åç¨‹
     private IEnumerator currentTranstion;
     
     private void OnEnable()
@@ -125,19 +125,19 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
     private void Start()
     {
         canDetectionMouseWorldPos = true;
-        //¹Ø±ÕÊó±ê¹Ø±Õ
+        //å…³é—­é¼ æ ‡å…³é—­
         Cursor.visible = false;
         playerController = GameObject.FindWithTag("Player").GetComponentInParent<PlayerController>();
         cursorCanvas = GameObject.FindGameObjectWithTag("CursorCanvas").GetComponent<RectTransform>();
         cursorImage = cursorCanvas.GetChild(0).GetComponent<Image>();
         cursorAnim = cursorCanvas.GetChild(0).GetComponent<Animator>();
-        //ÄÃµ½ÆäËû¹â±ê
+        //æ‹¿åˆ°å…¶ä»–å…‰æ ‡
         otherCursorImage = cursorCanvas.GetChild(3).GetComponent<Image>();
         //currentSprite = normal;
-        //ÉèÖÃÆ½Ê±µÄ¹â±êÍ¼Ïñ
+        //è®¾ç½®å¹³æ—¶çš„å…‰æ ‡å›¾åƒ
         cursorAnim.runtimeAnimatorController = cursorAnimList[0].cursorController;
         //SetCursorImage(normal);
-        //»ñÈ¡TagÎªMainCameraµÄÉãÏñ»ú
+        //è·å–Tagä¸ºMainCameraçš„æ‘„åƒæœº
         mainCamera = Camera.main;
 
 
@@ -154,27 +154,27 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
                 cursorEnable = false;
                 break;
         }
-        //¸ù¾İÉãÏñ»úµÄÎ»ÖÃÀ´»ñÈ¡Êó±êµÄÊÀ½ç×ø±ê
+        //æ ¹æ®æ‘„åƒæœºçš„ä½ç½®æ¥è·å–é¼ æ ‡çš„ä¸–ç•Œåæ ‡
         if (canDetectionMouseWorldPos)
         {
             mouseWorldPos = mainCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, -mainCamera.transform.position.z));
         }
         if (currentGrid != null)
         {
-            //ÔÙ¸ù¾İ»ñÈ¡µÄÊÀ½ç×ø±ê×ª»¯ÎªµØÍ¼×ø±ê
+            //å†æ ¹æ®è·å–çš„ä¸–ç•Œåæ ‡è½¬åŒ–ä¸ºåœ°å›¾åæ ‡
             mouseGridPos = currentGrid.WorldToCell(mouseWorldPos);
             mouseGridPos = currentGrid.WorldToCell(mouseWorldPos);
             playerGridPos = currentGrid.WorldToCell(playerTransform.position);
         }
-        //µ±¹â±êUI²»´æÔÚÊ±£¬²»µ÷ÓÃ¹â±ê½Å±¾
+        //å½“å…‰æ ‡UIä¸å­˜åœ¨æ—¶ï¼Œä¸è°ƒç”¨å…‰æ ‡è„šæœ¬
         if (cursorCanvas == null)
         {
             return;
         }
-        //¹â±êÍ¼Æ¬ËæÊó±êÎ»ÖÃÒÆ¶¯
+        //å…‰æ ‡å›¾ç‰‡éšé¼ æ ‡ä½ç½®ç§»åŠ¨
         cursorImage.transform.position = Input.mousePosition;
         otherCursorImage.rectTransform.position = Input.mousePosition;
-        //µ±Êó±êÒÆ¶¯µ½ÈÎºÎUIµÄ·¶Î§Ê±£¬Í¼Æ¬¶¼±äÎªnormal
+        //å½“é¼ æ ‡ç§»åŠ¨åˆ°ä»»ä½•UIçš„èŒƒå›´æ—¶ï¼Œå›¾ç‰‡éƒ½å˜ä¸ºnormal
         if (!InteractWithUI() && cursorEnable)
         {
             CheckCursorValid();
@@ -184,14 +184,14 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
         {
 
             cursorImage.gameObject.SetActive(true);
-            //¹Ø±Õ½¨ÔìÍ¼Æ¬¡¢¶¯Ì¬Êó±êÍ¼Æ¬
+            //å…³é—­å»ºé€ å›¾ç‰‡ã€åŠ¨æ€é¼ æ ‡å›¾ç‰‡
             otherCursorImage.gameObject.SetActive(false);
         }
         if (currentItem == null || currentItem.itemID == 0)
         {
             SwitchCursorImage();
         }
-        //µã»÷Êó±ê×ó¼üÖ´ĞĞÊó±êClicked¶¯»­ 
+        //ç‚¹å‡»é¼ æ ‡å·¦é”®æ‰§è¡Œé¼ æ ‡ClickedåŠ¨ç”» 
         if (Input.GetMouseButton(0))
         {
             cursorAnim.SetBool("Clicked", true);
@@ -201,21 +201,21 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
                 {
 
                     InventoryUI.Instance.OpenAnimalAskUI(currentAnimalDetails.animalSprite);
-                    Debug.Log("Õâ¸öÎ»ÖÃ¿ÉÒÔ");
+                    Debug.Log("è¿™ä¸ªä½ç½®å¯ä»¥");
                 }
                 else
                 {
-                    Debug.Log("Ã»·¨·ÅÔÚÕâ¸öÎ»ÖÃ");
+                    Debug.Log("æ²¡æ³•æ”¾åœ¨è¿™ä¸ªä½ç½®");
                 }
             }
             if (canPat && !InteractWithUI())
             {
-                //´¥Ãş¶¯Îï
+                //è§¦æ‘¸åŠ¨ç‰©
                 if (checkCollider.GetComponent<AnimalController>() != null)
                 {
                     checkCollider.GetComponent<AnimalController>().AddAnimalFriendliness(0.5f, playerTransform.position);
                 }
-                //×øÒÎ×Ó
+                //åæ¤…å­
                 if(checkCollider.GetComponent<Chair>() != null && Vector2.Distance(playerTransform.position, checkCollider.transform.position) <= 3f)
                 {
                     var chair = checkCollider.GetComponent<Chair>();
@@ -227,7 +227,7 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
         {
             cursorAnim.SetBool("Clicked", false);
         }
-        //½¨ÔìÄ£Ê½ÏÂ
+        //å»ºé€ æ¨¡å¼ä¸‹
         if (buildMode)
         {
             if (bluPrintPrefab != null)
@@ -254,7 +254,7 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
     }
 
     /// <summary>
-    /// »ñÈ¡µ±Ç°µØÍ¼µÄÍßÆ¬Î»ÖÃ
+    /// è·å–å½“å‰åœ°å›¾çš„ç“¦ç‰‡ä½ç½®
     /// </summary>
     private void OnAfterSceneLoadedEvent()
     {
@@ -274,9 +274,9 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
     {
         cursorEnable = false;
         GridMapManager.Instance.canGetPlayerPos = false;
-        //È¡Ïûµ±Ç°Ñ¡ÔñµÄÎïÆ·ºÍ»Ö¸´Êó±êÍ¼Æ¬ÎªNormal
+        //å–æ¶ˆå½“å‰é€‰æ‹©çš„ç‰©å“å’Œæ¢å¤é¼ æ ‡å›¾ç‰‡ä¸ºNormal
         InventoryManager.Instance.currentSelectedItem = null;
-        //Çå¿Õµ±Ç°³ÖÓĞµÄÎïÆ·£¬·ñÔòÇĞ³¡¾°ºóÈÔ»á°´¾É¹¤¾ßÖ´ĞĞ»¥¶¯£¬ºÍ¿ÕÊÖ¶¯»­¶Ô²»ÉÏ
+        //æ¸…ç©ºå½“å‰æŒæœ‰çš„ç‰©å“ï¼Œå¦åˆ™åˆ‡åœºæ™¯åä»ä¼šæŒ‰æ—§å·¥å…·æ‰§è¡Œäº’åŠ¨ï¼Œå’Œç©ºæ‰‹åŠ¨ç”»å¯¹ä¸ä¸Š
         currentItem = null;
         canExcuteMouse = false;
         cursorAnim.runtimeAnimatorController = cursorAnimList[0].cursorController;
@@ -291,7 +291,7 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
     }
 
     /// <summary>
-    /// ÉèÖÃÊó±êËæÎïÆ·ÀàĞÍ¶ø±ä»¯
+    /// è®¾ç½®é¼ æ ‡éšç‰©å“ç±»å‹è€Œå˜åŒ–
     /// </summary>
     /// <param name="itemDetails"></param>
     /// <param name="isSelected"></param>
@@ -304,18 +304,18 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
         }
         if (!isSelected)
         {
-            //µ±Ã»ÓĞÑ¡ÔñÎïÆ·Ê±£¬¶¯»­ÎªNormal
+            //å½“æ²¡æœ‰é€‰æ‹©ç‰©å“æ—¶ï¼ŒåŠ¨ç”»ä¸ºNormal
             cursorAnim.runtimeAnimatorController = cursorAnimList[0].cursorController;
             //currentSprite = normal;
             cursorEnable = false;
             currentItem = null;
         }
-        //ÎïÆ·±»Ñ¡ÖĞ²Å¸ü¸ÄÊó±êÍ¼±ê
+        //ç‰©å“è¢«é€‰ä¸­æ‰æ›´æ”¹é¼ æ ‡å›¾æ ‡
         else
         {
             currentItem = itemDetails;
 
-            //ÀûÓÃswitchÓï¾äÑ­»·¸÷ÖÖItemÀàĞÍÀ´·µ»Ø²»Í¬µÄÊó±ê¶¯»­
+            //åˆ©ç”¨switchè¯­å¥å¾ªç¯å„ç§Itemç±»å‹æ¥è¿”å›ä¸åŒçš„é¼ æ ‡åŠ¨ç”»
             currentCursorType = itemDetails.itemType switch
             {
                 ItemType.Seed => CursorType.Normal,
@@ -338,7 +338,7 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
                     cursorAnim.runtimeAnimatorController = cursorAnimList[i].cursorController;
                 }
             }
-            //µ±Ñ¡Ôñ¼Ò¾ßÎïÆ·Ê±£¬Ô¤Éú³É¼Ò¾ß
+            //å½“é€‰æ‹©å®¶å…·ç‰©å“æ—¶ï¼Œé¢„ç”Ÿæˆå®¶å…·
             if (itemDetails.itemType == ItemType.Furniture)
             {
                 currentBluPrintDetails = bluPrintData.GetBluPrintDetails(currentItem.itemID);
@@ -351,7 +351,7 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
 
     }
     /// <summary>
-    /// ÔÚUI¿ªÆôÊ±½ûÖ¹Ê¹ÓÃµÀ¾ß
+    /// åœ¨UIå¼€å¯æ—¶ç¦æ­¢ä½¿ç”¨é“å…·
     /// </summary>
     /// <param name="isbool"></param>
     /// <exception cref="System.NotImplementedException"></exception>
@@ -373,20 +373,20 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
         {
             currentScene = SceneManager.GetActiveScene().name;
             currentPlayerPos = playerTransform.position;
-            //ÇĞ»»³¡¾°µ½Å©³¡
+            //åˆ‡æ¢åœºæ™¯åˆ°å†œåœº
             EventHandler.CallTransitionEvent("Farm", currentPlayerPos);
             buildModeCameraPos.position = new Vector2(35f, -25f);
-            //ÉèÖÃÉãÏñÍ·µÄ¸úËæºÍÏÔÊ¾±ÈÀı£¬Éú³ÉÔ¤Éú³É½¨ÖşÔÚµØÍ¼¼ÓÔØºóµÄÊÂ¼şÖĞ
+            //è®¾ç½®æ‘„åƒå¤´çš„è·Ÿéšå’Œæ˜¾ç¤ºæ¯”ä¾‹ï¼Œç”Ÿæˆé¢„ç”Ÿæˆå»ºç­‘åœ¨åœ°å›¾åŠ è½½åçš„äº‹ä»¶ä¸­
             camera.Follow = buildModeCameraPos;
             camera.m_Lens.OrthographicSize = 20;
-            //½¨ÔìÄ£Ê½
+            //å»ºé€ æ¨¡å¼
             if (building != null)
             {
                 currentBuildingDetails = bluPrintData.GetBuildingDetails(building.ID);
                 buildMode = true;
                 return;
             }
-            //¶¯ÎïÑ¡Ôñ½¨ÖşÄ£Ê½
+            //åŠ¨ç‰©é€‰æ‹©å»ºç­‘æ¨¡å¼
             if (animal != null)
             {
                 currentAnimalDetails = animal;
@@ -433,17 +433,17 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
         }
     }
     /// <summary>
-    /// Êó±êÒÆ¶¯µ½¶ÔÓ¦ÎïÌåÇĞ»»³É²»Ò»ÑùµÄÊó±êÍ¼Æ¬
+    /// é¼ æ ‡ç§»åŠ¨åˆ°å¯¹åº”ç‰©ä½“åˆ‡æ¢æˆä¸ä¸€æ ·çš„é¼ æ ‡å›¾ç‰‡
     /// </summary>
     private void SwitchCursorImage()
     {
-        //ÈÎºÎ±³°üUI´ò¿ª¶¼²»»»¼ì²éÍ¼Æ¬
+        //ä»»ä½•èƒŒåŒ…UIæ‰“å¼€éƒ½ä¸æ¢æ£€æŸ¥å›¾ç‰‡
         if (!InventoryManager.Instance.anyBagOpened)
         {
             checkCollider = Physics2D.OverlapPoint(mouseWorldPos, checkLayer);
             if (checkCollider != null)
             {
-                //SpriteRendererÎ´¼¤»îµÄNPC¿´²»¼û£¬Êó±êÍ£ÉÏÈ¥Ò²²»ÇĞ»»³É¿Éµ÷²éµÄÊó±êÍ¼Æ¬
+                //SpriteRendereræœªæ¿€æ´»çš„NPCçœ‹ä¸è§ï¼Œé¼ æ ‡åœä¸Šå»ä¹Ÿä¸åˆ‡æ¢æˆå¯è°ƒæŸ¥çš„é¼ æ ‡å›¾ç‰‡
                 if (checkCollider.CompareTag("NPC"))
                 {
                     NPCMovement npc = checkCollider.GetComponentInParent<NPCMovement>();
@@ -455,21 +455,21 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
                         return;
                     }
                 }
-                //NPC»òÕß¿Éµ÷²éÊÂÎï
+                //NPCæˆ–è€…å¯è°ƒæŸ¥äº‹ç‰©
                 if (checkCollider.CompareTag("NPC") || checkCollider.CompareTag("Investigable"))
                 {
                     cursorAnim.runtimeAnimatorController = cursorAnimList[1].cursorController;
                     canCheck = true;
                     return;
                 }
-                //¿É»¥¶¯ÊÂÎï
+                //å¯äº’åŠ¨äº‹ç‰©
                 if (checkCollider.CompareTag("Interactive") || checkCollider.CompareTag("Animal"))
                 {
                     cursorAnim.runtimeAnimatorController = cursorAnimList[4].cursorController;
                     canPat = true;
                     return;
                 }
-                //¿ÉÅëâ¿ÊÂÎï
+                //å¯çƒ¹é¥ªäº‹ç‰©
                 if (checkCollider.CompareTag("Cooked"))
                 {
                     cursorAnim.runtimeAnimatorController = cursorAnimList[5].cursorController;
@@ -479,7 +479,7 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
                     }
                     return;
                 }
-                //µã»÷¿É°Ñ³öÊÛÎïÆ·Âôµô
+                //ç‚¹å‡»å¯æŠŠå‡ºå”®ç‰©å“å–æ‰
                 if (checkCollider.CompareTag("SellBox"))
                 {
                     cursorAnim.runtimeAnimatorController = cursorAnimList[6].cursorController;
@@ -501,7 +501,7 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
         }
     }
     /// <summary>
-    /// ¼ì²éµã»÷µÄ½¨ÖşÊÇ·ñÊÇºÏÊÊµÄ¶¯Îï³ß´ç
+    /// æ£€æŸ¥ç‚¹å‡»çš„å»ºç­‘æ˜¯å¦æ˜¯åˆé€‚çš„åŠ¨ç‰©å°ºå¯¸
     /// </summary>
     /// <param name="size"></param>
     /// <returns></returns>
@@ -521,7 +521,7 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
         return false;
     }
     /// <summary>
-    /// ¿ÕÊÖÊÕ»ñÅ©×÷Îï
+    /// ç©ºæ‰‹æ”¶è·å†œä½œç‰©
     /// </summary>
     private void EmptyHandHatvestCrop()
     {
@@ -535,14 +535,14 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
                     ItemClick clickItem = GridMapManager.Instance.GetItemObject(mouseWorldPos);
                     if (clickCrop != null && clickCrop.canHarvest)
                     {
-                        //²¥·ÅÍæ¼ÒÊÕ»ñ¶¯»­
+                        //æ’­æ”¾ç©å®¶æ”¶è·åŠ¨ç”»
                         EventHandler.CallDisplayCollectItemSprite(clickCrop.cropDetails.producedItemID[0]);
                         clickCrop.ProcessCropAction();
                         return;
                     }
                     if (clickItem != null)
                     {
-                        //²¥·ÅÍæ¼ÒÊÕ»ñ¶¯»­
+                        //æ’­æ”¾ç©å®¶æ”¶è·åŠ¨ç”»
                         EventHandler.CallDisplayCollectItemSprite(clickItem.itemID);
                         clickItem.AddItemToBag();
                     }
@@ -553,7 +553,7 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
 
     }
     /// <summary>
-    /// Êó±êµã»÷ÎïÆ·Ê±Ö´ĞĞµÄ²Ù×÷
+    /// é¼ æ ‡ç‚¹å‡»ç‰©å“æ—¶æ‰§è¡Œçš„æ“ä½œ
     /// </summary>
     public void CheckPlayerInput()
     {
@@ -561,22 +561,22 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
         {
             return;
         }
-        //µ±ËùÓĞUI¶¼Î´¿ªÆôÊ±²Å¿ÉÒÔÊ¹ÓÃµÀ¾ß
+        //å½“æ‰€æœ‰UIéƒ½æœªå¼€å¯æ—¶æ‰å¯ä»¥ä½¿ç”¨é“å…·
         if (isUIOpened == false)
         {
             if (currentItem.itemType == ItemType.Sword)
             {
-                //µã»÷×ó¼ü¹¥»÷
+                //ç‚¹å‡»å·¦é”®æ”»å‡»
                 if (Input.GetMouseButtonDown(0))
                 {
                     EventHandler.CallMouseClickedEvent(mouseWorldPos, currentItem);
                 }
-                //µã»÷ÓÒ¼ü·ÀÓù
+                //ç‚¹å‡»å³é”®é˜²å¾¡
                 if (Input.GetMouseButtonDown(1) && !playerController.isKnocking)
                 {
                     StartCoroutine(playerController.PlayerDefence(mouseWorldPos));
                 }
-                //°´ÏÂF´¦¾ö
+                //æŒ‰ä¸‹Få¤„å†³
                 if (Input.GetKeyDown(KeyCode.F) && CheckRoundEnemy())
                 {
                     StartCoroutine(playerController.PlayerExecution());
@@ -584,7 +584,7 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
             }
             if (currentItem.itemType == ItemType.FishingRod)
             {
-                //³¤°´Êó±ê×ó¼ü
+                //é•¿æŒ‰é¼ æ ‡å·¦é”®
                 if (Input.GetMouseButton(0) && fishingEventDisable == false)
                 {
                     EventHandler.CallControlPlayerBagOpen(false);
@@ -596,7 +596,7 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
                     }
 
                 }
-                //ËÉ¿ªÊó±ê³¤°´
+                //æ¾å¼€é¼ æ ‡é•¿æŒ‰
                 if (Input.GetMouseButtonUp(0) && fishingEventDisable == false)
                 {
                     if (holdPressDuration >= 0.2f)
@@ -614,7 +614,7 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
                 }
 
             }
-            //¼·ÄÌ
+            //æŒ¤å¥¶
             if (currentItem.itemType == ItemType.Bucket)
             {
                 if (Input.GetMouseButtonUp(0))
@@ -626,12 +626,12 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
             {
                 if (canExcuteMouse)
                 {
-                    //µã»÷×ó¼ü
+                    //ç‚¹å‡»å·¦é”®
                     if (Input.GetMouseButtonDown(0))
                     {
                         EventHandler.CallMouseClickedEvent(mouseWorldPos, currentItem);
                     }
-                    //µã»÷ÓÒ¼ü³Ô¶«Î÷
+                    //ç‚¹å‡»å³é”®åƒä¸œè¥¿
                     if (Input.GetMouseButtonDown(1))
                     {
                         if (currentItem.canEat == true)
@@ -661,7 +661,7 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
                 {
                     bluPrintTileList.Add(newBluPrintTile);
                 }
-                //¼ì²é¸Ã¼Ò¾ß»ò½¨ÖşÊÇ·ñ¿ÉÒÔ·ÅÖÃÔÚÕâÀï
+                //æ£€æŸ¥è¯¥å®¶å…·æˆ–å»ºç­‘æ˜¯å¦å¯ä»¥æ”¾ç½®åœ¨è¿™é‡Œ
                 foreach (var tile in bluPrintTileList)
                 {
                     canExcuteMouse = true;
@@ -688,12 +688,12 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
         }
     }
     /// <summary>
-    /// ¼ì²éÊó±êÊÇ·ñ¿ÉÓÃ
+    /// æ£€æŸ¥é¼ æ ‡æ˜¯å¦å¯ç”¨
     /// </summary>
     private void CheckCursorValid()
     {
 
-        //ÅĞ¶ÏÊÇ·ñÊó±ê¶ªÆúµÄÎ»ÖÃ³¬¹ı¸ÃÎïÆ·µÄÊ¹ÓÃ·¶Î§
+        //åˆ¤æ–­æ˜¯å¦é¼ æ ‡ä¸¢å¼ƒçš„ä½ç½®è¶…è¿‡è¯¥ç‰©å“çš„ä½¿ç”¨èŒƒå›´
         //if(currentItem != null && currentItem.canDropped)
         //{
         //    if (Mathf.Abs(mouseGridPos.x - playerGridPos.x) > currentItem.itemUseRadius || Mathf.Abs(mouseGridPos.y - playerGridPos.y) > currentItem.itemUseRadius)
@@ -703,7 +703,7 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
         //    }
         //}
         currentTile = GridMapManager.Instance.GetTileDetailsOnMousePosition(mouseGridPos);
-        //Ô¤Éú³É¼Ò¾ß¸úËæÊó±êµÄGrid×ø±ê
+        //é¢„ç”Ÿæˆå®¶å…·è·Ÿéšé¼ æ ‡çš„Gridåæ ‡
         if (bluPrintPrefab != null)
         {
             bluPrintPrefab.transform.position = mouseGridPos;
@@ -714,12 +714,12 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
                 lastBounds = currentBounds;
             }
         }
-        //¸ù¾İÑ¡ÔñµÄÎïÆ·ÀàĞÍÀ´¾ö¶¨Êó±êÊÇ·ñ¿ÉÓÃ
+        //æ ¹æ®é€‰æ‹©çš„ç‰©å“ç±»å‹æ¥å†³å®šé¼ æ ‡æ˜¯å¦å¯ç”¨
         if (currentTile != null && currentItem != null)
         {
-            //»ñÈ¡µ±Ç°ÍßÆ¬ÉÏµÄÖÖ×ÓĞÅÏ¢
+            //è·å–å½“å‰ç“¦ç‰‡ä¸Šçš„ç§å­ä¿¡æ¯
             CropDetails currentCrop = CropManager.Instance.GetCropDetails(currentTile.seedItemID);
-            //»ñÈ¡Êó±êµã»÷Î»ÖÃµÄCrop½Å±¾×é¼ş
+            //è·å–é¼ æ ‡ç‚¹å‡»ä½ç½®çš„Cropè„šæœ¬ç»„ä»¶
             Crop crop = GridMapManager.Instance.GetCropObject(mouseWorldPos);
 
             switch (currentItem.itemType)
@@ -731,7 +731,7 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
                     break;
                 case ItemType.Commodity:
                     //GridMapManager.Instance.QuitDigAvailableGround();
-                    //µ±Ç°Ñ¡ÔñµÄÍßÆ¬ÊÇ¿É¶ªÍßÆ¬ÇÒÑ¡ÔñµÄÎïÆ·ÊÇ¿ÉÒÔ¶ªÆúµÄ
+                    //å½“å‰é€‰æ‹©çš„ç“¦ç‰‡æ˜¯å¯ä¸¢ç“¦ç‰‡ä¸”é€‰æ‹©çš„ç‰©å“æ˜¯å¯ä»¥ä¸¢å¼ƒçš„
                     if (currentTile.canDropItem && currentItem.canDropped)
                     {
                         //SetCursorValid();
@@ -739,7 +739,7 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
                     break;
                 case ItemType.TreeSeed:
                 case ItemType.WaterTool:
-                //ÅĞ¶ÏÑ¡ÔñµÄÍßÆ¬ÊÇ·ñ¿ÉÒÔÍÚ¿Ó
+                //åˆ¤æ–­é€‰æ‹©çš„ç“¦ç‰‡æ˜¯å¦å¯ä»¥æŒ–å‘
                 case ItemType.HoeTool:
                     GridMapManager.Instance.DisplayerAvailableGround(currentItem, currentTile);
                     //SetCursorValid();
@@ -769,7 +769,7 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
                     //SetCursorValid();
                     //GridMapManager.Instance.QuitDigAvailableGround();
                     break;
-                //Í¼Ö½
+                //å›¾çº¸
                 case ItemType.Furniture:
                     GridMapManager.Instance.DisplayBluPrintAvaliableGround(bluPrintTileList, lastBluPrintTileList);
                     //GridMapManager.Instance.QuitDigAvailableGround();
@@ -789,7 +789,7 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
         }
     }
     /// <summary>
-    /// ÊÇ·ñÓëUI»¥¶¯
+    /// æ˜¯å¦ä¸UIäº’åŠ¨
     /// </summary>
     /// <returns></returns>
     private bool InteractWithUI()
@@ -807,7 +807,7 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
 
     }
     /// <summary>
-    /// ¼ì²âÍæ¼ÒÖÜÎ§ÊÇ·ñÓĞÑ£ÔÎµÄµĞÈË
+    /// æ£€æµ‹ç©å®¶å‘¨å›´æ˜¯å¦æœ‰çœ©æ™•çš„æ•Œäºº
     /// </summary>
     /// <returns></returns>
     private bool CheckRoundEnemy()
@@ -827,14 +827,14 @@ public class CursorManager : MonoBehaviour  //µ÷ÓÃÔÚCursorManager¶ÔÏóÉÏ
         return false;
     }
     /// <summary>
-    /// ½¨ÔìÄ£Ê½ÏÂ´¥ÅöÉãÏñ»ú±ßÔµÒÆ¶¯ÉãÏñ»ú
+    /// å»ºé€ æ¨¡å¼ä¸‹è§¦ç¢°æ‘„åƒæœºè¾¹ç¼˜ç§»åŠ¨æ‘„åƒæœº
     /// </summary>
     private void MoveBuildModeCameraPos()
     {
         Vector3 mousePos = Input.mousePosition;
         float screenWidth = Screen.width;
         float screenHeight = Screen.height;
-        // ¼ì²âÊó±êÊÇ·ñÔÚÆÁÄ»±ßÔµ
+        // æ£€æµ‹é¼ æ ‡æ˜¯å¦åœ¨å±å¹•è¾¹ç¼˜
         bool isLeftEdge = mousePos.x <= cameraEdgeThreshold;
         bool isRightEdge = mousePos.x >= screenWidth - cameraEdgeThreshold;
         bool isBottomEdge = mousePos.y <= cameraEdgeThreshold;

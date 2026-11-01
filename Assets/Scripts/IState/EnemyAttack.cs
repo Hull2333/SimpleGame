@@ -1,8 +1,8 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
 using UnityEngine;
-public class EnemyAttack : MonoBehaviour//µ÷ÓÃÔÚµĞÈËÏÂµÄAttackBox¶ÔÏóÉÏ
+public class EnemyAttack : MonoBehaviour//è°ƒç”¨åœ¨æ•Œäººä¸‹çš„AttackBoxå¯¹è±¡ä¸Š
 {
     private PlayerController player;
     private void Start()
@@ -14,11 +14,11 @@ public class EnemyAttack : MonoBehaviour//µ÷ÓÃÔÚµĞÈËÏÂµÄAttackBox¶ÔÏóÉÏ
        
         if (other.CompareTag("DefenceBox"))
         {
-            //»ñÈ¡Ïà¶Ô×Ô¼º¶ÔÓÚotherµÄ×î½üµÄµã
+            //è·å–ç›¸å¯¹è‡ªå·±å¯¹äºotherçš„æœ€è¿‘çš„ç‚¹
             Vector2 closestPointOnSelf = GetComponent<Collider2D>().ClosestPoint(other.transform.position);
-            //»ñÈ¡Ïà¶ÔÓëotherÀë×Ô¼º×î½üµÄµã
+            //è·å–ç›¸å¯¹ä¸otherç¦»è‡ªå·±æœ€è¿‘çš„ç‚¹
             Vector2 closestPointOnOther = other.ClosestPoint(transform.position);
-            //½üËÆÅö×²µã
+            //è¿‘ä¼¼ç¢°æ’ç‚¹
             Vector2 collisionPoint = (closestPointOnSelf + closestPointOnOther) / 2f;
             transform.GetComponentInParent<FSM>().parameter.isFainting = true;
             player.PlayDefenceGetAnim(transform.parent);

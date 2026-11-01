@@ -1,15 +1,15 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using UnityEngine;
 namespace MFarm.Transition
 {
-    public class Teleport : MonoBehaviour   //µ÷ÓÃÔÚËùÓĞ´«ËÍµãTeleport¶ÔÏóÉÏ
+    public class Teleport : MonoBehaviour   //è°ƒç”¨åœ¨æ‰€æœ‰ä¼ é€ç‚¹Teleportå¯¹è±¡ä¸Š
     {
         public string sceneToGo;
-        //µ½´ïĞÂ³¡¾°Ê±ËùÔÚµÄÎ»ÖÃ
+        //åˆ°è¾¾æ–°åœºæ™¯æ—¶æ‰€åœ¨çš„ä½ç½®
         public Vector3 positionToGo;
-        [Header("Ëæ»ú´«ËÍÏà¹Ø£¬¿ªÆôºó¿ÉÒÔ²»ÌîÉÏÃæµÄ³¡¾°ºÍÎ»ÖÃ")]
+        [Header("éšæœºä¼ é€ç›¸å…³ï¼Œå¼€å¯åå¯ä»¥ä¸å¡«ä¸Šé¢çš„åœºæ™¯å’Œä½ç½®")]
         public MineSceneDataList_SO mineData;
         public bool isRandomTeleport;
         public int buildCode;
@@ -30,7 +30,7 @@ namespace MFarm.Transition
             }
         }
         /// <summary>
-        /// »ñÈ¡ÏÂÒ»¸ö¿ó¶´³¡¾°
+        /// è·å–ä¸‹ä¸€ä¸ªçŸ¿æ´åœºæ™¯
         /// </summary>
         private void GetNextMineScene()
         {

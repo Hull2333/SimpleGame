@@ -1,8 +1,8 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BuildingParent : MonoBehaviour //µ÷ÓÃÔÚBuildingParent¶ÔÏóÉÏ
+public class BuildingParent : MonoBehaviour //è°ƒç”¨åœ¨BuildingParentå¯¹è±¡ä¸Š
 {
   
 }

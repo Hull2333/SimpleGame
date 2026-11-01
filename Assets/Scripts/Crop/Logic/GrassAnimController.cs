@@ -1,8 +1,8 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GrassAnimController : MonoBehaviour //µ÷ÓÃÔÚ¿ÉÊÕ¸î»·¾³ÔÓ²İÔ¤ÖÆÌåÉÏ
+public class GrassAnimController : MonoBehaviour //è°ƒç”¨åœ¨å¯æ”¶å‰²ç¯å¢ƒæ‚è‰é¢„åˆ¶ä½“ä¸Š
 {
     private Animator anim;
 
@@ -27,14 +27,14 @@ public class GrassAnimController : MonoBehaviour //µ÷ÓÃÔÚ¿ÉÊÕ¸î»·¾³ÔÓ²İÔ¤ÖÆÌåÉÏ
     }
    
     /// <summary>
-    /// ²¥·ÅÔÓ²İÍù×óÒ¡»Î¶¯»­
+    /// æ’­æ”¾æ‚è‰å¾€å·¦æ‘‡æ™ƒåŠ¨ç”»
     /// </summary>
     public void PlayLeftShakeAnim()
     {
         anim.SetTrigger("LeftShake");
     }
     /// <summary>
-    /// ²¥·ÅÔÓ²İÍùÓÒÒ¡»Î¶¯»­
+    /// æ’­æ”¾æ‚è‰å¾€å³æ‘‡æ™ƒåŠ¨ç”»
     /// </summary>
     private void PlayRightShakeAnim()
     {

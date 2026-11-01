@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 namespace MFarm.Inventory
 {
-    public class TradeUI : MonoBehaviour    //µ÷ÓÃÔÚTradeUI¶ÔÏóÉÏ
+    public class TradeUI : MonoBehaviour    //è°ƒç”¨åœ¨TradeUIå¯¹è±¡ä¸Š
     {
 
         public Image itemIcon;
@@ -17,24 +17,24 @@ namespace MFarm.Inventory
         public Button submitButton;
         public Button cancelButton;
         private ItemDetails item;
-        //ÊÇ·ñÊÇ½»Ò×
+        //æ˜¯å¦æ˜¯äº¤æ˜“
         private bool isSellTrade;
-        //ÊÇ·ñÊÇÖ±½ÓÍÏµ½³öÊÛÏä
+        //æ˜¯å¦æ˜¯ç›´æ¥æ‹–åˆ°å‡ºå”®ç®±
         private bool isToSellBox;
-        //½»Ò×ÊıÁ¿
+        //äº¤æ˜“æ•°é‡
         private int tradeAmount;
-        //ÓµÓĞµÄ×î´óÎïÆ·Êı
+        //æ‹¥æœ‰çš„æœ€å¤§ç‰©å“æ•°
         private int maxAmount;
-        //È«²¿Ìí¼Ó°´Å¥
+        //å…¨éƒ¨æ·»åŠ æŒ‰é’®
         public Button allIncreaseButton;
-        //±³°üµÄslotindexºÍ³öÊÛÏäµÄindex
+        //èƒŒåŒ…çš„slotindexå’Œå‡ºå”®ç®±çš„index
         private int startIndex, endIndex;
         private InventoryLocation startLocation, endLocation;
-        //µ±Ç°Õâ¸öÎïÆ·½»Ò×½ğ¶î
+        //å½“å‰è¿™ä¸ªç‰©å“äº¤æ˜“é‡‘é¢
         private int currentTradeValue; 
         private void Awake()
         {
-            //µã»÷°´Å¥´¥·¢ÆäÖĞµÄ·½·¨
+            //ç‚¹å‡»æŒ‰é’®è§¦å‘å…¶ä¸­çš„æ–¹æ³•
             allIncreaseButton.onClick.AddListener(ClickAllIncreaseButton);
             cancelButton.onClick.AddListener(CancelTrade);
             submitButton.onClick.AddListener(ClickSubmitButton);
@@ -42,7 +42,7 @@ namespace MFarm.Inventory
 
         }
         /// <summary>
-        /// ÉèÖÃTradeUIÏÔÊ¾ÏêÇé
+        /// è®¾ç½®TradeUIæ˜¾ç¤ºè¯¦æƒ…
         /// </summary>
         /// <param name="item"></param>
         /// <param name="isSell"></param>
@@ -74,14 +74,14 @@ namespace MFarm.Inventory
            
         }
         /// <summary>
-        /// µã»÷½»Ò×Ìá½»°´Å¥
+        /// ç‚¹å‡»äº¤æ˜“æäº¤æŒ‰é’®
         /// </summary>
         private void ClickSubmitButton() 
         {
-            //½«tradeAmountÊäÈëµÄÎÄ±¾Êı×Ö×ª»»ÎªInt
+            //å°†tradeAmountè¾“å…¥çš„æ–‡æœ¬æ•°å­—è½¬æ¢ä¸ºInt
             //var amount = Convert.ToInt32(tradeAmountText.recipeName);
             InventoryManager.Instance.TradeItem(item, tradeAmount, isSellTrade,startIndex,endIndex, startLocation,endLocation, isToSellBox);
-            //½»Ò×½áÊøºó¹Ø±ÕTradeUI;
+            //äº¤æ˜“ç»“æŸåå…³é—­TradeUI;
             CancelTrade();
         }
         private void CancelTrade()
@@ -89,11 +89,11 @@ namespace MFarm.Inventory
             transform.parent.gameObject.SetActive(false);
         }
         /// <summary>
-        /// µã»÷Ôö¼Ó°´Å¥,µ÷ÓÃÔÚIncreaseButton°´Å¥ÉÏ
+        /// ç‚¹å‡»å¢åŠ æŒ‰é’®,è°ƒç”¨åœ¨IncreaseButtonæŒ‰é’®ä¸Š
         /// </summary>
         public void ClickIncreaseButton()
         {
-            //Âô
+            //å–
             if (isSellTrade)
             {
                 if (tradeAmount < maxAmount)
@@ -104,7 +104,7 @@ namespace MFarm.Inventory
                 currentTradeValue = (int)(item.itemPrice * item.sellPercentage * tradeAmount);
                 currentTradeValueText.text = currentTradeValue.ToString();
             }
-            //Âò
+            //ä¹°
             else
             {
                 if (item.itemPrice * (tradeAmount + 1) <= InventoryManager.Instance.playerMoney && tradeAmount < maxAmount)
@@ -117,11 +117,11 @@ namespace MFarm.Inventory
             }
         }
         /// <summary>
-        /// µã»÷¼õÉÙ°´Å¥£¬µ÷ÓÃÔÚDecreaseButton°´Å¥ÉÏ
+        /// ç‚¹å‡»å‡å°‘æŒ‰é’®ï¼Œè°ƒç”¨åœ¨DecreaseButtonæŒ‰é’®ä¸Š
         /// </summary>
         public void ClickDecreaseButton()
         {
-            //Âô
+            //å–
             if (isSellTrade)
             {
                 if (tradeAmount > 1)
@@ -132,7 +132,7 @@ namespace MFarm.Inventory
                 currentTradeValue = (int)(item.itemPrice * item.sellPercentage * tradeAmount);
                 currentTradeValueText.text = currentTradeValue.ToString();
             }
-            //Âò
+            //ä¹°
             else
             {
                 if (tradeAmount > 1)
@@ -145,11 +145,11 @@ namespace MFarm.Inventory
             }
         }
         /// <summary>
-        /// Ë«»÷Ôö¼Ó10¸öÊıÁ¿£¬µ÷ÓÃÔÚµ÷ÓÃÔÚIncreaseButton°´Å¥ÉÏ
+        /// åŒå‡»å¢åŠ 10ä¸ªæ•°é‡ï¼Œè°ƒç”¨åœ¨è°ƒç”¨åœ¨IncreaseButtonæŒ‰é’®ä¸Š
         /// </summary>
         public void DoubleClickInCreaseButton()
         {
-            //Âô
+            //å–
             if (isSellTrade)
             {
                 if (tradeAmount < maxAmount)
@@ -167,7 +167,7 @@ namespace MFarm.Inventory
                 currentTradeValue = (int)(item.itemPrice * item.sellPercentage * tradeAmount);
                 currentTradeValueText.text = currentTradeValue.ToString();
             }
-            //Âò
+            //ä¹°
             else
             {
                 if(tradeAmount < 99)
@@ -205,7 +205,7 @@ namespace MFarm.Inventory
            
         }
         /// <summary>
-        /// Ë«»÷¼õÉÙ10¸öÊıÁ¿£¬µ÷ÓÃÔÚµ÷ÓÃÔÚDecreaseButton°´Å¥ÉÏ
+        /// åŒå‡»å‡å°‘10ä¸ªæ•°é‡ï¼Œè°ƒç”¨åœ¨è°ƒç”¨åœ¨DecreaseButtonæŒ‰é’®ä¸Š
         /// </summary>
         public void DoubleClickDeCreaseButton()
         {
@@ -235,7 +235,7 @@ namespace MFarm.Inventory
 
         }
         /// <summary>
-        /// µã»÷È«²¿½»Ò×°´Å¥
+        /// ç‚¹å‡»å…¨éƒ¨äº¤æ˜“æŒ‰é’®
         /// </summary>
         public void ClickAllIncreaseButton()
         {

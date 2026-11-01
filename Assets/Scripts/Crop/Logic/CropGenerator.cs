@@ -1,15 +1,15 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using MFarm.Map;
 namespace MFarm.CropPlant
 {
-    public class CropGenerator : MonoBehaviour  //µ÷ÓÃÔÚĞèÒªÔ¤Éú³ÉµÄCropÔ¤ÖÆÌåÉÏ
+    public class CropGenerator : MonoBehaviour  //è°ƒç”¨åœ¨éœ€è¦é¢„ç”Ÿæˆçš„Cropé¢„åˆ¶ä½“ä¸Š
     {
         private Grid currentGrid;
 
         public int seedItemID;
-        //Ô¤ÏÈ¼ÓÔØµÄCrop³É³¤µÄÌìÊı
+        //é¢„å…ˆåŠ è½½çš„Cropæˆé•¿çš„å¤©æ•°
         public int growthDays;
 
         private void Awake()
@@ -26,20 +26,20 @@ namespace MFarm.CropPlant
         }
         private void GenerateCrop()
         {
-            //ÍßÆ¬µÄÊÀ½ç×ø±ê×ª»»ÎªÍø¸ñ×ø±ê
+            //ç“¦ç‰‡çš„ä¸–ç•Œåæ ‡è½¬æ¢ä¸ºç½‘æ ¼åæ ‡
             Vector3Int cropGridPos = currentGrid.WorldToCell(transform.position);
 
             if(seedItemID != null)
             {
                 var tile = GridMapManager.Instance.GetTileDetailsOnMousePosition(cropGridPos);
-                //Èç¹û¸ÃÍßÆ¬ÉÏÊ²Ã´¶¼Ã»ÓĞ£¬ÔòÖØĞÂ¸³ÖµĞÂÍßÆ¬ĞÅÏ¢
+                //å¦‚æœè¯¥ç“¦ç‰‡ä¸Šä»€ä¹ˆéƒ½æ²¡æœ‰ï¼Œåˆ™é‡æ–°èµ‹å€¼æ–°ç“¦ç‰‡ä¿¡æ¯
                 if(tile == null)
                 {
                     tile = new TileDetails();
                     tile.gridX = cropGridPos.x;
                     tile.gridY = cropGridPos.y;
                 }
-                //ÖØĞÂ¶ÔĞÂtile¸³Öµ
+                //é‡æ–°å¯¹æ–°tileèµ‹å€¼
                 tile.gridX = cropGridPos.x;
                 tile.gridY = cropGridPos.y;
                 tile.daysSinceWatered = -1;

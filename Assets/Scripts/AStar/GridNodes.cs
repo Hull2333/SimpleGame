@@ -1,28 +1,28 @@
-using MFarm.AStar;
+ï»¿using MFarm.AStar;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 namespace MFarm.AStar
 {
-    public class GridNodes //ÓÃÓÚ»æÖÆËùÓĞÓÎÏ·µØÍ¼µÄNodeÖµ
+    public class GridNodes //ç”¨äºç»˜åˆ¶æ‰€æœ‰æ¸¸æˆåœ°å›¾çš„Nodeå€¼
     {
-        //Õû¸ö³¡¾°µÄ¿í¶ÈºÍ¸ß¶È
+        //æ•´ä¸ªåœºæ™¯çš„å®½åº¦å’Œé«˜åº¦
         private int width;
         private int height;
-        //Ã¿¸öNodeµÄx£¬yÖá£¬ÆğÃû½ĞgridNode
+        //æ¯ä¸ªNodeçš„xï¼Œyè½´ï¼Œèµ·åå«gridNode
         private Node[,] gridNode;
         /// <summary>
-        /// ¹¹ÔìÓÎÏ·ÖĞÃ¿¸ö¸ñ×ÓµÄCostÖµ£¬¹¹Ôìº¯Êı³õÊ¼»¯½Úµã·¶Î§Êı×é
+        /// æ„é€ æ¸¸æˆä¸­æ¯ä¸ªæ ¼å­çš„Costå€¼ï¼Œæ„é€ å‡½æ•°åˆå§‹åŒ–èŠ‚ç‚¹èŒƒå›´æ•°ç»„
         /// </summary>
-        /// <param name="width">µØÍ¼¿í¶È</param>
-        /// <param name="height">µØÍ¼¸ß¶È</param>
+        /// <param name="width">åœ°å›¾å®½åº¦</param>
+        /// <param name="height">åœ°å›¾é«˜åº¦</param>
         public GridNodes(int width, int height)
         {
             this.width = width;
             this.height = height;
 
             gridNode = new Node[width, height];
-            //»ñÈ¡Ã¿¸öÍø¸ñµÄx,y×ø±ê
+            //è·å–æ¯ä¸ªç½‘æ ¼çš„x,yåæ ‡
             for(int x = 0; x < width; x++)
             {
                 for(int y = 0; y < height; y++)
@@ -38,7 +38,7 @@ namespace MFarm.AStar
             {
                 return gridNode[xPos, yPos];
             }
-            Debug.Log("xPos:  " + xPos + "yPos:  " + yPos +  "³¬³öÍø¸ñ·¶Î§: " + width +"  "+ height);
+            Debug.Log("xPos:  " + xPos + "yPos:  " + yPos +  "è¶…å‡ºç½‘æ ¼èŒƒå›´: " + width +"  "+ height);
             return null;
         }
     }

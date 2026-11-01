@@ -1,21 +1,21 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using MFarm.Save;
 using TMPro;
 
-public class SaveSlotUi : MonoBehaviour //µ÷ÓÃÔÚSaveSlot¶ÔÏóÉÏ
+public class SaveSlotUi : MonoBehaviour //è°ƒç”¨åœ¨SaveSlotå¯¹è±¡ä¸Š
 {
     public TextMeshProUGUI dateTime, dateScene;
     private Button currentButton;
     private DataSlot currentData;
-    //»ñÈ¡µ±Ç°µã»÷°´Å¥µÄĞòºÅ£¬¸ù¾İ×ÓÎïÌåÀ´·Ö
+    //è·å–å½“å‰ç‚¹å‡»æŒ‰é’®çš„åºå·ï¼Œæ ¹æ®å­ç‰©ä½“æ¥åˆ†
     private int Index => transform.GetSiblingIndex();
     private void Awake()
     {
         currentButton = GetComponent<Button>();
-        //°´Å¥±»µã»÷ºóÖ´ĞĞLoadGameData·½·¨
+        //æŒ‰é’®è¢«ç‚¹å‡»åæ‰§è¡ŒLoadGameDataæ–¹æ³•
         currentButton.onClick.AddListener(LoadGameData);
     }
     private void OnEnable()
@@ -25,7 +25,7 @@ public class SaveSlotUi : MonoBehaviour //µ÷ÓÃÔÚSaveSlot¶ÔÏóÉÏ
 
 
     /// <summary>
-    /// ÏÔÊ¾´æµµUIµÄÏêÇé
+    /// æ˜¾ç¤ºå­˜æ¡£UIçš„è¯¦æƒ…
     /// </summary>
     private void SetupSlotUI()
     {
@@ -37,16 +37,16 @@ public class SaveSlotUi : MonoBehaviour //µ÷ÓÃÔÚSaveSlot¶ÔÏóÉÏ
         }
         else
         {
-            dateTime.text = "Õâ¸öÊÀ½ç»¹Ã»¿ªÊ¼";
-            dateScene.text = "ÃÎ»¹Ã»¿ªÊ¼";
+            dateTime.text = "è¿™ä¸ªä¸–ç•Œè¿˜æ²¡å¼€å§‹";
+            dateScene.text = "æ¢¦è¿˜æ²¡å¼€å§‹";
         }
     }
     /// <summary>
-    /// µã»÷´æµµ¿ªÊ¼ÓÎÏ·
+    /// ç‚¹å‡»å­˜æ¡£å¼€å§‹æ¸¸æˆ
     /// </summary>
     private void LoadGameData()
     {
-        //²»Îª¿Õ£¬±íÊ¾µ±Ç°ÓĞ½ø¶È
+        //ä¸ä¸ºç©ºï¼Œè¡¨ç¤ºå½“å‰æœ‰è¿›åº¦
         if (currentData != null)
         {
             SaveLoadManager.Instance.Load(Index);

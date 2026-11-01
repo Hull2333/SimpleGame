@@ -1,29 +1,29 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 namespace MFarm.AStar
 {
     /// <summary>
-    /// Ã¿¸öµØÍ¼¸ñ×ÓµÄCostÖµ
+    /// æ¯ä¸ªåœ°å›¾æ ¼å­çš„Costå€¼
     /// </summary>
-    //IComparable ±È½ÏNodeÖµ
+    //IComparable æ¯”è¾ƒNodeå€¼
     public class Node : IComparable<Node>
     {
-        //Íø¸ñ×ø±ê
+        //ç½‘æ ¼åæ ‡
         public Vector2Int gridPosition;
-        //¾àÀëStart¸ñ×ÓµÄ¾àÀë
+        //è·ç¦»Startæ ¼å­çš„è·ç¦»
         public int gCost;
-        //¾àÀëtarget¸ñ×ÓµÄ¾àÀë
+        //è·ç¦»targetæ ¼å­çš„è·ç¦»
         public int hCost;
-        //µ±Ç°¸ñ×ÓµÄÖµ
+        //å½“å‰æ ¼å­çš„å€¼
         public int FCost => gCost + hCost;
-        //µ±Ç°¸ñ×ÓÊÇ·ñÊÇÕÏ°­
+        //å½“å‰æ ¼å­æ˜¯å¦æ˜¯éšœç¢
         public bool isObstacle = false;
-        //¸¸½Úµã
+        //çˆ¶èŠ‚ç‚¹
         public Node parentNode;
         /// <summary>
-        /// ³õÊ¼»¯Íø¸ñ
+        /// åˆå§‹åŒ–ç½‘æ ¼
         /// </summary>
         /// <param name="pos"></param>
         public Node(Vector2Int pos)
@@ -32,14 +32,14 @@ namespace MFarm.AStar
             parentNode = null;
         }
         /// <summary>
-        /// ±È½Ïµ±Ç°¸ñ×ÓºÍotherµÄFCost´óĞ¡£¬´óÓÚ·µ»Ø1£¬µÈÓÚ·µ»Ø0£¬Ğ¡ÓÚ·µ»Ø-1
+        /// æ¯”è¾ƒå½“å‰æ ¼å­å’Œotherçš„FCostå¤§å°ï¼Œå¤§äºè¿”å›1ï¼Œç­‰äºè¿”å›0ï¼Œå°äºè¿”å›-1
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
         public int CompareTo(Node other)
         {
             int result = FCost.CompareTo(other.FCost);
-            //µ±FCostÏàµÈÊ±£¬ÔÚ±È½ÏhCostµÄ´óĞ¡
+            //å½“FCostç›¸ç­‰æ—¶ï¼Œåœ¨æ¯”è¾ƒhCostçš„å¤§å°
             if (result == 0)
             {
                 result = hCost.CompareTo(other.hCost);

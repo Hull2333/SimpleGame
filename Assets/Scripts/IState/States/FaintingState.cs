@@ -1,4 +1,4 @@
-
+ï»¿
 
 using UnityEngine;
 
@@ -6,7 +6,7 @@ public class FaintingState : IState
 {
     private FSM manager;
     private Parameter parameter;
-    //»ñÈ¡ÕýÔÚ²¥·ÅµÄ¶¯»­
+    //èŽ·å–æ­£åœ¨æ’­æ”¾çš„åŠ¨ç”»
     private AnimatorStateInfo info;
 
     public FaintingState(FSM manager)
@@ -31,7 +31,7 @@ public class FaintingState : IState
         {
             manager.TransitionState(EnemyStateType.Hurted);
         }
-        //Ñ£ÔÎ½áÊøºó½øÈë×·»÷×´Ì¬
+        //çœ©æ™•ç»“æŸåŽè¿›å…¥è¿½å‡»çŠ¶æ€
         if (info.normalizedTime >= 0.98f)
         {
             manager.TransitionState(EnemyStateType.Chase);

@@ -1,8 +1,8 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AnimationEvent : MonoBehaviour //µ÷ÓÃÔÚLeg¶ÔÏóÉÏ
+public class AnimationEvent : MonoBehaviour //è°ƒç”¨åœ¨Legå¯¹è±¡ä¸Š
 {
 
     public void FootstepSound()

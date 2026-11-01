@@ -1,8 +1,8 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyChaseArea : MonoBehaviour //µ÷ÓÃÔÚEnemy×ÓÎïÌåÉÏµÄChaseArea¶ÔÏóÉÏ
+public class EnemyChaseArea : MonoBehaviour //è°ƒç”¨åœ¨Enemyå­ç‰©ä½“ä¸Šçš„ChaseAreaå¯¹è±¡ä¸Š
 {
     private FSM manager;
     private void Start()

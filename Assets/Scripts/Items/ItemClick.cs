@@ -1,17 +1,17 @@
-using MFarm.Inventory;
+ï»¿using MFarm.Inventory;
 using MFarm.Map;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class ItemClick : MonoBehaviour //µ÷ÓÃÔÚItemClickÔ¤ÖÆÌåÉÏ
+public class ItemClick : MonoBehaviour //è°ƒç”¨åœ¨ItemClické¢„åˆ¶ä½“ä¸Š
 {
     public int itemID;
     public ItemDetails itemDetails;
     private SpriteRenderer sprite => transform.GetChild(0).GetComponent<SpriteRenderer>();
     /// <summary>
-    /// ÉèÖÃÎïÆ·µÄÍ¼Æ¬
+    /// è®¾ç½®ç‰©å“çš„å›¾ç‰‡
     /// </summary>
     public void SetItemSprite()
     {
@@ -19,7 +19,7 @@ public class ItemClick : MonoBehaviour //µ÷ÓÃÔÚItemClickÔ¤ÖÆÌåÉÏ
         sprite.sprite = itemDetails.itemOnWorldSprites[0];
     }
     /// <summary>
-    /// Ìí¼Óµ½Íæ¼Ò±³°üÖĞ
+    /// æ·»åŠ åˆ°ç©å®¶èƒŒåŒ…ä¸­
     /// </summary>
     public void AddItemToBag()
     {

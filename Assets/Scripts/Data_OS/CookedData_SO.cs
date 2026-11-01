@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 [CreateAssetMenu(fileName = "CookedDataList_SO", menuName = "Inventory/CookedDataList_SO")]
@@ -6,7 +6,7 @@ public class CookedData_SO : ScriptableObject
 {
     public List<CookedDetails> cookedDataList;
     /// <summary>
-    /// ¸ù¾İID²éÕÒ¶ÔÓ¦µÄ²ËëÈĞÅÏ¢
+    /// æ ¹æ®IDæŸ¥æ‰¾å¯¹åº”çš„èœè‚´ä¿¡æ¯
     /// </summary>
     /// <param name="itemID"></param>
     /// <returns></returns>
@@ -20,7 +20,7 @@ public class CookedData_SO : ScriptableObject
 public class CookedDetails
 {
     public int ID;
-    //ĞèÒªÊ³²Ä
+    //éœ€è¦é£Ÿæ
     public InventoryItem[] cookResource = new InventoryItem[3];
     public Sprite graySprite;
 }

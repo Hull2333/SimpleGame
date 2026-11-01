@@ -1,10 +1,10 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using UnityEngine.UIElements;
 
-public class QuestManager : Singleton<QuestManager> //µ÷ÓÃÔÚQuestManager¶ÔÏóÉÏ
+public class QuestManager : Singleton<QuestManager> //è°ƒç”¨åœ¨QuestManagerå¯¹è±¡ä¸Š
 {
     [System.Serializable]
     public class QuestTask
@@ -14,17 +14,17 @@ public class QuestManager : Singleton<QuestManager> //µ÷ÓÃÔÚQuestManager¶ÔÏóÉÏ
         public bool IsComplete { get { return questData.isComplete; } set { questData.isComplete = value; } }
         public bool IsFinshed { get { return questData.isFinshed; } set { questData.isFinshed = value; } }
     }
-    //Íæ¼Ò½ÓÊÜÈÎÎñÁĞ±í
+    //ç©å®¶æ¥å—ä»»åŠ¡åˆ—è¡¨
     public List<QuestTask> tasks = new List<QuestTask>();
-    [Header("¹«¸æÀ¸ÈÎÎñÁĞ±í")]
-    //¹«¸æÀ¸·¢²¼ÈÎÎñÁĞ±í
+    [Header("å…¬å‘Šæ ä»»åŠ¡åˆ—è¡¨")]
+    //å…¬å‘Šæ å‘å¸ƒä»»åŠ¡åˆ—è¡¨
     public List<QuestTask> bulletinBoardTaskList;
     [HideInInspector] public QuestTask bulletinBoardTask;
-    //ÁÙÊ±´æ´¢¹«¸æÀ¸ÈÎÎñĞÅÏ¢
+    //ä¸´æ—¶å­˜å‚¨å…¬å‘Šæ ä»»åŠ¡ä¿¡æ¯
     private QuestTask lastbulletinBoardTask;
-    //ÉÏÒ»¸ö¹«¸æÀ¸ÈÎÎñµÄĞòÁĞºÅ
+    //ä¸Šä¸€ä¸ªå…¬å‘Šæ ä»»åŠ¡çš„åºåˆ—å·
     private int lastRandomNum;
-    //Ë¢ĞÂ¹«¸æÀ¸ÈÎÎñÌìÊı
+    //åˆ·æ–°å…¬å‘Šæ ä»»åŠ¡å¤©æ•°
     private int waitQuestDay;
     public void OnEnable()
     {
@@ -56,7 +56,7 @@ public class QuestManager : Singleton<QuestManager> //µ÷ÓÃÔÚQuestManager¶ÔÏóÉÏ
         UpdateQuestDay();
     }
     /// <summary>
-    /// ²éÕÒÊÇ·ñÖØ¸´½ÓÊÜÈÎÎñ
+    /// æŸ¥æ‰¾æ˜¯å¦é‡å¤æ¥å—ä»»åŠ¡
     /// </summary>
     /// <param name="data"></param>
     /// <returns></returns>
@@ -64,7 +64,7 @@ public class QuestManager : Singleton<QuestManager> //µ÷ÓÃÔÚQuestManager¶ÔÏóÉÏ
     {
         if (data != null)
         {
-            //Linq£¬ÔÚtasksÁĞ±íÖĞ²éÕÒÓëµ±Ç°dataÏàÍ¬µÄquestName£¬ÓĞÏàÍ¬·µ»Øtrue
+            //Linqï¼Œåœ¨tasksåˆ—è¡¨ä¸­æŸ¥æ‰¾ä¸å½“å‰dataç›¸åŒçš„questNameï¼Œæœ‰ç›¸åŒè¿”å›true
             return tasks.Any(q => q.questData.questName == data.questName);
         }
         else
@@ -73,7 +73,7 @@ public class QuestManager : Singleton<QuestManager> //µ÷ÓÃÔÚQuestManager¶ÔÏóÉÏ
         }
     }
     /// <summary>
-    /// ²éÕÒ½ÓÊÜÈÎÎñÁĞ±íÖĞµÄÈÎÎñ
+    /// æŸ¥æ‰¾æ¥å—ä»»åŠ¡åˆ—è¡¨ä¸­çš„ä»»åŠ¡
     /// </summary>
     /// <param name="data"></param>
     /// <returns></returns>
@@ -83,20 +83,20 @@ public class QuestManager : Singleton<QuestManager> //µ÷ÓÃÔÚQuestManager¶ÔÏóÉÏ
         
     }
     /// <summary>
-    /// Ëæ»úÉú³É¹«¸æÀ¸ÈÎÎñ
+    /// éšæœºç”Ÿæˆå…¬å‘Šæ ä»»åŠ¡
     /// </summary>
     /// <returns></returns>
     public void InstantiateBulletinBoardQuest()
     {
-        //Ã¿Ìì¼õÉÙÈÎÎñË¢ĞÂÊ±¼ä
+        //æ¯å¤©å‡å°‘ä»»åŠ¡åˆ·æ–°æ—¶é—´
         waitQuestDay --;
         if(waitQuestDay <= 0)
         {
-            //Ëæ»úÉú³ÉĞÂÈÎÎñµÄÌìÊıÎª4~5Ìì
+            //éšæœºç”Ÿæˆæ–°ä»»åŠ¡çš„å¤©æ•°ä¸º4~5å¤©
             waitQuestDay = Random.Range(4, 6);
             //BulletinBoardUI.Instance.isAccepted = false;
             int randomNum = Random.Range(0, bulletinBoardTaskList.Count);
-            //²»ÈÃÕâ´Î·¢³öµÄÈÎÎñºÍÉÏÒ»´ÎÈÎÎñÏàÍ¬
+            //ä¸è®©è¿™æ¬¡å‘å‡ºçš„ä»»åŠ¡å’Œä¸Šä¸€æ¬¡ä»»åŠ¡ç›¸åŒ
             do
             {
                 randomNum = Random.Range(0, bulletinBoardTaskList.Count);
@@ -116,7 +116,7 @@ public class QuestManager : Singleton<QuestManager> //µ÷ÓÃÔÚQuestManager¶ÔÏóÉÏ
        
     }
     /// <summary>
-    /// ¸üĞÂ´Ó¹«¸æÀ¸½ÓÊÜÈÎÎñÖĞÌìÊı
+    /// æ›´æ–°ä»å…¬å‘Šæ æ¥å—ä»»åŠ¡ä¸­å¤©æ•°
     /// </summary>
     public void UpdateQuestDay()
     {

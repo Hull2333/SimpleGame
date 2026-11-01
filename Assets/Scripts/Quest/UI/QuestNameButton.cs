@@ -1,9 +1,9 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class QuestNameButton : MonoBehaviour // µ÷ÓÃÔÚQuestNameButtonÔ¤ÖÆÌåÉÏ
+public class QuestNameButton : MonoBehaviour // è°ƒç”¨åœ¨QuestNameButtoné¢„åˆ¶ä½“ä¸Š
 {
     public Text questNameText;
     public QuestData_OS currentData;
@@ -15,7 +15,7 @@ public class QuestNameButton : MonoBehaviour // µ÷ÓÃÔÚQuestNameButtonÔ¤ÖÆÌåÉÏ
         originColor = questNameText.color;
     }
     /// <summary>
-    /// ÈÎÎñ°´Å¥µã»÷Ö®ºóÏÔÊ¾ÈÎÎñĞÅÏ¢
+    /// ä»»åŠ¡æŒ‰é’®ç‚¹å‡»ä¹‹åæ˜¾ç¤ºä»»åŠ¡ä¿¡æ¯
     /// </summary>
     private void UpdateQuestContent()
     {
@@ -23,7 +23,7 @@ public class QuestNameButton : MonoBehaviour // µ÷ÓÃÔÚQuestNameButtonÔ¤ÖÆÌåÉÏ
         QuestUI.Instance.questRightPanel.SetActive(true);
         QuestUI.Instance.SetUpRequireList(currentData);
         QuestUI.Instance.SetUpQuestDay(currentData);
-        //¿ªÆô¸ßÁÁ
+        //å¼€å¯é«˜äº®
         foreach (Transform questListTransform in QuestUI.Instance.questListTransforms)
         {
             foreach (Transform item in questListTransform)
@@ -32,7 +32,7 @@ public class QuestNameButton : MonoBehaviour // µ÷ÓÃÔÚQuestNameButtonÔ¤ÖÆÌåÉÏ
             }
         }
         transform.GetChild(0).gameObject.SetActive(true);
-        //ÏÈÉ¾³ıËùÓĞ½±ÀøÄÚÈİÔÙÏÔÊ¾ÈÎÎñ½±Àø
+        //å…ˆåˆ é™¤æ‰€æœ‰å¥–åŠ±å†…å®¹å†æ˜¾ç¤ºä»»åŠ¡å¥–åŠ±
         foreach (Transform item in QuestUI.Instance.rewardTransform)
         {
             Destroy(item.gameObject);
@@ -44,7 +44,7 @@ public class QuestNameButton : MonoBehaviour // µ÷ÓÃÔÚQuestNameButtonÔ¤ÖÆÌåÉÏ
         }
     }
     /// <summary>
-    /// ÉèÖÃÈÎÎñ°´Å¥ÄÚÈİ
+    /// è®¾ç½®ä»»åŠ¡æŒ‰é’®å†…å®¹
     /// </summary>
     /// <param name="questData"></param>
     public void SetUpNameButton(QuestData_OS questData)
@@ -52,13 +52,13 @@ public class QuestNameButton : MonoBehaviour // µ÷ÓÃÔÚQuestNameButtonÔ¤ÖÆÌåÉÏ
         currentData = questData;
         if (questData.isComplete)
         {
-            //×ÖÌå±äÎªÂÌÉ«
-            questNameText.text = questData.questName + "(Íê³É)";
+            //å­—ä½“å˜ä¸ºç»¿è‰²
+            questNameText.text = questData.questName + "(å®Œæˆ)";
             questNameText.color = new Color(0.645f, 0.914f, 0.263f, 1f);
         }
         else
         {
-            //»Øµ½³õÊ¼ÑÕÉ«
+            //å›åˆ°åˆå§‹é¢œè‰²
             questNameText.text = questData.questName;
             questNameText.color = originColor;
         }

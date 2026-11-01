@@ -1,15 +1,15 @@
-using System.Collections;
+锘縰sing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 namespace MFarm.Save
 {
     /// <summary>
-    /// interface接口
+    /// interface鎺ュ彛
     /// </summary>
     public interface ISaveable
     {
         /// <summary>
-        /// 让每个存档拿到自己的GUID
+        /// 璁╂瘡涓瓨妗ｆ嬁鍒拌嚜宸辩殑GUID
         /// </summary>
         string GUID {  get; }
         void RegisterSaveable()
@@ -17,7 +17,7 @@ namespace MFarm.Save
             SaveLoadManager.Instance.RegisterSaveable(this);
         }
         /// <summary>
-        /// 通过GenerateSaveData()方法返回GameSaveData
+        /// 閫氳繃GenerateSaveData()鏂规硶杩斿洖GameSaveData
         /// </summary>
         /// <returns></returns>
         GameSaveData GenerateSaveData();

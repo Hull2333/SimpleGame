@@ -1,58 +1,58 @@
-using MFarm.Map;
+ï»¿using MFarm.Map;
 using System.Collections;
 using System.Collections.Generic;
 using TreeEditor;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class KnockableItem : MonoBehaviour //µ÷ÓÃÔÚ¿ÉÊÕ¸îÎïÌåÔ¤ÖÆÌåÉÏ
+public class KnockableItem : MonoBehaviour //è°ƒç”¨åœ¨å¯æ”¶å‰²ç‰©ä½“é¢„åˆ¶ä½“ä¸Š
 {
-    //¿óÊ¯±àºÅ,ÓÃÓÚ±£´æµ±Ç°³¡¾°µÄ¿óÊ¯
+    //çŸ¿çŸ³ç¼–å·,ç”¨äºä¿å­˜å½“å‰åœºæ™¯çš„çŸ¿çŸ³
     public int rockIndex;
     public Animator anim;
-    //ÊÕ¸îºó²úÉúµÄitem
+    //æ”¶å‰²åäº§ç”Ÿçš„item
     public int[] produceItemID;
-    //Éú³ÉµÄ×î´ó×îĞ¡ÊıÁ¿ºÍÈ·¶¨Éú³ÉÊıÁ¿
+    //ç”Ÿæˆçš„æœ€å¤§æœ€å°æ•°é‡å’Œç¡®å®šç”Ÿæˆæ•°é‡
     public int[] minProduceNum;
     public int[] maxPriduceNum;
     private int randomPriduceNum;
-    //Á£×ÓÌØĞ§
+    //ç²’å­ç‰¹æ•ˆ
     public ParticalEffectType rockEffectType;
     public ParticalEffectType treeEffectType;
     public ParticalEffectType trunkEffectType;
     private Grid KnockableGrid;
-    //µ±Ç°Éú³ÉµØÍ¼ÔÓ²İµÄµØÍ¼×ø±ê
+    //å½“å‰ç”Ÿæˆåœ°å›¾æ‚è‰çš„åœ°å›¾åæ ‡
     private Vector3Int KnockableGridPos;
-    //»¥¶¯´ÎÊı
+    //äº’åŠ¨æ¬¡æ•°
     public int interactionCount;
     private Transform playerPosition => FindObjectOfType<PlayerController>().transform;
-    [Header("Ê÷ºÍÅü¿³ÎïÆ·´İ»Ùºó×ª»»µÄÔ¤ÖÆÌå£¬Åü¿³ÎïÆ·ĞèÒª·ÅÍ¼Æ¬")]
-    //×ª»»ºóµÄÔ¤ÖÆÌå
+    [Header("æ ‘å’ŒåŠˆç ç‰©å“æ‘§æ¯åè½¬æ¢çš„é¢„åˆ¶ä½“ï¼ŒåŠˆç ç‰©å“éœ€è¦æ”¾å›¾ç‰‡")]
+    //è½¬æ¢åçš„é¢„åˆ¶ä½“
     public GameObject convertGameObject;
-    //×ª»»ºóµÄÍ¼Æ¬
+    //è½¬æ¢åçš„å›¾ç‰‡
     public Sprite convertSprite;
-    //Ã»ÓĞ¶¯»­ÎïÌåµÄ¿ÉÏú»ÙÑ¡Ïî
+    //æ²¡æœ‰åŠ¨ç”»ç‰©ä½“çš„å¯é”€æ¯é€‰é¡¹
     public bool canDestroy;
     public TreeGrowing treeGrowing;
     private void Start()
     {
-        //»ñÈ¡Óëµ±Ç°Éú³ÉµØÍ¼ÔÓ²İµÄµØÍ¼×ø±ê
+        //è·å–ä¸å½“å‰ç”Ÿæˆåœ°å›¾æ‚è‰çš„åœ°å›¾åæ ‡
         KnockableGrid = FindObjectOfType<Grid>();
         KnockableGridPos = KnockableGrid.WorldToCell(transform.position);
     }
     /// <summary>
-    /// ÇÃ»÷ÎïÌå
+    /// æ•²å‡»ç‰©ä½“
     /// </summary>
     public void KnockItems(TileDetails rockTile)
     {
         interactionCount --;
         SwitchRockShake();
-        //Ê¯×ÓÁ£×ÓÌØĞ§
+        //çŸ³å­ç²’å­ç‰¹æ•ˆ
         EventHandler.CallParticleEffectEvent(rockEffectType, transform.position + Vector3.up * 0.25f, Vector2.zero);
-        //ÎïÌåÒÑ±»ÇÃËé
+        //ç‰©ä½“å·²è¢«æ•²ç¢
         if (interactionCount <= 0)
         {
-            //Éú³É¶ÔÓ¦µÄ³É¹ûºÍÊıÁ¿
+            //ç”Ÿæˆå¯¹åº”çš„æˆæœå’Œæ•°é‡
             for (int i = 0; i < produceItemID.Length; i++)
             {
                 if(minProduceNum[i] < maxPriduceNum[i])
@@ -73,7 +73,7 @@ public class KnockableItem : MonoBehaviour //µ÷ÓÃÔÚ¿ÉÊÕ¸îÎïÌåÔ¤ÖÆÌåÉÏ
                 }
             }
            
-            //»ñÈ¡µ±Ç°Éú³ÉµØÍ¼Ê¯¿éµØ¿éµÄTileDetail
+            //è·å–å½“å‰ç”Ÿæˆåœ°å›¾çŸ³å—åœ°å—çš„TileDetail
             var rockTileDetails = GridMapManager.Instance.GetTileDetailsOnMousePosition(KnockableGridPos);
             rockTileDetails.haveRock = -1;
             EventHandler.CallInCreaseExploreSkillEvent(5);
@@ -82,12 +82,12 @@ public class KnockableItem : MonoBehaviour //µ÷ÓÃÔÚ¿ÉÊÕ¸îÎïÌåÔ¤ÖÆÌåÉÏ
        
     }
     /// <summary>
-    /// ¿³·¥Ê÷Ä¾
+    /// ç ä¼æ ‘æœ¨
     /// </summary>
     public void AxeItems(TileDetails treeTile)
     {
         interactionCount--;
-        //²¥·Å¿³Ê÷ºÍ¿³Ê÷×®µÄÁ£×ÓÌØĞ§
+        //æ’­æ”¾ç æ ‘å’Œç æ ‘æ¡©çš„ç²’å­ç‰¹æ•ˆ
         if(trunkEffectType == ParticalEffectType.None)
         {
             EventHandler.CallParticleEffectEvent(treeEffectType, transform.position + Vector3.up * 2.5f, Vector2.zero);
@@ -96,16 +96,16 @@ public class KnockableItem : MonoBehaviour //µ÷ÓÃÔÚ¿ÉÊÕ¸îÎïÌåÔ¤ÖÆÌåÉÏ
         {
             EventHandler.CallParticleEffectEvent(trunkEffectType, transform.position + Vector3.up * 0.25f, Vector2.zero);
         }
-        //Ê÷±»¿³µ¹
+        //æ ‘è¢«ç å€’
         if (interactionCount <= 0)
         {
-            //Èç¹û×ª»»Ô¤ÖÆÌå²»Îª¿Õ£¬ÄÇ¾ÍÔÚÔ­ÎïÌåÏú»ÙÇ°ÔÚÔ­Î»ÖÃÉú³É×ª»»Ô¤ÖÆÌå
+            //å¦‚æœè½¬æ¢é¢„åˆ¶ä½“ä¸ä¸ºç©ºï¼Œé‚£å°±åœ¨åŸç‰©ä½“é”€æ¯å‰åœ¨åŸä½ç½®ç”Ÿæˆè½¬æ¢é¢„åˆ¶ä½“
             if (convertGameObject != null)
             {
                 Instantiate(convertGameObject, transform.position, Quaternion.identity, transform.parent);
                 treeGrowing.isTreeGrow = false;
             }
-            //µ±¿ÉÒÔË¢ĞÂÖÜÎ§µÄTile
+            //å½“å¯ä»¥åˆ·æ–°å‘¨å›´çš„Tile
             if (canDestroy)
             {
                 for (int x = treeTile.gridX - 2; x <= treeTile.gridX + 2; x++)
@@ -122,7 +122,7 @@ public class KnockableItem : MonoBehaviour //µ÷ÓÃÔÚ¿ÉÊÕ¸îÎïÌåÔ¤ÖÆÌåÉÏ
                 }
             }
             SwitchTreeFall();
-            //Éú³É¶ÔÓ¦µÄ³É¹ûºÍÊıÁ¿
+            //ç”Ÿæˆå¯¹åº”çš„æˆæœå’Œæ•°é‡
             for (int i = 0; i < produceItemID.Length; i++)
             {
                 int amountToProduce = Random.Range(minProduceNum[i], maxPriduceNum[i]);
@@ -135,25 +135,25 @@ public class KnockableItem : MonoBehaviour //µ÷ÓÃÔÚ¿ÉÊÕ¸îÎïÌåÔ¤ÖÆÌåÉÏ
             {
                 DestroyGameObject();
             }
-            //ÍË³ö¸Ã·½·¨£¬ºóĞø½Å±¾²»Ö´ĞĞ
+            //é€€å‡ºè¯¥æ–¹æ³•ï¼Œåç»­è„šæœ¬ä¸æ‰§è¡Œ
             return;
         }
         SwitchTreeRotate();
        
     }
     /// <summary>
-    /// Åü¿³ÎïÆ·
+    /// åŠˆç ç‰©å“
     /// </summary>
     public void ChopItems()
     {
         interactionCount--;
         SwitchChopItemShake();
-        //Á£×ÓÌØĞ§
+        //ç²’å­ç‰¹æ•ˆ
         EventHandler.CallParticleEffectEvent(ParticalEffectType.WoodEffect01, transform.position + Vector3.up * 0.25f, Vector2.zero);
-        //ÎïÌåÒÑ±»ÇÃËé
+        //ç‰©ä½“å·²è¢«æ•²ç¢
         if (interactionCount <= 0)
         {
-            //Éú³É¶ÔÓ¦µÄ³É¹ûºÍÊıÁ¿
+            //ç”Ÿæˆå¯¹åº”çš„æˆæœå’Œæ•°é‡
             for (int i = 0; i < produceItemID.Length; i++)
             {
                 if (minProduceNum[i] < maxPriduceNum[i])
@@ -174,7 +174,7 @@ public class KnockableItem : MonoBehaviour //µ÷ÓÃÔÚ¿ÉÊÕ¸îÎïÌåÔ¤ÖÆÌåÉÏ
                 }
             }
 
-            //»ñÈ¡µ±Ç°Éú³ÉµØÍ¼Ê¯¿éµØ¿éµÄTileDetail
+            //è·å–å½“å‰ç”Ÿæˆåœ°å›¾çŸ³å—åœ°å—çš„TileDetail
             var chopTileDetails = GridMapManager.Instance.GetTileDetailsOnMousePosition(KnockableGridPos);
             chopTileDetails.haveChop = -1;
             EventHandler.CallInCreaseExploreSkillEvent(5);
@@ -184,7 +184,7 @@ public class KnockableItem : MonoBehaviour //µ÷ÓÃÔÚ¿ÉÊÕ¸îÎïÌåÔ¤ÖÆÌåÉÏ
         }
     }
     /// <summary>
-    /// ¿ØÖÆÊ¯¿ó¶¶¶¯
+    /// æ§åˆ¶çŸ³çŸ¿æŠ–åŠ¨
     /// </summary>
     public void SwitchRockShake()
     {
@@ -217,21 +217,21 @@ public class KnockableItem : MonoBehaviour //µ÷ÓÃÔÚ¿ÉÊÕ¸îÎïÌåÔ¤ÖÆÌåÉÏ
         }
     }
     /// <summary>
-    /// µ÷ÓÃÔÚÊ¯Í·´İ»Ù¶¯»­Ö¡ÖĞ
+    /// è°ƒç”¨åœ¨çŸ³å¤´æ‘§æ¯åŠ¨ç”»å¸§ä¸­
     /// </summary>
     public void DestroySelfGameObject()
     {
         Destroy(gameObject);
     }
     /// <summary>
-    /// ´İ»Ù¸¸ÎïÌå
+    /// æ‘§æ¯çˆ¶ç‰©ä½“
     /// </summary>
     public void DestroyGameObject()
     {
         Destroy(transform.parent.gameObject);
     }
     /// <summary>
-    /// ¹Ø±Õ×Ô¼º£¬ÔÚÊ÷µ¹ÏÂ¶¯»­Ö¡ÖĞÔËĞĞ
+    /// å…³é—­è‡ªå·±ï¼Œåœ¨æ ‘å€’ä¸‹åŠ¨ç”»å¸§ä¸­è¿è¡Œ
     /// </summary>
     public void SetDownGameObject()
     {

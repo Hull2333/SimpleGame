@@ -1,39 +1,39 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
 using MFarm.Save;
 using Unity.VisualScripting;
 
-public class TimeManager : Singleton<TimeManager>,ISaveable    //µ÷ÓÃÔÚTimeManager¶ÔÏóÉÏ
+public class TimeManager : Singleton<TimeManager>,ISaveable    //è°ƒç”¨åœ¨TimeManagerå¯¹è±¡ä¸Š
 {
     [HideInInspector] public int gameSecond, gameMinute,gameHour,gameDay,gameMonth,gameYear;
-    [HideInInspector] public Weekday gameWeekday = Weekday.ÖÜËÄ;
-    public Season gameSeason=Season.´ºÌì;
-    //Ò»¼¾ÓĞ¶àÉÙÔÂ
+    [HideInInspector] public Weekday gameWeekday = Weekday.å‘¨å››;
+    public Season gameSeason=Season.æ˜¥å¤©;
+    //ä¸€å­£æœ‰å¤šå°‘æœˆ
     private int monthInSeason = 1;
-    //ÌìÆøÔ¤±¨£¬0Îª½ñÌì£¬1~3ÎªÎ´À´ÈıÌì
+    //å¤©æ°”é¢„æŠ¥ï¼Œ0ä¸ºä»Šå¤©ï¼Œ1~3ä¸ºæœªæ¥ä¸‰å¤©
     private Weather[] weatherForecast = new Weather[4];
-    //½ñÌìµÄÌìÆø
+    //ä»Šå¤©çš„å¤©æ°”
     public Weather currentWeather => weatherForecast[0];
-    //¸÷¼¾½ÚËæ»ú¸÷ÌìÆøµÄÈ¨ÖØ£¬ĞĞË³ĞòÓëSeasonÃ¶¾ÙÒ»ÖÂ£¬ÁĞË³ĞòÓëWeatherÃ¶¾ÙÒ»ÖÂ
+    //å„å­£èŠ‚éšæœºå„å¤©æ°”çš„æƒé‡ï¼Œè¡Œé¡ºåºä¸Seasonæšä¸¾ä¸€è‡´ï¼Œåˆ—é¡ºåºä¸Weatheræšä¸¾ä¸€è‡´
     private readonly int[,] weatherWeight = new int[,]
     {
-        { 50, 40, 10 },   //´ºÌì£ºÇçÌì50%¡¢ÓêÌì40%¡¢´òÀ×10%
-        { 60, 20, 20 },   //ÏÄÌì£ºÇçÌì60%¡¢ÓêÌì20%¡¢´òÀ×20%
-        { 80, 20, 0 },    //ÇïÌì£ºÇçÌì80%¡¢ÓêÌì20%¡¢´òÀ×0%
-        { 60, 40, 0 },    //¶¬Ìì£ºÇçÌì60%¡¢ÓêÌì40%¡¢´òÀ×0%
+        { 50, 40, 10 },   //æ˜¥å¤©ï¼šæ™´å¤©50%ã€é›¨å¤©40%ã€æ‰“é›·10%
+        { 60, 20, 20 },   //å¤å¤©ï¼šæ™´å¤©60%ã€é›¨å¤©20%ã€æ‰“é›·20%
+        { 80, 20, 0 },    //ç§‹å¤©ï¼šæ™´å¤©80%ã€é›¨å¤©20%ã€æ‰“é›·0%
+        { 60, 40, 0 },    //å†¬å¤©ï¼šæ™´å¤©60%ã€é›¨å¤©40%ã€æ‰“é›·0%
     };
-    //¼ÆÊ±Æ÷
+    //è®¡æ—¶å™¨
     private float tikTime;
-    //Ê±¼äÔİÍ£
+    //æ—¶é—´æš‚åœ
     public bool gameClockPause;
-    //ÓÎÏ·µ±Ç°Ê±¼ä´Á
+    //æ¸¸æˆå½“å‰æ—¶é—´æˆ³
     public TimeSpan gameTime => new TimeSpan(gameHour,gameMinute,gameSecond);
 
     public string GUID => GetComponent<DataGUID>().guid;
 
-    //µÆ¹âÊ±¼ä²î
+    //ç¯å…‰æ—¶é—´å·®
     private float timeDifference;
     public PlayerController playerController;
     private void OnEnable()
@@ -41,9 +41,9 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //µ÷ÓÃÔÚTimeManag
         EventHandler.BeforeSceneUnloadEvent += OnBeforeSceneUnloadEvent;
         EventHandler.AfterSceneLoadedEvent += OnAfterSceneLoadedEvent;
         EventHandler.UpdateGameStateEvent += OnUpdateGameStateEvent;
-        //ĞÂÓÎÏ·¿ªÊ¼Ê±ĞèÒªÖØÖÃµÄÊı¾İ
+        //æ–°æ¸¸æˆå¼€å§‹æ—¶éœ€è¦é‡ç½®çš„æ•°æ®
         EventHandler.StartNewGameEvent += OnStartNewGameEvent;
-        //ÓÎÏ·½áÊøµÄÊÂ¼ş
+        //æ¸¸æˆç»“æŸçš„äº‹ä»¶
         EventHandler.EndGameEvent += OnEndGameEvent;
     }
     private void OnDisable()
@@ -55,25 +55,25 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //µ÷ÓÃÔÚTimeManag
         EventHandler.EndGameEvent -= OnEndGameEvent;
     }
     /// <summary>
-    /// ÓÎÏ·Ò»¿ªÊ¼¾ÍÖ´ĞĞÓÎÏ·Ê±¼äÊÂ¼ş
+    /// æ¸¸æˆä¸€å¼€å§‹å°±æ‰§è¡Œæ¸¸æˆæ—¶é—´äº‹ä»¶
     /// </summary>
     private void Start()
     {
         ISaveable saveable = this;
         saveable.RegisterSaveable();
         gameClockPause = true;
-        //ÏÈËæ»úÒ»Ì×ÌìÆøÔ¤±¨£¬¶ÁµµÊ±»á±»´æµµÊı¾İ¸²¸Ç
+        //å…ˆéšæœºä¸€å¥—å¤©æ°”é¢„æŠ¥ï¼Œè¯»æ¡£æ—¶ä¼šè¢«å­˜æ¡£æ•°æ®è¦†ç›–
         RandomWeatherForecast();
         //EventHandler.CallGameMinuteEvent(gameMinute, gameHour,gameDay,gameSeason);
         //EventHandler.CallGameDateEvemnt(gameHour, gameDay, gameMonth, gameYear, gameSeason);
-        ////ÇĞ»»µÆ¹â
+        ////åˆ‡æ¢ç¯å…‰
         //EventHandler.CallLightShiftChangeEvent(gameSeason, GetCurrentLightShift(), timeDifference);
     }
     private void Update()
     {
         if (!gameClockPause)
         {
-            //´´½¨ÃëÖÓ¼ÆÊ±Æ÷,µ±tikTime´ïµ½SettingÉèÖÃµÄÃëÖÓ¼ÆÊ±£¬Ö±½ÓÌøÔ¾µ½ÏÂÒ»Ãë
+            //åˆ›å»ºç§’é’Ÿè®¡æ—¶å™¨,å½“tikTimeè¾¾åˆ°Settingè®¾ç½®çš„ç§’é’Ÿè®¡æ—¶ï¼Œç›´æ¥è·³è·ƒåˆ°ä¸‹ä¸€ç§’
             tikTime += Time.deltaTime;
             if (tikTime >= Settings.secondThreshold)
             {
@@ -82,7 +82,7 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //µ÷ÓÃÔÚTimeManag
                 
             }
         }
-        //°´×¡TÊ±£¬¿ìËÙÖ´ĞĞ60´ÎUpdateGameTime()·½·¨£¬¼´°´Ò»ÏÂ¿ìËÙ¹ı1·ÖÖÓ
+        //æŒ‰ä½Tæ—¶ï¼Œå¿«é€Ÿæ‰§è¡Œ60æ¬¡UpdateGameTime()æ–¹æ³•ï¼Œå³æŒ‰ä¸€ä¸‹å¿«é€Ÿè¿‡1åˆ†é’Ÿ
         if (Input.GetKey(KeyCode.T))
         {
             for (int i = 0; i < 60; i++)
@@ -90,7 +90,7 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //µ÷ÓÃÔÚTimeManag
                 UpdateGameTime();
             }
         }
-        //°´G¼ü¿ìËÙ¹ıÒ»Ìì£¬ÓëÕı³£Ê±¼äÁ÷ÊÅ×ßÍ¬Ò»Ì×ÈÕÆÚÍÆ½øÂß¼­
+        //æŒ‰Gé”®å¿«é€Ÿè¿‡ä¸€å¤©ï¼Œä¸æ­£å¸¸æ—¶é—´æµé€èµ°åŒä¸€å¥—æ—¥æœŸæ¨è¿›é€»è¾‘
         if (Input.GetKeyDown(KeyCode.G))
         {
             NextDay();
@@ -99,7 +99,7 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //µ÷ÓÃÔÚTimeManag
     }
 
     /// <summary>
-    /// Ê±¼äÔİÍ£
+    /// æ—¶é—´æš‚åœ
     /// </summary>
     /// <param name="gameState"></param>
     private void OnUpdateGameStateEvent(GameState gameState)
@@ -116,14 +116,14 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //µ÷ÓÃÔÚTimeManag
     }
 
     /// <summary>
-    /// ÔÚ³¡¾°¼ÓÔØÖ®ºóÊ±¼ä»Ö¸´
+    /// åœ¨åœºæ™¯åŠ è½½ä¹‹åæ—¶é—´æ¢å¤
     /// </summary>
     private void OnAfterSceneLoadedEvent()
     {
         gameClockPause = false;
     }
     /// <summary>
-    /// ÔÚ³¡¾°¼ÓÔØÖ®Ç°Ê±¼äÔİÍ£
+    /// åœ¨åœºæ™¯åŠ è½½ä¹‹å‰æ—¶é—´æš‚åœ
     /// </summary>
     private void OnBeforeSceneUnloadEvent()
     {
@@ -143,7 +143,7 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //µ÷ÓÃÔÚTimeManag
 
 
     /// <summary>
-    /// ³õÊ¼»¯ÓÎÏ·µÄÊ±¼äºÍ¼¾½Ú
+    /// åˆå§‹åŒ–æ¸¸æˆçš„æ—¶é—´å’Œå­£èŠ‚
     /// </summary>
     private void NewGameTime()
     {
@@ -153,19 +153,19 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //µ÷ÓÃÔÚTimeManag
         gameDay = 1;
         gameMonth = 1;
         gameYear = 1;
-        gameSeason = Season.´ºÌì;
-        gameWeekday = Weekday.ÖÜËÄ;
-        //ĞÂÓÎÏ·ÖØĞÂËæ»úËÄÌìµÄÌìÆøÔ¤±¨
+        gameSeason = Season.æ˜¥å¤©;
+        gameWeekday = Weekday.å‘¨å››;
+        //æ–°æ¸¸æˆé‡æ–°éšæœºå››å¤©çš„å¤©æ°”é¢„æŠ¥
         RandomWeatherForecast();
-        //==========²âÊÔÓÃ£º×Ô¶¨ÒåĞÂÓÎÏ·µÚÒ»ÌìµÄĞÇÆÚºÍÌìÆø£¬²âÊÔÍêÉ¾µôÕâÒ»¶Î¼´¿É==========
-        //ĞÇÆÚ¿ÉÑ¡£ºÖÜÈÕ¡¢ÖÜÒ»¡¢ÖÜ¶ş¡¢ÖÜÈı¡¢ÖÜËÄ¡¢ÖÜÎå¡¢ÖÜÁù
-        //ÌìÆø¿ÉÑ¡£ºSunny£¨ÇçÌì£©¡¢Rainy£¨ÓêÌì£©¡¢Thunder£¨´òÀ×£©
-        gameWeekday = Weekday.ÖÜÈÕ;
+        //==========æµ‹è¯•ç”¨ï¼šè‡ªå®šä¹‰æ–°æ¸¸æˆç¬¬ä¸€å¤©çš„æ˜ŸæœŸå’Œå¤©æ°”ï¼Œæµ‹è¯•å®Œåˆ æ‰è¿™ä¸€æ®µå³å¯==========
+        //æ˜ŸæœŸå¯é€‰ï¼šå‘¨æ—¥ã€å‘¨ä¸€ã€å‘¨äºŒã€å‘¨ä¸‰ã€å‘¨å››ã€å‘¨äº”ã€å‘¨å…­
+        //å¤©æ°”å¯é€‰ï¼šSunnyï¼ˆæ™´å¤©ï¼‰ã€Rainyï¼ˆé›¨å¤©ï¼‰ã€Thunderï¼ˆæ‰“é›·ï¼‰
+        gameWeekday = Weekday.å‘¨æ—¥;
         weatherForecast[0] = Weather.Sunny;
         //==============================================================================
     }
     /// <summary>
-    /// ÓÎÏ·Ê±¼ä¡¢¼¾½Ú±ä»¯Ñ­»·
+    /// æ¸¸æˆæ—¶é—´ã€å­£èŠ‚å˜åŒ–å¾ªç¯
     /// </summary>
     private void UpdateGameTime()
     {
@@ -183,23 +183,23 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //µ÷ÓÃÔÚTimeManag
                     gameHour = 0;
                     NextDay();
                 }
-                //Ã¿Ò»Ğ¡Ê±¹ıÈ¥£¬¿ªÊ¼Ö´ĞĞĞ¡Ê±ÊÂ¼ş
+                //æ¯ä¸€å°æ—¶è¿‡å»ï¼Œå¼€å§‹æ‰§è¡Œå°æ—¶äº‹ä»¶
                 EventHandler.CallGameDateEvemnt(gameHour, gameDay, gameMonth, gameYear, gameSeason);
             }
-            // Ã¿Ò»·ÖÖÓ¹ıÈ¥£¬¿ªÊ¼Ö´ĞĞ·ÖÖÓÊÂ¼ş
+            // æ¯ä¸€åˆ†é’Ÿè¿‡å»ï¼Œå¼€å§‹æ‰§è¡Œåˆ†é’Ÿäº‹ä»¶
             EventHandler.CallGameMinuteEvent(gameMinute, gameHour,gameDay, gameSeason);
-            //ÇĞ»»µÆ¹â
+            //åˆ‡æ¢ç¯å…‰
             EventHandler.CallLightShiftChangeEvent(gameSeason, GetCurrentLightShift(), timeDifference);
         }
         
     }
     /// <summary>
-    /// ÍÆ½øµ½ÏÂÒ»Ìì£¬´¦ÀíĞÇÆÚ¡¢ÔÂ·İ¡¢¼¾½ÚºÍÄê·İµÄ±ä»¯
+    /// æ¨è¿›åˆ°ä¸‹ä¸€å¤©ï¼Œå¤„ç†æ˜ŸæœŸã€æœˆä»½ã€å­£èŠ‚å’Œå¹´ä»½çš„å˜åŒ–
     /// </summary>
     public void NextDay()
     {
         gameDay++;
-        //Ã¿¹ıÒ»Ìì£¬ĞÇÆÚÑ­»·ÍÆ½øÒ»Ìì
+        //æ¯è¿‡ä¸€å¤©ï¼Œæ˜ŸæœŸå¾ªç¯æ¨è¿›ä¸€å¤©
         gameWeekday = GetNextWeekday(gameWeekday);
         if(gameDay > Settings.dayHold)
         {
@@ -209,12 +209,12 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //µ÷ÓÃÔÚTimeManag
             {
                 gameMonth = 1;
             }
-            //Ã¿¹ıÒ»ÕûÔÂ£¬¼õÉÙmonthInSeason
+            //æ¯è¿‡ä¸€æ•´æœˆï¼Œå‡å°‘monthInSeason
             monthInSeason--;
             if(monthInSeason == 0)
             {
                 monthInSeason = 1;
-                //gameSeasonÎªÃ¶¾Ù,int»¯ºógameSeasonÖµÎª4,ÒòÎªÓĞËÄ¸öÃ¶¾Ù
+                //gameSeasonä¸ºæšä¸¾,intåŒ–ågameSeasonå€¼ä¸º4,å› ä¸ºæœ‰å››ä¸ªæšä¸¾
                 int seasonNumber = (int)gameSeason;
                 seasonNumber++;
                 if (seasonNumber > Settings.seasonHold)
@@ -222,21 +222,21 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //µ÷ÓÃÔÚTimeManag
                     seasonNumber = 0;
                     gameYear++;
                 }
-                //ÔÙ°Ñint»¯ºógameSeason¸ÄÎªÔ­À´µÄÃ¶¾ÙÀàĞÍ
+                //å†æŠŠintåŒ–ågameSeasonæ”¹ä¸ºåŸæ¥çš„æšä¸¾ç±»å‹
                 gameSeason = (Season)seasonNumber;
             }
         }
-        //ÌìÆøÔ¤±¨ÕûÌåÇ°ÒÆÒ»Ìì£¬Ö»Ëæ»ú²¹ÉÏĞÂµÄµÚËÄÌì
+        //å¤©æ°”é¢„æŠ¥æ•´ä½“å‰ç§»ä¸€å¤©ï¼Œåªéšæœºè¡¥ä¸Šæ–°çš„ç¬¬å››å¤©
         for (int i = 0; i < weatherForecast.Length - 1; i++)
         {
             weatherForecast[i] = weatherForecast[i + 1];
         }
         weatherForecast[weatherForecast.Length - 1] = GetRandomWeather();
-        //Ã¿ÌìË¢ĞÂ¸÷µØÍ¼ÍßÆ¬ĞÅÏ¢ºÍ×÷ÎïĞÅÏ¢
+        //æ¯å¤©åˆ·æ–°å„åœ°å›¾ç“¦ç‰‡ä¿¡æ¯å’Œä½œç‰©ä¿¡æ¯
         EventHandler.CallGameDayEvent(gameDay, gameSeason, gameWeekday);
     }
     /// <summary>
-    /// Ëæ»úÉú³ÉËÄÌìµÄÌìÆøÔ¤±¨
+    /// éšæœºç”Ÿæˆå››å¤©çš„å¤©æ°”é¢„æŠ¥
     /// </summary>
     private void RandomWeatherForecast()
     {
@@ -246,19 +246,19 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //µ÷ÓÃÔÚTimeManag
         }
     }
     /// <summary>
-    /// °´µ±Ç°¼¾½ÚµÄ¸ÅÂÊËæ»úÒ»¸öÌìÆø
+    /// æŒ‰å½“å‰å­£èŠ‚çš„æ¦‚ç‡éšæœºä¸€ä¸ªå¤©æ°”
     /// </summary>
     private Weather GetRandomWeather()
     {
         int seasonIndex = (int)gameSeason;
         int weatherCount = weatherWeight.GetLength(1);
-        //ÏÈËã³öµ±Ç°¼¾½ÚËùÓĞÌìÆøµÄÈ¨ÖØ×ÜºÍ
+        //å…ˆç®—å‡ºå½“å‰å­£èŠ‚æ‰€æœ‰å¤©æ°”çš„æƒé‡æ€»å’Œ
         int totalWeight = 0;
         for (int i = 0; i < weatherCount; i++)
         {
             totalWeight += weatherWeight[seasonIndex, i];
         }
-        //ÔÚÈ¨ÖØ×ÜºÍÄÚËæ»úÒ»¸öÊı£¬ÂäÔÚÄÄ¸öÌìÆøµÄÈ¨ÖØÇø¼ä¾Í·µ»ØÄÄ¸öÌìÆø
+        //åœ¨æƒé‡æ€»å’Œå†…éšæœºä¸€ä¸ªæ•°ï¼Œè½åœ¨å“ªä¸ªå¤©æ°”çš„æƒé‡åŒºé—´å°±è¿”å›å“ªä¸ªå¤©æ°”
         int roll = UnityEngine.Random.Range(0, totalWeight);
         for (int i = 0; i < weatherCount; i++)
         {
@@ -271,11 +271,11 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //µ÷ÓÃÔÚTimeManag
         return Weather.Sunny;
     }
     /// <summary>
-    /// »ñÈ¡ÏÂÒ»ÌìµÄĞÇÆÚ£¬0~6»·ĞÎÑ­»·
+    /// è·å–ä¸‹ä¸€å¤©çš„æ˜ŸæœŸï¼Œ0~6ç¯å½¢å¾ªç¯
     /// </summary>
     private Weekday GetNextWeekday(Weekday weekday)
     {
-        //Weekday¹²ÓĞ7¸öÃ¶¾ÙÖµ£¨ÖÜÈÕ~ÖÜÁù£©
+        //Weekdayå…±æœ‰7ä¸ªæšä¸¾å€¼ï¼ˆå‘¨æ—¥~å‘¨å…­ï¼‰
         int weekdayNumber = (int)weekday;
         weekdayNumber++;
         if (weekdayNumber > 6)
@@ -286,7 +286,7 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //µ÷ÓÃÔÚTimeManag
     }
 
     /// <summary>
-    /// ¸ù¾İµ±Ç°ÓÎÏ·Ê±¼äÇĞ»»µØÍ¼µÆ¹âÄ£Ê½
+    /// æ ¹æ®å½“å‰æ¸¸æˆæ—¶é—´åˆ‡æ¢åœ°å›¾ç¯å…‰æ¨¡å¼
     /// </summary>
     /// <returns></returns>
     private LightShift GetCurrentLightShift()
@@ -298,7 +298,7 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //µ÷ÓÃÔÚTimeManag
         }
         if(gameTime < Settings.morningTime || gameTime >= Settings.nightTime)
         {
-            //Abs¾ø¶ÔÖµ
+            //Absç»å¯¹å€¼
             timeDifference = Mathf.Abs((float)(gameTime - Settings.nightTime).TotalMinutes);
             Debug.Log(timeDifference);
             return LightShift.Night;
@@ -318,7 +318,7 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //µ÷ÓÃÔÚTimeManag
         saveData.timeDict.Add("gameSecond", gameSecond);
         saveData.timeDict.Add("gameSeason", (int)gameSeason);
         saveData.timeDict.Add("gameWeekday", (int)gameWeekday);
-        //±£´æ½ñÌìºÍÎ´À´ÈıÌìµÄÌìÆø
+        //ä¿å­˜ä»Šå¤©å’Œæœªæ¥ä¸‰å¤©çš„å¤©æ°”
         for (int i = 0; i < weatherForecast.Length; i++)
         {
             saveData.timeDict.Add("weather" + i, (int)weatherForecast[i]);
@@ -336,12 +336,12 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //µ÷ÓÃÔÚTimeManag
         gameMinute = saveData.timeDict["gameMinute"];
         gameSecond = saveData.timeDict["gameSecond"];
         gameSeason = (Season)saveData.timeDict["gameSeason"];
-        //¾É´æµµÖĞÃ»ÓĞgameWeekday×Ö¶Î£¬Ã»ÓĞÊ±±£³ÖÄ¬ÈÏÖµ£¬±ÜÃâÅ×KeyNotFoundException
+        //æ—§å­˜æ¡£ä¸­æ²¡æœ‰gameWeekdayå­—æ®µï¼Œæ²¡æœ‰æ—¶ä¿æŒé»˜è®¤å€¼ï¼Œé¿å…æŠ›KeyNotFoundException
         if (saveData.timeDict.ContainsKey("gameWeekday"))
         {
             gameWeekday = (Weekday)saveData.timeDict["gameWeekday"];
         }
-        //¾É´æµµÖĞÃ»ÓĞÌìÆø×Ö¶Î£¬Ã»ÓĞÊ±±£³Öµ±Ç°Ëæ»úÖµ
+        //æ—§å­˜æ¡£ä¸­æ²¡æœ‰å¤©æ°”å­—æ®µï¼Œæ²¡æœ‰æ—¶ä¿æŒå½“å‰éšæœºå€¼
         for (int i = 0; i < weatherForecast.Length; i++)
         {
             string weatherKey = "weather" + i;

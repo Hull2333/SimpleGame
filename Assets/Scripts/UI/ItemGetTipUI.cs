@@ -1,13 +1,13 @@
-using MFarm.Inventory;
+ï»¿using MFarm.Inventory;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ItemGetTipUI : MonoBehaviour //µ÷ÓÃÔÚSlot_ItemGetTipÔ¤ÖÆÌåÉÏ
+public class ItemGetTipUI : MonoBehaviour //è°ƒç”¨åœ¨Slot_ItemGetTipé¢„åˆ¶ä½“ä¸Š
 {
-    //UIÏÔÊ¾Ê±¼ä
+    //UIæ˜¾ç¤ºæ—¶é—´
     private float showTimer;
     public int itemID;
     public Image itemSprite;
@@ -24,7 +24,7 @@ public class ItemGetTipUI : MonoBehaviour //µ÷ÓÃÔÚSlot_ItemGetTipÔ¤ÖÆÌåÉÏ
         }
     }
     /// <summary>
-    /// ĞŞ¸ÄÊ°È¡ÎïÆ·µÄUIÏÔÊ¾
+    /// ä¿®æ”¹æ‹¾å–ç‰©å“çš„UIæ˜¾ç¤º
     /// </summary>
     /// <param name="item"></param>
     public void ModifyItemParameter(ItemDetails item)
@@ -37,7 +37,7 @@ public class ItemGetTipUI : MonoBehaviour //µ÷ÓÃÔÚSlot_ItemGetTipÔ¤ÖÆÌåÉÏ
         amountText.text = currentAmount.ToString();
     }
     /// <summary>
-    /// ĞŞ¸ÄÊ°È¡ÎïÆ·ÊıÁ¿ºÍ²¥·Å¶¯»­
+    /// ä¿®æ”¹æ‹¾å–ç‰©å“æ•°é‡å’Œæ’­æ”¾åŠ¨ç”»
     /// </summary>
     public void ModifyItemAmount()
     {

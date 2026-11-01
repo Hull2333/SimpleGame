@@ -1,11 +1,11 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using UnityEngine.UI;
 using static AnimalData_SO;
 
-public class TimeUI : MonoBehaviour //µ÷ÓÃÔÚGameTime¶ÔÏóÉÏ
+public class TimeUI : MonoBehaviour //è°ƒç”¨åœ¨GameTimeå¯¹è±¡ä¸Š
 {
     public Canvas timeCanvas;
     public GameObject timeUIBg;
@@ -14,11 +14,11 @@ public class TimeUI : MonoBehaviour //µ÷ÓÃÔÚGameTime¶ÔÏóÉÏ
     public Text dayText;
     public Text yearText;
     public Text timeText;
-    //ËÄ¸ö¼¾½ÚµÄÍ¼Æ¬
+    //å››ä¸ªå­£èŠ‚çš„å›¾ç‰‡
     public Sprite[] seasonSprites;
-    //ĞÇÆÚÍ¼Æ¬
+    //æ˜ŸæœŸå›¾ç‰‡
     public Sprite[] weekDaySprites;
-    //ÌìÆøÍ¼Æ¬
+    //å¤©æ°”å›¾ç‰‡
     public Sprite[] weatherSprites;
     public Image weekImage;
 
@@ -49,17 +49,17 @@ public class TimeUI : MonoBehaviour //µ÷ÓÃÔÚGameTime¶ÔÏóÉÏ
     }
 
     /// <summary>
-    /// Ğ¡Ê±·ÖÖÓUIÏÔÊ¾
+    /// å°æ—¶åˆ†é’ŸUIæ˜¾ç¤º
     /// </summary>
     /// <param name="mintue"></param>
     /// <param name="hour"></param>
     private void OnGameMinuteEvent(int mintue, int hour, int day, Season season)
     {
-        //"00"ÒÔÁ½Î»ÊıÏÔÊ¾
+        //"00"ä»¥ä¸¤ä½æ•°æ˜¾ç¤º
         timeText.text = hour.ToString("00") + ":" + mintue.ToString("00");
     }
     /// <summary>
-    /// ÄêÔÂÈÕUIÏÔÊ¾
+    /// å¹´æœˆæ—¥UIæ˜¾ç¤º
     /// </summary>
     /// <param name="hour"></param>
     /// <param name="day"></param>
@@ -68,28 +68,28 @@ public class TimeUI : MonoBehaviour //µ÷ÓÃÔÚGameTime¶ÔÏóÉÏ
     /// <param name="season"></param>
     private void OnGameDateEvent(int hour, int day, int month, int year, Season season)
     {
-        //ÌìÊıÓëĞÇÆÚÍ¼Æ¬ÏÔÊ¾
+        //å¤©æ•°ä¸æ˜ŸæœŸå›¾ç‰‡æ˜¾ç¤º
         RefreshDayUI(day, TimeManager.Instance.gameWeekday);
         yearText.text = "Year" + " " + year.ToString("00");
-        //¼¾½ÚÍ¼Æ¬ÏÔÊ¾
+        //å­£èŠ‚å›¾ç‰‡æ˜¾ç¤º
         seasonImage.sprite = seasonSprites[(int)season];
     }
     /// <summary>
-    /// ÓÎÏ·¿ªÊ¼»ò¶Áµµºó³¡¾°¼ÓÔØÍê³É£¬Á¢¼´Ë¢ĞÂÒ»´ÎÌìÊıºÍĞÇÆÚÏÔÊ¾
+    /// æ¸¸æˆå¼€å§‹æˆ–è¯»æ¡£ååœºæ™¯åŠ è½½å®Œæˆï¼Œç«‹å³åˆ·æ–°ä¸€æ¬¡å¤©æ•°å’Œæ˜ŸæœŸæ˜¾ç¤º
     /// </summary>
     private void OnAfterSceneLoadedEvent()
     {
         RefreshDayUI(TimeManager.Instance.gameDay, TimeManager.Instance.gameWeekday);
     }
     /// <summary>
-    /// Ë¢ĞÂÌìÊıÎÄ±¾¡¢ĞÇÆÚÍ¼Æ¬ºÍÌìÆøÍ¼Æ¬
+    /// åˆ·æ–°å¤©æ•°æ–‡æœ¬ã€æ˜ŸæœŸå›¾ç‰‡å’Œå¤©æ°”å›¾ç‰‡
     /// </summary>
     private void RefreshDayUI(int day, Weekday weekday)
     {
         dayText.text = "Day" + " " + day.ToString("00");
-        //weekDaySpritesµÄË³ĞòÓëWeekdayÃ¶¾ÙÒ»ÖÂ£¬¿ÉÖ±½ÓÓÃÃ¶¾ÙÖµË÷Òı
+        //weekDaySpritesçš„é¡ºåºä¸Weekdayæšä¸¾ä¸€è‡´ï¼Œå¯ç›´æ¥ç”¨æšä¸¾å€¼ç´¢å¼•
         weekImage.sprite = weekDaySprites[(int)weekday];
-        //weatherSpritesµÄË³ĞòÓëWeatherÃ¶¾ÙÒ»ÖÂ£¬¿ÉÖ±½ÓÓÃÃ¶¾ÙÖµË÷Òı
+        //weatherSpritesçš„é¡ºåºä¸Weatheræšä¸¾ä¸€è‡´ï¼Œå¯ç›´æ¥ç”¨æšä¸¾å€¼ç´¢å¼•
         weatherImage.sprite = weatherSprites[(int)TimeManager.Instance.currentWeather];
     }
 

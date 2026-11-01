@@ -1,4 +1,4 @@
-using MFarm.Map;
+ï»¿using MFarm.Map;
 using MFarm.Save;
 using System;
 using System.Collections;
@@ -7,56 +7,56 @@ using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Playables;
-//´´½¨Ò»¸öÃüÃû¿Õ¼ä£¬¿ÉÒÔÔÚÆäËû½Å±¾ÖĞusing¸ÃÃüÃû¿Õ¼äÀ´Ê¹ÓÃ¸Ã½Å±¾ÀïµÄ·½·¨
+//åˆ›å»ºä¸€ä¸ªå‘½åç©ºé—´ï¼Œå¯ä»¥åœ¨å…¶ä»–è„šæœ¬ä¸­usingè¯¥å‘½åç©ºé—´æ¥ä½¿ç”¨è¯¥è„šæœ¬é‡Œçš„æ–¹æ³•
 namespace MFarm.Inventory
 {
-    public class InventoryManager : Singleton<InventoryManager>,ISaveable   //µ÷ÓÃÔÚInventoryManager¶ÔÏóÉÏ
+    public class InventoryManager : Singleton<InventoryManager>,ISaveable   //è°ƒç”¨åœ¨InventoryManagerå¯¹è±¡ä¸Š
     {
         private InventoryUI inventoryUI;
-        //ÈÎºÎÒ»¸ö¸ñ×ÓUI±»´ò¿ª
+        //ä»»ä½•ä¸€ä¸ªæ ¼å­UIè¢«æ‰“å¼€
         public bool anyBagOpened;
-        [Header("ÎïÆ·Êı¾İ")]
+        [Header("ç‰©å“æ•°æ®")]
         public ItemDataList_SO itemDataList_SO;
-        [Header("½¨ÔìÀ¶Í¼")]
+        [Header("å»ºé€ è“å›¾")]
         public BluPrintData_SO bluPrintData;
-        [Header("²ËÆ×")]
+        [Header("èœè°±")]
         public CookedData_SO cookedData;
-        //Íæ¼ÒÄ¿Ç°»áµÄÊ³Æ×
+        //ç©å®¶ç›®å‰ä¼šçš„é£Ÿè°±
         public List<int> learnedRecipeList;
-        [Header("±³°üÊı¾İ")]
+        [Header("èƒŒåŒ…æ•°æ®")]
         public InventoryBag_SO playerBagTemp;
         public InventoryBag_SO playerBag;
-        //µ±Ç°±»Ñ¡ÔñµÄÎïÆ·ĞòºÅ
+        //å½“å‰è¢«é€‰æ‹©çš„ç‰©å“åºå·
         private int currentSelectBagIndex;
-        //µ±Ç°´ò¿ªµÄÏä×Ó
+        //å½“å‰æ‰“å¼€çš„ç®±å­
         private InventoryBag_SO currentBoxBag;
         public InventoryBag_SO sellBoxBag;
         public InventoryBag_SO sellBoxBagTemp;
-        // Âô³µ¸ñ×ÓµÄÎïÆ·Êı¾İ£¨81 ¸ñ£©£¬Ôİ²»²ÎÓëÊÛÂô½áËã
+        // å–è½¦æ ¼å­çš„ç‰©å“æ•°æ®ï¼ˆ81 æ ¼ï¼‰ï¼Œæš‚ä¸å‚ä¸å”®å–ç»“ç®—
         public List<InventoryItem> sellCarItemList = new List<InventoryItem>();
-       [Header("½»Ò×")]
+       [Header("äº¤æ˜“")]
         [HideInInspector]public int playerMoney;
-        //´æ´¢µØÍ¼ÖĞËùÓĞµÄÏä×ÓÀïµÄÎïÆ·Êı¾İ
+        //å­˜å‚¨åœ°å›¾ä¸­æ‰€æœ‰çš„ç®±å­é‡Œçš„ç‰©å“æ•°æ®
         private Dictionary<string, List<InventoryItem>> boxDataDict = new Dictionary<string, List<InventoryItem>>();
         public int boxDataAmount => boxDataDict.Count;
 
         public string GUID => GetComponent<DataGUID>().guid;
         //private AnimatorOverride animatorOverride;
-        //ËùÓĞÓãÀàµÄÁĞ±í
+        //æ‰€æœ‰é±¼ç±»çš„åˆ—è¡¨
         public static List<ItemDetails> fishList = new List<ItemDetails>();
-        //²»Í¬Ê±¼ä¶ÎµÄµ­Ë®ÓãºÍº£Ë®ÓãµÄÁĞ±í
+        //ä¸åŒæ—¶é—´æ®µçš„æ·¡æ°´é±¼å’Œæµ·æ°´é±¼çš„åˆ—è¡¨
         public List<ItemDetails> laterFishList = new List<ItemDetails>();
         public List<ItemDetails> seaFishList = new List<ItemDetails>();
-        //µ±Ç°Ñ¡ÔñµÄÎïÆ·
+        //å½“å‰é€‰æ‹©çš„ç‰©å“
         public ItemDetails currentSelectedItem;
-        //³öÊÛ×´Ì¬
+        //å‡ºå”®çŠ¶æ€
         public bool isSellState;
-        //ÎïÆ·¶Ô°ë·Ö
+        //ç‰©å“å¯¹åŠåˆ†
         public bool isHalfAmount;
-        //´ËÊ±ÊÇ·ñ¿ÉÒÔµã»÷SlotUI
+        //æ­¤æ—¶æ˜¯å¦å¯ä»¥ç‚¹å‡»SlotUI
         private bool canClickSlot;
         /// <summary>
-        /// ÔÚÃ¿´ÎÓÎÏ·¿ªÊ¼Ê±¾ÍÖ´ĞĞÒ»´ÎÍæ¼Ò±³°üÊı¾İ¸üĞÂ
+        /// åœ¨æ¯æ¬¡æ¸¸æˆå¼€å§‹æ—¶å°±æ‰§è¡Œä¸€æ¬¡ç©å®¶èƒŒåŒ…æ•°æ®æ›´æ–°
         /// </summary>
         private void Start()
         {
@@ -65,7 +65,7 @@ namespace MFarm.Inventory
             saveable.RegisterSaveable();
             //animatorOverride = GameObject.FindAnyObjectByType<AnimatorOverride>();
             inventoryUI = GameObject.FindWithTag("InventoryUI").gameObject.GetComponent<InventoryUI>();
-            // Âô³µ¸ñ×Ó¹Ì¶¨ 81 ¸ñ£¬ÏÈÈ«²¿³õÊ¼»¯Îª¿ÕÎïÆ·
+            // å–è½¦æ ¼å­å›ºå®š 81 æ ¼ï¼Œå…ˆå…¨éƒ¨åˆå§‹åŒ–ä¸ºç©ºç‰©å“
             for (int i = 0; i < 81; i++)
             {
                 sellCarItemList.Add(new InventoryItem());
@@ -78,13 +78,13 @@ namespace MFarm.Inventory
         {
             EventHandler.DropItemEvent += OnDropItemEvent;
             EventHandler.HarvestAtPlayerPosition += OnHarvestAtPlayerPosition;
-            //½¨ÔìÎïÆ·ºóÉ¾³ı±³°üËØ²Ä
+            //å»ºé€ ç‰©å“ååˆ é™¤èƒŒåŒ…ç´ æ
             EventHandler.BuildFurnitureEvent += OnBuildFurnitureEvent;
-            //Ïä×Ó´ò¿ª´æ·ÅÊÂ¼ş
+            //ç®±å­æ‰“å¼€å­˜æ”¾äº‹ä»¶
             EventHandler.BaseBagOpenEvent += OnBaseBagOpenEvent;
-            //ĞÂÓÎÏ·¿ªÊ¼ÊÂ¼ş
+            //æ–°æ¸¸æˆå¼€å§‹äº‹ä»¶
             EventHandler.StartNewGameEvent += OnStartNewGameEvent;
-            //Ê¹ÓÃÎïÆ·»Ö¸´Íæ¼Ò×´Ì¬
+            //ä½¿ç”¨ç‰©å“æ¢å¤ç©å®¶çŠ¶æ€
             EventHandler.FishListInSpriteDayFreshEvent += OnFishListInSpriteDayFreshEvent;
             EventHandler.RemoveTreeSeedCount += OnRemoveTreeSeedCount;
             EventHandler.ClickHaveItemYesEvent += OnClickHaveItemYesEvent;
@@ -97,7 +97,7 @@ namespace MFarm.Inventory
         {
             EventHandler.DropItemEvent -= OnDropItemEvent;
             EventHandler.HarvestAtPlayerPosition -= OnHarvestAtPlayerPosition;
-            //½¨ÔìÎïÆ·ºóÉ¾³ı±³°üËØ²Ä
+            //å»ºé€ ç‰©å“ååˆ é™¤èƒŒåŒ…ç´ æ
             EventHandler.BuildFurnitureEvent -= OnBuildFurnitureEvent;
             EventHandler.BaseBagOpenEvent -= OnBaseBagOpenEvent;
             EventHandler.StartNewGameEvent -= OnStartNewGameEvent;
@@ -117,9 +117,9 @@ namespace MFarm.Inventory
         }
 
         /// <summary>
-        /// ¼Ò¾ß½¨ÔìºóÉ¾³ı¼Ò¾ßÍ¼Ö½ºÍ¼Ò¾ßËØ²Ä
+        /// å®¶å…·å»ºé€ ååˆ é™¤å®¶å…·å›¾çº¸å’Œå®¶å…·ç´ æ
         /// </summary>
-        /// <param name="ID">Í¼Ö½ID</param>
+        /// <param name="ID">å›¾çº¸ID</param>
         /// <param name="mousePos"></param>
         private void OnBuildFurnitureEvent(BluPrintDetails building, Vector3 mousePos , Transform parent)
         {
@@ -136,12 +136,12 @@ namespace MFarm.Inventory
         {
             var index = GetItemIndexInBag(ID,playerBag.itemList);
             AddItemAtIndex(ID, index, 1 ,false);
-            //Ë¢ĞÂÍæ¼Ò±³°ü
+            //åˆ·æ–°ç©å®¶èƒŒåŒ…
             EventHandler.CallUpdateInventoryUI(InventoryLocation.Player,playerBag.itemList,0);
         }
 
         /// <summary>
-        /// ¶ªÆúÎïÆ·
+        /// ä¸¢å¼ƒç‰©å“
         /// </summary>
         /// <param name="ID"></param>
         /// <param name="pos"></param>
@@ -150,18 +150,18 @@ namespace MFarm.Inventory
             RemoveItem(ID,1);
         }
         /// <summary>
-        /// ÖØĞÂ¿ªÊ¼ÓÎÏ·Ê±ĞèÒª³õÊ¼»¯µÄÊı¾İ
+        /// é‡æ–°å¼€å§‹æ¸¸æˆæ—¶éœ€è¦åˆå§‹åŒ–çš„æ•°æ®
         /// </summary>
         /// <param name="obj"></param>
         private void OnStartNewGameEvent(int obj)
         {
-            //³õÊ¼»¯Íæ¼Ò±³°üÊı¾İ
+            //åˆå§‹åŒ–ç©å®¶èƒŒåŒ…æ•°æ®
             playerBag = Instantiate(playerBagTemp);
-            //³õÊ¼»¯Íæ¼Ò½ğ¶î
+            //åˆå§‹åŒ–ç©å®¶é‡‘é¢
             playerMoney = Settings.playerStartMoney;
-            //Çå¿ÕÏä×Óshuju
+            //æ¸…ç©ºç®±å­shuju
             boxDataDict.Clear();
-            //Çå¿ÕÓãÀàÁĞ±í,È»ºóÖØĞÂÌí¼ÓÓãÀàÁĞ±í
+            //æ¸…ç©ºé±¼ç±»åˆ—è¡¨,ç„¶åé‡æ–°æ·»åŠ é±¼ç±»åˆ—è¡¨
             fishList.Clear();
             for(int i = 0; i < itemDataList_SO.itemDetailsList.Count; i++)
             {
@@ -172,18 +172,18 @@ namespace MFarm.Inventory
                 }
             }
             Debug.Log(fishList.Count);
-            //Ë¢ĞÂµ±Ç°Ê±¶ÎµÄÓæ»ñÁĞ±í
+            //åˆ·æ–°å½“å‰æ—¶æ®µçš„æ¸”è·åˆ—è¡¨
             EventHandler.CallFishListInSpriteDayFreshEvent(fishList);
-            //¸üĞÂÍæ¼Ò±³°üUI
+            //æ›´æ–°ç©å®¶èƒŒåŒ…UI
             EventHandler.CallUpdateInventoryUI(InventoryLocation.Player,playerBag.itemList,0);
-            //³õÊ¼»¯²¢Ë¢ĞÂ³öÊÛÏä
+            //åˆå§‹åŒ–å¹¶åˆ·æ–°å‡ºå”®ç®±
             sellBoxBag = Instantiate(sellBoxBagTemp);
             EventHandler.CallUpdateInventoryUI(InventoryLocation.SellBox, sellBoxBag.itemList,0);
 
         }
         private void OnFishListInSpriteDayFreshEvent(List<ItemDetails> list)
         {
-            //³õÊ¼»¯¸÷¸öÓãÁĞ±í
+            //åˆå§‹åŒ–å„ä¸ªé±¼åˆ—è¡¨
             laterFishList.Clear();
             seaFishList.Clear();
             for (int i = 0; i < list.Count; i++)
@@ -252,17 +252,17 @@ namespace MFarm.Inventory
             canClickSlot = canClickSlotUI;
         }
         /// <summary>
-        /// Í¨¹ıID·µ»ØÎïÆ·ĞÅÏ¢
+        /// é€šè¿‡IDè¿”å›ç‰©å“ä¿¡æ¯
         /// </summary>
         /// <param name="ID"></param>
         /// <returns></returns>
         public ItemDetails GetItemDetails(int ID)
         {
-            //Í¨¹ı´«½øÀ´µÄIDÀ´ºÍitemDetailListÖĞµÄi.getItemID(item.getItemID)½øĞĞ±È¶ÔËÑË÷,ËÑË÷µÄ½á¹ûÔÙ·Å»Ø¸øÉÏÃæµÄ·½·¨
+            //é€šè¿‡ä¼ è¿›æ¥çš„IDæ¥å’ŒitemDetailListä¸­çš„i.getItemID(item.getItemID)è¿›è¡Œæ¯”å¯¹æœç´¢,æœç´¢çš„ç»“æœå†æ”¾å›ç»™ä¸Šé¢çš„æ–¹æ³•
             return itemDataList_SO.itemDetailsList.Find(i => i.itemID == ID);
         }
         /// <summary>
-        /// ¸ù¾İ´«½øÀ´µÄĞòºÅ»ñÈ¡ÓãµÄĞÅÏ¢
+        /// æ ¹æ®ä¼ è¿›æ¥çš„åºå·è·å–é±¼çš„ä¿¡æ¯
         /// </summary>
         /// <param name="index"></param>
         /// <param name="isLaterFish"></param>
@@ -281,15 +281,15 @@ namespace MFarm.Inventory
             return fishDetail;
         }
         /// <summary>
-        /// ½«Ê°È¡ÎïÆ·µÄÊı¾İÌí¼Óµ½±³°ü
+        /// å°†æ‹¾å–ç‰©å“çš„æ•°æ®æ·»åŠ åˆ°èƒŒåŒ…
         /// </summary>
         /// <param name="item"></param>
-        /// <param name="toDestory">ÊÇ·ñÒªÏú»ÙÎïÆ·</param>
+        /// <param name="toDestory">æ˜¯å¦è¦é”€æ¯ç‰©å“</param>
         public bool AddItem(Item item,bool toDestory)
         {
-            //ÏÈÕÒ±³°üÀïÍ¬ÀàÎïÆ·µÄÎ»ÖÃ
+            //å…ˆæ‰¾èƒŒåŒ…é‡ŒåŒç±»ç‰©å“çš„ä½ç½®
             var index = GetStackableItemIndex(item.itemID);
-            //±³°üÒÑÂúÇÒÃ»ÓĞ¿É¼ÌĞøµş¼ÓµÄÍ¬ÀàÎïÆ·Ê±¼ñ²»ÆğÀ´£¬ÎïÆ·ÁôÔÚ³¡¾°ÖĞ
+            //èƒŒåŒ…å·²æ»¡ä¸”æ²¡æœ‰å¯ç»§ç»­å åŠ çš„åŒç±»ç‰©å“æ—¶æ¡ä¸èµ·æ¥ï¼Œç‰©å“ç•™åœ¨åœºæ™¯ä¸­
             bool canAdd = CanAddItem(item.itemID);
             if (!canAdd)
             {
@@ -302,12 +302,12 @@ namespace MFarm.Inventory
             }
             AddItemAtIndex(item.itemID, index, 1,false);
             
-            //¸üĞÂUI,½«ĞèÒª¸üĞÂµÄ±³°üÎ»ÖÃºÍ´Ë±³°üµÄitemÁĞ±íÊäÈë½øÈ¥
+            //æ›´æ–°UI,å°†éœ€è¦æ›´æ–°çš„èƒŒåŒ…ä½ç½®å’Œæ­¤èƒŒåŒ…çš„itemåˆ—è¡¨è¾“å…¥è¿›å»
             EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, playerBag.itemList,0);
             return true;
         }
         /// <summary>
-        /// »ñÈ¡ÈÎÎñ½±ÀøÎïÆ·
+        /// è·å–ä»»åŠ¡å¥–åŠ±ç‰©å“
         /// </summary>
         /// <param name="itemID"></param>
         /// <param name="amount"></param>
@@ -318,7 +318,7 @@ namespace MFarm.Inventory
             EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, playerBag.itemList,0);
         }
         /// <summary>
-        /// ¼ì²é±³°üÊÇ·ñÓĞ¿ÕÎ»
+        /// æ£€æŸ¥èƒŒåŒ…æ˜¯å¦æœ‰ç©ºä½
         /// </summary>
         /// <returns></returns>
         public bool CheckBagCapacity()
@@ -334,17 +334,17 @@ namespace MFarm.Inventory
         }
 
         /// <summary>
-        /// ±³°üÊÇ·ñ»¹ÄÜ·ÅÈë¸ÃÎïÆ·£ºÓĞÎ´Âú 99 µÄÍ¬Àà¶Ñµş£¬»òÕßÓĞ¿ÕÎ»
+        /// èƒŒåŒ…æ˜¯å¦è¿˜èƒ½æ”¾å…¥è¯¥ç‰©å“ï¼šæœ‰æœªæ»¡ 99 çš„åŒç±»å †å ï¼Œæˆ–è€…æœ‰ç©ºä½
         /// </summary>
         public bool CanAddItem(int ID)
         {
             return CheckBagCapacity() || GetStackableItemIndex(ID) != -1;
         }
-        //ÕıÔÚ·ÉÏòÍæ¼Ò¡¢ÒÑ¾­Ô¤¶¨µ«»¹Ã»·Å½ø±³°üµÄÊ°È¡ÊıÁ¿£¨°´ÎïÆ·IDÍ³¼Æ£©
+        //æ­£åœ¨é£å‘ç©å®¶ã€å·²ç»é¢„å®šä½†è¿˜æ²¡æ”¾è¿›èƒŒåŒ…çš„æ‹¾å–æ•°é‡ï¼ˆæŒ‰ç‰©å“IDç»Ÿè®¡ï¼‰
         private Dictionary<int, int> pendingPickupDict = new Dictionary<int, int>();
 
         /// <summary>
-        /// ±³°ü»¹ÄÜ·ÅÈë¶àÉÙ¸ö¸ÃÎïÆ·£ºÍ¬ÀàÎ´Âú¶ÑµşµÄÓàÁ¿¼Ó¿Õ¸ñ×ÓµÄÈİÁ¿
+        /// èƒŒåŒ…è¿˜èƒ½æ”¾å…¥å¤šå°‘ä¸ªè¯¥ç‰©å“ï¼šåŒç±»æœªæ»¡å †å çš„ä½™é‡åŠ ç©ºæ ¼å­çš„å®¹é‡
         /// </summary>
         public int GetRemainingCapacity(int ID)
         {
@@ -364,7 +364,7 @@ namespace MFarm.Inventory
         }
 
         /// <summary>
-        /// Ô¤¶¨Ò»¸öÊ°È¡Ãû¶î£¬Ö»ÓĞ»¹ÓĞÊ£ÓàÈİÁ¿Ê±²ÅÔÊĞíÎïÆ·Îü¸½µ½Íæ¼Ò
+        /// é¢„å®šä¸€ä¸ªæ‹¾å–åé¢ï¼Œåªæœ‰è¿˜æœ‰å‰©ä½™å®¹é‡æ—¶æ‰å…è®¸ç‰©å“å¸é™„åˆ°ç©å®¶
         /// </summary>
         public bool TryReservePickup(int ID)
         {
@@ -379,7 +379,7 @@ namespace MFarm.Inventory
         }
 
         /// <summary>
-        /// ÊÍ·ÅÔ¤¶¨µÄÊ°È¡Ãû¶î£¨ÎïÆ·±»Ïú»ÙÊ±µ÷ÓÃ£©
+        /// é‡Šæ”¾é¢„å®šçš„æ‹¾å–åé¢ï¼ˆç‰©å“è¢«é”€æ¯æ—¶è°ƒç”¨ï¼‰
         /// </summary>
         public void ReleasePickup(int ID)
         {
@@ -399,15 +399,15 @@ namespace MFarm.Inventory
         }
 
         /// <summary>
-        /// Í¨¹ıÎïÆ·IDÕÒµ½±³°üÒÑÓĞÎïÆ·Î»ÖÃ
+        /// é€šè¿‡ç‰©å“IDæ‰¾åˆ°èƒŒåŒ…å·²æœ‰ç‰©å“ä½ç½®
         /// </summary>
-        /// <param name="ID">ÎïÆ·ID</param>
-        /// <returns>-1Ôò±íÊ¾Ã»ÓĞ¸ÃÎïÆ·£¬ÓĞµÄ»°·µ»Ø¶ÔÓ¦µÄĞòºÅ</returns>
+        /// <param name="ID">ç‰©å“ID</param>
+        /// <returns>-1åˆ™è¡¨ç¤ºæ²¡æœ‰è¯¥ç‰©å“ï¼Œæœ‰çš„è¯è¿”å›å¯¹åº”çš„åºå·</returns>
         public int GetItemIndexInBag(int ID , List<InventoryItem> bagList)
         {
             if(bagList == playerBag.itemList)
             {
-                //ºóËÄ¸ö¸ñ×ÓÊÇÓã¶üºÍ×°±¸¸ñ×Ó£¬²»¿ÉÒÔ×°ÆäËûÎïÆ·
+                //åå››ä¸ªæ ¼å­æ˜¯é±¼é¥µå’Œè£…å¤‡æ ¼å­ï¼Œä¸å¯ä»¥è£…å…¶ä»–ç‰©å“
                 for (int i = 0; i < bagList.Count - 4; i++)
                 {
                     if (bagList[i].itemID == ID)
@@ -431,7 +431,7 @@ namespace MFarm.Inventory
         }
 
         /// <summary>
-        /// ÕÒ±³°üÀï»¹ÄÜ¼ÌĞøµş¼Ó£¨Î´Âú 99£©µÄÍ¬ÀàÎïÆ·Î»ÖÃ£¬Ã»ÓĞÔò·µ»Ø -1
+        /// æ‰¾èƒŒåŒ…é‡Œè¿˜èƒ½ç»§ç»­å åŠ ï¼ˆæœªæ»¡ 99ï¼‰çš„åŒç±»ç‰©å“ä½ç½®ï¼Œæ²¡æœ‰åˆ™è¿”å› -1
         /// </summary>
         public int GetStackableItemIndex(int ID)
         {
@@ -445,11 +445,11 @@ namespace MFarm.Inventory
             return -1;
         }
         /// <summary>
-        /// Í¨¹ıÎïÆ·ID²éÕÒÖ¸¶¨bagListÖĞµÄÏàÍ¬ÎïÆ·µÄindex¼¯ºÏ
+        /// é€šè¿‡ç‰©å“IDæŸ¥æ‰¾æŒ‡å®šbagListä¸­çš„ç›¸åŒç‰©å“çš„indexé›†åˆ
         /// </summary>
-        /// <param name="ID">ĞèÒª²éÕÒµÄÎïÆ·ID</param>
-        /// <param name="bagList">ĞèÒª²éÕÒµÄbagList</param>
-        /// <returns>ÏàÍ¬ÎïÆ·index¼¯ºÏ</returns>
+        /// <param name="ID">éœ€è¦æŸ¥æ‰¾çš„ç‰©å“ID</param>
+        /// <param name="bagList">éœ€è¦æŸ¥æ‰¾çš„bagList</param>
+        /// <returns>ç›¸åŒç‰©å“indexé›†åˆ</returns>
         public List<int> GetItemsIndexInBag(int ID,List<InventoryItem> bagList)
         {
             List<int> indexList = new List<int>();
@@ -463,23 +463,23 @@ namespace MFarm.Inventory
             return indexList;
         }
         /// <summary>
-        /// ÕÒµ½±³°ü¿ÕÎ»Î»ÖÃ»òÕßÒÑÓĞÎïÆ·Î»ÖÃºóÌí¼ÓÎïÆ·µ½Íæ¼Ò±³°ü
+        /// æ‰¾åˆ°èƒŒåŒ…ç©ºä½ä½ç½®æˆ–è€…å·²æœ‰ç‰©å“ä½ç½®åæ·»åŠ ç‰©å“åˆ°ç©å®¶èƒŒåŒ…
         /// </summary>
-        /// <param name="ID">Ê°È¡ÎïÆ·µÄitemID</param>
-        /// <param name="index">ÒÑÓĞÎïÆ·ÔÚ±³°üµÄÎ»ÖÃ»ò¿ÕµÄ¸ñ×Ó</param>
-        /// <param name="amount">Ñ¡ÔñµÄÎïÆ·µÄÊıÁ¿</param>
+        /// <param name="ID">æ‹¾å–ç‰©å“çš„itemID</param>
+        /// <param name="index">å·²æœ‰ç‰©å“åœ¨èƒŒåŒ…çš„ä½ç½®æˆ–ç©ºçš„æ ¼å­</param>
+        /// <param name="amount">é€‰æ‹©çš„ç‰©å“çš„æ•°é‡</param>
         private void AddItemAtIndex(int ID,int index,int amount,bool isBuy)
         {
-            //¹ºÂòµÄÎïÆ·Ìí¼Óµ½Íæ¼Ò±³°ü
+            //è´­ä¹°çš„ç‰©å“æ·»åŠ åˆ°ç©å®¶èƒŒåŒ…
             if (isBuy)
             {
-                //ËÍµ½¿ÕµÄÍæ¼Ò±³°ü¸ñ×Ó
+                //é€åˆ°ç©ºçš„ç©å®¶èƒŒåŒ…æ ¼å­
                 if (playerBag.itemList[index].itemID == null)
                 {
                     var newItem = new InventoryItem { itemID = ID, itemAmount = amount };
                     playerBag.itemList[index] = newItem;
                 }
-                //ËÍµ½ÓĞÏàÍ¬ÎïÆ·µÄÍæ¼Ò±³°ü¸ñ×Ó
+                //é€åˆ°æœ‰ç›¸åŒç‰©å“çš„ç©å®¶èƒŒåŒ…æ ¼å­
                 else
                 {
                     int newAmount = playerBag.itemList[index].itemAmount + amount;
@@ -490,23 +490,23 @@ namespace MFarm.Inventory
                     }
                     else
                     {
-                        //»¹ÓĞ¶àÉÙÊıÁ¿Ã»¼Óµ½Íæ¼Ò±³°üÖĞ
+                        //è¿˜æœ‰å¤šå°‘æ•°é‡æ²¡åŠ åˆ°ç©å®¶èƒŒåŒ…ä¸­
                         int remainingAmount = amount - (99 - playerBag.itemList[index].itemAmount);
                         var newItem = new InventoryItem { itemID = ID, itemAmount = 99 };
                         playerBag.itemList[index] = newItem;
                         List<int> itemIndexList = GetItemsIndexInBag(ID, playerBag.itemList);
-                        //ÓĞÆäËûÏàÍ¬ÎïÆ·µÄ¸ñ×Ó
+                        //æœ‰å…¶ä»–ç›¸åŒç‰©å“çš„æ ¼å­
                         if(itemIndexList.Count > 1)
                         {
                            
                             for (int i = 0; i < itemIndexList.Count; i++)
                             {
-                                //ºöÂÔÑ¡ÔñµÄÒÑÓĞÎïÆ·¸ñ
+                                //å¿½ç•¥é€‰æ‹©çš„å·²æœ‰ç‰©å“æ ¼
                                 if(i == index)
                                 {
                                     continue;
                                 }
-                                //¸ÕºÃÕâÒ»¸ñ¿ÉÒÔ°ÑÊ£ÓàÊıÁ¿È«²¿¼ÓÍê
+                                //åˆšå¥½è¿™ä¸€æ ¼å¯ä»¥æŠŠå‰©ä½™æ•°é‡å…¨éƒ¨åŠ å®Œ
                                 if (playerBag.itemList[itemIndexList[i]].itemAmount + remainingAmount <= 99)
                                 {
                                     var otherItem = new InventoryItem { itemID = ID, itemAmount = playerBag.itemList[itemIndexList[i]].itemAmount + remainingAmount };
@@ -514,24 +514,24 @@ namespace MFarm.Inventory
                                     remainingAmount = 0;
                                     return;
                                 }
-                                //ÕâÒ»¸ñ¼Óµ½99»¹ÊÇÓĞÊ£ÓàÊıÁ¿
+                                //è¿™ä¸€æ ¼åŠ åˆ°99è¿˜æ˜¯æœ‰å‰©ä½™æ•°é‡
                                 else
                                 {
                                     remainingAmount -= (99 - playerBag.itemList[itemIndexList[i]].itemAmount);
                                     var otherItem = new InventoryItem { itemID = ID, itemAmount = 99 };
                                     playerBag.itemList[itemIndexList[i]] = otherItem;
                                 }
-                                //Ê£ÓàÊıÁ¿ÒÑ¼ÓÍê£¬¾ÍÍË³ö
+                                //å‰©ä½™æ•°é‡å·²åŠ å®Œï¼Œå°±é€€å‡º
                                 //if(remainingAmount <= 0)
                                 //{
                                 //    return;
                                 //}
                             }
                            
-                            //Èç¹ûÈ«²¿ÒÑÓĞÎïÆ·¶¼¼Óµ½ÁË99ÊıÁ¿»¹ÊÇÓĞÊ£ÓàµÄÊıÁ¿
+                            //å¦‚æœå…¨éƒ¨å·²æœ‰ç‰©å“éƒ½åŠ åˆ°äº†99æ•°é‡è¿˜æ˜¯æœ‰å‰©ä½™çš„æ•°é‡
                             if(remainingAmount > 0)
                             {
-                                //»ñÈ¡Íæ¼Ò±³°ü¸ñÄÚÆäËû¿ÕµÄ¸ñ×Ó
+                                //è·å–ç©å®¶èƒŒåŒ…æ ¼å†…å…¶ä»–ç©ºçš„æ ¼å­
                                 for (int i = 0; i < playerBag.itemList.Count; i++)
                                 {
                                     if (playerBag.itemList[i].itemID == 0)
@@ -542,10 +542,10 @@ namespace MFarm.Inventory
                                 }
                             }
                         }
-                        //±³°üÄÚ³ı×Ô¼ºÃ»ÓĞÆäËûÏàÍ¬µÄÎïÆ·¸ñ×Ó
+                        //èƒŒåŒ…å†…é™¤è‡ªå·±æ²¡æœ‰å…¶ä»–ç›¸åŒçš„ç‰©å“æ ¼å­
                         else
                         {
-                            //»ñÈ¡Íæ¼Ò±³°ü¸ñÄÚÆäËû¿ÕµÄ¸ñ×Ó
+                            //è·å–ç©å®¶èƒŒåŒ…æ ¼å†…å…¶ä»–ç©ºçš„æ ¼å­
                             for (int i = 0; i < playerBag.itemList.Count; i++)
                             {
                                 if (playerBag.itemList[i].itemID == 0)
@@ -561,12 +561,12 @@ namespace MFarm.Inventory
             }
             else
             {
-                //±³°üÃ»ÓĞ¸ÃÎïÆ·,ÇÒÓĞ¿ÕÎ»
+                //èƒŒåŒ…æ²¡æœ‰è¯¥ç‰©å“,ä¸”æœ‰ç©ºä½
                 if (index == -1 && CheckBagCapacity())
                 {
-                    //³õÊ¼»¯Õâ¸öÎïÆ·
+                    //åˆå§‹åŒ–è¿™ä¸ªç‰©å“
                     var item = new InventoryItem { itemID = ID, itemAmount = amount };
-                    //ÕÒµ½±³°ü¿ÕÎ»µÄÎ»ÖÃ²¢°ÑĞÂÎïÆ·¸³Öµµ½¿ÕÎ»ÉÏ
+                    //æ‰¾åˆ°èƒŒåŒ…ç©ºä½çš„ä½ç½®å¹¶æŠŠæ–°ç‰©å“èµ‹å€¼åˆ°ç©ºä½ä¸Š
                     for (int i = 0; i < playerBag.itemList.Count - 4; i++)
                     {
                         if (playerBag.itemList[i].itemID == 0)
@@ -576,12 +576,12 @@ namespace MFarm.Inventory
                         }
                     }
                 }
-                //±³°üÖĞÒÑÓĞ¸ÃÎïÆ·
+                //èƒŒåŒ…ä¸­å·²æœ‰è¯¥ç‰©å“
                 else
                 {
-                    //Ôö¼Óµ±Ç°ÎïÆ·µÄÊıÁ¿,²¢³õÊ¼»¯ÎïÆ·µÄIDºÍÊıÁ¿ºÍÕÒµ½¸ÃÎïÆ·µÄÎ»ÖÃÖØĞÂ¸³ÖµĞÂµÄÎïÆ·ĞÅÏ¢
+                    //å¢åŠ å½“å‰ç‰©å“çš„æ•°é‡,å¹¶åˆå§‹åŒ–ç‰©å“çš„IDå’Œæ•°é‡å’Œæ‰¾åˆ°è¯¥ç‰©å“çš„ä½ç½®é‡æ–°èµ‹å€¼æ–°çš„ç‰©å“ä¿¡æ¯
                     int currentAmount = playerBag.itemList[index].itemAmount + amount;
-                    //¶Ñµş²»ÄÜ³¬¹ı 99£¬³¬³ö²¿·Ö·Åµ½±³°ü¿ÕÎ»
+                    //å †å ä¸èƒ½è¶…è¿‡ 99ï¼Œè¶…å‡ºéƒ¨åˆ†æ”¾åˆ°èƒŒåŒ…ç©ºä½
                     if (currentAmount <= 99)
                     {
                         var item = new InventoryItem { itemID = ID, itemAmount = currentAmount };
@@ -607,20 +607,20 @@ namespace MFarm.Inventory
             
         }
         /// <summary>
-        /// ½»»»slotµÄĞòºÅ
+        /// äº¤æ¢slotçš„åºå·
         /// </summary>
         /// <param name="fromIndex"></param>
         /// <param name="targetIndex"></param>
-        /// <param name="currentAmount">È¡³öµÄ°ëÊı</param>
-        /// <param name="halfAmount">×Ô¼ºµÄ°ëÊı</param>
+        /// <param name="currentAmount">å–å‡ºçš„åŠæ•°</param>
+        /// <param name="halfAmount">è‡ªå·±çš„åŠæ•°</param>
         public void Swapitem(int fromIndex,int targetIndex,int currentAmount,int halfAmount)
         {
             InventoryItem currentItem = playerBag.itemList[fromIndex];
             InventoryItem targetItem = playerBag.itemList[targetIndex];
-            //Ä¿±ê±³°ü¸ñ²»Îª¿Õ
+            //ç›®æ ‡èƒŒåŒ…æ ¼ä¸ä¸ºç©º
             if(targetItem.itemID != 0)
             {
-                //Ô­À´ÎïÆ·ºÍÄ¿±êÎïÆ·²»Í¬
+                //åŸæ¥ç‰©å“å’Œç›®æ ‡ç‰©å“ä¸åŒ
                 if (targetItem.itemID != currentItem.itemID)
                 {
                     if (isHalfAmount)
@@ -629,29 +629,29 @@ namespace MFarm.Inventory
                     }
                     else
                     {
-                        //½»»»ĞòºÅ
+                        //äº¤æ¢åºå·
                         playerBag.itemList[fromIndex] = targetItem;
                         playerBag.itemList[targetIndex] = currentItem;
                     }
                    
                 }
-                //Ô­À´ÎïÆ·ºÍÄ¿±êÎïÆ·ÏàÍ¬
+                //åŸæ¥ç‰©å“å’Œç›®æ ‡ç‰©å“ç›¸åŒ
                 else
                 {
-                    //Ã»ÒÆ¶¯ÎïÆ·
+                    //æ²¡ç§»åŠ¨ç‰©å“
                     if(fromIndex == targetIndex)
                     {
-                        //Í¬Ê±Ë¢ĞÂÒ»ÏÂÍæ¼Ò±³°ü
+                        //åŒæ—¶åˆ·æ–°ä¸€ä¸‹ç©å®¶èƒŒåŒ…
                         EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, playerBag.itemList,0);
                         return;
                     }
-                    //Ìí¼ÓÎïÆ·ÊıÁ¿
+                    //æ·»åŠ ç‰©å“æ•°é‡
                     else
                     {
                         if (isHalfAmount)
                         {
                             var amount = targetItem.itemAmount + currentAmount;
-                            //¸öÊı²»³¬¹ı99
+                            //ä¸ªæ•°ä¸è¶…è¿‡99
                             if(amount <= 99)
                             {
                                 var item = new InventoryItem { itemID = currentItem.itemID, itemAmount = amount };
@@ -673,14 +673,14 @@ namespace MFarm.Inventory
                             var amount = targetItem.itemAmount + currentItem.itemAmount;
                             if(amount <= 99)
                             {
-                                //Ä¿±êÎïÆ·
+                                //ç›®æ ‡ç‰©å“
                                 var item = new InventoryItem { itemID = currentItem.itemID, itemAmount = amount };
                                 playerBag.itemList[targetIndex] = item;
                                 playerBag.itemList[fromIndex] = new InventoryItem();
                             }
                             else
                             {
-                                //Ä¿±êÎïÆ·
+                                //ç›®æ ‡ç‰©å“
                                 var item = new InventoryItem { itemID = currentItem.itemID, itemAmount = 99 };
                                 playerBag.itemList[fromIndex] = new InventoryItem { itemID = currentItem.itemID, itemAmount = currentItem.itemAmount - (99 - targetItem.itemAmount) };
                                 playerBag.itemList[targetIndex] = item;
@@ -690,7 +690,7 @@ namespace MFarm.Inventory
                 }
              
             }
-            //Èç¹ûÍÏ×§½áÊøºóslotÊÇ¿ÕµÄ
+            //å¦‚æœæ‹–æ‹½ç»“æŸåslotæ˜¯ç©ºçš„
             else
             {
                 if (isHalfAmount)
@@ -702,17 +702,17 @@ namespace MFarm.Inventory
                 else
                 {
 
-                    //°ÑÍÏ×§¿ªÊ¼µÄslotÉèÖÃÎªĞÂµÄslot
+                    //æŠŠæ‹–æ‹½å¼€å§‹çš„slotè®¾ç½®ä¸ºæ–°çš„slot
                     playerBag.itemList[targetIndex] = currentItem;
                     playerBag.itemList[fromIndex] = new InventoryItem();
                 }
               
             }
-            //Í¬Ê±Ë¢ĞÂÒ»ÏÂÍæ¼Ò±³°ü
+            //åŒæ—¶åˆ·æ–°ä¸€ä¸‹ç©å®¶èƒŒåŒ…
             EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, playerBag.itemList,0);
         }
         /// <summary>
-        /// ÔÚ³öÊÛÏäÄÚÍÏ×§ÎïÆ·
+        /// åœ¨å‡ºå”®ç®±å†…æ‹–æ‹½ç‰©å“
         /// </summary>
         /// <param name="fromIndex"></param>
         /// <param name="targetIndex"></param>
@@ -720,38 +720,38 @@ namespace MFarm.Inventory
         {
             InventoryItem currentItem = sellBoxBag.itemList[fromIndex];
             InventoryItem targetItem = sellBoxBag.itemList[targetIndex];
-            //ÍÏ×§½áÊøºóµÄslot²»ÊÇ¿ÕµÄ
+            //æ‹–æ‹½ç»“æŸåçš„slotä¸æ˜¯ç©ºçš„
             if (targetItem.itemID != 0)
             {
-                //ÍÏ×§µÄÎïÆ·ºÍÄ¿±êÎïÆ·²»Í¬
+                //æ‹–æ‹½çš„ç‰©å“å’Œç›®æ ‡ç‰©å“ä¸åŒ
                 if (currentItem.itemID != targetItem.itemID)
                 {
-                    //½»»»ĞòºÅ
+                    //äº¤æ¢åºå·
                     sellBoxBag.itemList[fromIndex] = targetItem;
                     sellBoxBag.itemList[targetIndex] = currentItem;
                 }
-                //Á½¸öÎïÆ·ÏàµÈÊ±
+                //ä¸¤ä¸ªç‰©å“ç›¸ç­‰æ—¶
                 else
                 {
-                    //Ã»ÒÆ¶¯ÎïÆ·
+                    //æ²¡ç§»åŠ¨ç‰©å“
                     if (fromIndex == targetIndex)
                     {
                         return;
                     }
-                    //Ôö¼ÓÎïÆ·µÄ·½·¨ºÜ¹Ö£¬²»¹ıÃ»°ì·¨
+                    //å¢åŠ ç‰©å“çš„æ–¹æ³•å¾ˆæ€ªï¼Œä¸è¿‡æ²¡åŠæ³•
                     else
                     {
                         var amount = targetItem.itemAmount + currentItem.itemAmount;
                         if (amount <= 99)
                         {
-                            //Ä¿±êÎïÆ·
+                            //ç›®æ ‡ç‰©å“
                             var item = new InventoryItem { itemID = currentItem.itemID, itemAmount = amount };
                             sellBoxBag.itemList[targetIndex] = item;
                             sellBoxBag.itemList[fromIndex] = new InventoryItem();
                         }
                         else
                         {
-                            //Ä¿±êÎïÆ·
+                            //ç›®æ ‡ç‰©å“
                             var item = new InventoryItem { itemID = currentItem.itemID, itemAmount = 99 };
                             sellBoxBag.itemList[fromIndex] = new InventoryItem { itemID = currentItem.itemID, itemAmount = currentItem.itemAmount - (99 - targetItem.itemAmount) };
                             sellBoxBag.itemList[targetIndex] = item;
@@ -760,63 +760,63 @@ namespace MFarm.Inventory
                    
                 }
             }
-            //Èç¹ûÍÏ×§½áÊøºóslotÊÇ¿ÕµÄ
+            //å¦‚æœæ‹–æ‹½ç»“æŸåslotæ˜¯ç©ºçš„
             else
             {
-                //°ÑÍÏ×§¿ªÊ¼µÄslotÉèÖÃÎªĞÂµÄslot
+                //æŠŠæ‹–æ‹½å¼€å§‹çš„slotè®¾ç½®ä¸ºæ–°çš„slot
                 sellBoxBag.itemList[targetIndex] = currentItem;
                 sellBoxBag.itemList[fromIndex] = new InventoryItem();
             }
-            //Í¬Ê±Ë¢ĞÂÒ»ÏÂ³öÊÛÏä
+            //åŒæ—¶åˆ·æ–°ä¸€ä¸‹å‡ºå”®ç®±
             EventHandler.CallUpdateInventoryUI(InventoryLocation.SellBox, sellBoxBag.itemList,0);
         }
         /// <summary>
-        /// ¿ç±³°ü½»»»Êı¾İ
+        /// è·¨èƒŒåŒ…äº¤æ¢æ•°æ®
         /// </summary>
         /// <param name="locationFrom"></param>
         /// <param name="fromIndex"></param>
         /// <param name="locationTarget"></param>
         /// <param name="targetIndex"></param>
-        /// <param name="isSelect">ÊÇ·ñÑ¯ÎÊÊıÁ¿</param>
-        /// <param name="selectAmount">Ñ¡ÔñµÄÊıÁ¿</param>
+        /// <param name="isSelect">æ˜¯å¦è¯¢é—®æ•°é‡</param>
+        /// <param name="selectAmount">é€‰æ‹©çš„æ•°é‡</param>
         public void SwapItem(InventoryLocation locationFrom, int fromIndex, InventoryLocation locationTarget, int targetIndex, bool isSelect, int selectAmount)
         {
             var currentList = GetItemList(locationFrom);
             var targetList = GetItemList(locationTarget);
             InventoryItem currentItem = currentList[fromIndex];
-            //²»Ñ¯ÎÊÊıÁ¿
+            //ä¸è¯¢é—®æ•°é‡
             if (!isSelect)
             {
               
                 if (targetIndex < targetList.Count)
                 {
                     InventoryItem targetItem = targetList[targetIndex];
-                    //µ±Ïä×ÓºÍÍæ¼Ò±³°ü½»»»µÄÎïÆ·²»Í¬Ê±
+                    //å½“ç®±å­å’Œç©å®¶èƒŒåŒ…äº¤æ¢çš„ç‰©å“ä¸åŒæ—¶
                     if (targetItem.itemID != 0 && currentItem.itemID != targetItem.itemID)
                     {
                         currentList[fromIndex] = targetItem;
                         targetList[targetIndex] = currentItem;
                     }
-                    //Á½¸öÎïÆ·ÏàµÈÊ±
+                    //ä¸¤ä¸ªç‰©å“ç›¸ç­‰æ—¶
                     else if (currentItem.itemID == targetItem.itemID)
                     {
                        
                         currentList[fromIndex] = new InventoryItem();
                        
-                        //Ìí¼ÓÄ¿±êÎïÆ·µÄÊıÁ¿Ğ¡ÓÚ99Ê±
+                        //æ·»åŠ ç›®æ ‡ç‰©å“çš„æ•°é‡å°äº99æ—¶
                         if (targetItem.itemAmount + currentItem.itemAmount <= 99)
                         {
                             targetItem.itemAmount += currentItem.itemAmount;
                             targetList[targetIndex] = targetItem;
                         }
-                        //Ìí¼ÓÄ¿±êÎïÆ·µÄÊıÁ¿´óÓÚ99Ê±
+                        //æ·»åŠ ç›®æ ‡ç‰©å“çš„æ•°é‡å¤§äº99æ—¶
                         else
                         {
                             
                             List<int> itemIndexList = GetItemsIndexInBag(currentItem.itemID, targetList);
                             int remainingAmount = selectAmount -  (99 - targetList[targetIndex].itemAmount);
                             targetList[targetIndex] = new InventoryItem { itemID = currentItem.itemID, itemAmount = 99 };
-                            //Íæ¼Ò±³°üÄÚÖ»ÓĞÒ»¸öÏàÍ¬ÎïÆ·
+                            //ç©å®¶èƒŒåŒ…å†…åªæœ‰ä¸€ä¸ªç›¸åŒç‰©å“
                             if (itemIndexList.Count <= 1)
                             {
                                 for (int i = 0; i < targetList.Count; i++)
@@ -829,7 +829,7 @@ namespace MFarm.Inventory
                                     }
                                 }
                             }
-                            //Íæ¼Ò±³°üÄÚÓĞ¶à¸öÏàÍ¬ÎïÆ·
+                            //ç©å®¶èƒŒåŒ…å†…æœ‰å¤šä¸ªç›¸åŒç‰©å“
                             else
                             {
                                 for (int i = 0; i < itemIndexList.Count; i++)
@@ -851,10 +851,10 @@ namespace MFarm.Inventory
                                         targetList[itemIndexList[i]] = new InventoryItem { itemID = currentItem.itemID, itemAmount = 99 };
                                     }
                                 }
-                                //Èç¹ûÈ«²¿ÒÑÓĞÎïÆ·¶¼¼Óµ½ÁË99ÊıÁ¿»¹ÊÇÓĞÊ£ÓàµÄÊıÁ¿
+                                //å¦‚æœå…¨éƒ¨å·²æœ‰ç‰©å“éƒ½åŠ åˆ°äº†99æ•°é‡è¿˜æ˜¯æœ‰å‰©ä½™çš„æ•°é‡
                                 if (remainingAmount > 0)
                                 {
-                                    //»ñÈ¡Íæ¼Ò±³°ü¸ñÄÚÆäËû¿ÕµÄ¸ñ×Ó
+                                    //è·å–ç©å®¶èƒŒåŒ…æ ¼å†…å…¶ä»–ç©ºçš„æ ¼å­
                                     for (int i = 0; i < targetList.Count; i++)
                                     {
                                         if (targetList[i].itemID == 0)
@@ -869,7 +869,7 @@ namespace MFarm.Inventory
                         }
                        
                     }
-                    //Ä¿±êÊÇ¿Õ¸ñ×Ó
+                    //ç›®æ ‡æ˜¯ç©ºæ ¼å­
                     else
                     {
                         targetList[targetIndex] = currentItem;
@@ -878,21 +878,21 @@ namespace MFarm.Inventory
                     }
                 }
             }
-            //Ñ¯ÎÊÊıÁ¿
+            //è¯¢é—®æ•°é‡
             else
             {
                 if (targetIndex < targetList.Count)
                 {
                     InventoryItem targetItem = targetList[targetIndex];
-                    //µ±Ïä×ÓºÍÍæ¼Ò±³°ü½»»»µÄÎïÆ·²»Í¬Ê±
+                    //å½“ç®±å­å’Œç©å®¶èƒŒåŒ…äº¤æ¢çš„ç‰©å“ä¸åŒæ—¶
                     if (targetItem.itemID != 0 && currentItem.itemID != targetItem.itemID)
                     {
                         return;
                     }
-                    //Á½¸öÎïÆ·ÏàµÈÊ±
+                    //ä¸¤ä¸ªç‰©å“ç›¸ç­‰æ—¶
                     else if (currentItem.itemID == targetItem.itemID)
                     {
-                        //Ìí¼ÓÄ¿±êÎïÆ·µÄÊıÁ¿Ğ¡ÓÚ99Ê±
+                        //æ·»åŠ ç›®æ ‡ç‰©å“çš„æ•°é‡å°äº99æ—¶
                         if (targetItem.itemAmount + selectAmount <= 99)
                         {
                             targetItem.itemAmount += selectAmount;
@@ -900,7 +900,7 @@ namespace MFarm.Inventory
                             currentItem.itemAmount -= selectAmount;
                             currentList[fromIndex] = currentItem;
                         }
-                        //Ìí¼ÓÄ¿±êÎïÆ·µÄÊıÁ¿´óÓÚ99Ê±
+                        //æ·»åŠ ç›®æ ‡ç‰©å“çš„æ•°é‡å¤§äº99æ—¶
                         else
                         {
 
@@ -909,7 +909,7 @@ namespace MFarm.Inventory
                             targetList[targetIndex] = new InventoryItem { itemID = currentItem.itemID, itemAmount = 99 };
                             currentItem.itemAmount -= selectAmount;
                             currentList[fromIndex] = currentItem;
-                            //Íæ¼Ò±³°üÄÚÖ»ÓĞÒ»¸öÏàÍ¬ÎïÆ·
+                            //ç©å®¶èƒŒåŒ…å†…åªæœ‰ä¸€ä¸ªç›¸åŒç‰©å“
                             if (itemIndexList.Count <= 1)
                             {
                                 for (int i = 0; i < targetList.Count; i++)
@@ -922,7 +922,7 @@ namespace MFarm.Inventory
                                     }
                                 }
                             }
-                            //Íæ¼Ò±³°üÄÚÓĞ¶à¸öÏàÍ¬ÎïÆ·
+                            //ç©å®¶èƒŒåŒ…å†…æœ‰å¤šä¸ªç›¸åŒç‰©å“
                             else
                             {
                                 for (int i = 0; i < itemIndexList.Count; i++)
@@ -944,10 +944,10 @@ namespace MFarm.Inventory
                                         targetList[itemIndexList[i]] = new InventoryItem { itemID = currentItem.itemID, itemAmount = 99 };
                                     }
                                 }
-                                //Èç¹ûÈ«²¿ÒÑÓĞÎïÆ·¶¼¼Óµ½ÁË99ÊıÁ¿»¹ÊÇÓĞÊ£ÓàµÄÊıÁ¿
+                                //å¦‚æœå…¨éƒ¨å·²æœ‰ç‰©å“éƒ½åŠ åˆ°äº†99æ•°é‡è¿˜æ˜¯æœ‰å‰©ä½™çš„æ•°é‡
                                 if (remainingAmount > 0)
                                 {
-                                    //»ñÈ¡Íæ¼Ò±³°ü¸ñÄÚÆäËû¿ÕµÄ¸ñ×Ó
+                                    //è·å–ç©å®¶èƒŒåŒ…æ ¼å†…å…¶ä»–ç©ºçš„æ ¼å­
                                     for (int i = 0; i < targetList.Count; i++)
                                     {
                                         if (targetList[i].itemID == 0)
@@ -961,7 +961,7 @@ namespace MFarm.Inventory
                             }
                         }
                     }
-                    //Ä¿±êÊÇ¿Õ¸ñ×Ó
+                    //ç›®æ ‡æ˜¯ç©ºæ ¼å­
                     else
                     {
                         var tempTargetItem = new InventoryItem { itemID = currentItem.itemID, itemAmount = selectAmount };
@@ -971,12 +971,12 @@ namespace MFarm.Inventory
                     }
                 }
             }
-            //¸üĞÂË«·½µÄ¸ñ×ÓUI
+            //æ›´æ–°åŒæ–¹çš„æ ¼å­UI
             EventHandler.CallUpdateInventoryUI(locationFrom, currentList,0);
             EventHandler.CallUpdateInventoryUI(locationTarget, targetList,0);
         }
         /// <summary>
-        /// ¸ù¾İÎ»ÖÃ·µ»Ø±³°üÊı¾İÁĞ±í
+        /// æ ¹æ®ä½ç½®è¿”å›èƒŒåŒ…æ•°æ®åˆ—è¡¨
         /// </summary>
         /// <param name="location"></param>
         /// <returns></returns>
@@ -992,17 +992,17 @@ namespace MFarm.Inventory
             };
         }
 /// <summary>
-/// ÒÆ³ıÖ¸¶¨ÊıÁ¿µÄ±³°üÎïÆ·
+/// ç§»é™¤æŒ‡å®šæ•°é‡çš„èƒŒåŒ…ç‰©å“
 /// </summary>
 /// <param name="ID"></param>
 /// <param name="removeAmount"></param>
         public void RemoveItem(int ID , int removeAmount)
         {
-            //»ñÈ¡¶ªÆúÎïÆ·IDÔÚ±³°ü¸ñÖĞµÄĞòºÅ
+            //è·å–ä¸¢å¼ƒç‰©å“IDåœ¨èƒŒåŒ…æ ¼ä¸­çš„åºå·
             var index = GetItemIndexInBag(ID, playerBag.itemList);
             if (playerBag.itemList[index].itemAmount > removeAmount)
             {
-                //¸üĞÂµ±Ç°ÎïÆ·ÊıÁ¿
+                //æ›´æ–°å½“å‰ç‰©å“æ•°é‡
                 var amount = playerBag.itemList[index].itemAmount - removeAmount;
                 var item = new InventoryItem { itemID=ID, itemAmount = amount };
                 playerBag.itemList[index] = item;
@@ -1014,18 +1014,18 @@ namespace MFarm.Inventory
                 currentSelectedItem = null;
                 GridMapManager.Instance.QuitDigAvailableGround();
             }
-            //Í¬Ê±¶ÔUIÒ²ÒªË¢ĞÂÊıÁ¿
+            //åŒæ—¶å¯¹UIä¹Ÿè¦åˆ·æ–°æ•°é‡
             EventHandler.CallUpdateInventoryUI(InventoryLocation.Player,playerBag.itemList,0);
         }
         /// <summary>
-        /// ¼õÉÙµ±Ç°Ñ¡ÔñµÄÎïÆ·ÊıÁ¿
+        /// å‡å°‘å½“å‰é€‰æ‹©çš„ç‰©å“æ•°é‡
         /// </summary>
         /// <param name="removeAmount"></param>
         public void RemoveItemOfIndex(int removeAmount)
         {
             if (playerBag.itemList[currentSelectBagIndex].itemAmount > removeAmount)
             {
-                //¸üĞÂµ±Ç°ÎïÆ·ÊıÁ¿
+                //æ›´æ–°å½“å‰ç‰©å“æ•°é‡
                 var amount = playerBag.itemList[currentSelectBagIndex].itemAmount - removeAmount;
                 var item = new InventoryItem { itemID = playerBag.itemList[currentSelectBagIndex].itemID, itemAmount = amount };
                 playerBag.itemList[currentSelectBagIndex] = item;
@@ -1037,67 +1037,67 @@ namespace MFarm.Inventory
                 currentSelectedItem = null;
                 GridMapManager.Instance.QuitDigAvailableGround();
             }
-            //Í¬Ê±¶ÔUIÒ²ÒªË¢ĞÂÊıÁ¿
+            //åŒæ—¶å¯¹UIä¹Ÿè¦åˆ·æ–°æ•°é‡
             EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, playerBag.itemList, 0);
         }
         /// <summary>
-        /// ½»Ò×ÎïÆ·
+        /// äº¤æ˜“ç‰©å“
         /// </summary>
-        /// <param name="itemDetails">½»Ò×ÎïÆ·µÄĞÅÏ¢</param>
-        /// <param name="amount">½»Ò×ÊıÁ¿</param>
-        /// <param name="isSellTrade">ÊÇ·ñÂô¶«Î÷</param>
+        /// <param name="itemDetails">äº¤æ˜“ç‰©å“çš„ä¿¡æ¯</param>
+        /// <param name="amount">äº¤æ˜“æ•°é‡</param>
+        /// <param name="isSellTrade">æ˜¯å¦å–ä¸œè¥¿</param>
         public void TradeItem(ItemDetails itemDetails,int amount,bool isSellTrade,int startIndex,int endIndex,InventoryLocation startLocation,InventoryLocation endLocation,bool isToSellBox)
         {
             int cost = itemDetails.itemPrice * amount;
-            //»ñµÃÎïÆ·±³°üÎ»ÖÃ
+            //è·å¾—ç‰©å“èƒŒåŒ…ä½ç½®
             //int index = GetItemIndexInBag(itemDetails.getItemID);
-            //Âô
+            //å–
             if (isSellTrade)
             {
-                //µ½³öÊÛÏä
+                //åˆ°å‡ºå”®ç®±
                 if (isToSellBox)
                 {
                     SwapItem(startLocation, startIndex, endLocation, endIndex, true, amount);
                 }
-                //µ½ÉÌµê
+                //åˆ°å•†åº—
                 else
                 {
                     RemoveItem(itemDetails.itemID, amount);
                     playerMoney += (int)(cost * itemDetails.sellPercentage);
                 }
             }
-            //Âò
+            //ä¹°
             else
             {
                 AddItemAtIndex(itemDetails.itemID, endIndex, amount, true);
                 EventHandler.CallDoTweenPlayerMoneyChageEvent(playerMoney, -cost);
-                //¼ì²é±³°üÊÇ·ñ»¹ÓĞ¿ÕÎ»
+                //æ£€æŸ¥èƒŒåŒ…æ˜¯å¦è¿˜æœ‰ç©ºä½
                 //if (CheckBagCapacity())
                 //{
                    
                 //}
             }
-            //Âò£¬ÒªÓĞ×ã¹»µÄÇ®
+            //ä¹°ï¼Œè¦æœ‰è¶³å¤Ÿçš„é’±
             //else if(playerMoney - cost >= 0)
             //{
                
             //}
-            //Ë¢ĞÂUI
+            //åˆ·æ–°UI
             EventHandler.CallUpdateInventoryUI(InventoryLocation.Player,playerBag.itemList,0);
         }
         /// <summary>
-        /// ¼ì²éÍ¼Ö½½¨ÔìËùĞèµÄ¿â´æ
+        /// æ£€æŸ¥å›¾çº¸å»ºé€ æ‰€éœ€çš„åº“å­˜
         /// </summary>
-        /// <param name="ID">Í¼Ö½ID</param>
+        /// <param name="ID">å›¾çº¸ID</param>
         /// <returns></returns>
         public bool CheckStock(int ID)
         {
             var bluePrintDetails = bluPrintData.GetBluPrintDetails(ID);
             foreach(var resourceItem in bluePrintDetails.resourceItem)
             {
-                //Íæ¼Ò±³°ü¿â´æ
+                //ç©å®¶èƒŒåŒ…åº“å­˜
                 var itemStock = playerBag.GetInventoryItem(resourceItem.itemID);
-                //½¨ÔìËØ²ÄºÍÍæ¼Ò±³°ü¿â´æ×ö±È½Ï
+                //å»ºé€ ç´ æå’Œç©å®¶èƒŒåŒ…åº“å­˜åšæ¯”è¾ƒ
                 if (itemStock.itemAmount >= resourceItem.itemAmount)
                 {
                     continue;
@@ -1107,14 +1107,14 @@ namespace MFarm.Inventory
             return true;
         }
         /// <summary>
-        /// ¼ì²éÍæ¼ÒÊÇ·ñÓĞ×ã¹»µÄÊ³²Ä
+        /// æ£€æŸ¥ç©å®¶æ˜¯å¦æœ‰è¶³å¤Ÿçš„é£Ÿæ
         /// </summary>
-        /// <param name="ID">²ËëÈID</param>
+        /// <param name="ID">èœè‚´ID</param>
         /// <returns></returns>
         public bool CheckIngredients(int ID)
         {
             var cookedDetails = cookedData.GetCookedDetails(ID);
-            //ingredientsItemËùĞèÊ³²Ä£¬ingredientStockÍæ¼Ò³ÖÓĞÊ³²Ä
+            //ingredientsItemæ‰€éœ€é£Ÿæï¼ŒingredientStockç©å®¶æŒæœ‰é£Ÿæ
             foreach (var ingredientsItem in cookedDetails.cookResource)
             {
                 var ingredientStock = playerBag.GetInventoryItem(ingredientsItem.itemID);
@@ -1128,7 +1128,7 @@ namespace MFarm.Inventory
             return true;
         }
         /// <summary>
-        /// ²éÕÒÏä×ÓÊı¾İ
+        /// æŸ¥æ‰¾ç®±å­æ•°æ®
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
@@ -1141,7 +1141,7 @@ namespace MFarm.Inventory
             return null;
         }
         /// <summary>
-        /// ¼ÓÈëÏä×ÓÊı¾İ×Öµä
+        /// åŠ å…¥ç®±å­æ•°æ®å­—å…¸
         /// </summary>
         /// <param name="box"></param>
         public void AddBoxDataDict(Box box)
@@ -1153,7 +1153,7 @@ namespace MFarm.Inventory
             }
         }
         /// <summary>
-        /// ÔÚ½ÓÊÜÈÎÎñÊ±¼ì²é±³°üÊÇ·ñÒÑÓĞÈÎÎñÎïÆ·
+        /// åœ¨æ¥å—ä»»åŠ¡æ—¶æ£€æŸ¥èƒŒåŒ…æ˜¯å¦å·²æœ‰ä»»åŠ¡ç‰©å“
         /// </summary>
         /// <param name="ID"></param>
         public void CheckQuestItemInBag(int ID)
@@ -1170,7 +1170,7 @@ namespace MFarm.Inventory
             }
         }
         /// <summary>
-        /// ĞŞ¸Ä³öÊÛÏä½ğ¶î
+        /// ä¿®æ”¹å‡ºå”®ç®±é‡‘é¢
         /// </summary>
         /// <returns></returns>
         public int ModifySellBoxValue()
@@ -1187,18 +1187,18 @@ namespace MFarm.Inventory
             return currentAllValue;
         }
         /// <summary>
-        /// Ôö¼ÓÍæ¼ÒµÄ½ğÇ®²¢Çå¿Õ³öÊÛÏäµÄÎïÆ·
+        /// å¢åŠ ç©å®¶çš„é‡‘é’±å¹¶æ¸…ç©ºå‡ºå”®ç®±çš„ç‰©å“
         /// </summary>
         /// <param name="value"></param>
         public void IncreasePlayerMoney(int value)
         {
-            //Çå¿Õ³öÊÛÏäÊı¾İ
+            //æ¸…ç©ºå‡ºå”®ç®±æ•°æ®
             sellBoxBag = Instantiate(sellBoxBagTemp);
             EventHandler.CallUpdateInventoryUI(InventoryLocation.SellBox, sellBoxBag.itemList, value);
             
         }
         /// <summary>
-        /// ½áËãÂô³µ¸ñ×Ó£º×Ü¼ÛÖµ¼Óµ½Íæ¼Ò½ğÇ®£¬²¢Çå¿ÕËùÓĞÂô³µ¸ñ×Ó
+        /// ç»“ç®—å–è½¦æ ¼å­ï¼šæ€»ä»·å€¼åŠ åˆ°ç©å®¶é‡‘é’±ï¼Œå¹¶æ¸…ç©ºæ‰€æœ‰å–è½¦æ ¼å­
         /// </summary>
         public void SettleSellCarItems()
         {
@@ -1211,23 +1211,23 @@ namespace MFarm.Inventory
                     totalValue += (int)(item.itemAmount * details.itemPrice * details.sellPercentage);
                 }
             }
-            // Çå¿ÕÂô³µ¸ñ×Ó£¬±£Áô 81 ¸ñ½á¹¹
+            // æ¸…ç©ºå–è½¦æ ¼å­ï¼Œä¿ç•™ 81 æ ¼ç»“æ„
             for (int i = 0; i < sellCarItemList.Count; i++)
             {
                 sellCarItemList[i] = new InventoryItem();
             }
-            // Ë¢ĞÂÂô³µ¸ñ×ÓµÄ UI£¬Í¬Ê±°Ñ×Ü¼ÛÖµ¼Óµ½Íæ¼Ò½ğÇ®ÉÏ
+            // åˆ·æ–°å–è½¦æ ¼å­çš„ UIï¼ŒåŒæ—¶æŠŠæ€»ä»·å€¼åŠ åˆ°ç©å®¶é‡‘é’±ä¸Š
             EventHandler.CallUpdateInventoryUI(InventoryLocation.SellCar, sellCarItemList, totalValue);
         }
         public GameSaveData GenerateSaveData()
         {
             GameSaveData saveData = new GameSaveData();
-            //Íæ¼Ò½ğÇ®
+            //ç©å®¶é‡‘é’±
             saveData.playerMoney = this.playerMoney;
-            //´æµµ±³°üµ±Ç°ÎïÆ·
+            //å­˜æ¡£èƒŒåŒ…å½“å‰ç‰©å“
             saveData.inventoryDict = new Dictionary<string,List<InventoryItem>>();
             saveData.inventoryDict.Add(playerBag.name, playerBag.itemList);
-            //±éÀúÓÎÏ·ÖĞËùÓĞµÄ±³°üºÍÏä×Ó£¬±£´æ±³°üÊı¾İ
+            //éå†æ¸¸æˆä¸­æ‰€æœ‰çš„èƒŒåŒ…å’Œç®±å­ï¼Œä¿å­˜èƒŒåŒ…æ•°æ®
             foreach(var item in boxDataDict)
             {
                 saveData.inventoryDict.Add(item.Key, item.Value);
@@ -1237,12 +1237,12 @@ namespace MFarm.Inventory
 
         public void RestoreData(GameSaveData saveData)
         {
-            //ÄÃ»Ø½ğÇ®
+            //æ‹¿å›é‡‘é’±
             this.playerMoney = saveData.playerMoney;
-            //¶ÁÈ¡´æµµÊ±ÏÈ°ÑÍæ¼Ò±³°üÉú³É³öÀ´£¬ÒÔÃâ±¨´í
+            //è¯»å–å­˜æ¡£æ—¶å…ˆæŠŠç©å®¶èƒŒåŒ…ç”Ÿæˆå‡ºæ¥ï¼Œä»¥å…æŠ¥é”™
             playerBag = Instantiate(playerBagTemp);
             playerBag.itemList = saveData.inventoryDict[playerBag.name];
-            //ÔÚ´æµµÖĞÄÃÈ¡Ïä×ÓÊı¾İ£¬¶ø²»ÊÇÓÎÏ·ÖĞ
+            //åœ¨å­˜æ¡£ä¸­æ‹¿å–ç®±å­æ•°æ®ï¼Œè€Œä¸æ˜¯æ¸¸æˆä¸­
             foreach(var item in saveData.inventoryDict)
             {
                 if (boxDataDict.ContainsKey(item.Key))
@@ -1250,9 +1250,9 @@ namespace MFarm.Inventory
                     boxDataDict[item.Key] = item.Value;
                 }
             }
-            //Ë¢ĞÂUI
+            //åˆ·æ–°UI
             EventHandler.CallUpdateInventoryUI(InventoryLocation.Player, playerBag.itemList,0);
-            //Íæ¼Ò½ğ±ÒUI¸üĞÂ
+            //ç©å®¶é‡‘å¸UIæ›´æ–°
             
         }
        

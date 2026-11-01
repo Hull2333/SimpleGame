@@ -1,37 +1,37 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 namespace MFarm.Inventory 
 {
-    public class SkillBar : MonoBehaviour //µ÷ÓÃÔÚPlayerSkillPanel¶ÔÏóÉÏ
+    public class SkillBar : MonoBehaviour //è°ƒç”¨åœ¨PlayerSkillPanelå¯¹è±¡ä¸Š
     {
-        [Header("µÈ¼¶¾­ÑéÌõ")]
+        [Header("ç­‰çº§ç»éªŒæ¡")]
         public Image plantingBar;
         public Image cultivetionBar;
         public Image fishingBar;
         public Image fightBar;
         public Image exploreBar;
-        [Header("¼¼ÄÜµÈ¼¶")]
+        [Header("æŠ€èƒ½ç­‰çº§")]
         public Text plantingLevel;
         public Text cultivetionLevel;
         public Text fishingLevel;
         public Text fightLevel;
         public Text exploreLevel;
-        [Header("µ±Ç°µÈ¼¶¾­ÑéÖµ")]
+        [Header("å½“å‰ç­‰çº§ç»éªŒå€¼")]
         public Text currentPlantingExp;
         public Text currentCultivetionExp;
         public Text currentFishingExp;
         public Text currentFightExp;
         public Text currentExploreExp;
-        [Header("µ±Ç°µÈ¼¶ËùĞè¾­ÑéÖµ")]
+        [Header("å½“å‰ç­‰çº§æ‰€éœ€ç»éªŒå€¼")]
         public Text maxPlantingExp;
         public Text maxCultivetionExp;
         public Text maxFishingExp;
         public Text maxFightExp;
         public Text maxExploreExp;
-        [Header("Âú¼¶ÌáÊ¾")]
+        [Header("æ»¡çº§æç¤º")]
         public Text plantMax;
         public Text cultivetionMax;
         public Text fishingMax;
@@ -39,7 +39,7 @@ namespace MFarm.Inventory
         public Text exploreMax;
         private PlayerController playerController => FindObjectOfType<PlayerController>();
         /// <summary>
-        /// ¸üĞÂÍæ¼Ò¼¼ÄÜµÈ¼¶ºÍ¾­Ñé
+        /// æ›´æ–°ç©å®¶æŠ€èƒ½ç­‰çº§å’Œç»éªŒ
         /// </summary>
         public void UpdateSkillBar()
         {

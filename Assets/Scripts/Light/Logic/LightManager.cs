@@ -1,8 +1,8 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LightManager : MonoBehaviour //µ÷ÓÃÔÚLightManager¶ÔÏóÉÏ
+public class LightManager : MonoBehaviour //è°ƒç”¨åœ¨LightManagerå¯¹è±¡ä¸Š
 {
 
     private LightController[] sceneLights;
@@ -14,7 +14,7 @@ public class LightManager : MonoBehaviour //µ÷ÓÃÔÚLightManager¶ÔÏóÉÏ
     {
         EventHandler.AfterSceneLoadedEvent += OnAfterSceneLoadedEvent;
         EventHandler.LightShiftChangeEvent += OnLightShiftChangeEvent;
-        //ĞÂÓÎÏ·¿ªÊ¼Ê±ĞèÒªÖØÖÃµÄÊı¾İ
+        //æ–°æ¸¸æˆå¼€å§‹æ—¶éœ€è¦é‡ç½®çš„æ•°æ®
         EventHandler.StartNewGameEvent += OnStartNewGameEvent;
     }
 
@@ -25,7 +25,7 @@ public class LightManager : MonoBehaviour //µ÷ÓÃÔÚLightManager¶ÔÏóÉÏ
         EventHandler.StartNewGameEvent -= OnStartNewGameEvent;
     }
     /// <summary>
-    /// Ã¿´Î¼ÓÔØÍêµØÍ¼Ö®ºó»ñÈ¡³¡¾°ÖĞµÄËùÓĞµÆ¹â
+    /// æ¯æ¬¡åŠ è½½å®Œåœ°å›¾ä¹‹åè·å–åœºæ™¯ä¸­çš„æ‰€æœ‰ç¯å…‰
     /// </summary>
     private void OnAfterSceneLoadedEvent()
     {
@@ -33,7 +33,7 @@ public class LightManager : MonoBehaviour //µ÷ÓÃÔÚLightManager¶ÔÏóÉÏ
 
         foreach(LightController light in sceneLights)
         {
-            //lightController ¸Ä±äµÆ¹âµÄ·½·¨
+            //lightController æ”¹å˜ç¯å…‰çš„æ–¹æ³•
             light.ChangeLightShift(currentSeason, currentLightShift, timeDifference);
         }
     }
@@ -47,7 +47,7 @@ public class LightManager : MonoBehaviour //µ÷ÓÃÔÚLightManager¶ÔÏóÉÏ
             currentLightShift = lightShift;
             foreach (LightController light in sceneLights)
             {
-                //lightController ¸Ä±äµÆ¹âµÄ·½·¨
+                //lightController æ”¹å˜ç¯å…‰çš„æ–¹æ³•
                 light.ChangeLightShift(currentSeason, currentLightShift, timeDifference);
             }
         }

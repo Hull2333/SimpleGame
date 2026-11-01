@@ -1,10 +1,10 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 namespace MFarm.Inventory
 {
     [RequireComponent(typeof(SpriteRenderer))]
-    public class ItemShadow : MonoBehaviour //µ÷ÓÃÔÚBounceItemBaseÖĞShadow¶ÔÏóÉÏ
+    public class ItemShadow : MonoBehaviour //è°ƒç”¨åœ¨BounceItemBaseä¸­Shadowå¯¹è±¡ä¸Š
     {
         public SpriteRenderer itemSprite;
 

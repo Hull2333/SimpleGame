@@ -1,8 +1,8 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 [System.Serializable]
 public class TaskDetails 
 {
-    //ÈÎÎñµÄID¡¢ÀàĞÍ¡¢ÎïÆ·ID¡¢Íê³ÉÊıÁ¿¡¢ÈÎÎñÃèÊö¡¢ÈÎÎñÍê³ÉÌìÊı
+    //ä»»åŠ¡çš„IDã€ç±»å‹ã€ç‰©å“IDã€å®Œæˆæ•°é‡ã€ä»»åŠ¡æè¿°ã€ä»»åŠ¡å®Œæˆå¤©æ•°
     public int taskID;
     public TaskType taskType;
     public int itemID;

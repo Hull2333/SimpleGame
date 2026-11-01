@@ -1,12 +1,12 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 [RequireComponent(typeof(AudioSource))]
-public class Sound : MonoBehaviour  //µ÷ÓÃÔÚSound¶ÔÏóÉÏ
+public class Sound : MonoBehaviour  //è°ƒç”¨åœ¨Soundå¯¹è±¡ä¸Š
 {
     [SerializeField] private AudioSource audioSource;
     /// <summary>
-    /// ÉèÖÃÒôĞ§
+    /// è®¾ç½®éŸ³æ•ˆ
     /// </summary>
     /// <param name="soundDetails"></param>
     public void SetSound(SoundDetails soundDetails)

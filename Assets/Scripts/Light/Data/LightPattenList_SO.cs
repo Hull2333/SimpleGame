@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.WSA;
@@ -7,10 +7,10 @@ public class LightPattenList_SO : ScriptableObject
 {
     public List<LightDetails> lightPattenList;
     /// <summary>
-    /// ¸ù¾İ¼¾½ÚºÍÊ±¼ä»ñÈ¡µÆ¹âÏ¸½Ú
+    /// æ ¹æ®å­£èŠ‚å’Œæ—¶é—´è·å–ç¯å…‰ç»†èŠ‚
     /// </summary>
-    /// <param name="season">¼¾½Ú</param>
-    /// <param name="lightShift">Ê±¼ä</param>
+    /// <param name="season">å­£èŠ‚</param>
+    /// <param name="lightShift">æ—¶é—´</param>
     /// <returns></returns>
     public LightDetails GetLightDetails(Season season,LightShift lightShift)
     {
@@ -22,10 +22,10 @@ public class LightPattenList_SO : ScriptableObject
 public class LightDetails
 {
     public Season season;
-    //µÆ¹âÄ£Ê½
+    //ç¯å…‰æ¨¡å¼
     public LightShift lightShift;
     public Color lightColor;
-    //µÆ¹âÇ¿¶È
+    //ç¯å…‰å¼ºåº¦
     public float lightAmount;
 
 }

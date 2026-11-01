@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,22 +6,22 @@ using UnityEngine.Tilemaps;
 using UnityEngine.UIElements;
 using UnityEngine.WSA;
 
-public class SwapTimemap : MonoBehaviour //¹ÒÔÚÃ¿¸ösceneµÄGridÉÏ£¬Ëæ¼¾½ÚÇĞ»»µØÍ¼Í¼¿é
+public class SwapTimemap : MonoBehaviour //æŒ‚åœ¨æ¯ä¸ªsceneçš„Gridä¸Šï¼Œéšå­£èŠ‚åˆ‡æ¢åœ°å›¾å›¾å—
 {
     public Tilemap[] tilemaps;
     public TileBase[] springTileBase;
     public TileBase[] summerTileBase;
     public TileBase[] autumnTileBase;
     public TileBase[] WinterTileBase;
-    //¼ÇÂ¼Ã¿ÕÅÍ¼¿éÔÚÍ¬×éÀïµÄÏÂ±ê£¬ËÄ¼¾Êı×é°´Í¬Ò»ÏÂ±ê¶ÔÓ¦Í¬Ò»¿éµØÍ¼
+    //è®°å½•æ¯å¼ å›¾å—åœ¨åŒç»„é‡Œçš„ä¸‹æ ‡ï¼Œå››å­£æ•°ç»„æŒ‰åŒä¸€ä¸‹æ ‡å¯¹åº”åŒä¸€å—åœ°å›¾
     private Dictionary<TileBase, int> tileIndexDic = new Dictionary<TileBase, int>();
     private TileBase[][] seasonTileBases;
-    //µ±Ç°µØÍ¼Ëù´¦µÄ¼¾½Ú£¬³¡¾°ÖĞµÄÍ¼¿éÄ¬ÈÏ°´´º¼¾°Ú·Å
-    private Season currentSeason = Season.´ºÌì;
+    //å½“å‰åœ°å›¾æ‰€å¤„çš„å­£èŠ‚ï¼Œåœºæ™¯ä¸­çš„å›¾å—é»˜è®¤æŒ‰æ˜¥å­£æ‘†æ”¾
+    private Season currentSeason = Season.æ˜¥å¤©;
 
     private void Update()
     {
-        //²âÊÔÓÃ£º°´ Q ÈÃµØÍ¼ÇĞµ½ÏÂÒ»¸ö¼¾½Ú
+        //æµ‹è¯•ç”¨ï¼šæŒ‰ Q è®©åœ°å›¾åˆ‡åˆ°ä¸‹ä¸€ä¸ªå­£èŠ‚
         if (Input.GetKeyDown(KeyCode.Q))
         {
             SwapSeasonTile((Season)(((int)currentSeason + 1) % seasonTileBases.Length));
@@ -55,20 +55,20 @@ public class SwapTimemap : MonoBehaviour //¹ÒÔÚÃ¿¸ösceneµÄGridÉÏ£¬Ëæ¼¾½ÚÇĞ»»µØÍ¼
         EventHandler.AfterSceneLoadedEvent -= OnAfterSceneLoadedEvent;
     }
 
-    //ÈÕÆÚÍÆ½øÊ±¼¾½Ú¿ÉÄÜ±ä»¯£¬°´µ±Ç°¼¾½ÚÍ¬²½µØÍ¼
+    //æ—¥æœŸæ¨è¿›æ—¶å­£èŠ‚å¯èƒ½å˜åŒ–ï¼ŒæŒ‰å½“å‰å­£èŠ‚åŒæ­¥åœ°å›¾
     private void OnGameDayEvent(int day, Season season, Weekday weekday)
     {
         SwapSeasonTile(season);
     }
 
-    //½øÈë³¡¾°Ê±Í¬²½Ò»´Î£¬ÊÒÄÚ³¡¾°Ã»ÓĞ¸Ã½Å±¾£¬»Øµ½ÊÒÍâÊ±µØÍ¼¿ÉÄÜ»¹Í£ÁôÔÚ¾É¼¾½Ú
+    //è¿›å…¥åœºæ™¯æ—¶åŒæ­¥ä¸€æ¬¡ï¼Œå®¤å†…åœºæ™¯æ²¡æœ‰è¯¥è„šæœ¬ï¼Œå›åˆ°å®¤å¤–æ—¶åœ°å›¾å¯èƒ½è¿˜åœç•™åœ¨æ—§å­£èŠ‚
     private void OnAfterSceneLoadedEvent()
     {
         SwapSeasonTile(TimeManager.Instance.gameSeason);
     }
 
     /// <summary>
-    /// °ÑµØÍ¼Í¼¿éÇĞ»»µ½Ö¸¶¨¼¾½Ú
+    /// æŠŠåœ°å›¾å›¾å—åˆ‡æ¢åˆ°æŒ‡å®šå­£èŠ‚
     /// </summary>
     public void SwapSeasonTile(Season season)
     {

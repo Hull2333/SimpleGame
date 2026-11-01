@@ -1,15 +1,15 @@
-using System.Collections;
+锘縰sing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
-//PlayableAsset用于实例化Playable资源，ITimelineClipAsset必须有才可以实现Playable播放
+//PlayableAsset鐢ㄤ簬瀹炰緥鍖朠layable璧勬簮锛孖TimelineClipAsset蹇呴』鏈夋墠鍙互瀹炵幇Playable鎾斁
 public class DialogueClip : PlayableAsset,ITimelineClipAsset
 {
     public ClipCaps clipCaps => ClipCaps.None;
     public DialogueBehaviour dialogue = new DialogueBehaviour();
     /// <summary>
-    /// 获取dialogueClip  
+    /// 鑾峰彇dialogueClip  
     /// </summary>
     /// <param name="graph"></param>
     /// <param name="owner"></param>

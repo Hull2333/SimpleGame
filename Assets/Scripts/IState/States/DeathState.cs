@@ -1,4 +1,4 @@
-
+﻿
 public class DeathState : IState
 {
     private FSM manager;

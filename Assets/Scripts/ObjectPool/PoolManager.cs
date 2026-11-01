@@ -1,22 +1,22 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 
-public class PoolManager : MonoBehaviour    //µ÷ÓÃÔÚPoolManager¶ÔÏóÉÏ
+public class PoolManager : MonoBehaviour    //è°ƒç”¨åœ¨PoolManagerå¯¹è±¡ä¸Š
 {
-    //¶ÔÏó³ØÁĞ±í
+    //å¯¹è±¡æ± åˆ—è¡¨
     public List<GameObject> poolPrefabs;
-    //´¢´æËùÓĞ¶ÔÏó³ØµÄÁĞ±í,ÉÏÃæµÄÃ¿Ò»¸öpoolPrefabsÉú³ÉÒ»¸ö¶ÔÏó³ØObjectPool
+    //å‚¨å­˜æ‰€æœ‰å¯¹è±¡æ± çš„åˆ—è¡¨,ä¸Šé¢çš„æ¯ä¸€ä¸ªpoolPrefabsç”Ÿæˆä¸€ä¸ªå¯¹è±¡æ± ObjectPool
     private List<ObjectPool<GameObject>> poolEffectList = new List<ObjectPool<GameObject>>();
-    //ÒôĞ§¶ÓÁĞ£¬ÏÈ½øÏÈ³ö
+    //éŸ³æ•ˆé˜Ÿåˆ—ï¼Œå…ˆè¿›å…ˆå‡º
     private Queue<GameObject> soundQueue = new Queue<GameObject>();
     private void OnEnable()
     {
-        //Á£×ÓÌØĞ§²¥·ÅÊÂ¼ş
+        //ç²’å­ç‰¹æ•ˆæ’­æ”¾äº‹ä»¶
         EventHandler.ParticleEffectEvent += OnParticleEffectEvent;
-        //ÒôĞ§²¥·ÅÊÂ¼ş
+        //éŸ³æ•ˆæ’­æ”¾äº‹ä»¶
         EventHandler.InitSoundEffect += InitSoundEffect;
         
     }
@@ -35,35 +35,35 @@ public class PoolManager : MonoBehaviour    //µ÷ÓÃÔÚPoolManager¶ÔÏóÉÏ
         
     }
     /// <summary>
-    /// ´´½¨ºÍÌí¼Ó¶ÔÏó³Øµ½poolEffectListÁĞ±íÖĞ
+    /// åˆ›å»ºå’Œæ·»åŠ å¯¹è±¡æ± åˆ°poolEffectListåˆ—è¡¨ä¸­
     /// </summary>
     private void CreatePool()
     {
         foreach(GameObject item in poolPrefabs)
         {
-            //¸ø¶ÔÏó³Ø´´½¨Ò»¸ö¸¸ÎïÌå
+            //ç»™å¯¹è±¡æ± åˆ›å»ºä¸€ä¸ªçˆ¶ç‰©ä½“
             Transform parent = new GameObject(item.name).transform;
-            //Í¬Ê±parentÓÖÊôÓÚPoolManager¶ÔÏóµÄ×ÓÎïÌå
+            //åŒæ—¶parentåˆå±äºPoolManagerå¯¹è±¡çš„å­ç‰©ä½“
             parent.SetParent(transform);
-            //e´ú±í¶ÔÏó³ØÖĞÃ¿Ò»¸öÓÎÏ·¶ÔÏó£¬È¡³ö£¬ÊÍ·Å£¬Ïú»Ù
+            //eä»£è¡¨å¯¹è±¡æ± ä¸­æ¯ä¸€ä¸ªæ¸¸æˆå¯¹è±¡ï¼Œå–å‡ºï¼Œé‡Šæ”¾ï¼Œé”€æ¯
             var newPool = new ObjectPool<GameObject>(
-                //Éú³É¶ÔÏó£¬ÀıÈçÁ£×ÓÌØĞ§
+                //ç”Ÿæˆå¯¹è±¡ï¼Œä¾‹å¦‚ç²’å­ç‰¹æ•ˆ
                 () => Instantiate(item,parent),
                 e => { e.SetActive(true); },
                 e => { e.SetActive(false); },
                 e => { Destroy(e); }
                 );
-            //Ìí¼Óµ½´æ´¢¶ÔÏó³ØµÄÁĞ±íÖĞ
+            //æ·»åŠ åˆ°å­˜å‚¨å¯¹è±¡æ± çš„åˆ—è¡¨ä¸­
             poolEffectList.Add(newPool);
         }
     }
 
     private void OnParticleEffectEvent(ParticalEffectType effectType, Vector3 pos, Vector2 dir)
     {
-        //WORKFOLLOW£º¸ù¾İÁ£×ÓÌØĞ§²¹È«
+        //WORKFOLLOWï¼šæ ¹æ®ç²’å­ç‰¹æ•ˆè¡¥å…¨
         ObjectPool<GameObject> objPool = effectType switch
         {
-            //¸ù¾İÌØĞ§ÀàĞÍÀ´ÏÔÊ¾²»Í¬ĞòºÅµÄÁ£×ÓĞ§¹û
+            //æ ¹æ®ç‰¹æ•ˆç±»å‹æ¥æ˜¾ç¤ºä¸åŒåºå·çš„ç²’å­æ•ˆæœ
             ParticalEffectType.LeavesFall01 => poolEffectList[0],
             ParticalEffectType.LeavesFall02 => poolEffectList[1],
             ParticalEffectType.Rock => poolEffectList[2],
@@ -89,11 +89,11 @@ public class PoolManager : MonoBehaviour    //µ÷ÓÃÔÚPoolManager¶ÔÏóÉÏ
             ParticalEffectType.BigWeedFallEffect => poolEffectList[23],
             _ => null,
         };
-        //ÔÚ¶ÔÏó³ØÖĞ»ñÈ¡¡¢ÊÍ·Å¶ÔÏó
+        //åœ¨å¯¹è±¡æ± ä¸­è·å–ã€é‡Šæ”¾å¯¹è±¡
         GameObject obj = objPool.Get();
         obj.transform.position = pos;
-        //dirÎª0±íÊ¾¸ÃÌØĞ§²»ĞèÒª³¯Ïò£¬´ËÊ±±£ÁôÔ¤ÖÆÌå×ÔÉíµÄĞı×ª
-        //LookRotation(Vector3.zero)»á·µ»Øµ¥Î»Ğı×ª£¬¸²¸ÇÔ¤ÖÆÌåµÄ-90¶ÈXĞı×ª£¬µ¼ÖÂÁ£×Ó·¢ÉäÃæ±»Ñ¹±â³ÉÒ»ÌõÏß
+        //dirä¸º0è¡¨ç¤ºè¯¥ç‰¹æ•ˆä¸éœ€è¦æœå‘ï¼Œæ­¤æ—¶ä¿ç•™é¢„åˆ¶ä½“è‡ªèº«çš„æ—‹è½¬
+        //LookRotation(Vector3.zero)ä¼šè¿”å›å•ä½æ—‹è½¬ï¼Œè¦†ç›–é¢„åˆ¶ä½“çš„-90åº¦Xæ—‹è½¬ï¼Œå¯¼è‡´ç²’å­å‘å°„é¢è¢«å‹æ‰æˆä¸€æ¡çº¿
         if (dir != Vector2.zero)
         {
             obj.transform.rotation = Quaternion.LookRotation(dir);
@@ -102,7 +102,7 @@ public class PoolManager : MonoBehaviour    //µ÷ÓÃÔÚPoolManager¶ÔÏóÉÏ
     }
     
     /// <summary>
-    /// Á£×ÓÌØĞ§³ÖĞøµÄÊ±¼ä
+    /// ç²’å­ç‰¹æ•ˆæŒç»­çš„æ—¶é—´
     /// </summary>
     /// <param name="pool"></param>
     /// <param name="obj"></param>
@@ -115,12 +115,12 @@ public class PoolManager : MonoBehaviour    //µ÷ÓÃÔÚPoolManager¶ÔÏóÉÏ
 
     
     /// <summary>
-    /// Éú³ÉÒôĞ§
+    /// ç”ŸæˆéŸ³æ•ˆ
     /// </summary>
     /// <param name="soundDetails"></param>
     //private void InitSoundEffect(SoundDetails soundDetails)
     //{
-    //    //»ñÈ¡¶ÔÏó³ØÖĞµÄµÚËÄ¸ö¶ÔÏó
+    //    //è·å–å¯¹è±¡æ± ä¸­çš„ç¬¬å››ä¸ªå¯¹è±¡
     //    ObjectPool<GameObject> pool = poolEffectList[4];
     //    var obj = pool.Get();
 
@@ -130,41 +130,41 @@ public class PoolManager : MonoBehaviour    //µ÷ÓÃÔÚPoolManager¶ÔÏóÉÏ
 
     //private IEnumerator DisableSound(ObjectPool<GameObject> pool , GameObject obj , SoundDetails soundDetails)
     //{
-    //    //µÈ´ı¸ÃÒôĞ§µÄÊµ¼Ê²¥·ÅÊ±¼ä
+    //    //ç­‰å¾…è¯¥éŸ³æ•ˆçš„å®é™…æ’­æ”¾æ—¶é—´
     //    yield return new WaitForSeconds(soundDetails.soundClip.length);
     //    pool.Release(obj);
     //}
 
     private void CreateSoundPool()
     {
-        //ÒôĞ§¶ÔÏóÉú³ÉÎ»ÖÃ
+        //éŸ³æ•ˆå¯¹è±¡ç”Ÿæˆä½ç½®
         var parent = new GameObject(poolPrefabs[4].name).transform;
         parent.SetParent(transform);
-        //Ô¤ÏÈÉú³É20¸öÒôĞ§¶ÔÏóµ½¶ÓÁĞÖĞ
+        //é¢„å…ˆç”Ÿæˆ20ä¸ªéŸ³æ•ˆå¯¹è±¡åˆ°é˜Ÿåˆ—ä¸­
         for(int i = 0; i < 20 ; i++)
         {
             GameObject newObj = Instantiate(poolPrefabs[4], parent);
             newObj.SetActive(false);
-            //½«¶ÔÏó³ØµÄµÚËÄ¸ö¶ÔÏóÑ¹ÈëÒôĞ§¶ÓÁĞÖĞ
+            //å°†å¯¹è±¡æ± çš„ç¬¬å››ä¸ªå¯¹è±¡å‹å…¥éŸ³æ•ˆé˜Ÿåˆ—ä¸­
             soundQueue.Enqueue(newObj);
         }
     }
     /// <summary>
-    /// »ñÈ¡ÒôĞ§¶ÔÏó³ØÖĞµÄÒôĞ§
+    /// è·å–éŸ³æ•ˆå¯¹è±¡æ± ä¸­çš„éŸ³æ•ˆ
     /// </summary>
     /// <returns></returns>
     private GameObject GetPoolObject()
     {
-        //Ò»µ©¶ÓÁĞÖĞ¶ÔÏóÉÙÓÚ2¸ö£¬¾ÍÖØĞÂÉú³É¶ÔÏó³Ø
+        //ä¸€æ—¦é˜Ÿåˆ—ä¸­å¯¹è±¡å°‘äº2ä¸ªï¼Œå°±é‡æ–°ç”Ÿæˆå¯¹è±¡æ± 
         if(soundQueue.Count < 2)
         {
             CreateSoundPool();
         }
-        //¶ÓÁĞµÚÒ»¸öÆô¶¯
+        //é˜Ÿåˆ—ç¬¬ä¸€ä¸ªå¯åŠ¨
         return soundQueue.Dequeue();
     }
     /// <summary>
-    /// Éú³ÉÒôĞ§
+    /// ç”ŸæˆéŸ³æ•ˆ
     /// </summary>
     /// <param name="soundDetails"></param>
     private void InitSoundEffect(SoundDetails soundDetails)
@@ -175,10 +175,10 @@ public class PoolManager : MonoBehaviour    //µ÷ÓÃÔÚPoolManager¶ÔÏóÉÏ
         StartCoroutine(DisableSound(obj,soundDetails.soundClip.length));
     }
     /// <summary>
-    /// ²¥·ÅÍêÒôĞ§ºó¹Ø±Õ
+    /// æ’­æ”¾å®ŒéŸ³æ•ˆåå…³é—­
     /// </summary>
-    /// <param name="obj">ÒôĞ§¶ÔÏó</param>
-    /// <param name="duration">²¥·ÅÊ±¼ä</param>
+    /// <param name="obj">éŸ³æ•ˆå¯¹è±¡</param>
+    /// <param name="duration">æ’­æ”¾æ—¶é—´</param>
     /// <returns></returns>
     private IEnumerator DisableSound(GameObject obj,float duration)
     {

@@ -1,37 +1,37 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using MFarm.Inventory;
 
-public class BushController : MonoBehaviour //µ÷ÓÃÔÚBigBush¶ÔÏóÉÏ
+public class BushController : MonoBehaviour //è°ƒç”¨åœ¨BigBushå¯¹è±¡ä¸Š
 {
     private CursorManager cursorManager;
     public SpriteRenderer spriteRenderer;
-    //´ºÇï¶¬¼¾½Ú¹àÄ¾´ÔÍ¼Æ¬
+    //æ˜¥ç§‹å†¬å­£èŠ‚çŒæœ¨ä¸›å›¾ç‰‡
     public Sprite springBushSprite;
     public Sprite autumnBushSprite;
     public Sprite winterBushSprite;
-    //¹àÄ¾´ÔµÄ»¨
+    //çŒæœ¨ä¸›çš„èŠ±
     public GameObject flowerSprite;
-    //¹àÄ¾´Ô½á¹ûÎ»ÖÃ
+    //çŒæœ¨ä¸›ç»“æœä½ç½®
     public Transform[] fruitPos;
-    //´º¶¬¼¾½Ú¹àÄ¾´Ô¹ûÊµµÄID
+    //æ˜¥å†¬å­£èŠ‚çŒæœ¨ä¸›æœå®çš„ID
     public int itemID_Spring;
     public int itemID_Winter;
-    //Éú³ÉµÄ¹ûÊµItem
+    //ç”Ÿæˆçš„æœå®Item
     public GameObject bounceItemBase;
     public Transform fruitParent;
-    //ÒÑÍ¬²½µ½µÄ¼¾½Ú£¬ÓÃÀ´ÅĞ¶Ï¼¾½ÚÊÇ·ñ·¢ÉúÇĞ»»
+    //å·²åŒæ­¥åˆ°çš„å­£èŠ‚ï¼Œç”¨æ¥åˆ¤æ–­å­£èŠ‚æ˜¯å¦å‘ç”Ÿåˆ‡æ¢
     private Season currentSeason;
-    //ÊÇ·ñÒÑ¾­Í¬²½¹ıÒ»´Î¼¾½Ú×´Ì¬
+    //æ˜¯å¦å·²ç»åŒæ­¥è¿‡ä¸€æ¬¡å­£èŠ‚çŠ¶æ€
     private bool hasSyncedSeason;
-    //ÊÇ·ñÒÑ½á¹û
+    //æ˜¯å¦å·²ç»“æœ
     private bool isFruiting;
-    //ÉÏ´Î²ÉÕª¹ûÊµÊ±µÄ¾ø¶ÔÌìÊı£¬-1±íÊ¾»¹Ã»²ÉÕª¹ı
+    //ä¸Šæ¬¡é‡‡æ‘˜æœå®æ—¶çš„ç»å¯¹å¤©æ•°ï¼Œ-1è¡¨ç¤ºè¿˜æ²¡é‡‡æ‘˜è¿‡
     private int pickedDayIndex = -1;
-    //¼ÇÂ¼ÒÑÉú³ÉµÄ¹ûÊµ£¬¼¾½Ú½áÊø»òÇĞ»»³¡¾°Ê±Í³Ò»ÇåÀí
+    //è®°å½•å·²ç”Ÿæˆçš„æœå®ï¼Œå­£èŠ‚ç»“æŸæˆ–åˆ‡æ¢åœºæ™¯æ—¶ç»Ÿä¸€æ¸…ç†
     private List<GameObject> fruitList = new List<GameObject>();
-    //¹ûÊµµôÂäºóµÄ¸¸ÎïÌå£¬ÓÃÀ´°ÑµôÂäµÄ¹ûÊµµ±×÷ÆÕÍ¨ÎïÆ·´æµµ
+    //æœå®æ‰è½åçš„çˆ¶ç‰©ä½“ï¼Œç”¨æ¥æŠŠæ‰è½çš„æœå®å½“ä½œæ™®é€šç‰©å“å­˜æ¡£
     private Transform itemParent;
 
     private void OnEnable()
@@ -46,25 +46,25 @@ public class BushController : MonoBehaviour //µ÷ÓÃÔÚBigBush¶ÔÏóÉÏ
         EventHandler.AfterSceneLoadedEvent -= OnAfterSceneLoadedEvent;
     }
 
-    //¿çÌìÊ±¼¾½Ú¿ÉÄÜ±ä»¯£¬°´µ±Ìì¼¾½ÚË¢ĞÂ¹àÄ¾´Ô
+    //è·¨å¤©æ—¶å­£èŠ‚å¯èƒ½å˜åŒ–ï¼ŒæŒ‰å½“å¤©å­£èŠ‚åˆ·æ–°çŒæœ¨ä¸›
     private void OnGameDayEvent(int day, Season season, Weekday weekday)
     {
         RefreshBushState(season);
-        //²ÉÕªºóÂúÈıÌìÇÒ²»ÔÚ´ºÌìÊ±ÖØĞÂ½á¹û
+        //é‡‡æ‘˜åæ»¡ä¸‰å¤©ä¸”ä¸åœ¨æ˜¥å¤©æ—¶é‡æ–°ç»“æœ
         TryRegrow(season);
     }
 
-    //½øÈë³¡¾°Ê±°´µ±Ç°¼¾½ÚÍ¬²½Ò»´Î£¬±ÜÃâÔÚ±ğµÄ³¡¾°¿ç¼¾ºó»ØÀ´×´Ì¬²»¶Ô
+    //è¿›å…¥åœºæ™¯æ—¶æŒ‰å½“å‰å­£èŠ‚åŒæ­¥ä¸€æ¬¡ï¼Œé¿å…åœ¨åˆ«çš„åœºæ™¯è·¨å­£åå›æ¥çŠ¶æ€ä¸å¯¹
     private void OnAfterSceneLoadedEvent()
     {
         RefreshBushState(TimeManager.Instance.gameSeason);
-        //ÇĞ³¡¾°Ê±°´µ±Ç°¼¾½Ú»»¹àÄ¾´Ô×ÔÉíµÄÍ¼Æ¬
+        //åˆ‡åœºæ™¯æ—¶æŒ‰å½“å‰å­£èŠ‚æ¢çŒæœ¨ä¸›è‡ªèº«çš„å›¾ç‰‡
         UpdateBushSprite(TimeManager.Instance.gameSeason);
     }
     private void Start()
     {
         cursorManager = GameObject.FindWithTag("CursorManager").GetComponent<CursorManager>();
-        //ÕÒµ½³¡¾°ÎïÆ·µÄ¸¸ÎïÌå£¬¹ûÊµµôÂäÊ±×ª¹Ò¹ıÈ¥
+        //æ‰¾åˆ°åœºæ™¯ç‰©å“çš„çˆ¶ç‰©ä½“ï¼Œæœå®æ‰è½æ—¶è½¬æŒ‚è¿‡å»
         GameObject itemParentObj = GameObject.FindWithTag("ItemParent");
         if (itemParentObj != null)
         {
@@ -82,64 +82,64 @@ public class BushController : MonoBehaviour //µ÷ÓÃÔÚBigBush¶ÔÏóÉÏ
         }
     }
     /// <summary>
-    /// ²ÉÕª¹ûÊµ
+    /// é‡‡æ‘˜æœå®
     /// </summary>
     private void PickingFruit()
     {
-        //²ÉÕªºó¹àÄ¾´Ô²»ÔÙ´¦ÓÚ½á¹û×´Ì¬£¬±ÜÃâ°´×¡ÓÒ¼üÊ±ÖØ¸´´¥·¢
+        //é‡‡æ‘˜åçŒæœ¨ä¸›ä¸å†å¤„äºç»“æœçŠ¶æ€ï¼Œé¿å…æŒ‰ä½å³é”®æ—¶é‡å¤è§¦å‘
         isFruiting = false;
-        //¼ÇÂ¼²ÉÕªµ±ÌìµÄ¾ø¶ÔÌìÊı£¬ÈıÌìºóÖØĞÂ½á¹û
+        //è®°å½•é‡‡æ‘˜å½“å¤©çš„ç»å¯¹å¤©æ•°ï¼Œä¸‰å¤©åé‡æ–°ç»“æœ
         pickedDayIndex = CurrentDayIndex();
         for (int i = 0; i < fruitList.Count; i++)
         {
             GameObject fruit = fruitList[i];
-            //¹ûÊµ¿ÉÄÜÒÑ±»Íæ¼Ò¼ñ×ßÏú»Ù£¬ÕâÀïĞèÒªÅĞ¿Õ
+            //æœå®å¯èƒ½å·²è¢«ç©å®¶æ¡èµ°é”€æ¯ï¼Œè¿™é‡Œéœ€è¦åˆ¤ç©º
             if (fruit == null)
             {
                 continue;
             }
-            //°Ñ¹ûÊµÖØÁ¦µ÷»Ø1£¬ÈÃ¹ûÊµ´Ó¹àÄ¾´ÔÉÏµôÂä
+            //æŠŠæœå®é‡åŠ›è°ƒå›1ï¼Œè®©æœå®ä»çŒæœ¨ä¸›ä¸Šæ‰è½
             Rigidbody2D fruitRigidbody = fruit.GetComponent<Rigidbody2D>();
             if (fruitRigidbody != null)
             {
                 fruitRigidbody.gravityScale = 1;
             }
-            //Éú³ÉÊ±µ¯Ìø½Å±¾±»¹Ø±Õ£¬Start»¹Ã»Ö´ĞĞ¹ı£»ÕâÀïÆôÓÃºóStartÖ»»áÊ©Á¦Ò»´Î£¬UpdateÒ²ÄÜ¼ÌĞø×ö¶ş´Îµ¯Ìø
+            //ç”Ÿæˆæ—¶å¼¹è·³è„šæœ¬è¢«å…³é—­ï¼ŒStartè¿˜æ²¡æ‰§è¡Œè¿‡ï¼›è¿™é‡Œå¯ç”¨åStartåªä¼šæ–½åŠ›ä¸€æ¬¡ï¼ŒUpdateä¹Ÿèƒ½ç»§ç»­åšäºŒæ¬¡å¼¹è·³
             ItemBounce itemBounce = fruit.GetComponent<ItemBounce>();
             if (itemBounce != null)
             {
                 itemBounce.enabled = true;
             }
-            //¹ûÊµÀë¿ª¹àÄ¾´Ôºó×ª¹Òµ½³¡¾°ÎïÆ·¸¸ÎïÌåÏÂ£¬Ö®ºó°´ÆÕÍ¨µôÂäÎï´æµµ
+            //æœå®ç¦»å¼€çŒæœ¨ä¸›åè½¬æŒ‚åˆ°åœºæ™¯ç‰©å“çˆ¶ç‰©ä½“ä¸‹ï¼Œä¹‹åæŒ‰æ™®é€šæ‰è½ç‰©å­˜æ¡£
             if (itemParent != null)
             {
                 fruit.transform.SetParent(itemParent);
             }
         }
-        //¹ûÊµÒÑ¾­²ÉÕª£¬Çå¿Õ¼ÇÂ¼±ÜÃâºóĞøÖØ¸´´¦Àí
+        //æœå®å·²ç»é‡‡æ‘˜ï¼Œæ¸…ç©ºè®°å½•é¿å…åç»­é‡å¤å¤„ç†
         fruitList.Clear();
     }
     /// <summary>
-    /// °´¼¾½ÚË¢ĞÂ¹àÄ¾´Ô£º´ºÌìÖ»¿ª»¨²»½á¹û£¬ÆäËû¼¾½Ú¹Ø»¨²¢ÔÚÃ»ÓĞ¹ûÊµÊ±½á¹û
+    /// æŒ‰å­£èŠ‚åˆ·æ–°çŒæœ¨ä¸›ï¼šæ˜¥å¤©åªå¼€èŠ±ä¸ç»“æœï¼Œå…¶ä»–å­£èŠ‚å…³èŠ±å¹¶åœ¨æ²¡æœ‰æœå®æ—¶ç»“æœ
     /// </summary>
     private void RefreshBushState(Season season)
     {
-        //¼¾½ÚÃ»ÓĞ±ä»¯¾Í²»ÔÙ´¦Àí£¬±ÜÃâÍ¬Ò»¼¾ÄÚÃ¿ÌìÍÆ½ø¶¼ÖØ¸´Éú³É¹ûÊµ
+        //å­£èŠ‚æ²¡æœ‰å˜åŒ–å°±ä¸å†å¤„ç†ï¼Œé¿å…åŒä¸€å­£å†…æ¯å¤©æ¨è¿›éƒ½é‡å¤ç”Ÿæˆæœå®
         if (hasSyncedSeason && season == currentSeason)
         {
             return;
         }
         hasSyncedSeason = true;
         currentSeason = season;
-        //Ö»ÓĞ´ºÌì¿ª»¨
-        flowerSprite.SetActive(season == Season.´ºÌì);
-        //´ºÌì²»½á¹û£¬Ã÷È·±ê¼ÇÎªÎ´½á¹û×´Ì¬
-        if (season == Season.´ºÌì)
+        //åªæœ‰æ˜¥å¤©å¼€èŠ±
+        flowerSprite.SetActive(season == Season.æ˜¥å¤©);
+        //æ˜¥å¤©ä¸ç»“æœï¼Œæ˜ç¡®æ ‡è®°ä¸ºæœªç»“æœçŠ¶æ€
+        if (season == Season.æ˜¥å¤©)
         {
             isFruiting = false;
         }
-        //³ı´ºÌìÍâ£¬½øÈë¼¾½ÚÊ±»¹Ã»ÓĞ¹ûÊµ¾Í½á¹û
-        if (season != Season.´ºÌì && !isFruiting)
+        //é™¤æ˜¥å¤©å¤–ï¼Œè¿›å…¥å­£èŠ‚æ—¶è¿˜æ²¡æœ‰æœå®å°±ç»“æœ
+        if (season != Season.æ˜¥å¤© && !isFruiting)
         {
             GenerateFruits(season);
         }
@@ -147,7 +147,7 @@ public class BushController : MonoBehaviour //µ÷ÓÃÔÚBigBush¶ÔÏóÉÏ
     }
 
     /// <summary>
-    /// °´µ±Ç°¼¾½Ú»»¹àÄ¾´Ô×ÔÉíµÄÍ¼Æ¬£º´ºÌìÓÃ´º¼¾Í¼£¬¶¬ÌìÓÃ¶¬¼¾Í¼
+    /// æŒ‰å½“å‰å­£èŠ‚æ¢çŒæœ¨ä¸›è‡ªèº«çš„å›¾ç‰‡ï¼šæ˜¥å¤©ç”¨æ˜¥å­£å›¾ï¼Œå†¬å¤©ç”¨å†¬å­£å›¾
     /// </summary>
     private void UpdateBushSprite(Season season)
     {
@@ -155,31 +155,31 @@ public class BushController : MonoBehaviour //µ÷ÓÃÔÚBigBush¶ÔÏóÉÏ
         {
             return;
         }
-        if (season == Season.´ºÌì && springBushSprite != null)
+        if (season == Season.æ˜¥å¤© && springBushSprite != null)
         {
             spriteRenderer.sprite = springBushSprite;
         }
-        else if (season == Season.¶¬Ìì && winterBushSprite != null)
+        else if (season == Season.å†¬å¤© && winterBushSprite != null)
         {
             spriteRenderer.sprite = winterBushSprite;
         }
-        else if (season == Season.ÇïÌì && autumnBushSprite != null)
+        else if (season == Season.ç§‹å¤© && autumnBushSprite != null)
         {
             spriteRenderer.sprite = autumnBushSprite;
         }
     }
 
     /// <summary>
-    /// ²ÉÕªºó¹ıÈıÌìÖØĞÂ½á¹û£¬´ºÌì²»½á¹û
+    /// é‡‡æ‘˜åè¿‡ä¸‰å¤©é‡æ–°ç»“æœï¼Œæ˜¥å¤©ä¸ç»“æœ
     /// </summary>
     private void TryRegrow(Season season)
     {
-        //Ã»ÓĞ²ÉÕª¼ÇÂ¼¡¢ÒÑ¾­½á¹û»ò´ºÌìÊ±²»ÖØĞÂ½á¹û
-        if (pickedDayIndex < 0 || isFruiting || season == Season.´ºÌì)
+        //æ²¡æœ‰é‡‡æ‘˜è®°å½•ã€å·²ç»ç»“æœæˆ–æ˜¥å¤©æ—¶ä¸é‡æ–°ç»“æœ
+        if (pickedDayIndex < 0 || isFruiting || season == Season.æ˜¥å¤©)
         {
             return;
         }
-        //¿ç¼¾¿çÄê¶¼ÄÜ±È½Ï£¬²»×ãÈıÌì¾Í²»½á¹û
+        //è·¨å­£è·¨å¹´éƒ½èƒ½æ¯”è¾ƒï¼Œä¸è¶³ä¸‰å¤©å°±ä¸ç»“æœ
         if (CurrentDayIndex() - pickedDayIndex < 3)
         {
             return;
@@ -189,7 +189,7 @@ public class BushController : MonoBehaviour //µ÷ÓÃÔÚBigBush¶ÔÏóÉÏ
     }
 
     /// <summary>
-    /// ½á¹û£ºÔÚËæ»úµÄ½á¹ûÎ»ÖÃÉú³É1~3¸ö¹ûÊµ
+    /// ç»“æœï¼šåœ¨éšæœºçš„ç»“æœä½ç½®ç”Ÿæˆ1~3ä¸ªæœå®
     /// </summary>
     private void GenerateFruits(Season season, int fruitCount = -1)
     {
@@ -197,7 +197,7 @@ public class BushController : MonoBehaviour //µ÷ÓÃÔÚBigBush¶ÔÏóÉÏ
         {
             return;
         }
-        //ÏÈ´òÂÒ½á¹ûÎ»ÖÃµÄÏÂ±ê£¬±£Ö¤Ã¿¸ö¹ûÊµÂäÔÚ²»Í¬µÄÎ»ÖÃÉÏ
+        //å…ˆæ‰“ä¹±ç»“æœä½ç½®çš„ä¸‹æ ‡ï¼Œä¿è¯æ¯ä¸ªæœå®è½åœ¨ä¸åŒçš„ä½ç½®ä¸Š
         List<int> posIndexList = new List<int>();
         for (int i = 0; i < fruitPos.Length; i++)
         {
@@ -210,29 +210,29 @@ public class BushController : MonoBehaviour //µ÷ÓÃÔÚBigBush¶ÔÏóÉÏ
             posIndexList[i] = posIndexList[randomIndex];
             posIndexList[randomIndex] = temp;
         }
-        //Ã»Ö¸¶¨ÊıÁ¿Ê±Ëæ»ú1~3¸ö£¬Ö¸¶¨ÊıÁ¿Ê±°´´æµµµÄÊıÁ¿Éú³É£»½á¹ûÎ»ÖÃ²»¹»Ê±°´Êµ¼ÊÎ»ÖÃÊıÁ¿Éú³É
+        //æ²¡æŒ‡å®šæ•°é‡æ—¶éšæœº1~3ä¸ªï¼ŒæŒ‡å®šæ•°é‡æ—¶æŒ‰å­˜æ¡£çš„æ•°é‡ç”Ÿæˆï¼›ç»“æœä½ç½®ä¸å¤Ÿæ—¶æŒ‰å®é™…ä½ç½®æ•°é‡ç”Ÿæˆ
         int count = fruitCount > 0 ? fruitCount : Random.Range(1, 4);
         count = Mathf.Min(count, posIndexList.Count);
         for (int i = 0; i < count; i++)
         {
             Transform pos = fruitPos[posIndexList[i]];
             GameObject fruit = Instantiate(bounceItemBase, pos.position, Quaternion.identity,fruitParent);
-            //¹ûÊµÒª¾²Ö¹¹ÒÔÚ¹àÄ¾´ÔÉÏ£¬ÏÈ°ÑÖØÁ¦ÉèÎª0±ÜÃâÍùÏÂµôÂä
+            //æœå®è¦é™æ­¢æŒ‚åœ¨çŒæœ¨ä¸›ä¸Šï¼Œå…ˆæŠŠé‡åŠ›è®¾ä¸º0é¿å…å¾€ä¸‹æ‰è½
             Rigidbody2D fruitRigidbody = fruit.GetComponent<Rigidbody2D>();
             if (fruitRigidbody != null)
             {
                 fruitRigidbody.gravityScale = 0;
             }
-            //¶¬ÌìÓÃ¶¬¼¾¹ûÊµID£¬ÆäËû¼¾½ÚÓÃ´º¼¾¹ûÊµID
-            int fruitID = season == Season.¶¬Ìì ? itemID_Winter : itemID_Spring;
-            //°Ñ¹ûÊµµÄItemIDÉèÖÃÎª¹àÄ¾´ÔÅäÖÃµÄ¹ûÊµID£¬Item½Å±¾»á°´ID³õÊ¼»¯Í¼Æ¬
+            //å†¬å¤©ç”¨å†¬å­£æœå®IDï¼Œå…¶ä»–å­£èŠ‚ç”¨æ˜¥å­£æœå®ID
+            int fruitID = season == Season.å†¬å¤© ? itemID_Winter : itemID_Spring;
+            //æŠŠæœå®çš„ItemIDè®¾ç½®ä¸ºçŒæœ¨ä¸›é…ç½®çš„æœå®IDï¼ŒItemè„šæœ¬ä¼šæŒ‰IDåˆå§‹åŒ–å›¾ç‰‡
             Item item = fruit.GetComponent<Item>();
             if (item != null)
             {
                 item.itemID = fruitID;
                 item.Init(fruitID);
             }
-            //¹ûÊµÒª¾²Ö¹¹ÒÔÚ¹àÄ¾´ÔÉÏ£¬¹Ø±Õµ¯Ìø½Å±¾±ÜÃâ±»µ¯·É
+            //æœå®è¦é™æ­¢æŒ‚åœ¨çŒæœ¨ä¸›ä¸Šï¼Œå…³é—­å¼¹è·³è„šæœ¬é¿å…è¢«å¼¹é£
             ItemBounce itemBounce = fruit.GetComponent<ItemBounce>();
             if (itemBounce != null)
             {
@@ -244,7 +244,7 @@ public class BushController : MonoBehaviour //µ÷ÓÃÔÚBigBush¶ÔÏóÉÏ
     }
 
     /// <summary>
-    /// µ±Ç°¹Ò×ÅÇÒÃ»ÓĞ±»Ïú»ÙµÄ¹ûÊµÊıÁ¿
+    /// å½“å‰æŒ‚ç€ä¸”æ²¡æœ‰è¢«é”€æ¯çš„æœå®æ•°é‡
     /// </summary>
     public int GetFruitingCount()
     {
@@ -260,7 +260,7 @@ public class BushController : MonoBehaviour //µ÷ÓÃÔÚBigBush¶ÔÏóÉÏ
     }
 
     /// <summary>
-    /// µ¼³ö´æµµÓÃµÄ¹àÄ¾×´Ì¬
+    /// å¯¼å‡ºå­˜æ¡£ç”¨çš„çŒæœ¨çŠ¶æ€
     /// </summary>
     public SceneBush GetSceneBush()
     {
@@ -274,31 +274,31 @@ public class BushController : MonoBehaviour //µ÷ÓÃÔÚBigBush¶ÔÏóÉÏ
     }
 
     /// <summary>
-    /// ¶Áµµºó°Ñ¹àÄ¾×´Ì¬Ìù»ØÀ´
+    /// è¯»æ¡£åæŠŠçŒæœ¨çŠ¶æ€è´´å›æ¥
     /// </summary>
     public void ApplySaveState(Season season, bool fruiting, int fruitCount, int pickedDayIndex)
     {
-        //ÏÈ±ê¼Ç±¾¼¾ÒÑÍ¬²½£¬±ÜÃâRefreshBushStateÔÚ³¡¾°¼ÓÔØÊ±ÓÖ×Ô¶¯½á¹ûÒ»´Î
+        //å…ˆæ ‡è®°æœ¬å­£å·²åŒæ­¥ï¼Œé¿å…RefreshBushStateåœ¨åœºæ™¯åŠ è½½æ—¶åˆè‡ªåŠ¨ç»“æœä¸€æ¬¡
         hasSyncedSeason = true;
         currentSeason = season;
-        flowerSprite.SetActive(season == Season.´ºÌì);
+        flowerSprite.SetActive(season == Season.æ˜¥å¤©);
         this.pickedDayIndex = pickedDayIndex;
-        //Çåµô³¡¾°¼ÓÔØÊ±¿ÉÄÜÒÑ¾­Éú³ÉµÄ¹ûÊµ£¬ÔÙ°´´æµµµÄÊıÁ¿ÖØĞÂÉú³É
+        //æ¸…æ‰åœºæ™¯åŠ è½½æ—¶å¯èƒ½å·²ç»ç”Ÿæˆçš„æœå®ï¼Œå†æŒ‰å­˜æ¡£çš„æ•°é‡é‡æ–°ç”Ÿæˆ
         ClearHangingFruits();
         isFruiting = false;
         if (fruiting && fruitCount > 0)
         {
             GenerateFruits(season, fruitCount);
         }
-        //Ã»ÓĞ¹ûÊµÇÒ·Ç´ºÌì£º´ºÌìÀë¿ª£¨ÎŞ²ÉÕª¼ÇÂ¼£©»ò²ÉÕªÒÑÂúÈıÌìÊ±°´µ±Ç°¼¾½Ú½á¹û
-        else if (season != Season.´ºÌì && (this.pickedDayIndex < 0 || CurrentDayIndex() - this.pickedDayIndex >= 3))
+        //æ²¡æœ‰æœå®ä¸”éæ˜¥å¤©ï¼šæ˜¥å¤©ç¦»å¼€ï¼ˆæ— é‡‡æ‘˜è®°å½•ï¼‰æˆ–é‡‡æ‘˜å·²æ»¡ä¸‰å¤©æ—¶æŒ‰å½“å‰å­£èŠ‚ç»“æœ
+        else if (season != Season.æ˜¥å¤© && (this.pickedDayIndex < 0 || CurrentDayIndex() - this.pickedDayIndex >= 3))
         {
             GenerateFruits(season);
         }
     }
 
     /// <summary>
-    /// Çå¿Õµ±Ç°¹Ò×ÅµÄ¹ûÊµ
+    /// æ¸…ç©ºå½“å‰æŒ‚ç€çš„æœå®
     /// </summary>
     private void ClearHangingFruits()
     {
@@ -313,7 +313,7 @@ public class BushController : MonoBehaviour //µ÷ÓÃÔÚBigBush¶ÔÏóÉÏ
     }
 
     /// <summary>
-    /// ÓÉÄê¡¢¼¾¡¢ÈÕºÏ³ÉµÄ¾ø¶ÔÌìÊı£¬¿ç¼¾ºÍ¶ÁµµºóÒÀÈ»¿ÉÒÔ±È½Ï
+    /// ç”±å¹´ã€å­£ã€æ—¥åˆæˆçš„ç»å¯¹å¤©æ•°ï¼Œè·¨å­£å’Œè¯»æ¡£åä¾ç„¶å¯ä»¥æ¯”è¾ƒ
     /// </summary>
     private int CurrentDayIndex()
     {

@@ -1,21 +1,21 @@
-using MFarm.Inventory;
+ï»¿using MFarm.Inventory;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 
 namespace MFarm.Task
 {
-    public class TaskImage : MonoBehaviour //µ÷ÓÃÔÚTaskImageÔ¤ÖÆÌåÉÏ
+    public class TaskImage : MonoBehaviour //è°ƒç”¨åœ¨TaskImageé¢„åˆ¶ä½“ä¸Š
     {
         private TextMeshProUGUI taskDes, taskDay, taskNum;
         public int taskID;
         public TaskData_SO taskData;
-        //´ËÔ¤ÖÆÌåµÄTaskDetail
+        //æ­¤é¢„åˆ¶ä½“çš„TaskDetail
         public TaskDetails taskDetail;
         public InventoryBag_SO playerBag;
-        //ÈÎÎñÊ£ÓàÌìÊı
+        //ä»»åŠ¡å‰©ä½™å¤©æ•°
         public int taskRemainingDay;
-        //µÚÒ»´ÎµÄÏÔÊ¾
+        //ç¬¬ä¸€æ¬¡çš„æ˜¾ç¤º
         public bool isFristSet;
         
         private void OnEnable()
@@ -23,8 +23,8 @@ namespace MFarm.Task
             if (isFristSet == false)
             {
                 CheckTaskItemNum();
-                taskDay.text = (taskRemainingDay.ToString() + "Ìì");
-                //¿Û³ıÈÎÎñÌìÊı
+                taskDay.text = (taskRemainingDay.ToString() + "å¤©");
+                //æ‰£é™¤ä»»åŠ¡å¤©æ•°
                 if (taskRemainingDay <= 0)
                 {
                     TaskManager.Instance.DeleteTaskDetailsInPlayerAcceptTaskDetails(taskID);
@@ -35,7 +35,7 @@ namespace MFarm.Task
                 }
             }
         }
-        /// ÉèÖÃTask ImageµÄÏÔÊ¾ÄÚÈİ
+        /// è®¾ç½®Task Imageçš„æ˜¾ç¤ºå†…å®¹
         /// </summary>
         /// <param name="currentTaskDetails"></param>
         public void SetTaskImageContent()
@@ -50,22 +50,22 @@ namespace MFarm.Task
             CheckTaskItemNum();
             taskDes.text = taskDetail.taskDescriptionInPlayerTaskBar;
             taskRemainingDay = taskDetail.finishDay;
-            taskDay.text = (taskRemainingDay.ToString() + "Ìì");
+            taskDay.text = (taskRemainingDay.ToString() + "å¤©");
         }
         /// <summary>
-        /// ÏÔÊ¾ÈÎÎñÎïÆ·ÊıÁ¿
+        /// æ˜¾ç¤ºä»»åŠ¡ç‰©å“æ•°é‡
         /// </summary>
         public void CheckTaskItemNum()
         {
 
-            //Ã¿´Î¿ªÆôÍæ¼ÒÈÎÎñÃæ°å¶¼»ñÈ¡Ò»´ÎInventoryUIÉÏµÄplayerSlot
+            //æ¯æ¬¡å¼€å¯ç©å®¶ä»»åŠ¡é¢æ¿éƒ½è·å–ä¸€æ¬¡InventoryUIä¸Šçš„playerSlot
             var inventoryUI = GameObject.FindWithTag("InventoryUI").gameObject.GetComponent<InventoryUI>();
-            //ÅĞ¶ÏÍæ¼Ò±³°üÊÇ·ñÓĞÈÎÎñÎïÆ·
+            //åˆ¤æ–­ç©å®¶èƒŒåŒ…æ˜¯å¦æœ‰ä»»åŠ¡ç‰©å“
             if (InventoryManager.Instance.GetItemIndexInBag(taskDetail.itemID, InventoryManager.Instance.playerBag.itemList) == -1)
             {
                 taskNum.text = ("0/" + taskDetail.finishNum.ToString());
             }
-            //ÒÑÓĞÈÎÎñÎïÆ·¾ÍÏÔÊ¾ÊıÁ¿
+            //å·²æœ‰ä»»åŠ¡ç‰©å“å°±æ˜¾ç¤ºæ•°é‡
             else
             {
                 for (int i = 0; i < inventoryUI.playerSlots.Length; i++)
@@ -75,7 +75,7 @@ namespace MFarm.Task
                         if (inventoryUI.playerSlots[i].itemDetails.itemID == taskDetail.itemID)
                         {
                             taskNum.text = (inventoryUI.playerSlots[i].itemAmount + "/" + taskDetail.finishNum.ToString());
-                            //µ±»ñÈ¡ÊıÁ¿´óÓÚµÈÓÚÈÎÎñËùĞèÊıÁ¿£¬ĞŞ¸ÄÈÎÎñ×´Ì¬
+                            //å½“è·å–æ•°é‡å¤§äºç­‰äºä»»åŠ¡æ‰€éœ€æ•°é‡ï¼Œä¿®æ”¹ä»»åŠ¡çŠ¶æ€
                             if(inventoryUI.playerSlots[i].itemAmount >= taskDetail.finishNum)
                             {
                                 taskDetail.isFinshing = true;

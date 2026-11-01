@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,61 +8,61 @@ namespace MFarm.Save
     public class GameSaveData
     {
         /// <summary>
-        /// ³¡¾°ĞÅÏ¢
+        /// åœºæ™¯ä¿¡æ¯
         /// </summary>
         public string dataSceneName;
         /// <summary>
-        /// ´æ´¢ÈËÎï×ø±ê£¬stringÈËÎïÃû×Ö
+        /// å­˜å‚¨äººç‰©åæ ‡ï¼Œstringäººç‰©åå­—
         /// </summary>
         public Dictionary<string, SerializableVector3> characterPosDict;
         /// <summary>
-        /// ´æ´¢³¡¾°ÖĞµÄËùÓĞÎïÆ·
+        /// å­˜å‚¨åœºæ™¯ä¸­çš„æ‰€æœ‰ç‰©å“
         /// </summary>
         public Dictionary<string, List<SceneItem>> sceneItemDict;
         /// <summary>
-        /// ´æ´¢ËùÓĞ¹àÄ¾´ÔµÄ×´Ì¬
+        /// å­˜å‚¨æ‰€æœ‰çŒæœ¨ä¸›çš„çŠ¶æ€
         /// </summary>
         public Dictionary<string, List<SceneBush>> sceneBushDict;
         /// <summary>
-        /// ´æ´¢ËùÓĞ¼Ò¾ßĞÅÏ¢
+        /// å­˜å‚¨æ‰€æœ‰å®¶å…·ä¿¡æ¯
         /// </summary>
         public Dictionary<string, List<SceneFurniture>> sceneFurnitureDict;
         /// <summary>
-        /// ´æ´¢ËùÓĞµÄ½¨Ôì½¨ÖşĞÅÏ¢
+        /// å­˜å‚¨æ‰€æœ‰çš„å»ºé€ å»ºç­‘ä¿¡æ¯
         /// </summary>
         public Dictionary<string, List<SceneBuilding>> sceneBuildingDict;
         /// <summary>
-        /// ´æ´¢ÍßÆ¬ĞÅÏ¢
+        /// å­˜å‚¨ç“¦ç‰‡ä¿¡æ¯
         /// </summary>
         public Dictionary<string, TileDetails> tileDetailsDict;
         /// <summary>
-        /// ´æ´¢µÚÒ»´Î¼ÓÔØµÄboolÖµ
+        /// å­˜å‚¨ç¬¬ä¸€æ¬¡åŠ è½½çš„boolå€¼
         /// </summary>
         public Dictionary<string, bool> firstLoadDict;
         /// <summary>
-        /// ´æ´¢¸÷ÖÖ±³°üĞÅÏ¢
+        /// å­˜å‚¨å„ç§èƒŒåŒ…ä¿¡æ¯
         /// </summary>
         public Dictionary<string, List<InventoryItem>> inventoryDict;
         /// <summary>
-        /// ´æ´¢ÓÎÏ·Ê±¼äĞÅÏ¢
+        /// å­˜å‚¨æ¸¸æˆæ—¶é—´ä¿¡æ¯
         /// </summary>
         public Dictionary<string, int> timeDict;
         /// <summary>
-        /// ´æ´¢Íæ¼Ò½ğÇ®
+        /// å­˜å‚¨ç©å®¶é‡‘é’±
         /// </summary>
         public int playerMoney;
 
         //NPC
         /// <summary>
-        /// NPC scheludeµÄÄ¿±ê³¡¾°
+        /// NPC scheludeçš„ç›®æ ‡åœºæ™¯
         /// </summary>
         public string targetScene;
         /// <summary>
-        /// NPCÊÇ·ñ¿É»¥¶¯
+        /// NPCæ˜¯å¦å¯äº’åŠ¨
         /// </summary>
         public bool interactable;
         /// <summary>
-        /// NPC¶¯×÷
+        /// NPCåŠ¨ä½œ
         /// </summary>
         public int animationInstanceID;
     }

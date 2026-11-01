@@ -1,10 +1,10 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Chair : MonoBehaviour //µ÷ÓÃÔÚËùÓÐChair¶ÔÏòÉÏ
+public class Chair : MonoBehaviour //è°ƒç”¨åœ¨æ‰€æœ‰Chairå¯¹å‘ä¸Š
 {
-    //ÒÎ×ÓÃæ³¯·½Ïò
+    //æ¤…å­é¢æœæ–¹å‘
     public Vector2Int chairFaceDir;
     private BoxCollider2D BoxCollider2D => GetComponent<BoxCollider2D>();
     

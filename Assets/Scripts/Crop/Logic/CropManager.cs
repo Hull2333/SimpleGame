@@ -1,9 +1,9 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 namespace MFarm.CropPlant
 {
-    public class CropManager : Singleton<CropManager>   //µ÷ÓÃÔÚCropManager¶ÔÏóÉÏ
+    public class CropManager : Singleton<CropManager>   //è°ƒç”¨åœ¨CropManagerå¯¹è±¡ä¸Š
     {
         public CropDetailsList_SO cropData;
         private Transform cropParent;
@@ -39,7 +39,7 @@ namespace MFarm.CropPlant
             CropDetails currentCrop = GetCropDetails(ID);
             if(currentCrop != null)
             {
-                //ÓÃÓÚµÚÒ»´ÎÖÖÖ²
+                //ç”¨äºç¬¬ä¸€æ¬¡ç§æ¤
                 if (tileDetails.seedItemID == -1)
                 {
                     tileDetails.seedItemID = ID;
@@ -47,7 +47,7 @@ namespace MFarm.CropPlant
                     DisplayCropPlant(tileDetails, currentCrop);
 
                 }
-                //ÓÃÓÚË¢ĞÂµØÍ¼
+                //ç”¨äºåˆ·æ–°åœ°å›¾
                 else if (tileDetails.seedItemID != -1)
                 {
                     DisplayCropPlant(tileDetails, currentCrop);
@@ -56,18 +56,18 @@ namespace MFarm.CropPlant
             
         }
         /// <summary>
-        /// ÏÔÊ¾ÖÖÏÂµÄÅ©×÷Îï
+        /// æ˜¾ç¤ºç§ä¸‹çš„å†œä½œç‰©
         /// </summary>
-        /// <param name="tileDetails">Ñ¡ÖĞÍßÆ¬ĞÅÏ¢</param>
-        /// <param name="cropDetails">Ñ¡ÖĞÖÖ×ÓĞÅÏ¢</param>
+        /// <param name="tileDetails">é€‰ä¸­ç“¦ç‰‡ä¿¡æ¯</param>
+        /// <param name="cropDetails">é€‰ä¸­ç§å­ä¿¡æ¯</param>
         private void DisplayCropPlant(TileDetails tileDetails,CropDetails cropDetails)
         {
            
-            //³É³¤½×¶Î
+            //æˆé•¿é˜¶æ®µ
             int growthStages = cropDetails.growthDays.Length; 
             int currentStage = 0;
             int dayCounter = cropDetails.totalGrowthDays;
-            //µ¹Ğò¼ÆËãµ±Ç°µÄ³É³¤½×¶Î
+            //å€’åºè®¡ç®—å½“å‰çš„æˆé•¿é˜¶æ®µ
             for(int i = growthStages - 1; i >= 0; i--)
             {
                 if (tileDetails.growthDays >= dayCounter)
@@ -79,12 +79,12 @@ namespace MFarm.CropPlant
                 dayCounter -= cropDetails.growthDays[i];
             }
             Debug.Log("currentStage:  " + currentStage);
-            //»ñÈ¡µ±Ç°½×¶ÎµÄPrefabºÍÍ¼Æ¬
+            //è·å–å½“å‰é˜¶æ®µçš„Prefabå’Œå›¾ç‰‡
             GameObject cropPrefab = cropDetails.growthPrefab[currentStage];
             Sprite cropSprite;
             if (currentStage == growthStages - 1)
             {
-                //Ëæ»ú×÷ÎïÏÔÊ¾Í¼Æ¬
+                //éšæœºä½œç‰©æ˜¾ç¤ºå›¾ç‰‡
                 int spriteIndex = Random.Range(currentStage, currentStage + 1);
                 cropSprite = cropDetails.growthSprites[spriteIndex];
             }
@@ -93,14 +93,14 @@ namespace MFarm.CropPlant
                 cropSprite = cropDetails.growthSprites[currentStage];
             }
            
-            //Å©×÷ÎïÉú³ÉµÄÎ»ÖÃ
+            //å†œä½œç‰©ç”Ÿæˆçš„ä½ç½®
             Vector3 pos = new Vector3(tileDetails.gridX + 0.5f, tileDetails.gridY + 0.5f, 0);
             GameObject cropInstance = Instantiate(cropPrefab,pos,Quaternion.identity,cropParent);
             cropInstance.GetComponentInChildren<SpriteRenderer>().sprite = cropSprite;
-            //ÈÃÅ©×÷ÎïÖªµÀ×Ô¼ºµÄÅ©×÷ÎïÏêÇéºÍËùÔÚÍßÆ¬µÄĞÅÏ¢
+            //è®©å†œä½œç‰©çŸ¥é“è‡ªå·±çš„å†œä½œç‰©è¯¦æƒ…å’Œæ‰€åœ¨ç“¦ç‰‡çš„ä¿¡æ¯
             cropInstance.GetComponent<Crop>().cropDetails = cropDetails;
             cropInstance.GetComponent<Crop>().tileDetails = tileDetails;
-            //ÉèÖÃÅ©×÷ÎïÅö×²ÌåÊÇ·ñ¿ªÆô
+            //è®¾ç½®å†œä½œç‰©ç¢°æ’ä½“æ˜¯å¦å¼€å¯
             if (cropDetails.openCollider)
             {
                 cropInstance.GetComponent<Crop>().collider2D.enabled = true;
@@ -111,18 +111,18 @@ namespace MFarm.CropPlant
             }
         }
         /// <summary>
-        /// Í¨¹ıÎïÆ·ID²éÕÒÖÖ×ÓĞÅÏ¢
+        /// é€šè¿‡ç‰©å“IDæŸ¥æ‰¾ç§å­ä¿¡æ¯
         /// </summary>
-        /// <param name="ID">ÎïÆ·ID</param>
+        /// <param name="ID">ç‰©å“ID</param>
         /// <returns></returns>
         public CropDetails GetCropDetails(int ID)
         {
             return cropData.cropDetailsList.Find(c => c.seedItemID == ID);
         }
         /// <summary>
-        /// ÅĞ¶Ïµ±Ç°¼¾½ÚÊÇ·ñ¿ÉÒÔÖÖÖ²¶ÔÓ¦µÄÖÖ×Ó
+        /// åˆ¤æ–­å½“å‰å­£èŠ‚æ˜¯å¦å¯ä»¥ç§æ¤å¯¹åº”çš„ç§å­
         /// </summary>
-        /// <param name="crop">ÖÖ×ÓĞÅÏ¢</param>
+        /// <param name="crop">ç§å­ä¿¡æ¯</param>
         /// <returns></returns>
         public bool SeasonAvailable(CropDetails crop)
         {

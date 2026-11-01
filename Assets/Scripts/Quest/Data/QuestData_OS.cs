@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -22,54 +22,54 @@ public class QuestData_OS : ScriptableObject
     public NPCname questman;
     public int questDay;
     [HideInInspector] public int currentQuestDay;
-    //¿ªÊ¼ÈÎÎñ¡¢ÁìÈ¡½±Àø¡¢Íê³ÉÈÎÎñ
+    //å¼€å§‹ä»»åŠ¡ã€é¢†å–å¥–åŠ±ã€å®Œæˆä»»åŠ¡
     public bool isStarted;
     public bool isComplete;
     public bool isFinshed;
-    //½ÓÊÜÈÎÎñÁĞ±í
+    //æ¥å—ä»»åŠ¡åˆ—è¡¨
     public List<QuestRequire> questRequires = new List<QuestRequire>();
-    //ÈÎÎñ½±ÀøÁĞ±í
+    //ä»»åŠ¡å¥–åŠ±åˆ—è¡¨
     public List<InventoryItem> rewards = new List<InventoryItem>();
     /// <summary>
-    /// ¼ì²éÈÎÎñ½ø¶È
+    /// æ£€æŸ¥ä»»åŠ¡è¿›åº¦
     /// </summary>
     public void CheckQuestProgress()
     {
-        //finishRequire±íÊ¾¸÷¸öÈÎÎñÖ¸±ê´ïµ½ÈÎÎñÊıÁ¿µÄÁĞ±í
+        //finishRequireè¡¨ç¤ºå„ä¸ªä»»åŠ¡æŒ‡æ ‡è¾¾åˆ°ä»»åŠ¡æ•°é‡çš„åˆ—è¡¨
         var finishRequires = questRequires.Where(r => r.requireAmount <= r.currentAmount);
-        //µ±finishRequireµÄÊıÁ¿µÈÓÚÈÎÎñÖ¸±êµÄÊıÁ¿£¬Ôò±íÊ¾¸ÃÈÎÎñ¿ÉÒÔÌá½»ÁË
+        //å½“finishRequireçš„æ•°é‡ç­‰äºä»»åŠ¡æŒ‡æ ‡çš„æ•°é‡ï¼Œåˆ™è¡¨ç¤ºè¯¥ä»»åŠ¡å¯ä»¥æäº¤äº†
         isComplete = finishRequires.Count() == questRequires.Count;
         if (isComplete)
         {
-            Debug.Log("ÈÎÎñÍê³É");
+            Debug.Log("ä»»åŠ¡å®Œæˆ");
         }
     }
     /// <summary>
-    /// ÁìÈ¡ÈÎÎñ½±Àø
+    /// é¢†å–ä»»åŠ¡å¥–åŠ±
     /// </summary>
     public void GiveRewards()
     {
         foreach(var reward in rewards)
         {
-            //»ñÈ¡ÈÎÎñ½±Àø
+            //è·å–ä»»åŠ¡å¥–åŠ±
             InventoryManager.Instance.AddRewardItem(reward.itemID, reward.itemAmount);
-            ////¿Û³ıÈÎÎñÎïÆ·ÊıÁ¿
+            ////æ‰£é™¤ä»»åŠ¡ç‰©å“æ•°é‡
             //if (reward.itemAmount < 0)
             //{
-            //    //¾ø¶ÔÖµ
+            //    //ç»å¯¹å€¼
             //    int requireCount = Mathf.Abs(reward.itemAmount);
 
 
             //}
             //else
             //{
-            //    //»ñÈ¡ÈÎÎñ½±Àø
+            //    //è·å–ä»»åŠ¡å¥–åŠ±
             //    InventoryManager.Instance.AddRewardItem(reward.getItemID, reward.itemAmount);
             //}
         }
     }
     /// <summary>
-    /// µ±Ç°½ÓÊÜÈÎÎñµÄËùÓĞĞèÇóÎïÆ·/µĞÈËµÄIDÁĞ±í
+    /// å½“å‰æ¥å—ä»»åŠ¡çš„æ‰€æœ‰éœ€æ±‚ç‰©å“/æ•Œäººçš„IDåˆ—è¡¨
     /// </summary>
     /// <returns></returns>
     public List<int> RequireTargetItemID()

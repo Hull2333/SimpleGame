@@ -1,38 +1,38 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using UnityEngine;
 namespace MFarm.Inventory
 {
-    public class ItemBounce : MonoBehaviour //µ÷ÓÃÔÚBounceItemBase¶ÔÏóÉÏ
+    public class ItemBounce : MonoBehaviour //è°ƒç”¨åœ¨BounceItemBaseå¯¹è±¡ä¸Š
     {
         private Transform spriteTrans;
         public CircleCollider2D coll;
-        //ÅĞ¶ÏÈÓ³öµÄ¾àÀë
+        //åˆ¤æ–­æ‰”å‡ºçš„è·ç¦»
         private float distance;
-        //ÈÓ³öµÄ·½Ïò
+        //æ‰”å‡ºçš„æ–¹å‘
         private Vector2 direction;
-        //µ½´ïµÄÎ»ÖÃ
+        //åˆ°è¾¾çš„ä½ç½®
         private Vector3 targetPos;
         private float inSkyTime;
-        //itemÅ×³öµÄ×î´óÁ¦¶È¡¢×îĞ¡Á¦¶È
+        //itemæŠ›å‡ºçš„æœ€å¤§åŠ›åº¦ã€æœ€å°åŠ›åº¦
         private float maxForce = 5f;
         private float minForce = 4f;
         private Vector2 originalPos;
-        //Ëæ»ú·½Ïòµã
+        //éšæœºæ–¹å‘ç‚¹
         private Vector2 randomPos;
         private Rigidbody2D rigidbody2D => transform.GetComponent<Rigidbody2D>();
-        // ========== ĞÂÔö£º¶ş´Îµ¯Ìø²ÎÊı ==========
+        // ========== æ–°å¢ï¼šäºŒæ¬¡å¼¹è·³å‚æ•° ==========
         private int secondaryBounceCount = 2;
-        private float secondaryDecay = 0.4f;       // Á¦¶ÈË¥¼õÏµÊı
-        private float secondaryInterval = 0.18f;   // µ¯Ìø¼ä¸ô
+        private float secondaryDecay = 0.4f;       // åŠ›åº¦è¡°å‡ç³»æ•°
+        private float secondaryInterval = 0.18f;   // å¼¹è·³é—´éš”
         private bool isSecondaryBouncing = false;
         private bool hasLanded = false;
 
         private void Start()
         {
             //spriteTrans = transform.GetChild(0);
-            //ÈÓ³öÎïÆ·Ê±¹Ø±ÕÎïÆ·Åö×²Ìå£¬±ÜÃâÎïÌå¸ÕÈÓ³öÀ´¾Í±»Íæ¼Ò¼ñ»Ø        
+            //æ‰”å‡ºç‰©å“æ—¶å…³é—­ç‰©å“ç¢°æ’ä½“ï¼Œé¿å…ç‰©ä½“åˆšæ‰”å‡ºæ¥å°±è¢«ç©å®¶æ¡å›        
             GiveItemForce();
         }
         private void Update()
@@ -43,7 +43,7 @@ namespace MFarm.Inventory
             {
                 coll.enabled = true;
                 hasLanded = true;
-                //²»ÔÙÁ¢¿ÌÍ£Ö¹ËÙ¶È£¬¸ÄÎªÆô¶¯µ¯ÌøĞ­³Ì
+                //ä¸å†ç«‹åˆ»åœæ­¢é€Ÿåº¦ï¼Œæ”¹ä¸ºå¯åŠ¨å¼¹è·³åç¨‹
                 StartCoroutine(SecondaryBounce());
             }
 
@@ -63,7 +63,7 @@ namespace MFarm.Inventory
         }
 
         /// <summary>
-        /// Éú³ÉÈÓ³öµÄÎïÆ·
+        /// ç”Ÿæˆæ‰”å‡ºçš„ç‰©å“
         /// </summary>
         /// <param name="target"></param>
         /// <param name="dir"></param>
@@ -77,21 +77,21 @@ namespace MFarm.Inventory
         }
     
         /// <summary>
-        /// ¸ø¸Õ³öÏÖµÄÎïÌåÊ©¼ÓËæ»úÁ¦ºÍ·½Ïò
+        /// ç»™åˆšå‡ºç°çš„ç‰©ä½“æ–½åŠ éšæœºåŠ›å’Œæ–¹å‘
         /// </summary>
         public void GiveItemForce()
         {
-            //ÒÔµ±Ç°ËùÔÚÎ»ÖÃ×÷Îªµ¯ÌøÆğµã£¬±ÜÃâÒÀÀµÍâ²¿ÊÂ¼ş´«ÈëµÄÎ»ÖÃ
+            //ä»¥å½“å‰æ‰€åœ¨ä½ç½®ä½œä¸ºå¼¹è·³èµ·ç‚¹ï¼Œé¿å…ä¾èµ–å¤–éƒ¨äº‹ä»¶ä¼ å…¥çš„ä½ç½®
             originalPos = transform.position;
             inSkyTime = 0.5f;
             randomPos = new Vector2(originalPos.x + Random.Range(-0.3f, 0.3f), originalPos.y + Random.Range(0.1f, 1f));
             direction = (randomPos - originalPos).normalized;
-            //Ê©¼Ó·½ÏòºÍËæ»úµÄÁ¦
+            //æ–½åŠ æ–¹å‘å’Œéšæœºçš„åŠ›
             rigidbody2D.AddForce(direction * Random.Range(minForce, maxForce), ForceMode2D.Impulse);
 
         }
         /// <summary>
-        /// ¶ş´Îµ¯ÌøĞ­³Ì£¬Ê©¼ÓË¥¼õµÄËæ»úÁ¦
+        /// äºŒæ¬¡å¼¹è·³åç¨‹ï¼Œæ–½åŠ è¡°å‡çš„éšæœºåŠ›
         /// </summary>
         /// <returns></returns>
         private IEnumerator SecondaryBounce()
@@ -100,17 +100,17 @@ namespace MFarm.Inventory
             for (int i = 0; i < secondaryBounceCount; i++)
             {
                 yield return new WaitForSeconds(secondaryInterval);
-                // Ë¥¼õÁ¦¶È
+                // è¡°å‡åŠ›åº¦
                 float decay = Mathf.Pow(secondaryDecay, i + 1);
                 float currentMin = minForce * decay;
                 float currentMax = maxForce * decay;
-                // Í£Ö¹µ±Ç°ËÙ¶È£¬Ê©¼ÓĞÂÁ¦
+                // åœæ­¢å½“å‰é€Ÿåº¦ï¼Œæ–½åŠ æ–°åŠ›
                 rigidbody2D.velocity = Vector2.zero;
                 rigidbody2D.AddForce(direction * Random.Range(currentMin, currentMax), ForceMode2D.Impulse);
                 yield return new WaitForSeconds(0.09f - 0.03f * i);
                 rigidbody2D.velocity = Vector2.zero;
             }
-            // µ¯Ìø½áÊø£¬×îÖÕÍ£Ö¹
+            // å¼¹è·³ç»“æŸï¼Œæœ€ç»ˆåœæ­¢
             rigidbody2D.velocity = Vector2.zero;
             rigidbody2D.gravityScale = 0;
             isSecondaryBouncing = false;

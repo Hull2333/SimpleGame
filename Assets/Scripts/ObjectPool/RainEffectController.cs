@@ -1,13 +1,13 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class RainEffectController : MonoBehaviour //¸ù¾İTimeManagerµÄÌìÆøºÍµ±Ç°³¡¾°¿ª¹ØÓêÌìÁ£×ÓÌØĞ§
+public class RainEffectController : MonoBehaviour //æ ¹æ®TimeManagerçš„å¤©æ°”å’Œå½“å‰åœºæ™¯å¼€å…³é›¨å¤©ç²’å­ç‰¹æ•ˆ
 {
     public GameObject[] rainEffects;
     public GameObject snowEffect;
-    //ÔÊĞíÏÔÊ¾ÓêÌìÁ£×ÓÌØĞ§µÄ³¡¾°Ãû
+    //å…è®¸æ˜¾ç¤ºé›¨å¤©ç²’å­ç‰¹æ•ˆçš„åœºæ™¯å
     public string[] showRainSceneName;
 
     private void OnEnable()
@@ -24,7 +24,7 @@ public class RainEffectController : MonoBehaviour //¸ù¾İTimeManagerµÄÌìÆøºÍµ±Ç°³
 
     private void Start()
     {
-        //½øÈë³¡¾°Ê±ÏÈ°´µ±Ç°ÌìÆøºÍ³¡¾°ÉèÖÃÒ»´Î
+        //è¿›å…¥åœºæ™¯æ—¶å…ˆæŒ‰å½“å‰å¤©æ°”å’Œåœºæ™¯è®¾ç½®ä¸€æ¬¡
         RefreshRainEffects();
     }
 
@@ -35,19 +35,19 @@ public class RainEffectController : MonoBehaviour //¸ù¾İTimeManagerµÄÌìÆøºÍµ±Ç°³
 
     private void OnAfterSceneLoadedEvent()
     {
-        //ÇĞ»»³¡¾°ºóÖØĞÂÅĞ¶ÏÊÇ·ñÏÔÊ¾
+        //åˆ‡æ¢åœºæ™¯åé‡æ–°åˆ¤æ–­æ˜¯å¦æ˜¾ç¤º
         RefreshRainEffects();
     }
 
     /// <summary>
-    /// Ö»ÓĞÓêÌì/À×ÓêÌì£¬²¢ÇÒµ±Ç°³¡¾°ÔÚÔÊĞíÏÔÊ¾µÄ³¡¾°ÁĞ±íÖĞ£¬²ÅÏÔÊ¾Á£×ÓÌØĞ§
-    /// ¶¬¼¾ÏÔÊ¾ÏÂÑ©ÌØĞ§£¬ÆäËû¼¾½ÚÏÔÊ¾ÏÂÓêÌØĞ§
+    /// åªæœ‰é›¨å¤©/é›·é›¨å¤©ï¼Œå¹¶ä¸”å½“å‰åœºæ™¯åœ¨å…è®¸æ˜¾ç¤ºçš„åœºæ™¯åˆ—è¡¨ä¸­ï¼Œæ‰æ˜¾ç¤ºç²’å­ç‰¹æ•ˆ
+    /// å†¬å­£æ˜¾ç¤ºä¸‹é›ªç‰¹æ•ˆï¼Œå…¶ä»–å­£èŠ‚æ˜¾ç¤ºä¸‹é›¨ç‰¹æ•ˆ
     /// </summary>
     private void RefreshRainEffects()
     {
         Weather weather = TimeManager.Instance.currentWeather;
         bool isRainy = weather == Weather.Rainy || weather == Weather.Thunder;
-        bool isWinter = TimeManager.Instance.gameSeason == Season.¶¬Ìì;
+        bool isWinter = TimeManager.Instance.gameSeason == Season.å†¬å¤©;
         string activeSceneName = SceneManager.GetActiveScene().name;
         bool isShowScene = false;
         for (int i = 0; i < showRainSceneName.Length; i++)

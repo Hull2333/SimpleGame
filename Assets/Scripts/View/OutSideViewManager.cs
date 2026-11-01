@@ -1,9 +1,9 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class OutSideViewManager : MonoBehaviour //µ÷ÓÃÔÚOutSideViewManager¶ÔÏóÉÏ
+public class OutSideViewManager : MonoBehaviour //è°ƒç”¨åœ¨OutSideViewManagerå¯¹è±¡ä¸Š
 {
     public GameObject cloud;
     public GameObject butterfly01;
@@ -12,12 +12,12 @@ public class OutSideViewManager : MonoBehaviour //µ÷ÓÃÔÚOutSideViewManager¶ÔÏóÉÏ
     private float cloudMoveSpeed = 1f;
     private float butterflyMoveSpeed = 2f;
     public Sprite[] cloudSprite;
-    //³¡¾°ÔÆ³öÏÖ¼ä¸ô
+    //åœºæ™¯äº‘å‡ºç°é—´éš”
     private float cloudAppearTimer = 10f;
     private float butterflyAppearTimer = 5f;
     private float currentCloudAppearTime;
     private float currentButterAppearTime;
-    //ÊÇ·ñ¿ªÊ¼¼ÆÊ±ÔÆ³öÏÖ¼ä¸ô
+    //æ˜¯å¦å¼€å§‹è®¡æ—¶äº‘å‡ºç°é—´éš”
     private bool startCloudTime = true;
     private bool startButterTime = true;
     private bool cloudMove;
@@ -99,12 +99,12 @@ public class OutSideViewManager : MonoBehaviour //µ÷ÓÃÔÚOutSideViewManager¶ÔÏóÉÏ
             birdLeftDownPos = GameObject.FindGameObjectWithTag("BirdLeftDownPos").transform;
             birdRightUpPos = GameObject.FindGameObjectWithTag("BirdRightUpPos").transform;
             canSetOutside = true;
-            //³õÊ¼»¯³¡¾°ÔÆ¸÷Ïî²ÎÊı
+            //åˆå§‹åŒ–åœºæ™¯äº‘å„é¡¹å‚æ•°
             cloud.GetComponent<SpriteRenderer>().enabled = false;
             cloudMove = false;
             currentCloudAppearTime = 0;
             startCloudTime = true;
-            //³õÊ¼»¯³¡¾°ºûµû¸÷Ïî²ÎÊı
+            //åˆå§‹åŒ–åœºæ™¯è´è¶å„é¡¹å‚æ•°
             butterfly01.transform.GetChild(0).GetComponent<SpriteRenderer>().enabled = false;
             butterfly01.transform.GetChild(1).GetComponent<SpriteRenderer>().enabled = false;
             butterMove = false;
@@ -114,7 +114,7 @@ public class OutSideViewManager : MonoBehaviour //µ÷ÓÃÔÚOutSideViewManager¶ÔÏóÉÏ
         
     }
     /// <summary>
-    /// ³¡¾°ÔÆ³öÏÖ
+    /// åœºæ™¯äº‘å‡ºç°
     /// </summary>
     public void CloudAppear()
     {
@@ -126,7 +126,7 @@ public class OutSideViewManager : MonoBehaviour //µ÷ÓÃÔÚOutSideViewManager¶ÔÏóÉÏ
         cloudMove = true;
     }
     /// <summary>
-    /// ³¡¾°ÔÆÒÆ¶¯
+    /// åœºæ™¯äº‘ç§»åŠ¨
     /// </summary>
     public void CloudMove()
     {
@@ -140,7 +140,7 @@ public class OutSideViewManager : MonoBehaviour //µ÷ÓÃÔÚOutSideViewManager¶ÔÏóÉÏ
         }
     }
     /// <summary>
-    /// ³¡¾°ºûµû³öÏÖ
+    /// åœºæ™¯è´è¶å‡ºç°
     /// </summary>
     public void ButterAppear()
     {
@@ -153,7 +153,7 @@ public class OutSideViewManager : MonoBehaviour //µ÷ÓÃÔÚOutSideViewManager¶ÔÏóÉÏ
         butterMove = true;
     }
     /// <summary>
-    /// ³¡¾°ºûµûÒÆ¶¯
+    /// åœºæ™¯è´è¶ç§»åŠ¨
     /// </summary>
     public void ButterMove()
     {

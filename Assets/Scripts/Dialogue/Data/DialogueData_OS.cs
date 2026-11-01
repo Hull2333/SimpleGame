@@ -1,4 +1,4 @@
-using MFarm.Dialogue;
+ï»¿using MFarm.Dialogue;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,15 +7,15 @@ public class DialogueData_OS : ScriptableObject
 {
     public List<DialoguePieces> dialoguePieces = new List<DialoguePieces>();
     public Dictionary<string, DialoguePieces> dialogueIndex = new Dictionary<string, DialoguePieces>();
-    //Ö»ÔÚ±à¼­Ä£Ê½ÏÂÔËĞĞ
+    //åªåœ¨ç¼–è¾‘æ¨¡å¼ä¸‹è¿è¡Œ
 #if UNITY_EDITOR
     /// <summary>
-    /// µ±DialogueData_OSÏÂµÄÈÎºÎÊı¾İ±»ĞŞ¸ÄÊ±¾Í»áÖ´ĞĞÒ»´Î
+    /// å½“DialogueData_OSä¸‹çš„ä»»ä½•æ•°æ®è¢«ä¿®æ”¹æ—¶å°±ä¼šæ‰§è¡Œä¸€æ¬¡
     /// </summary>
     private void OnValidate()
     {
         dialogueIndex.Clear();
-        //Ìí¼ÓdialoguePiecesµ½×ÖµädialogueIndexÖĞ
+        //æ·»åŠ dialoguePiecesåˆ°å­—å…¸dialogueIndexä¸­
         foreach(var piece in dialoguePieces)
         {
             if (!dialogueIndex.ContainsKey(piece.ID))
@@ -26,7 +26,7 @@ public class DialogueData_OS : ScriptableObject
     }
 #endif
     /// <summary>
-    /// ²éÕÒÕû¸ö¶Ô»°ÄÚÈİÖĞÄÄÒ»¾ä¶Ô»°»áÏÂ·¢ÈÎÎñ£¬²¢·µ»Ø¸ÃÈÎÎñĞÅÏ¢
+    /// æŸ¥æ‰¾æ•´ä¸ªå¯¹è¯å†…å®¹ä¸­å“ªä¸€å¥å¯¹è¯ä¼šä¸‹å‘ä»»åŠ¡ï¼Œå¹¶è¿”å›è¯¥ä»»åŠ¡ä¿¡æ¯
     /// </summary>
     /// <returns></returns>
     public QuestData_OS GetQuest()

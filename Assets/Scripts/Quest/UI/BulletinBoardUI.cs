@@ -1,4 +1,4 @@
-using MFarm.Inventory;
+ï»¿using MFarm.Inventory;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using static QuestManager;
 
-public class BulletinBoardUI : Singleton<BulletinBoardUI> //µ÷ÓÃÔÚBulletinBoardUI¶ÔÏóÉÏ
+public class BulletinBoardUI : Singleton<BulletinBoardUI> //è°ƒç”¨åœ¨BulletinBoardUIå¯¹è±¡ä¸Š
 {
     public GameObject bulletinBoardPanel;
     public Button quitButton;
@@ -16,15 +16,15 @@ public class BulletinBoardUI : Singleton<BulletinBoardUI> //µ÷ÓÃÔÚBulletinBoardU
     public TextMeshProUGUI questDay;
     public GameObject IngImage;
     public QuestTask currentQuest;
-    //ÒÑ½ÓÊÜ¸ÃÈÎÎñ
+    //å·²æ¥å—è¯¥ä»»åŠ¡
     public bool isAccepted;
     /// <summary>
-    /// ´ò¿ª¹«¸æÀ¸
+    /// æ‰“å¼€å…¬å‘Šæ 
     /// </summary>
     public void OpenBulletinBoardUI()
     {
         bulletinBoardPanel.SetActive(true);
-        //Ê±¼äÔİÍ£
+        //æ—¶é—´æš‚åœ
         EventHandler.CallUpdateGameStateEvent(GameState.Pause);
         if (QuestManager.Instance.bulletinBoardTask != null)
         {
@@ -32,8 +32,8 @@ public class BulletinBoardUI : Singleton<BulletinBoardUI> //µ÷ÓÃÔÚBulletinBoardU
         }
         bulletinBoardDes.text = currentQuest.questData.description;
         NPCname.text = currentQuest.questData.questman.ToString();
-        questDay.text = currentQuest.questData.questDay.ToString() + " Ìì";
-        //¸Ä±ä¹«¸æÀ¸ÏÔÊ¾×´Ì¬
+        questDay.text = currentQuest.questData.questDay.ToString() + " å¤©";
+        //æ”¹å˜å…¬å‘Šæ æ˜¾ç¤ºçŠ¶æ€
         if (isAccepted)
         {
             IngImage.gameObject.SetActive(true);
@@ -47,7 +47,7 @@ public class BulletinBoardUI : Singleton<BulletinBoardUI> //µ÷ÓÃÔÚBulletinBoardU
         
     }
     /// <summary>
-    /// ¹Ø±Õ¹«¸æÀ¸
+    /// å…³é—­å…¬å‘Šæ 
     /// </summary>
     public void QuitBulletinBoardUI()
     {
@@ -55,28 +55,28 @@ public class BulletinBoardUI : Singleton<BulletinBoardUI> //µ÷ÓÃÔÚBulletinBoardU
         EventHandler.CallUpdateGameStateEvent(GameState.Gameplay);
     }
     /// <summary>
-    /// µã»÷½ÓÊÜÈÎÎñ°´Å¥½ÓÊÜÈÎÎñ
+    /// ç‚¹å‡»æ¥å—ä»»åŠ¡æŒ‰é’®æ¥å—ä»»åŠ¡
     /// </summary>
     public void AcceptQuest()
     {
-        //Ìí¼Óµ½ÈÎÎñÁĞ±í
-        //ÊÇ·ñÒÑ¾­ÓĞÏàÍ¬ÈÎÎñ
+        //æ·»åŠ åˆ°ä»»åŠ¡åˆ—è¡¨
+        //æ˜¯å¦å·²ç»æœ‰ç›¸åŒä»»åŠ¡
         if (QuestManager.Instance.HaveQuest(currentQuest.questData))
         {
-            //ÅĞ¶ÏÊÇ·ñÍê³É¸øÓè½±Àø
+            //åˆ¤æ–­æ˜¯å¦å®Œæˆç»™äºˆå¥–åŠ±
             if (QuestManager.Instance.GetTask(currentQuest.questData).IsComplete)
             {
                 currentQuest.questData.GiveRewards();
-                //½«ÈÎÎñ×´Ì¬¸ÄÎªIsFinish
+                //å°†ä»»åŠ¡çŠ¶æ€æ”¹ä¸ºIsFinish
                 QuestManager.Instance.GetTask(currentQuest.questData).IsFinshed = true;
             }
         }
         else
         {
-            //½«ÈÎÎñÌí¼Óµ½½ÓÊÜÈÎÎñÁĞ±íÖĞ²¢ĞŞ¸ÄÈÎÎñ×´Ì¬
+            //å°†ä»»åŠ¡æ·»åŠ åˆ°æ¥å—ä»»åŠ¡åˆ—è¡¨ä¸­å¹¶ä¿®æ”¹ä»»åŠ¡çŠ¶æ€
             QuestManager.Instance.tasks.Add(currentQuest);
             QuestManager.Instance.GetTask(currentQuest.questData).IsStarted = true;
-            //ÉèÖÃÈÎÎñÌìÊı
+            //è®¾ç½®ä»»åŠ¡å¤©æ•°
             QuestManager.Instance.GetTask(currentQuest.questData).questData.currentQuestDay = QuestManager.Instance.GetTask(currentQuest.questData).questData.questDay;
             foreach (var requireItem in currentQuest.questData.RequireTargetItemID())
             {
@@ -88,7 +88,7 @@ public class BulletinBoardUI : Singleton<BulletinBoardUI> //µ÷ÓÃÔÚBulletinBoardU
         acceptButton.gameObject.SetActive(false);
     }
     /// <summary>
-    /// ¸üĞÂ¹«¸æÀ¸ÏÔÊ¾×´Ì¬
+    /// æ›´æ–°å…¬å‘Šæ æ˜¾ç¤ºçŠ¶æ€
     /// </summary>
     public void UpdateIngImage()
     {

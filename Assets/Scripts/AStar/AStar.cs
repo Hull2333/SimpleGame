@@ -1,13 +1,13 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using MFarm.Map;
 using UnityEngine.Windows.Speech;
 namespace MFarm.AStar
 {
-    public class AStar : Singleton<AStar>  //µ÷ÓÃÔÚNPCManager¶ÔÏóÉÏ,Singleton<AStar>µ¥ÀıÄ£Ê½£¬Ê¹ÆäËû½Å±¾¿ÉÒÔÖ±½Óµ÷ÓÃÀïÃæµÄ·½·¨£¬¼ÓInstance,using AStar
+    public class AStar : Singleton<AStar>  //è°ƒç”¨åœ¨NPCManagerå¯¹è±¡ä¸Š,Singleton<AStar>å•ä¾‹æ¨¡å¼ï¼Œä½¿å…¶ä»–è„šæœ¬å¯ä»¥ç›´æ¥è°ƒç”¨é‡Œé¢çš„æ–¹æ³•ï¼ŒåŠ Instance,using AStar
     {
-        //Ã¿¸öµØÍ¼µÄÃ¿¸ö½Úµã
+        //æ¯ä¸ªåœ°å›¾çš„æ¯ä¸ªèŠ‚ç‚¹
         private GridNodes gridNodes;
         private Node startNode;
         private Node targetNode;
@@ -15,71 +15,71 @@ namespace MFarm.AStar
         private int gridHeight;
         private int originX;
         private int originY;
-        //µ±Ç°Ñ¡ÖĞNodeÖÜÎ§µÄ8¸öNode
+        //å½“å‰é€‰ä¸­Nodeå‘¨å›´çš„8ä¸ªNode
         private List<Node> openNodeList;
-        //½«openNodeListÉÏÃæ8¸öNodeÖĞÑ¡ÖĞµÄµã¼ÓÈëµ½´ËÁĞ±íÖĞ£¬HashSet¿ìËÙ²éÕÒ±»Ñ¡ÖĞµÄµã
+        //å°†openNodeListä¸Šé¢8ä¸ªNodeä¸­é€‰ä¸­çš„ç‚¹åŠ å…¥åˆ°æ­¤åˆ—è¡¨ä¸­ï¼ŒHashSetå¿«é€ŸæŸ¥æ‰¾è¢«é€‰ä¸­çš„ç‚¹
         private HashSet<Node> closedNodeList;
-        //ÊÇ·ñÕÒµ½Â·¾¶
+        //æ˜¯å¦æ‰¾åˆ°è·¯å¾„
         private bool pathFound;
-        //µ±Ç°Ñ°Â·ÊÇ·ñÔÊĞíĞ±·½ÏòÒÆ¶¯
+        //å½“å‰å¯»è·¯æ˜¯å¦å…è®¸æ–œæ–¹å‘ç§»åŠ¨
         private bool allowDiagonal = true;
         /// <summary>
-        /// ¹¹½¨Â·¾¶¸üĞÂStackÃ¿Ò»²½
+        /// æ„å»ºè·¯å¾„æ›´æ–°Stackæ¯ä¸€æ­¥
         /// </summary>
         /// <param name="sceneName"></param>
         /// <param name="startPos"></param>
         /// <param name="endPos"></param>
         /// <param name="npcMocementStep"></param>
-        /// <param name="allowDiagonal">ÊÇ·ñÔÊĞíĞ±·½ÏòÒÆ¶¯£¬falseÊ±Ö»×ßÉÏÏÂ×óÓÒËÄ¸ö·½Ïò</param>
+        /// <param name="allowDiagonal">æ˜¯å¦å…è®¸æ–œæ–¹å‘ç§»åŠ¨ï¼Œfalseæ—¶åªèµ°ä¸Šä¸‹å·¦å³å››ä¸ªæ–¹å‘</param>
         public void buildPath(string sceneName,Vector2Int startPos,Vector2Int endPos,Stack<MovementStep> npcMocementStep,bool allowDiagonal = true)
         {
             this.allowDiagonal = allowDiagonal;
             pathFound = false;
             if(GenerateGridNodes(sceneName,startPos,endPos))
             {
-                //²éÕÒ×î¶ÌÂ·¾¶
+                //æŸ¥æ‰¾æœ€çŸ­è·¯å¾„
                 if (FindShortestPath())
                 {
-                    //¹¹½¨NPCÒÆ¶¯Â·¾¶
+                    //æ„å»ºNPCç§»åŠ¨è·¯å¾„
                     UpdatePathOnMovementStepStack(sceneName,npcMocementStep);
                 }
             }
         }
         /// <summary>
-        /// ¹¹½¨Íø¸ñ½ÚµãĞÅÏ¢£¬³õÊ¼»¯Á½¸öÁĞ±í
+        /// æ„å»ºç½‘æ ¼èŠ‚ç‚¹ä¿¡æ¯ï¼Œåˆå§‹åŒ–ä¸¤ä¸ªåˆ—è¡¨
         /// </summary>
-        /// <param name="sceneName">³¡¾°Ãû×Ö</param>
-        /// <param name="startPos">Æğµã</param>
-        /// <param name="endPos">ÖÕµã</param>
+        /// <param name="sceneName">åœºæ™¯åå­—</param>
+        /// <param name="startPos">èµ·ç‚¹</param>
+        /// <param name="endPos">ç»ˆç‚¹</param>
         /// <returns></returns>
         private bool GenerateGridNodes(string sceneName,Vector2Int startPos,Vector2Int endPos)
         {
             if(GridMapManager.Instance.GetGridDimensions(sceneName,out Vector2Int gridDimensions,out Vector2Int gridOrigin))
             {
 
-                //¸ù¾İÍßÆ¬µØÍ¼·¶Î§¹¹½¨Íø¸ñÒÆ¶¯½Úµã·¶Î§Êı×é
+                //æ ¹æ®ç“¦ç‰‡åœ°å›¾èŒƒå›´æ„å»ºç½‘æ ¼ç§»åŠ¨èŠ‚ç‚¹èŒƒå›´æ•°ç»„
                 gridNodes = new GridNodes(gridDimensions.x, gridDimensions.y);
                 gridWidth = gridDimensions.x;
                 gridHeight = gridDimensions.y;
                 originX = gridOrigin.x;
                 originY = gridOrigin.y;
-                //Ö´ĞĞµ½ÕâÀï±íÊ¾ÒÑ¾­È·ÈÏÄÃµ½ÁËµ±Ç°µØÍ¼µÄĞÅÏ¢£¬ÕâÊÇ¿ªÊ¼³õÊ¼»¯Á½¸öÁĞ±í
+                //æ‰§è¡Œåˆ°è¿™é‡Œè¡¨ç¤ºå·²ç»ç¡®è®¤æ‹¿åˆ°äº†å½“å‰åœ°å›¾çš„ä¿¡æ¯ï¼Œè¿™æ˜¯å¼€å§‹åˆå§‹åŒ–ä¸¤ä¸ªåˆ—è¡¨
                 openNodeList = new List<Node>();
                 closedNodeList = new HashSet<Node>();
             }
-            //Ã»ÄÃµ½µ±Ç°µØÍ¼ĞÅÏ¢
+            //æ²¡æ‹¿åˆ°å½“å‰åœ°å›¾ä¿¡æ¯
             else
             {
                 return false;
             }
-            //»ñÈ¡NPCÒÆ¶¯µÄ³õÊ¼½ÚµãºÍÖÕµã£¬gridNodesµÄ·¶Î§ÊÇ´Ó0,0¿ªÊ¼£¬ËùÒÔĞèÒª¼õÈ¥Ô­µã×ø±êµÃµ½Êµ¼ÊÎ»ÖÃ
+            //è·å–NPCç§»åŠ¨çš„åˆå§‹èŠ‚ç‚¹å’Œç»ˆç‚¹ï¼ŒgridNodesçš„èŒƒå›´æ˜¯ä»0,0å¼€å§‹ï¼Œæ‰€ä»¥éœ€è¦å‡å»åŸç‚¹åæ ‡å¾—åˆ°å®é™…ä½ç½®
             startNode = gridNodes.GetGridNode(startPos.x - originX, startPos.y - originY);
             targetNode = gridNodes.GetGridNode(endPos.x - originX, endPos.y - originY);
             for(int x = 0; x < gridWidth; x++)
             {
                 for(int y = 0; y < gridHeight; y++)
                 {
-                    //Ê¹»ñÈ¡µ½µÄÍßÆ¬×ø±êÎªÕıÊı
+                    //ä½¿è·å–åˆ°çš„ç“¦ç‰‡åæ ‡ä¸ºæ­£æ•°
                     Vector3Int tilePos = new Vector3Int(x + originX, y + originY, 0);
                     var key = tilePos.x + "X" + tilePos.y + "Y" + sceneName;
 
@@ -87,7 +87,7 @@ namespace MFarm.AStar
                     if(tile != null)
                     {
                         Node node = gridNodes.GetGridNode(x,y);
-                        //ÅĞ¶Ï¸ñ×ÓÊÇ·ñÎªÕÏ°­Îï
+                        //åˆ¤æ–­æ ¼å­æ˜¯å¦ä¸ºéšœç¢ç‰©
                         if (tile.isNPCObstacle)
                         {
                             node.isObstacle = true;
@@ -98,42 +98,42 @@ namespace MFarm.AStar
             return true;
         }
         /// <summary>
-        /// ÕÒµ½×î¶ÌÂ·¾¶ËùÓĞNode²¢Ìí¼Óµ½closedNodelist
+        /// æ‰¾åˆ°æœ€çŸ­è·¯å¾„æ‰€æœ‰Nodeå¹¶æ·»åŠ åˆ°closedNodelist
         /// </summary>
         /// <returns></returns>
         public bool FindShortestPath()
         {
-            //Ìí¼ÓÆğµã
+            //æ·»åŠ èµ·ç‚¹
             openNodeList.Add(startNode);
             while(openNodeList.Count > 0)
             {
-                //×Ô¶¯Ö´ĞĞNode½Å±¾ÖĞµÄCompareTo·½·¨
+                //è‡ªåŠ¨æ‰§è¡ŒNodeè„šæœ¬ä¸­çš„CompareToæ–¹æ³•
                 openNodeList.Sort();
-                //±È½Ï³ö×î½üµÄNodeºó£¬ÎªopenNodeListµÄÒ»¸öNode£¬½«ÆäÔÚopenNodeListÖĞÉ¾³ıÔÙ¼Óµ½closedNodeListÖĞ
+                //æ¯”è¾ƒå‡ºæœ€è¿‘çš„Nodeåï¼Œä¸ºopenNodeListçš„ä¸€ä¸ªNodeï¼Œå°†å…¶åœ¨openNodeListä¸­åˆ é™¤å†åŠ åˆ°closedNodeListä¸­
                 Node closeNode = openNodeList[0];
                 openNodeList.RemoveAt(0);
                 closedNodeList.Add(closeNode);
-                //µ«Ñ¡ÖĞµÄcloseNodeµÈÓÚÄ¿±êNodeÊ±,ÕÒµ½Â·¾¶²¢Ìø³öÑ­»·
+                //ä½†é€‰ä¸­çš„closeNodeç­‰äºç›®æ ‡Nodeæ—¶,æ‰¾åˆ°è·¯å¾„å¹¶è·³å‡ºå¾ªç¯
                 if(closeNode == targetNode)
                 {
                     pathFound = true;
                     break;
                 }
-                //¼ÆËãÖÜÎ§8¸öNode²¹³äµ½openNodeList
+                //è®¡ç®—å‘¨å›´8ä¸ªNodeè¡¥å……åˆ°openNodeList
                 EvaluateNeighbourNodes(closeNode);
             }
             return pathFound;
         }
         /// <summary>
-        /// ÆÀ¹ÀÖÜÎ§8¸öµã£¬²¢Éú³É¶ÔÓ¦ÏûºÄÖµ
+        /// è¯„ä¼°å‘¨å›´8ä¸ªç‚¹ï¼Œå¹¶ç”Ÿæˆå¯¹åº”æ¶ˆè€—å€¼
         /// </summary>
-        /// <param name="currentNode">µ±Ç°Íø¸ñ</param>
+        /// <param name="currentNode">å½“å‰ç½‘æ ¼</param>
         private void EvaluateNeighbourNodes(Node currentNode)
         {
             Vector2Int currentNodePos = currentNode.gridPosition;
-            //ÖÜÎ§8¸öµãÖĞµÄ¿ÉĞĞµÄµã
+            //å‘¨å›´8ä¸ªç‚¹ä¸­çš„å¯è¡Œçš„ç‚¹
             Node validNeighbourNote;
-            //±éÀúÖĞĞÄµãÖÜÎ§µÄ8¸öµã£¬ºöÂÔ×ÔÉíµÄµã
+            //éå†ä¸­å¿ƒç‚¹å‘¨å›´çš„8ä¸ªç‚¹ï¼Œå¿½ç•¥è‡ªèº«çš„ç‚¹
             for(int x= -1; x <= 1; x++)
             {
                 for(int y= -1; y <= 1; y++)
@@ -142,7 +142,7 @@ namespace MFarm.AStar
                     {
                         continue;
                     }
-                    //²»ÔÊĞíĞ±·½ÏòÒÆ¶¯Ê±£¬Ìø¹ıĞ±·½ÏòµÄËÄ¸öµã
+                    //ä¸å…è®¸æ–œæ–¹å‘ç§»åŠ¨æ—¶ï¼Œè·³è¿‡æ–œæ–¹å‘çš„å››ä¸ªç‚¹
                     if (!allowDiagonal && x != 0 && y != 0)
                     {
                         continue;
@@ -152,11 +152,11 @@ namespace MFarm.AStar
                     {
                         if (!openNodeList.Contains(validNeighbourNote))
                         {
-                            //ÓĞĞ§µãµ½ÆğµãµÄ¾àÀë
+                            //æœ‰æ•ˆç‚¹åˆ°èµ·ç‚¹çš„è·ç¦»
                             validNeighbourNote.gCost = currentNode.gCost + GetDistance(currentNode, validNeighbourNote);
-                            //ÓĞĞ§µãµ½ÖÕµãµÄ¾àÀë
+                            //æœ‰æ•ˆç‚¹åˆ°ç»ˆç‚¹çš„è·ç¦»
                             validNeighbourNote.hCost = GetDistance(validNeighbourNote, targetNode);
-                            //Á´½Ó¸¸½Úµã
+                            //é“¾æ¥çˆ¶èŠ‚ç‚¹
                             validNeighbourNote.parentNode = currentNode;
                             openNodeList.Add(validNeighbourNote);   
                         }
@@ -165,7 +165,7 @@ namespace MFarm.AStar
             }
         }
         /// <summary>
-        /// ÕÒµ½ÓĞĞ§µÄNode£¬·ÇÕÏ°­£¬·ÇÒÑÑ¡Ôñ
+        /// æ‰¾åˆ°æœ‰æ•ˆçš„Nodeï¼Œééšœç¢ï¼Œéå·²é€‰æ‹©
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
@@ -176,7 +176,7 @@ namespace MFarm.AStar
             {
                 return null;
             }
-            //·µ»ØµÄNode¼È²»ÊÇÕÏ°­Îï£¬Ò²²»ÊÇÉÏÒ»¸öÑ¡ÖĞµÄNode
+            //è¿”å›çš„Nodeæ—¢ä¸æ˜¯éšœç¢ç‰©ï¼Œä¹Ÿä¸æ˜¯ä¸Šä¸€ä¸ªé€‰ä¸­çš„Node
             Node neighbourNode = gridNodes.GetGridNode(x, y);
             if(neighbourNode.isObstacle || closedNodeList.Contains(neighbourNode))
             {
@@ -188,16 +188,16 @@ namespace MFarm.AStar
             }    
         }
         /// <summary>
-        /// ·µ»ØÁ½µãµÄ¾àÀëÖµ
+        /// è¿”å›ä¸¤ç‚¹çš„è·ç¦»å€¼
         /// </summary>
         /// <param name="nodeA"></param>
         /// <param name="nodeB"></param>
-        /// <returns>14µÄ±¶Êı£¬10µÄ±¶Êı</returns>
+        /// <returns>14çš„å€æ•°ï¼Œ10çš„å€æ•°</returns>
         private int GetDistance(Node nodeA,Node nodeB)
         {
             int xDistance = Mathf.Abs(nodeA.gridPosition.x - nodeB.gridPosition.x);
             int yDistance = Mathf.Abs(nodeA.gridPosition.y - nodeB.gridPosition.y);
-            //²»ÔÊĞíĞ±·½ÏòÒÆ¶¯Ê±£¬Ê¹ÓÃÂü¹ş¶Ù¾àÀë
+            //ä¸å…è®¸æ–œæ–¹å‘ç§»åŠ¨æ—¶ï¼Œä½¿ç”¨æ›¼å“ˆé¡¿è·ç¦»
             if (!allowDiagonal)
             {
                 return 10 * (xDistance + yDistance);
@@ -209,20 +209,20 @@ namespace MFarm.AStar
             return 14 * xDistance + 10 * (yDistance - xDistance);
         }
         /// <summary>
-        /// ¸üĞÂÂ·¾¶Ã¿Ò»²½µÄ×ø±êµÄ³¡¾°Ãû×Ö
+        /// æ›´æ–°è·¯å¾„æ¯ä¸€æ­¥çš„åæ ‡çš„åœºæ™¯åå­—
         /// </summary>
         /// <param name="sceneName"></param>
         /// <param name="npcMovementStep"></param>
         private void UpdatePathOnMovementStepStack(string sceneName,Stack<MovementStep> npcMovementStep)
         {
-            //´ÓÂ·¾¶ÖÕµã¿ªÊ¼µ¹×ÅÍù»ØÍÆËã
+            //ä»è·¯å¾„ç»ˆç‚¹å¼€å§‹å€’ç€å¾€å›æ¨ç®—
             Node nextNode = targetNode;
             while(nextNode != null)
             {
                 MovementStep newStep = new MovementStep();
                 newStep.sceneName = sceneName;  
                 newStep.gridCoordinate = new Vector2Int(nextNode.gridPosition.x + originX,nextNode.gridPosition.y + originY);
-                //Ñ¹Èë¶ÑÕ»,StackÏÈ½øºó³ö£¬ListÏÈ½øÏÈ³ö
+                //å‹å…¥å †æ ˆ,Stackå…ˆè¿›åå‡ºï¼ŒListå…ˆè¿›å…ˆå‡º
                 npcMovementStep.Push(newStep);
                 nextNode = nextNode.parentNode;
             }

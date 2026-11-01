@@ -1,4 +1,4 @@
-using System.Collections;
+锘縰sing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 [CreateAssetMenu(fileName ="ItemDataList_OS",menuName="Inventory/ItemDataList")]
@@ -6,7 +6,7 @@ public class ItemDataList_SO : ScriptableObject
 {
 
     public List<ItemDetails> itemDetailsList;
-    [ContextMenu("编辑模式运行，itemID自动从小到大排序")]
+    [ContextMenu("缂栬緫妯″紡杩愯锛宨temID鑷姩浠庡皬鍒板ぇ鎺掑簭")]
     public void SortItemDetailsList()
     {
         itemDetailsList.Sort((a, b) => a.itemID.CompareTo(b.itemID));

@@ -1,4 +1,4 @@
-using MFarm.Inventory;
+ï»¿using MFarm.Inventory;
 using MFarm.Task;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,23 +8,23 @@ namespace MFarm.Dialogue
 {
     [RequireComponent(typeof(NPCMovement))]
     [RequireComponent(typeof(BoxCollider2D))]
-    public class DialogueController : MonoBehaviour //µ÷ÓÃÔÚĞèÒª¶Ô»°µÄNPCÉÏ
+    public class DialogueController : MonoBehaviour //è°ƒç”¨åœ¨éœ€è¦å¯¹è¯çš„NPCä¸Š
     {
         private NPCMovement npc => GetComponent<NPCMovement>();
         //public List<DialoguePiece> taskDialogueList = new List<DialoguePiece>();
         //private Stack<DialoguePiece> dialogueStack;
         private bool canTalk;
-        //NPCÏÖÔÚÊÇ·ñÕıÔÚËµ»°
+        //NPCç°åœ¨æ˜¯å¦æ­£åœ¨è¯´è¯
         public bool isTalking;
         public CursorManager cursorManager;
         public NPCname NPCname;
-        //ĞÂÌí¼Ó
+        //æ–°æ·»åŠ 
         public DialogueData_OS currentData;
-        //ÊÇ·ñÎª½ñÌìµÚÒ»´ÎºÍ¸ÃNPC¶Ô»°
+        //æ˜¯å¦ä¸ºä»Šå¤©ç¬¬ä¸€æ¬¡å’Œè¯¥NPCå¯¹è¯
         public bool isFristTalk;
-        //½ñÌìÎ´ÊÕµ½ÀñÎï
+        //ä»Šå¤©æœªæ”¶åˆ°ç¤¼ç‰©
         public bool isTodayNotGetGift;
-        //¶Ô»°¿â
+        //å¯¹è¯åº“
         private DialoguaGiver dialoguaGiver;
   
         private void Awake()
@@ -68,7 +68,7 @@ namespace MFarm.Dialogue
                 cursorManager = GameObject.FindWithTag("CursorManager").GetComponent<CursorManager>();
                 Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 Collider2D NPCCollider = Physics2D.OverlapPoint(mousePos);
-                //ÓÒ¼üµã»÷NPC¿ªÊ¼¶Ô»°
+                //å³é”®ç‚¹å‡»NPCå¼€å§‹å¯¹è¯
                 if (NPCCollider != null)
                 {
                    
@@ -76,7 +76,7 @@ namespace MFarm.Dialogue
                     {
                         if (Input.GetKey(KeyCode.Mouse1) && DialogueUI.Instance.talkWithNPC == false && canTalk && npc.spriteVisible && !InventoryManager.Instance.anyBagOpened && !other.GetComponentInParent<PlayerController>().isNpcEvent)
                         {
-                            //Íæ¼Ò´ËÊ±ÊÇ·ñÄÃ×ÅÎïÆ·
+                            //ç©å®¶æ­¤æ—¶æ˜¯å¦æ‹¿ç€ç‰©å“
                             if (InventoryManager.Instance.currentSelectedItem != null )
                             {
                                 dialoguaGiver.TalkWithPlayer(InventoryManager.Instance.currentSelectedItem.itemID);
@@ -93,7 +93,7 @@ namespace MFarm.Dialogue
 
         }
         /// <summary>
-        /// ÓÃ¶ÑÕ»µÄ·½Ê½°ÑÃ¿Ò»¾ä¶Ô»°Ñ¹ÈçListÖĞ
+        /// ç”¨å †æ ˆçš„æ–¹å¼æŠŠæ¯ä¸€å¥å¯¹è¯å‹å¦‚Listä¸­
         /// </summary>
         //private void FillDialogueStack(List<DialoguePiece> dialoguePieceList) 
         //{
@@ -105,7 +105,7 @@ namespace MFarm.Dialogue
         //    }
         //}
         /// <summary>
-        /// µÈ´ı¶Ô»°½áÊø£¬°ÑNPCµÄ³¯Ïò»Ö¸´Îª¶Ô»°¿ªÊ¼Ç°µÄ·½Ïò
+        /// ç­‰å¾…å¯¹è¯ç»“æŸï¼ŒæŠŠNPCçš„æœå‘æ¢å¤ä¸ºå¯¹è¯å¼€å§‹å‰çš„æ–¹å‘
         /// </summary>
         private IEnumerator WatchDialogueEnd()
         {
@@ -116,7 +116,7 @@ namespace MFarm.Dialogue
             npc.RestoreFaceDirection();
         }
         /// <summary>
-        /// ÏÔÊ¾¶Ô»°UI
+        /// æ˜¾ç¤ºå¯¹è¯UI
         /// </summary>
         public void OpenDialogue()
         {
@@ -124,7 +124,7 @@ namespace MFarm.Dialogue
             {
                 DialogueUI.Instance.UpdateDialogueData(currentData);
                 DialogueUI.Instance.UpdateMainDialogue(currentData.dialoguePieces[0]);
-                //¶Ô»°Ê±NPCÖ÷¶¯ÃæÏòÍæ¼Ò
+                //å¯¹è¯æ—¶NPCä¸»åŠ¨é¢å‘ç©å®¶
                 npc.FaceToPlayer();
                 StartCoroutine(WatchDialogueEnd());
             }

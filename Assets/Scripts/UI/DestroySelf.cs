@@ -1,8 +1,8 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DestroySelf : MonoBehaviour //µ÷ÓÃÔÚĞèÒª¶¯»­Ö¡½áÊøºó´İ»Ù×ÔÉíµÄÎïÌåÉÏ
+public class DestroySelf : MonoBehaviour //è°ƒç”¨åœ¨éœ€è¦åŠ¨ç”»å¸§ç»“æŸåæ‘§æ¯è‡ªèº«çš„ç‰©ä½“ä¸Š
 {
     public void DestroyGameObject()
     {

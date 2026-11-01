@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -8,7 +8,7 @@ namespace MFarm.AStar
     public class AStarText : MonoBehaviour
     {
         private AStar aStar;
-        [Header("ÓÃÓÚ²âÊÔ")]
+        [Header("ç”¨äºŽæµ‹è¯•")]
         public Vector2Int startPos;
         public Vector2Int finishPos;
         public Tilemap displayMap;
@@ -18,7 +18,7 @@ namespace MFarm.AStar
 
         private Stack<MovementStep> npcMovementStepStack;
 
-        [Header("²âÊÔÒÆ¶¯NPC")]
+        [Header("æµ‹è¯•ç§»åŠ¨NPC")]
         public NPCMovement NPCMovement;
         public bool moveNPC;
         [SceneName] public string targetScene;
@@ -37,7 +37,7 @@ namespace MFarm.AStar
             if (moveNPC)
             {
                 moveNPC = false;
-                //var schedule = new ScheduleDetails(0,0,0,0,Season.´ºÌì,targetScene,targetPos,stopClip,true);
+                //var schedule = new ScheduleDetails(0,0,0,0,Season.æ˜¥å¤©,targetScene,targetPos,stopClip,true);
                 //NPCMovement.BuildPath(schedule);
             }
         }

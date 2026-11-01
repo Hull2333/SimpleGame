@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 [System.Serializable]
@@ -8,13 +8,13 @@ public class DialoguePieces
     public Sprite Image;
     public bool shakeImage;
     public NPCname name;
-    //ÎÄ±¾ÇøÓò
+    //æ–‡æœ¬åŒºåŸŸ
     [TextArea]
     public string text;
-    //´Ë¶Ô»°µÄÈÎÎñ
+    //æ­¤å¯¹è¯çš„ä»»åŠ¡
     public QuestData_OS quest;
     public List<DialogueOption> options = new List<DialogueOption>();
-    [Header("Ñ¡ÍêÑ¡ÏîÖ®ºóµÄ¶Ô»°ÊÇ·ñ½áÊø")]
-    //µ±Ã»ÓĞ¶Ô»°Ñ¡ÏîÊ±ÊÇ·ñ½áÊø¶Ô»°
+    [Header("é€‰å®Œé€‰é¡¹ä¹‹åçš„å¯¹è¯æ˜¯å¦ç»“æŸ")]
+    //å½“æ²¡æœ‰å¯¹è¯é€‰é¡¹æ—¶æ˜¯å¦ç»“æŸå¯¹è¯
     public bool isEnd;
 }

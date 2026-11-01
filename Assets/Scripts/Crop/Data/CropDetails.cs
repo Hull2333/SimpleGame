@@ -1,11 +1,11 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 [System.Serializable]
 public class CropDetails
 {
     public int seedItemID;
-    [Header("²»Í¬½×¶ÎĞèÒªµÄÌìÊı")]
+    [Header("ä¸åŒé˜¶æ®µéœ€è¦çš„å¤©æ•°")]
     public int[] growthDays;
-    //ÍêÕûµÄÉú³¤Ê±¼ä
+    //å®Œæ•´çš„ç”Ÿé•¿æ—¶é—´
     public int totalGrowthDays
     {
         get
@@ -18,49 +18,49 @@ public class CropDetails
             return amount;
         }
     }
-    [Header("²»Í¬Éú³¤½×¶ÎÎïÆ·Prefab")]
+    [Header("ä¸åŒç”Ÿé•¿é˜¶æ®µç‰©å“Prefab")]
     public GameObject[] growthPrefab;
     public Sprite[] growthSprites;
-    [Header("¿ÉÖÖÖ²µÄ¼¾½Ú")]
+    [Header("å¯ç§æ¤çš„å­£èŠ‚")]
     public Season[] seasons;
 
     [Space]
-    [Header("ÊÕ¸î¹¤¾ß")]
+    [Header("æ”¶å‰²å·¥å…·")]
     public int[] harvestToolItemID;
-    [Header("Ã¿´Î¹¤¾ßÊ¹ÓÃ´ÎÊı")]
+    [Header("æ¯æ¬¡å·¥å…·ä½¿ç”¨æ¬¡æ•°")]
     public int[] requireActionCount;
-    [Header("×ª»»ĞÂÎïÆ·ID")]
+    [Header("è½¬æ¢æ–°ç‰©å“ID")]
     public int transferItemID;
 
     [Space]
-    [Header("ÊÕ¸î¹ûÊµĞÅÏ¢")]
+    [Header("æ”¶å‰²æœå®ä¿¡æ¯")]
     public int[] producedItemID;
     public int[] producedMinAmount;
     public int[] producedMaxAmount;
-    //Éú³É²úÆ·µÄ·¶Î§
+    //ç”Ÿæˆäº§å“çš„èŒƒå›´
     public Vector2 spawnRadius;
-    [Header("ÔÙ´ÎÉú³¤Ê±¼ä")]
-    //µ¹ÍËµÄÌìÊı
+    [Header("å†æ¬¡ç”Ÿé•¿æ—¶é—´")]
+    //å€’é€€çš„å¤©æ•°
     public int daysToRegrow;
-    //µ¹ÍËµÄ´ÎÊı
+    //å€’é€€çš„æ¬¡æ•°
     public int regrowTimes;
     [Header("Options")]
-    //ÊÇ·ñ´ò¿ªÅ©×÷ÎïÅö×²Ìå
+    //æ˜¯å¦æ‰“å¼€å†œä½œç‰©ç¢°æ’ä½“
     public bool openCollider;
-    //²úÆ·ÊÇ·ñÉú³ÉÔÚÍæ¼ÒÉíÉÏ
+    //äº§å“æ˜¯å¦ç”Ÿæˆåœ¨ç©å®¶èº«ä¸Š
     public bool generateAtPlayerPosition;
-    //ÓëÍæ¼Ò»¥¶¯Ê±ÊÇ·ñÓĞ¶¯»­£¬±ÈÈçÃ¿¿³Ò»ÏÂÊ÷£¬Ê÷»áÒ¡»Î
+    //ä¸ç©å®¶äº’åŠ¨æ—¶æ˜¯å¦æœ‰åŠ¨ç”»ï¼Œæ¯”å¦‚æ¯ç ä¸€ä¸‹æ ‘ï¼Œæ ‘ä¼šæ‘‡æ™ƒ
     public bool hasAnimation;
-    //ÊÇ·ñÓĞÁ£×ÓÌØĞ§
+    //æ˜¯å¦æœ‰ç²’å­ç‰¹æ•ˆ
     public bool hasParticalEffect;
     public ParticalEffectType effectType;
     public Vector3 effectPos;
-    //ÒôĞ§
+    //éŸ³æ•ˆ
     public SoundName soundEffect;
     /// <summary>
-    /// ¼ì²éÑ¡ÔñµÄ¹¤¾ßÊÇ·ñ¿ÉÒÔÊÕ¸î
+    /// æ£€æŸ¥é€‰æ‹©çš„å·¥å…·æ˜¯å¦å¯ä»¥æ”¶å‰²
     /// </summary>
-    /// <param name="toolID">¹¤¾ßID</param>
+    /// <param name="toolID">å·¥å…·ID</param>
     /// <returns></returns>
     public bool CheckToolAvailable(int toolID)
     {
@@ -74,13 +74,13 @@ public class CropDetails
         return false;
     }
     /// <summary>
-    /// Ê¹ÓÃ¹¤¾ßµÄ´ÎÊı
+    /// ä½¿ç”¨å·¥å…·çš„æ¬¡æ•°
     /// </summary>
     /// <param name="toolID"></param>
     /// <returns></returns>
     public int GetTotalRequireCount(int toolID)
     {
-        //ÔÚÊÕ¸î¹¤¾ßÁĞ±íÖĞÕÒµ½ÊÕ¸î¹¤¾ßºó£¬·µ»Ø¶ÔÓ¦µÄ¹¤¾ßÊ¹ÓÃ´ÎÊı
+        //åœ¨æ”¶å‰²å·¥å…·åˆ—è¡¨ä¸­æ‰¾åˆ°æ”¶å‰²å·¥å…·åï¼Œè¿”å›å¯¹åº”çš„å·¥å…·ä½¿ç”¨æ¬¡æ•°
         for(int i = 0; i < harvestToolItemID.Length; i++)
         {
             if (harvestToolItemID[i]== toolID)

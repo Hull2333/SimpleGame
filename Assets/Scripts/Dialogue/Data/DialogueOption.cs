@@ -1,16 +1,16 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 [System.Serializable]
 public class DialogueOption 
 {
-    [Header("Ñ¡ÏîÎÄ±¾")]
+    [Header("é€‰é¡¹æ–‡æœ¬")]
     public string text;
-    [Header("ÏÂÒ»¶Î¶Ô»°ID")]
+    [Header("ä¸‹ä¸€æ®µå¯¹è¯ID")]
     public string targetID;
-    [Header("ºÃ¸Ğ¶È")]
+    [Header("å¥½æ„Ÿåº¦")]
     public int friendlinessValue;
-    [Header("¶Ô»°Ñ¡ÏîÀàĞÍ")]
+    [Header("å¯¹è¯é€‰é¡¹ç±»å‹")]
     public DialogueOptionType optionType;
     public InventoryBag_SO bag_SO;
     public BuildingBagData_SO buildingBag;

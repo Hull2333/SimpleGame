@@ -1,11 +1,11 @@
-using MFarm.Inventory;
+ï»¿using MFarm.Inventory;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SlotUI_Build : MonoBehaviour //µ÷ÓÃÔÚSlot_BuildingÉÏ
+public class SlotUI_Build : MonoBehaviour //è°ƒç”¨åœ¨Slot_Buildingä¸Š
 {
     public int buildID;
     private BuildingDetails buildingDetails;
@@ -15,7 +15,7 @@ public class SlotUI_Build : MonoBehaviour //µ÷ÓÃÔÚSlot_BuildingÉÏ
     public Transform resourseParent;
     public SlotUI resourseSlot;
     private Button button;
-    //¿ÉÒÔ½¨Ôì
+    //å¯ä»¥å»ºé€ 
     private bool canBuilding;
 
 
@@ -25,7 +25,7 @@ public class SlotUI_Build : MonoBehaviour //µ÷ÓÃÔÚSlot_BuildingÉÏ
         button.onClick.AddListener(SwitchBuildMode);
     }
     /// <summary>
-    /// ¸üĞÂ½¨ÖşÑ¡ÏîUI
+    /// æ›´æ–°å»ºç­‘é€‰é¡¹UI
     /// </summary>
     public void UpdateBuildSlotMessage()
     {
@@ -43,7 +43,7 @@ public class SlotUI_Build : MonoBehaviour //µ÷ÓÃÔÚSlot_BuildingÉÏ
             var resourseItemSlot = Instantiate(resourseSlot, resourseParent);
             int resourseAllAmount = InventoryManager.Instance.playerBag.GetItemAllAmount(resourse.itemID);
             resourseItemSlot.UpdateSlot(resourseItem, resourse.itemAmount, true, resourseAllAmount);
-            //ÊıÁ¿×ÖÌå±ä»Ò
+            //æ•°é‡å­—ä½“å˜ç°
             if (resourse.itemAmount > resourseAllAmount)
             {
                 resourseItemSlot.SetRedAmountText();
@@ -56,7 +56,7 @@ public class SlotUI_Build : MonoBehaviour //µ÷ÓÃÔÚSlot_BuildingÉÏ
         }
     }
     /// <summary>
-    /// ÇĞ»»µ½½¨ÔìÄ£Ê½
+    /// åˆ‡æ¢åˆ°å»ºé€ æ¨¡å¼
     /// </summary>
     public void SwitchBuildMode()
     {

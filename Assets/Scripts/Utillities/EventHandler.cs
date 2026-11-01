@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -7,513 +7,513 @@ using MFarm.Dialogue;
 using static AnimalData_SO;
 public static class EventHandler
 {
-    //×¢²áÊÂ¼ş£¬µ±´¥·¢¸ÃÊÂ¼şUpdateInventoryUIÊ±£¬»áÍ¬Ê±µ÷ÓÃInventoryLocationºÍList<InventoryItem>
+    //æ³¨å†Œäº‹ä»¶ï¼Œå½“è§¦å‘è¯¥äº‹ä»¶UpdateInventoryUIæ—¶ï¼Œä¼šåŒæ—¶è°ƒç”¨InventoryLocationå’ŒList<InventoryItem>
     public static event Action<InventoryLocation, List<InventoryItem>,int> UpdateInventoryUI;
     /// <summary>
-    /// µ÷ÓÃÊÂ¼ş
+    /// è°ƒç”¨äº‹ä»¶
     /// </summary>
     /// <param name="location"></param>
     /// <param name="list"></param>
     public static void CallUpdateInventoryUI(InventoryLocation location, List<InventoryItem> list,int difference)
-    {   //if¼òĞ´£¬µ±UpdateInventoryUI != nullÊ±µ÷ÓÃ
+    {   //ifç®€å†™ï¼Œå½“UpdateInventoryUI != nullæ—¶è°ƒç”¨
         UpdateInventoryUI?.Invoke(location, list, difference);
     }
-    //ÔÚÖ¸¶¨Î»ÖÃÉú³ÉÎïÆ·µÄÊÂ¼ş
+    //åœ¨æŒ‡å®šä½ç½®ç”Ÿæˆç‰©å“çš„äº‹ä»¶
     public static event Action<int, Vector3> InstantiateItemInScene;
     public static void CallInstantiateItemInScene(int ID, Vector3 pos)
     {
         InstantiateItemInScene?.Invoke(ID, pos);
     }
-    //¶ªÆúÎïÆ·µÄÊÂ¼ş
+    //ä¸¢å¼ƒç‰©å“çš„äº‹ä»¶
     public static event Action<int, Vector3, ItemType> DropItemEvent;
     public static void CallDropItemEvent(int ID, Vector3 pos, ItemType itemType)
     {
         DropItemEvent?.Invoke(ID, pos, itemType);
     }
 
-    //×¢²áµã»÷slotÎïÆ·Ê±£¬Í·¶¥³öÏÖ¶ÔÓ¦ItemµÄÍ¼Æ¬
+    //æ³¨å†Œç‚¹å‡»slotç‰©å“æ—¶ï¼Œå¤´é¡¶å‡ºç°å¯¹åº”Itemçš„å›¾ç‰‡
     public static event Action<ItemDetails, bool> ItemSelectEvent;
     public static void CallItemSelectEvent(ItemDetails itemDetails, bool isSelected)
     {
         ItemSelectEvent?.Invoke(itemDetails, isSelected);
     }
     public static event Action<int> SlotUISelectIndexEvent;
-    //´ËÊ±µã»÷Ñ¡ÔñµÄÎïÆ·ÔÚ±³°üµÄĞòºÅÎ»ÖÃÊÂ¼ş
+    //æ­¤æ—¶ç‚¹å‡»é€‰æ‹©çš„ç‰©å“åœ¨èƒŒåŒ…çš„åºå·ä½ç½®äº‹ä»¶
     public static void CallSlotUISelectIndexEvent(int index)
     {
         SlotUISelectIndexEvent?.Invoke(index);
     }
-    //Ã¿·ÖÃ¿Ê±ËùÖ´ĞĞµÄÊÂ¼ş
+    //æ¯åˆ†æ¯æ—¶æ‰€æ‰§è¡Œçš„äº‹ä»¶
     public static event Action<int, int, int, Season> GameMinuteEvent;
     public static void CallGameMinuteEvent(int minute, int hour, int day, Season season)
     {
         GameMinuteEvent?.Invoke(minute, hour, day, season);
     }
-    //Ã¿ÌìÃ¿¼¾½Ú¶ÔÓ¦µÄÊÂ¼ş
+    //æ¯å¤©æ¯å­£èŠ‚å¯¹åº”çš„äº‹ä»¶
     public static event Action<int, Season, Weekday> GameDayEvent;
     public static void CallGameDayEvent(int day, Season season, Weekday weekday)
     {
         GameDayEvent?.Invoke(day, season, weekday);
     }
    
-    //Ã¿Ğ¡Ê±£¬Ìì£¬ÔÂ£¬Äê,¼¾½ÚµÄÊÂ¼ş
+    //æ¯å°æ—¶ï¼Œå¤©ï¼Œæœˆï¼Œå¹´,å­£èŠ‚çš„äº‹ä»¶
     public static event Action<int, int, int, int, Season> GameDateEvent;
     public static void CallGameDateEvemnt(int hour, int day, int month, int year, Season season)
     {
         GameDateEvent?.Invoke(hour, day, month, year, season);
     }
-    //ĞÂ³¡¾°´«ËÍÊÂ¼ş
+    //æ–°åœºæ™¯ä¼ é€äº‹ä»¶
     public static event Action<string, Vector3> TransitionEvent;
     public static void CallTransitionEvent(string sceneName, Vector3 pos)
     {
         TransitionEvent?.Invoke(sceneName, pos);
     }
-    //»ñÈ¡µ±Ç°½¨Öş³¡¾°µÄcode
+    //è·å–å½“å‰å»ºç­‘åœºæ™¯çš„code
     public static event Action<int, Vector3> GetCurrentBuildCode;
     public static void CallGetCurrentBuildCode(int code, Vector3 pos)
     {
         GetCurrentBuildCode?.Invoke(code, pos);
     }
-    //ÇĞ»»³¡¾°Ö®Ç°µÄÊÂ¼ş
+    //åˆ‡æ¢åœºæ™¯ä¹‹å‰çš„äº‹ä»¶
     public static event Action BeforeSceneUnloadEvent;
     public static void CallBeforeSceneUnloadEvent()
     {
         BeforeSceneUnloadEvent?.Invoke();
     }
-    //ÇĞ»»³¡¾°Ö®ºóµÄÊÂ¼ş
+    //åˆ‡æ¢åœºæ™¯ä¹‹åçš„äº‹ä»¶
     public static event Action AfterSceneLoadedEvent;
     public static void CallAfterSceneLoadedEvent()
     {
         AfterSceneLoadedEvent?.Invoke();
     }
-    //³¡¾°¼ÓÔØºÃºóÈËÎïËùÔÚµÄÎ»ÖÃÊÂ¼ş
+    //åœºæ™¯åŠ è½½å¥½åäººç‰©æ‰€åœ¨çš„ä½ç½®äº‹ä»¶
     public static event Action<Vector3> MoveToPosition;
     public static void CallMoveToPosition(Vector3 targetPosition)
     {
         MoveToPosition?.Invoke(targetPosition);
     }
-    //Êó±êµã»÷ÎïÆ·Ö®ºóÒ»ÏµÁĞ²Ù×÷
+    //é¼ æ ‡ç‚¹å‡»ç‰©å“ä¹‹åä¸€ç³»åˆ—æ“ä½œ
     public static event Action<Vector3, ItemDetails> MouseClickedEvent;
     public static void CallMouseClickedEvent(Vector3 pos, ItemDetails itemDetails)
     {
         MouseClickedEvent?.Invoke(pos, itemDetails);
     }
-    //Êó±ê³¤°´´¥·¢µÄÊÂ¼ş
+    //é¼ æ ‡é•¿æŒ‰è§¦å‘çš„äº‹ä»¶
     public static event Action<Vector3, ItemDetails> MouseHoldEvent;
     public static void CallMouseHoldEvent(Vector3 pos,ItemDetails itemDetails)
     {
         MouseHoldEvent?.Invoke(pos, itemDetails);
     }
-    //Êó±ê³¤°´ºóËÉ¿ªÊÂ¼ş
+    //é¼ æ ‡é•¿æŒ‰åæ¾å¼€äº‹ä»¶
     public static event Action MouseUpEvent;
     public static void CallMouseUpEvent()
     {
         MouseUpEvent?.Invoke();
     }
-    //»Ö¸´ÎªÄ¬ÈÏÊó±êÍ¼Æ¬ÊÂ¼ş
+    //æ¢å¤ä¸ºé»˜è®¤é¼ æ ‡å›¾ç‰‡äº‹ä»¶
     public static event Action RestoreNormalCursorImageEvent;
     public static void CallRestoreNormalCursorImageEvent()
     {
         RestoreNormalCursorImageEvent?.Invoke();
     }
-    //ÔÚÍæ¼ÒÖ´ĞĞÍê¶ÔÓ¦¶¯»­Ö®ºóÖ´ĞĞµÄ²Ù×÷
+    //åœ¨ç©å®¶æ‰§è¡Œå®Œå¯¹åº”åŠ¨ç”»ä¹‹åæ‰§è¡Œçš„æ“ä½œ
     public static event Action<Vector3, ItemDetails> ExecuteActionAfterAnimation;
     public static void CallExecuteActionAfterAnimation(Vector3 pos, ItemDetails itemDetails)
     {
         ExecuteActionAfterAnimation?.Invoke(pos, itemDetails);
     }
-    //²¥ÖÖµÄÊÂ¼ş,intÖÖ×ÓID£¬TileDetailsµ±Ç°Ñ¡ÔñÍßÆ¬µÄĞÅÏ¢ 
+    //æ’­ç§çš„äº‹ä»¶,intç§å­IDï¼ŒTileDetailså½“å‰é€‰æ‹©ç“¦ç‰‡çš„ä¿¡æ¯ 
     public static event Action<int, TileDetails> PlantSeedEvent;
     public static void CallPlantSeedEvent(int ID, TileDetails tile)
     {
         PlantSeedEvent?.Invoke(ID, tile);
     }
-    //ÊÕ»ñÅ©×÷Îï»ò²ÄÁÏÊ±µÄÊÂ¼ş  
+    //æ”¶è·å†œä½œç‰©æˆ–ææ–™æ—¶çš„äº‹ä»¶  
     public static event Action<int> HarvestAtPlayerPosition;
     public static void CallHarvestAtPlayerPosition(int ID)
     {
         HarvestAtPlayerPosition?.Invoke(ID);
     }
-    //Ë¢ĞÂµ±Ç°µØÍ¼
+    //åˆ·æ–°å½“å‰åœ°å›¾
     public static event Action RefreshCurrentMap;
     public static void CallRefreshCurrentMap()
     {
         RefreshCurrentMap?.Invoke();
     }
-    //µ÷ÓÃÁ£×ÓÌØĞ§µÄÊÂ¼ş
+    //è°ƒç”¨ç²’å­ç‰¹æ•ˆçš„äº‹ä»¶
     public static event Action<ParticalEffectType, Vector3 , Vector2> ParticleEffectEvent;
     public static void CallParticleEffectEvent(ParticalEffectType effectType, Vector3 pos , Vector2 dirction)
     {
         ParticleEffectEvent?.Invoke(effectType, pos , dirction);
     }
-    //Ô¤Éú³ÉCropÊÂ¼ş
+    //é¢„ç”ŸæˆCropäº‹ä»¶
     public static event Action GenerateCropEvent;
     public static void CallGenerateCropEvent()
     {
         GenerateCropEvent?.Invoke();
     }
-    //¶Ô»°ÏÔÊ¾ÊÂ¼ş
+    //å¯¹è¯æ˜¾ç¤ºäº‹ä»¶
     public static event Action<DialoguePiece> ShowDialogueEvent;
     public static void CallShowDialogueEvent(DialoguePiece piece)
     {
         ShowDialogueEvent?.Invoke(piece);
     }
 
-    //ÉÌµê¿ªÆô
+    //å•†åº—å¼€å¯
     public static event Action<SlotType, InventoryBag_SO> BaseBagOpenEvent;
     public static void CallBaseBagOpenEvent(SlotType slotType, InventoryBag_SO bag_SO)
     {
         BaseBagOpenEvent?.Invoke(slotType, bag_SO);
     }
-    //ÉÌµê¹Ø±Õ
+    //å•†åº—å…³é—­
     public static event Action<SlotType, InventoryBag_SO> BaseBagCloseEvent;
     public static void CallBaseBagCloseEvent(SlotType slotType, InventoryBag_SO bag_SO)
     {
         BaseBagCloseEvent?.Invoke(slotType, bag_SO);
     }
-    //ÓÎÏ·×´Ì¬ÉèÖÃ
+    //æ¸¸æˆçŠ¶æ€è®¾ç½®
     public static event Action<GameState> UpdateGameStateEvent;
     public static void CallUpdateGameStateEvent(GameState gameState)
     {
         UpdateGameStateEvent?.Invoke(gameState);
     }
 
-    //ÉÌÆ·ÂòÂôÊÂ¼ş
+    //å•†å“ä¹°å–äº‹ä»¶
     public static event Action<ItemDetails, bool,int,int,int,InventoryLocation,InventoryLocation,bool> ShowTradeUI;
     public static void CallShowTradeUI(ItemDetails item, bool isSell,int maxAmount, int startIndex,int endIndex,InventoryLocation startLocation,InventoryLocation endLocation, bool isToSellBox)
     {
         ShowTradeUI?.Invoke(item, isSell, maxAmount, startIndex, endIndex, startLocation, endLocation, isToSellBox);
     }
-    //µã»÷²Ğ´æ³öÊÛÏäUIµÄÈ·ÈÏ°´Å¥ÊÂ¼ş
+    //ç‚¹å‡»æ®‹å­˜å‡ºå”®ç®±UIçš„ç¡®è®¤æŒ‰é’®äº‹ä»¶
     public static event Action<List<InventoryItem>> ClickHaveItemYesEvent;
     public static void CallClickHaveItemYesEvent(List<InventoryItem> haveItemList)
     {
         ClickHaveItemYesEvent?.Invoke(haveItemList);
     }
-    //»ñÈ¡µ±Ç°µÄ¼Ò¾ßĞÅÏ¢
+    //è·å–å½“å‰çš„å®¶å…·ä¿¡æ¯
     public static event Action<BluPrintDetails,Transform,List<TileDetails>> GetCurrentBluPrintDetails;
     public static void CallGetCurrentBluPrintPrefab(BluPrintDetails bluPrintDetails,Transform parent, List<TileDetails> list)
     {
         GetCurrentBluPrintDetails?.Invoke(bluPrintDetails, parent, list);
     }
-    //½¨ÔìÎïÆ·Éú³ÉÊÂ¼ş
+    //å»ºé€ ç‰©å“ç”Ÿæˆäº‹ä»¶
     public static event Action<BluPrintDetails, Vector3 , Transform> BuildFurnitureEvent;
     public static void CallBuildFurnitureEvent(BluPrintDetails bluPrintDetails, Vector3 pos,Transform parent)
     {
         BuildFurnitureEvent?.Invoke(bluPrintDetails, pos, parent);
     }
-    //´ò¿ª½¨ÖşÉÌµêÊÂ¼ş
+    //æ‰“å¼€å»ºç­‘å•†åº—äº‹ä»¶
     public static event Action<BuildingBagData_SO> OpenBuildShopEvent;
     public static void CallOpenBuildShopEvent(BuildingBagData_SO buildingBag)
     {
         OpenBuildShopEvent?.Invoke(buildingBag);
     }
-    //½¨ÔìÄ£Ê½ÊÂ¼ş
+    //å»ºé€ æ¨¡å¼äº‹ä»¶
     public static event Action<BuildingDetails ,AnimalDetails, bool> BuildindModeEvent;
     public static void CallBuildindModeEvent(BuildingDetails buildingDetails, AnimalDetails animal,bool startMode)
     {
         BuildindModeEvent?.Invoke(buildingDetails, animal, startMode);
     }
-    //»ñÈ¡µ±Ç°½¨ÖşĞÅÏ¢
+    //è·å–å½“å‰å»ºç­‘ä¿¡æ¯
     public static event Action<BuildingDetails, Transform, List<TileDetails>> GetCurrentBuildingDetails;
     public static void CallGetCurrentBuildingDetails(BuildingDetails buildingDetails,Transform parent, List<TileDetails> tiles)
     {
         GetCurrentBuildingDetails?.Invoke(buildingDetails, parent, tiles);
     }
-    //·ÅÖÃ½¨ÖşÊÂ¼ş
+    //æ”¾ç½®å»ºç­‘äº‹ä»¶
     public static event Action<BuildingDetails, Vector3, Transform> InstantiateBuildingOnMapEvent;
     public static void CallInstantiateBuildingOnMapEvent(BuildingDetails buildingDetails,Vector3 pos,Transform parent)
     {
         InstantiateBuildingOnMapEvent?.Invoke(buildingDetails, pos, parent);
     }
-    //´ò¿ª¶¯ÎïÉÌµêÊÂ¼ş
+    //æ‰“å¼€åŠ¨ç‰©å•†åº—äº‹ä»¶
     public static event Action<AnimalBagData_SO> OpenAnimalShopEvent;
     public static void CallOpenAnimalShopEvent(AnimalBagData_SO animalShop)
     {
         OpenAnimalShopEvent?.Invoke(animalShop);
     }
-   //Éú³É¶¯ÎïÔÚ³¡¾°ÖĞ
+   //ç”ŸæˆåŠ¨ç‰©åœ¨åœºæ™¯ä¸­
     public static event Action<int> InstantiateAnimalInScene;
     public static void CallInstantiateAnimalInScene(int amount)
     {
         InstantiateAnimalInScene?.Invoke(amount);
     }
-    //ÏÔÊ¾»ò¹Ø±Õ½¨Öş¼ıÍ·Í¼Æ¬
+    //æ˜¾ç¤ºæˆ–å…³é—­å»ºç­‘ç®­å¤´å›¾ç‰‡
     public static event Action<AnimalSizeType,bool> DisplayBuildingArrowIcon;
     public static void CallDisplayBuildingArrowIcon(AnimalSizeType buildingSize, bool isShow)
     {
         DisplayBuildingArrowIcon?.Invoke(buildingSize, isShow);
     }
-    //ÇĞ»»µÆ¹âÄ£Ê½ÊÂ¼ş
+    //åˆ‡æ¢ç¯å…‰æ¨¡å¼äº‹ä»¶
     public static event Action<Season, LightShift, float> LightShiftChangeEvent;
     public static void CallLightShiftChangeEvent(Season season, LightShift lightShift, float timeDifference)
     {
         LightShiftChangeEvent?.Invoke(season, lightShift, timeDifference);
     }
 
-    //ÒôĞ§²¥·ÅÊÂ¼ş
+    //éŸ³æ•ˆæ’­æ”¾äº‹ä»¶
     public static event Action<SoundDetails> InitSoundEffect;
     public static void CallInitSoundEffect(SoundDetails soundDetails)
     {
         InitSoundEffect?.Invoke(soundDetails);
     }
-    //Íæ¼Ò¶¯×÷ÒôĞ§
+    //ç©å®¶åŠ¨ä½œéŸ³æ•ˆ
     public static event Action<SoundName> PlaySoundEvent;
     public static void CallPlaySoundEvent(SoundName soundName)
     {
         PlaySoundEvent?.Invoke(soundName);
     }
-    //¿Û³ı»òÔö¼ÓÆ£ÀÍÖµÊÂ¼ş
+    //æ‰£é™¤æˆ–å¢åŠ ç–²åŠ³å€¼äº‹ä»¶
     public static event Action<float> PlayerDecreaseStminaEvent;
     public static void CallPlayerDecreaseStminaEvent(float value)
     {
         PlayerDecreaseStminaEvent?.Invoke(value);
     }
-    //¿Û³ı»òÔö¼ÓÍæ¼ÒÑªÁ¿
+    //æ‰£é™¤æˆ–å¢åŠ ç©å®¶è¡€é‡
     public static event Action<float> PlayerDecreaseHealthEvent;
     public static void CallPlayerDecreaseHealthEvent(float value)
     {
         PlayerDecreaseHealthEvent?.Invoke(value);
     }
-    //¼ì²é²¢´ò¿ªÅëâ¿UIµÄÊÂ¼ş
+    //æ£€æŸ¥å¹¶æ‰“å¼€çƒ¹é¥ªUIçš„äº‹ä»¶
     public static event Action<bool> CheckCookedUIEvent;
     public static void CallCheckCookedUIEvent(bool canCooked)
     {
         CheckCookedUIEvent?.Invoke(canCooked);
     }
-    //²ËÆ×¼¤»îµÄÊÂ¼ş
+    //èœè°±æ¿€æ´»çš„äº‹ä»¶
     public static event Action CookedMenuSetupEvent;
     public static void CallCookedMenuSetupEvent()
     {
         CookedMenuSetupEvent?.Invoke();
     }
-    //¿ªÊ¼ĞÂÓÎÏ·µÄÊÂ¼ş
+    //å¼€å§‹æ–°æ¸¸æˆçš„äº‹ä»¶
     public static event Action<int> StartNewGameEvent;
     public static void CallStartNewGameEvent(int index)
     {
         StartNewGameEvent?.Invoke(index);
     }
 
-    //½áÊøÓÎÏ·µÄÊÂ¼ş
+    //ç»“æŸæ¸¸æˆçš„äº‹ä»¶
     public static event Action EndGameEvent;
     public static void CallEndGameEvent()
     {
         EndGameEvent?.Invoke();
     }
-    //Ê°È¡ÎïÆ·UIÌáÊ¾ÊÂ¼ş
+    //æ‹¾å–ç‰©å“UIæç¤ºäº‹ä»¶
     public static event Action<ItemDetails> GetItemTipEvent;
     public static void CallGetItemTipEvent(ItemDetails getitemDetail)
     {
         GetItemTipEvent?.Invoke(getitemDetail);
     }
-    //Item³öÏÖÊ±µÄÆğÊ¼Î»ÖÃ
+    //Itemå‡ºç°æ—¶çš„èµ·å§‹ä½ç½®
     public static event Action<Vector3> ItemFirstPos;
     public static void CallItemFirstPos(Vector3 itemFirstPos)
     {
         ItemFirstPos?.Invoke(itemFirstPos);
     }
-    //´ºÌì°×ÌìÓæ»ñÁĞ±íË¢ĞÂÊ±¼ä
+    //æ˜¥å¤©ç™½å¤©æ¸”è·åˆ—è¡¨åˆ·æ–°æ—¶é—´
     public static event Action<List<ItemDetails>> FishListInSpriteDayFreshEvent;
     public static void CallFishListInSpriteDayFreshEvent(List<ItemDetails> fishList)
     {
         FishListInSpriteDayFreshEvent?.Invoke(fishList);
         
     }
-    //Ôö¼ÓÖÖÖ²¾­ÑéÖµÊÂ¼ş
+    //å¢åŠ ç§æ¤ç»éªŒå€¼äº‹ä»¶
     public static event Action<int> IncreasePlantingSkillEvent;
     public static void CallInCreasePlantingSkillEvent(int EXP)
     {
         IncreasePlantingSkillEvent?.Invoke(EXP);
     }
     public static event Action<int> IncreaseCultivetionSkillEvent;
-    //Ôö¼ÓÑøÖ³¾­ÑéÖµÊÂ¼ş
+    //å¢åŠ å…»æ®–ç»éªŒå€¼äº‹ä»¶
     public static void CallInCreaseCultivetionSkillEvent(int EXP)
     {
         IncreaseCultivetionSkillEvent?.Invoke(EXP);
     }
-    //Ôö¼ÓµöÓã¾­ÑéÖµÊÂ¼ş
+    //å¢åŠ é’“é±¼ç»éªŒå€¼äº‹ä»¶
     public static event Action<int> IncreaseFishingSkillEvent;
     public static void CallInCreaseFishingSkillEvent(int EXP)
     {
         IncreaseFishingSkillEvent?.Invoke(EXP);
     }
-    //Ôö¼ÓÕ½¶·¾­ÑéÖµÊÂ¼ş
+    //å¢åŠ æˆ˜æ–—ç»éªŒå€¼äº‹ä»¶
     public static event Action<int> IncreaseFightSkillEvent;
     public static void CallInCreaseFightSkillEvent(int EXP)
     {
         IncreaseFightSkillEvent?.Invoke(EXP);
     }
-    //Ôö¼ÓÌ½Ë÷¾­ÑéÖµÊÂ¼ş
+    //å¢åŠ æ¢ç´¢ç»éªŒå€¼äº‹ä»¶
     public static event Action<int> IncreaseExploreSkillEvent;
     public static void CallInCreaseExploreSkillEvent(int EXP)
     {
         IncreaseExploreSkillEvent?.Invoke(EXP);
     }
-    //ÓÎÏ·UI¿ªÆôÊ±½ûÖ¹Êó±êÊ¹ÓÃµÀ¾ß
+    //æ¸¸æˆUIå¼€å¯æ—¶ç¦æ­¢é¼ æ ‡ä½¿ç”¨é“å…·
     public static event Action<bool> ItemUselessEvent;
     public static void CallItemUselessEvent(bool UIOpend)
     {
         ItemUselessEvent?.Invoke(UIOpend);
     }
-    //¿ªÊ¼ÈÎÎñÊÂ¼ş
+    //å¼€å§‹ä»»åŠ¡äº‹ä»¶
     public static event Action TaskStartEvent;
     public static void CallTaskStartEvent()
     {
         TaskStartEvent?.Invoke();
     }
-    //¸üĞÂÈÎÎñ½ø¶ÈÊÂ¼ş£¬ÔÚ¹ÖÎïËÀÍö£¬Ê°È¡ÎïÆ·Ê±µ÷ÓÃ£¬²»ÒªÍü¼ÇÈç¹û¸ÃÈÎÎñÎïÆ·¿ÉÒÔÊ¹ÓÃ£¬ÔÚÊ¹ÓÃµÄÊ±ºòÒ²Òª¼õÈ¥¶ÔÓ¦µÄÈÎÎñ½ø¶ÈÊıÁ¿
+    //æ›´æ–°ä»»åŠ¡è¿›åº¦äº‹ä»¶ï¼Œåœ¨æ€ªç‰©æ­»äº¡ï¼Œæ‹¾å–ç‰©å“æ—¶è°ƒç”¨ï¼Œä¸è¦å¿˜è®°å¦‚æœè¯¥ä»»åŠ¡ç‰©å“å¯ä»¥ä½¿ç”¨ï¼Œåœ¨ä½¿ç”¨çš„æ—¶å€™ä¹Ÿè¦å‡å»å¯¹åº”çš„ä»»åŠ¡è¿›åº¦æ•°é‡
     public static event Action<int,int> UpdateQuestProgressEvent;
     public static void CallUpdateQuestProgressEvent(int itemID,int amount)
     {
         UpdateQuestProgressEvent?.Invoke(itemID,amount);
     }
-    //¼ì²é×°±¸¿òÊÂ¼ş
+    //æ£€æŸ¥è£…å¤‡æ¡†äº‹ä»¶
     public static event Action<SlotUI, SlotUI> EquipSlotEvent;
     public static void CallEquipSlotEvent(SlotUI headSlot,SlotUI bodySlot)
     {
         EquipSlotEvent?.Invoke(headSlot, bodySlot);
     }
-    //¼õÉÙÍæ¼Ò±³°üÖĞµÄÊ÷ÖÖ×ÓÊıÁ¿
+    //å‡å°‘ç©å®¶èƒŒåŒ…ä¸­çš„æ ‘ç§å­æ•°é‡
     public static event Action<int> RemoveTreeSeedCount;
     public static void CallRemoveTreeSeedCount(int seedID)
     {
         RemoveTreeSeedCount?.Invoke(seedID);
     }
-    //ÏÔÊ¾ÊÕ»ñÅ©×÷ÎïµÄ¾ÙÆğÍ¼Æ¬
+    //æ˜¾ç¤ºæ”¶è·å†œä½œç‰©çš„ä¸¾èµ·å›¾ç‰‡
     public static event Action<int> DisplayCollectItemSprite;
     public static void CallDisplayCollectItemSprite(int itemID)
     {
         DisplayCollectItemSprite?.Invoke(itemID);
     }
-    //×°±¸»¤¼×µÄÊÂ¼ş
+    //è£…å¤‡æŠ¤ç”²çš„äº‹ä»¶
     public static event Action<int> EquipArmorEvent;
     public static void CallEquipArmorEven(int value)
     {
         EquipArmorEvent?.Invoke(value);
     }
-    //ĞŞ¸ÄÍæ¼Ò½ğÇ®²¢¡°Á÷¶¯¡±±ä»¯µÄÊÂ¼ş
+    //ä¿®æ”¹ç©å®¶é‡‘é’±å¹¶â€œæµåŠ¨â€å˜åŒ–çš„äº‹ä»¶
     public static event Action<int, int> DoTweenPlayerMoneyChageEvent;
     public static void CallDoTweenPlayerMoneyChageEvent(int fromValue,int difference)
     {
         DoTweenPlayerMoneyChageEvent?.Invoke(fromValue, difference);
     }
-    //¿ªÊ¼NPCÊÂ¼şµÄÊÂ¼ş
+    //å¼€å§‹NPCäº‹ä»¶çš„äº‹ä»¶
     public static event Action StartNPCEvent;
     public static void CallStartNPCEvent()
     {
         StartNPCEvent?.Invoke();
     }
 
-    //ÍÆ½øNPCÊÂ¼şµÄÊÂ¼ş
+    //æ¨è¿›NPCäº‹ä»¶çš„äº‹ä»¶
     public static event Action PromoteNPCEvent;
     public static void CallPromoteNPCEvent()
     {
         PromoteNPCEvent?.Invoke();
     }
-    //Ôö¼ÓNPCµÄºÃ¸Ğ¶È
+    //å¢åŠ NPCçš„å¥½æ„Ÿåº¦
     public static event Action<float,string> IncreaseFriendliness;
     public static void CallIncreaseFriendliness(float value,string name)
     {
         IncreaseFriendliness?.Invoke(value,name);
     }
-    //½áÊøNPCÊÂ¼şµÄÊÂ¼ş
+    //ç»“æŸNPCäº‹ä»¶çš„äº‹ä»¶
     public static event Action EndNPCEvent;
     public static void CallEndNPCEvent()
     {
         EndNPCEvent?.Invoke();
     }
  
-    //¸üĞÂºÃ¸Ğ¶ÈUIÊÂ¼ş
+    //æ›´æ–°å¥½æ„Ÿåº¦UIäº‹ä»¶
     public static event Action<string, float> UpdateNPCFriendlinessUIPanel;
     public static void CallUpdateNPCFriendlinessUIPanel(string name,float value)
     {
         UpdateNPCFriendlinessUIPanel?.Invoke(name, value);
     }
-    //Ê²Ã´Ê±ºòÄÜ´ò¿ªÍæ¼Ò±³°üÊÂ¼ş
+    //ä»€ä¹ˆæ—¶å€™èƒ½æ‰“å¼€ç©å®¶èƒŒåŒ…äº‹ä»¶
     public static event Action<bool> ControlPlayerBagOpen;
     public static void CallControlPlayerBagOpen(bool canOpen)
     {
         ControlPlayerBagOpen?.Invoke(canOpen);
     }
-    //ÏÂÒ»¸ö´«ËÍµã³öÏÖÊÂ¼ş
+    //ä¸‹ä¸€ä¸ªä¼ é€ç‚¹å‡ºç°äº‹ä»¶
     public static event Action NextTeleportAppearEvent;
     public static void CallNextTeleportAppearEvent()
     {
         NextTeleportAppearEvent?.Invoke();
     }
-    //³Ô¶«Î÷ÊÂ¼ş
+    //åƒä¸œè¥¿äº‹ä»¶
     public static event Action<int> PlayEatAnimEvent;
     public static void CallPlayEatAnimEvent(int itemID)
     {
         PlayEatAnimEvent?.Invoke(itemID);
     }
-    //¶¯ÎïÉú²úµÄÊÂ¼ş
+    //åŠ¨ç‰©ç”Ÿäº§çš„äº‹ä»¶
     public static event Action<int, int> InstantiateAniamlProduceItemEvent;
     public static void CallInstantiateAniamlProduceItemEvent(int code,int itemID)
     {
         InstantiateAniamlProduceItemEvent?.Invoke(code, itemID);
     }
-    //¶¯ÎïÔÚ»Øµ½¼ÒÖ®ºóµÄÊÂ¼ş
+    //åŠ¨ç‰©åœ¨å›åˆ°å®¶ä¹‹åçš„äº‹ä»¶
     public static event Action<int,SceneAnimal> AnimalArrivedAtHomeEvent;
     public static void CallAnimalArrivedAtHomeEvent(int buildCode, SceneAnimal animal)
     {
         AnimalArrivedAtHomeEvent?.Invoke(buildCode, animal);
     }
-    //¶¯ÎïÀë¿ª¼ÒÖ®ºóµÄÊÂ¼ş
+    //åŠ¨ç‰©ç¦»å¼€å®¶ä¹‹åçš„äº‹ä»¶
     public static event Action<int, SceneAnimal> AnimalExitCoopEvent;
     public static void CallAnimalExitCoopEvent(int buildCode, SceneAnimal animal)
     {
         AnimalExitCoopEvent?.Invoke(buildCode, animal);
     }
-    //»ñÈ¡ÖØÒªÎïÆ·µÄÊÂ¼ş
+    //è·å–é‡è¦ç‰©å“çš„äº‹ä»¶
     public static event Action<ItemDetails> RecerveItemEvent;
     public static void CallRecerveItemEvent(ItemDetails item)
     {
         RecerveItemEvent?.Invoke(item);
     }
-    //¹Ø±Õ»ñÈ¡ÖØÒªµÀ¾ßµÄUI
+    //å…³é—­è·å–é‡è¦é“å…·çš„UI
     public static event Action QuitRecerveItemUIEvent;
     public static void CallQuitRecerveItemUIEvent()
     {
         QuitRecerveItemUIEvent?.Invoke();
     }
-    //´ò¿ªË¯¾õÃæ°åµÄÊÂ¼ş
+    //æ‰“å¼€ç¡è§‰é¢æ¿çš„äº‹ä»¶
     public static event Action OpenSleepPanelEvent;
     public static void CallOpenSleepPanelEvent()
     {
         OpenSleepPanelEvent?.Invoke();
     }
-    //Íæ¼Òµã»÷Ë¯¾õÃæ°å¡°ÊÇ¡±ºóµÄÊÂ¼ş
+    //ç©å®¶ç‚¹å‡»ç¡è§‰é¢æ¿â€œæ˜¯â€åçš„äº‹ä»¶
     public static event Action SleepEvent;
     public static void CallSleepEvent()
     {
         SleepEvent?.Invoke();
     }
-    // ÏÔÊ¾Âô³µ½áËã½çÃæµÄÊÂ¼ş
+    // æ˜¾ç¤ºå–è½¦ç»“ç®—ç•Œé¢çš„äº‹ä»¶
     public static event Action ShowSettleUIEvent;
     public static void CallShowSettleUIEvent()
     {
         ShowSettleUIEvent?.Invoke();
     }
-    // ¹Ø±ÕÂô³µ½áËã½çÃæµÄÊÂ¼ş
+    // å…³é—­å–è½¦ç»“ç®—ç•Œé¢çš„äº‹ä»¶
     public static event Action HideSettleUIEvent;
     public static void CallHideSettleUIEvent()
     {
         HideSettleUIEvent?.Invoke();
     }
-    // ½áËã½çÃæ½áËã¸ñÈ«²¿Éú³ÉÍê±ÏµÄÊÂ¼ş
+    // ç»“ç®—ç•Œé¢ç»“ç®—æ ¼å…¨éƒ¨ç”Ÿæˆå®Œæ¯•çš„äº‹ä»¶
     public static event Action SettleUIGenerateDoneEvent;
     public static void CallSettleUIGenerateDoneEvent()
     {
         SettleUIGenerateDoneEvent?.Invoke();
     }
-    // ½áËã½çÃæ¹Ø±Õ¶¯»­²¥·ÅÍê±ÏµÄÊÂ¼ş
+    // ç»“ç®—ç•Œé¢å…³é—­åŠ¨ç”»æ’­æ”¾å®Œæ¯•çš„äº‹ä»¶
     public static event Action SettleUIHideDoneEvent;
     public static void CallSettleUIHideDoneEvent()
     {
         SettleUIHideDoneEvent?.Invoke();
     }
-    // ±³°üÒÑÂú£¬ÎŞ·¨¼ñÆğÎïÆ·Ê±µÄÌáÊ¾ÊÂ¼ş
+    // èƒŒåŒ…å·²æ»¡ï¼Œæ— æ³•æ¡èµ·ç‰©å“æ—¶çš„æç¤ºäº‹ä»¶
     public static event Action BagFullTipEvent;
     public static void CallBagFullTipEvent()
     {

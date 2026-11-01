@@ -1,4 +1,4 @@
-using MFarm.Inventory;
+ï»¿using MFarm.Inventory;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Remoting.Lifetime;
@@ -7,27 +7,27 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-public class PressingButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,IPointerClickHandler,IPointerExitHandler//µ÷ÓÃÔÚËùÓĞĞèÒª³¤°´¹¦ÄÜµÄ°´Å¥ÉÏ
+public class PressingButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,IPointerClickHandler,IPointerExitHandler//è°ƒç”¨åœ¨æ‰€æœ‰éœ€è¦é•¿æŒ‰åŠŸèƒ½çš„æŒ‰é’®ä¸Š
 {
-    //µã»÷ºÍ³¤°´ÊÂ¼ş 
+    //ç‚¹å‡»å’Œé•¿æŒ‰äº‹ä»¶ 
     public UnityEvent OnPress;
     public UnityEvent OnClick;
     public UnityEvent OnDoubleClick;
-    //ÊÇ·ñ°´ÏÂ
+    //æ˜¯å¦æŒ‰ä¸‹
     private bool isDown;
-    //ÊÇ·ñ³¤°´
+    //æ˜¯å¦é•¿æŒ‰
     private bool isPressing = false;
-    //°´ÏÂµÄÊ±¼ä
+    //æŒ‰ä¸‹çš„æ—¶é—´
     private float downTime;
-    //¼ÆÊ±Æ÷£¬¶àÉÙÊ±¼äÖ´ĞĞÒ»´Îpress
+    //è®¡æ—¶å™¨ï¼Œå¤šå°‘æ—¶é—´æ‰§è¡Œä¸€æ¬¡press
     private float timer;
-    //°´ÏÂ°´Å¥¶à¾Ã²ÅËã½øÈë³¤°´
+    //æŒ‰ä¸‹æŒ‰é’®å¤šä¹…æ‰ç®—è¿›å…¥é•¿æŒ‰
     private float pressDurationTime = 0.5f;
-    //¼ä¸ô¶àÉÙÊ±¼äÄÚËãË«»÷
+    //é—´éš”å¤šå°‘æ—¶é—´å†…ç®—åŒå‡»
     private float doubleClockIntervalTime = 0.2f;
-    //°´ÏÂ¿ªÊ¼¼ÆÊ±µÄ¼ä¸ô
+    //æŒ‰ä¸‹å¼€å§‹è®¡æ—¶çš„é—´éš”
     private float clickIntervalTime;
-    //µã»÷µÄ´ÎÊı
+    //ç‚¹å‡»çš„æ¬¡æ•°
     private int clickTimes;
     public void Update()
     {

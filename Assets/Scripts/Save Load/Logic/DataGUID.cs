@@ -1,12 +1,12 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-//Ò»Ö±Ö´ĞĞ
+//ä¸€ç›´æ‰§è¡Œ
 [ExecuteAlways]
-public class DataGUID : MonoBehaviour   //µ÷ÓÃÔÚĞèÒª´æµµµÄÎïÌåÉÏ£¬±ÈÈçPlayer
+public class DataGUID : MonoBehaviour   //è°ƒç”¨åœ¨éœ€è¦å­˜æ¡£çš„ç‰©ä½“ä¸Šï¼Œæ¯”å¦‚Player
 {
     /// <summary>
-    /// 16Î»×Ö·û´®£¬ÓÃÀ´ºÍ´æµµĞÅÏ¢×öÆ¥Åä£¬±£Ö¤´æµµĞÅÏ¢µÄÎ¨Ò»ĞÔ
+    /// 16ä½å­—ç¬¦ä¸²ï¼Œç”¨æ¥å’Œå­˜æ¡£ä¿¡æ¯åšåŒ¹é…ï¼Œä¿è¯å­˜æ¡£ä¿¡æ¯çš„å”¯ä¸€æ€§
     /// </summary>
     public string guid;
 
@@ -14,7 +14,7 @@ public class DataGUID : MonoBehaviour   //µ÷ÓÃÔÚĞèÒª´æµµµÄÎïÌåÉÏ£¬±ÈÈçPlayer
     {
         if(guid == string.Empty)
         {
-            //°ÑguidÉú³ÉÎªÒ»¸ö16Î»µÄ×Ö·û´®
+            //æŠŠguidç”Ÿæˆä¸ºä¸€ä¸ª16ä½çš„å­—ç¬¦ä¸²
             guid = System.Guid.NewGuid().ToString();
         }
     }

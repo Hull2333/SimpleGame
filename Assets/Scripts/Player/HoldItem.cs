@@ -1,23 +1,23 @@
-using MFarm.Inventory;
+ï»¿using MFarm.Inventory;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HoldItem : MonoBehaviour //µ÷ÓÃÔÚPlayerµÄHoldItem¶ÔÏóÉÏ
+public class HoldItem : MonoBehaviour //è°ƒç”¨åœ¨Playerçš„HoldItemå¯¹è±¡ä¸Š
 {
     public PlayerController playerController;
     public ItemDetails itemDetails;
 
     /// <summary>
-    /// ÔÚHoldItemµÄÊÕ»ñ¶¯»­Ö¡ÖĞÔËĞĞ
+    /// åœ¨HoldItemçš„æ”¶è·åŠ¨ç”»å¸§ä¸­è¿è¡Œ
     /// </summary>
     public void StartEvent()
     {
-        //È¡ÏûÍæ¼Ò¾ÙÆğ¶¯»­
+        //å–æ¶ˆç©å®¶ä¸¾èµ·åŠ¨ç”»
         EventHandler.CallItemSelectEvent(InventoryManager.Instance.currentSelectedItem, false);
     }
     /// <summary>
-    /// Ö´ĞĞÍæ¼Ò³ÔÍêµÄ¶¯»­£¬µ÷ÓÃÔÚHoldItem¶¯»­Ö¡ÉÏ 
+    /// æ‰§è¡Œç©å®¶åƒå®Œçš„åŠ¨ç”»ï¼Œè°ƒç”¨åœ¨HoldItemåŠ¨ç”»å¸§ä¸Š 
     /// </summary>
     public void PlayEatDoneAnim()
     {
@@ -33,7 +33,7 @@ public class HoldItem : MonoBehaviour //µ÷ÓÃÔÚPlayerµÄHoldItem¶ÔÏóÉÏ
         
     }
     /// <summary>
-    /// »Ö¸´ÓÎÏ·£¬µ÷ÓÃÔÚHoldItem¶¯»­Ö¡ÉÏ 
+    /// æ¢å¤æ¸¸æˆï¼Œè°ƒç”¨åœ¨HoldItemåŠ¨ç”»å¸§ä¸Š 
     /// </summary>
     public void RecoverGameplay()
     {

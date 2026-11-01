@@ -1,4 +1,4 @@
-using JetBrains.Annotations;
+ï»¿using JetBrains.Annotations;
 using MFarm.Map;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,20 +6,20 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using static AnimalData_SO;
-//ÊµÀı»¯ÏÂÁĞµÄÊı¾İ£¬²Å¿ÉÒÔÔÚItemDataList_OS¶ÔÏóÉÏ³öÏÖlistÎïÆ·Êı¾İ
+//å®ä¾‹åŒ–ä¸‹åˆ—çš„æ•°æ®ï¼Œæ‰å¯ä»¥åœ¨ItemDataList_OSå¯¹è±¡ä¸Šå‡ºç°listç‰©å“æ•°æ®
 [System.Serializable]
 public class ItemDetails
 {
     public int itemID;
     public string itemName;
-    //ÎïÆ·ÀàĞÍ£¬¸ù¾İÃ¶¾ÙItemType
+    //ç‰©å“ç±»å‹ï¼Œæ ¹æ®æšä¸¾ItemType
     public ItemType itemType;
-    [Header("×°±¸ÊıÖµ")]
+    [Header("è£…å¤‡æ•°å€¼")]
     public int minValue;
     public int maxValue;
-    [Header("ÎäÆ÷»÷ÍËÁ¦")]
+    [Header("æ­¦å™¨å‡»é€€åŠ›")]
     public float forceValue;
-    [Header("ÓãÀàÏà¹Ø")]
+    [Header("é±¼ç±»ç›¸å…³")]
     public FishLevel fishLevel;
     public FishlifeSeason fishlifeSeason;
     public FishlifeTime fishlifeTime;
@@ -33,14 +33,14 @@ public class ItemDetails
     public bool canDropped;
     public bool canCarried;
     public bool canEat;
-    [Header("Óã¶üÏà¹Ø")]
+    [Header("é±¼é¥µç›¸å…³")]
     public bool isBait;
     public float decreaseFishingTime;
     public int itemPrice;
     public int recoverHealth;
     public int recoverStmina;
     public EquipType equipType;
-    [Header("ÊÇ·ñËõ·Å£¬²»Ëõ·Å¾ÍÑ¡normal")]
+    [Header("æ˜¯å¦ç¼©æ”¾ï¼Œä¸ç¼©æ”¾å°±é€‰normal")]
     public SpriteScale scale;
     [Range(0, 1)]
     public float sellPercentage;
@@ -75,7 +75,7 @@ public class CursorAnimator
     public AnimatorOverrideController cursorController;
 }
 /// <summary>
-/// ´æ´¢ItemÔÚ³¡¾°ÖĞµÄ×ø±ê
+/// å­˜å‚¨Itemåœ¨åœºæ™¯ä¸­çš„åæ ‡
 /// </summary>
 [System.Serializable]
 public class SerializableVector3
@@ -99,71 +99,71 @@ public class SerializableVector3
         return new Vector2Int((int)x, (int)y);
     }
 }
-//³¡¾°ÖĞµÄËùÓĞÎïÆ·
+//åœºæ™¯ä¸­çš„æ‰€æœ‰ç‰©å“
 [System.Serializable]
 public class SceneItem
 {
     public int itemID;
     public SerializableVector3 position;
 }
-//³¡¾°ÖĞµÄ¹àÄ¾´Ô×´Ì¬
+//åœºæ™¯ä¸­çš„çŒæœ¨ä¸›çŠ¶æ€
 [System.Serializable]
 public class SceneBush
 {
     public SerializableVector3 position;
-    //ÊÇ·ñÕı¹Ò×Å¹ûÊµ
+    //æ˜¯å¦æ­£æŒ‚ç€æœå®
     public bool isFruiting;
-    //¹Ò×ÅµÄ¹ûÊµÊıÁ¿
+    //æŒ‚ç€çš„æœå®æ•°é‡
     public int fruitCount;
-    //ÉÏ´Î²ÉÕªµÄ¾ø¶ÔÌìÊı£¬-1±íÊ¾»¹Ã»²ÉÕª¹ı
+    //ä¸Šæ¬¡é‡‡æ‘˜çš„ç»å¯¹å¤©æ•°ï¼Œ-1è¡¨ç¤ºè¿˜æ²¡é‡‡æ‘˜è¿‡
     public int pickedDayIndex = -1;
 }
-//³¡¾°ÖĞµÄ½¨Ôì¼Ò¾ß
+//åœºæ™¯ä¸­çš„å»ºé€ å®¶å…·
 [System.Serializable]
 public class SceneFurniture
 {
-    //TODO:¸ü¶àÊôĞÔĞÅÏ¢
+    //TODO:æ›´å¤šå±æ€§ä¿¡æ¯
     public int itemID;
     public SerializableVector3 position;
-    //Ïä×Ó±àºÅ
+    //ç®±å­ç¼–å·
     public int boxIndex;
 }
-//³¡¾°ÖĞµÄ½¨Ôì½¨Öş
+//åœºæ™¯ä¸­çš„å»ºé€ å»ºç­‘
 [System.Serializable]
 public class SceneBuilding
 {
     public int buildID;
-    //½¨ÔìÊ±¼ä
+    //å»ºé€ æ—¶é—´
     public int buildDay;
-    //½¨ÖşÊ¶±ğÂë
+    //å»ºç­‘è¯†åˆ«ç 
     public int buildCodeID;
-    //ÊÇ·ñÍê¹¤
+    //æ˜¯å¦å®Œå·¥
     public bool isDone;
-    //¿É½ÓÊÜµÄ¶¯Îï³ß´ç
+    //å¯æ¥å—çš„åŠ¨ç‰©å°ºå¯¸
     public AnimalSizeType acceptAnimalSize;
     public SerializableVector3 position;
 }
-//³¡¾°ÖĞµÄ¶¯Îï
+//åœºæ™¯ä¸­çš„åŠ¨ç‰©
 [System.Serializable]
 public class SceneAnimal
 {
-    //³É³¤µÄÌìÊı
+    //æˆé•¿çš„å¤©æ•°
     public int growthDay;
     public float friendliness;
     public bool isTouch;
     public AnimalDetails animalDetails;
     public int animalCode;
-    //ÊÇ·ñÔÚÊÒÍâ
+    //æ˜¯å¦åœ¨å®¤å¤–
     public bool isOutSide;
 }
-//³¡¾°ÖĞµÄ¶¯ÎïµÄ»î¶¯·¶Î§
+//åœºæ™¯ä¸­çš„åŠ¨ç‰©çš„æ´»åŠ¨èŒƒå›´
 [System.Serializable]
 public class BuildColliderArea
 {
     public int code;
     public Collider2D area;
 }
-//´ıÉú³ÉµÄ¶¯Îï
+//å¾…ç”Ÿæˆçš„åŠ¨ç‰©
 [System.Serializable]
 public class AnimalSpawnInfo
 {
@@ -212,40 +212,40 @@ public class TileDetails
     public bool canTree;
     public bool canChopItem;
     public bool canBigWeeds;
-    //ÊÇ·ñ±»ÍÚ¿Ó£¬Ã»ÓĞÍÚÔòÊÇ-1£¬ÓĞÔòÊÇ1£¬¹ıÁËÒ»ÌìÎª2£¬ÒÔ´ËÀàÍÆ
+    //æ˜¯å¦è¢«æŒ–å‘ï¼Œæ²¡æœ‰æŒ–åˆ™æ˜¯-1ï¼Œæœ‰åˆ™æ˜¯1ï¼Œè¿‡äº†ä¸€å¤©ä¸º2ï¼Œä»¥æ­¤ç±»æ¨
     public int daysSinceDug = -1;
-    //ÊÇ·ñÒÑ½½Ë®
+    //æ˜¯å¦å·²æµ‡æ°´
     public int daysSinceWatered = -1;
-    //µ±Ç°ÖÖÏÂÖÖ×ÓµÄĞÅÏ¢
+    //å½“å‰ç§ä¸‹ç§å­çš„ä¿¡æ¯
     public int seedItemID = -1;
-    //ÖÖ×ÓÖÖÏÂµÄÌìÊı
+    //ç§å­ç§ä¸‹çš„å¤©æ•°
     public int growthDays = -1;
-    //ÖÖ×Ó¾àÀëÉÏÒ»´ÎÊÕ»ñµÄ´ÎÊı
+    //ç§å­è·ç¦»ä¸Šä¸€æ¬¡æ”¶è·çš„æ¬¡æ•°
     public int daysSinceLastHarvest = -1;
-    //Ô¤¸üĞÂÊÇ·ñÓĞÔÓ²İ
+    //é¢„æ›´æ–°æ˜¯å¦æœ‰æ‚è‰
     public int predictHaveWeeds = -1;
-    //ÊÇ·ñÓĞÔÓ²İ
+    //æ˜¯å¦æœ‰æ‚è‰
     public int haveWeeds = -1;
     public int haveBigWeeds = -1;
-    //ÊÇ·ñÓĞÊ¯¿ó
+    //æ˜¯å¦æœ‰çŸ³çŸ¿
     public int haveRock = -1;
-    //ÊÇ·ñÓĞ´óÊ¯¿ó
+    //æ˜¯å¦æœ‰å¤§çŸ³çŸ¿
     public int haveBigRock = -1;
-    //ÊÇ·ñÓĞÊ÷
+    //æ˜¯å¦æœ‰æ ‘
     public int haveTree = -1;
-    //ÊÇ·ñÓĞ¿ÉÅü¿³ÎïÌå
+    //æ˜¯å¦æœ‰å¯åŠˆç ç‰©ä½“
     public int haveChop = -1;
-    //ÊÇ·ñÓĞ·ÅÖÃ¶«Î÷
+    //æ˜¯å¦æœ‰æ”¾ç½®ä¸œè¥¿
     public int havePlace = -1;
 }
 [System.Serializable]
 public class NPCPosition
 {
-    //npc¶ÔÏó
+    //npcå¯¹è±¡
     public Transform npc;
-    //¿ªÊ¼³¡¾°
+    //å¼€å§‹åœºæ™¯
     public string startScene;
-    //µ±Ç°Î»ÖÃ
+    //å½“å‰ä½ç½®
     public Vector3 position;
 }
 
@@ -253,16 +253,16 @@ public class NPCPosition
 [System.Serializable]
 public class EquipImage
 {
-    //ÏÔÊ¾Íæ¼ÒÉíÉÏµÄ×°±¸Í¼Æ¬
+    //æ˜¾ç¤ºç©å®¶èº«ä¸Šçš„è£…å¤‡å›¾ç‰‡
     public int itemID;
     public PartName equipPartName;
     public Sprite equipSprite;
 }
 
-#region:npcÂ·¾¶¿â
+#region:npcè·¯å¾„åº“
 [System.Serializable]
 /// <summary>
-/// npc¶à¸ö³¡¾°µÄÒÆ¶¯£¬¼ÇÂ¼Ã¿¸ö³¡¾°µÄÂ·¾¶
+/// npcå¤šä¸ªåœºæ™¯çš„ç§»åŠ¨ï¼Œè®°å½•æ¯ä¸ªåœºæ™¯çš„è·¯å¾„
 /// </summary>
 public class SceneRoute
 {
@@ -272,14 +272,14 @@ public class SceneRoute
 }
 [System.Serializable]
 /// <summary>
-/// npc¿ç³¡¾°ÒÆ¶¯µÄÂ·¾¶
+/// npcè·¨åœºæ™¯ç§»åŠ¨çš„è·¯å¾„
 /// </summary>
 public class ScenePath
 {
     public string sceneName;
-    //ÔÚsceneNameÖĞµÄÆğµã
+    //åœ¨sceneNameä¸­çš„èµ·ç‚¹
     public Vector2Int fromGridCell;
-    //ÔÚsceneNameÖĞµÄÖÕµã
+    //åœ¨sceneNameä¸­çš„ç»ˆç‚¹
     public Vector2Int gotoGridCell;
 }
 #endregion
@@ -287,70 +287,70 @@ public class ScenePath
 public class NPCEvent
 {
     public string npcName;
-    //¸ÃÊÂ¼şÊÇ·ñÒÑ¾­·¢Éú
+    //è¯¥äº‹ä»¶æ˜¯å¦å·²ç»å‘ç”Ÿ
     public bool isHappened;
-    //ºÃ¸Ğ¶È
+    //å¥½æ„Ÿåº¦
     public float friendliness;
-    //NPCÊÂ¼ş¿ªÊ¼ºÍ½áÊøµÄÊ±¼ä
+    //NPCäº‹ä»¶å¼€å§‹å’Œç»“æŸçš„æ—¶é—´
     public int eventStartHour;
     public int eventEndHour;
-    //¿ªÊ¼³¡¾°ºÍÎ»ÖÃ
+    //å¼€å§‹åœºæ™¯å’Œä½ç½®
     public string startScene;
-    //ËÙ¶È
+    //é€Ÿåº¦
     public float normalSpeed;
     public float maxSpeed;
-    [Header("NPCµÄÎ»ÖÃ,NPCµÄÎ»ÖÃ¡¢¶Ô»°Êı¾İ¡¢¶¯»­ÊıÁ¿ÒªÏàµÈ")]
-    //ÏÂÒ»¸öÎ»ÖÃ
+    [Header("NPCçš„ä½ç½®,NPCçš„ä½ç½®ã€å¯¹è¯æ•°æ®ã€åŠ¨ç”»æ•°é‡è¦ç›¸ç­‰")]
+    //ä¸‹ä¸€ä¸ªä½ç½®
     public movePosAndSpeed[] nextPos;
     public AnimationClip[] animClip;
-    //¶Ô»°ÄÚÈİ
+    //å¯¹è¯å†…å®¹
     public DialogueData_OS[] dialogueData;
-    [Header("Íæ¼ÒµÄÎ»ÖÃ")]
-    //Íæ¼ÒµÄÎ»ÖÃ
+    [Header("ç©å®¶çš„ä½ç½®")]
+    //ç©å®¶çš„ä½ç½®
     public movePosAndSpeed[] playerPos;
-    [Header("Íæ¼ÒÃ¿´ÎÒÆ¶¯µ½Î»ÖÃµÄÃæ³¯·½Ïò")]
-    //Íæ¼Ò×î¿ªÊ¼ÒÆ¶¯ºóÃæ³¯µÄ·½Ïò
+    [Header("ç©å®¶æ¯æ¬¡ç§»åŠ¨åˆ°ä½ç½®çš„é¢æœæ–¹å‘")]
+    //ç©å®¶æœ€å¼€å§‹ç§»åŠ¨åé¢æœçš„æ–¹å‘
     public Vector2[] playerFaceDir;
-    [Header("ÆäËûNPCµÄ³öÏÖ")]
-    //ÆäËûNPCµÄ³öÏÖ
+    [Header("å…¶ä»–NPCçš„å‡ºç°")]
+    //å…¶ä»–NPCçš„å‡ºç°
     public EventNPC[] eventNPC;
-    [Header("ÕâÒ»²½ÊÇ·ñÇĞ»»ÉãÏñÍ·¸úËæ¶ÔÏó")]
+    [Header("è¿™ä¸€æ­¥æ˜¯å¦åˆ‡æ¢æ‘„åƒå¤´è·Ÿéšå¯¹è±¡")]
     public changeCameraFollow[] changeCameraFollow;
-    [Header("¸ÃÊ±¼ä½áÊøºóËÍµÄµÀ¾ß")]
+    [Header("è¯¥æ—¶é—´ç»“æŸåé€çš„é“å…·")]
     public int[] getItemID;
 }
-//NPCÊÂ¼şÖĞÆäËû³öÏÖµÄNPC
+//NPCäº‹ä»¶ä¸­å…¶ä»–å‡ºç°çš„NPC
 [System.Serializable]
 public class EventNPC
 {
-    //¶ÔÓ¦µÄNPCÊÂ¼ş²½Öè
+    //å¯¹åº”çš„NPCäº‹ä»¶æ­¥éª¤
     public int step;
     public GameObject NPC;
-    //Ò»¿ªÊ¼µÄÎ»ÖÃ
+    //ä¸€å¼€å§‹çš„ä½ç½®
     public Vector2 NPCStartPos;
     public StepPos[] NPCMovePos;
 
 }
-//NPCÊÂ¼şÃ¿Ò»²½µÄÎ»ÖÃ
+//NPCäº‹ä»¶æ¯ä¸€æ­¥çš„ä½ç½®
 [System.Serializable]
 public class StepPos
 {
     public int step;
-    //ÊÇ·ñÊ¹ÓÃ×î´óËÙ¶ÈÒÆ¶¯
+    //æ˜¯å¦ä½¿ç”¨æœ€å¤§é€Ÿåº¦ç§»åŠ¨
     public bool isMaxSpeed;
     public AnimationClip animClip;
     public Vector2 pos;
 }
-//ÒÆ¶¯ÏÂÒ»¸öÎ»ÖÃºÍËÙ¶È
+//ç§»åŠ¨ä¸‹ä¸€ä¸ªä½ç½®å’Œé€Ÿåº¦
 [System.Serializable]
 public class  movePosAndSpeed
 {
     public Vector2 pos;
     public bool isMaxSpeed;
-    //µ½´ïÎ»ÖÃÊÇ·ñ×øÏÂ
+    //åˆ°è¾¾ä½ç½®æ˜¯å¦åä¸‹
     public bool isSit;
 }
-//¸Ã²½ÖèÊÇ·ñÇĞ»»ÉãÏñ»ú¸úËæ¶ÔÏó
+//è¯¥æ­¥éª¤æ˜¯å¦åˆ‡æ¢æ‘„åƒæœºè·Ÿéšå¯¹è±¡
 [System.Serializable]
 public class changeCameraFollow
 {
@@ -361,7 +361,7 @@ public class changeCameraFollow
 [System.Serializable]
 public class NPCFriendLiness
 {
-    //NPCÃû×ÖºÍ¶ÔÓ¦µÄºÃ¸Ğ¶È
+    //NPCåå­—å’Œå¯¹åº”çš„å¥½æ„Ÿåº¦
     public string NPCname;
     public float friendlinessValue;
 }
@@ -377,7 +377,7 @@ public class AnimalItem
     public AnimalDetails animal;
     public int count;
 }
-//½¨Ôì½¨ÖşÖĞ¶¯ÎïµÄÉú²úÎïÆ·
+//å»ºé€ å»ºç­‘ä¸­åŠ¨ç‰©çš„ç”Ÿäº§ç‰©å“
 [System.Serializable]
 public class buildProduceItem
 {

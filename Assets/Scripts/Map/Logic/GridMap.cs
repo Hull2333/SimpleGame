@@ -1,11 +1,11 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 using UnityEngine;
 using UnityEngine.Tilemaps;
-//¸Ã½Å±¾ÔÚ±à¼­Ä£Ê½ÏÂÔËĞĞ£¬¶ø²»ÊÇÔÚÓÎÏ·ÖĞÔËĞĞ
+//è¯¥è„šæœ¬åœ¨ç¼–è¾‘æ¨¡å¼ä¸‹è¿è¡Œï¼Œè€Œä¸æ˜¯åœ¨æ¸¸æˆä¸­è¿è¡Œ
 [ExecuteInEditMode]
 public class GridMap : MonoBehaviour
 {
@@ -30,8 +30,8 @@ public class GridMap : MonoBehaviour
         {
             currentTilemap = GetComponent<Tilemap>();
             UpdateTileProperties();
-            //½«mapData±ê¼ÇÎªDirty£¬ÔÚ¿ÉÒÔÊµÊ±±£´æ
-//È·±£ÊÇÔÚ±à¼­Ä£Ê½ÏÂÔËĞĞ
+            //å°†mapDataæ ‡è®°ä¸ºDirtyï¼Œåœ¨å¯ä»¥å®æ—¶ä¿å­˜
+//ç¡®ä¿æ˜¯åœ¨ç¼–è¾‘æ¨¡å¼ä¸‹è¿è¡Œ
 #if UNITY_EDITOR
             if (mapData != null)
             {
@@ -41,27 +41,27 @@ public class GridMap : MonoBehaviour
         }
     }
     /// <summary>
-    /// »ñÈ¡µ±Ç°µØÍ¼ÖĞµÄÃ¿Ò»¸öTile¸ñ×Ó
+    /// è·å–å½“å‰åœ°å›¾ä¸­çš„æ¯ä¸€ä¸ªTileæ ¼å­
     /// </summary>
     private void UpdateTileProperties() 
     {
-        //¼ì²âÊµ¼ÊÓĞ»æÖÆµÄµØ¿é,Ñ¹ËõµØÍ¼¿é
+        //æ£€æµ‹å®é™…æœ‰ç»˜åˆ¶çš„åœ°å—,å‹ç¼©åœ°å›¾å—
         currentTilemap.CompressBounds();
         if (!Application.IsPlaying(this))
         {
             if (mapData != null)
             {
-                //ÒÑ»æÖÆ·¶Î§µÄ×óÏÂ½Ç×ø±ê
+                //å·²ç»˜åˆ¶èŒƒå›´çš„å·¦ä¸‹è§’åæ ‡
                 Vector3Int startPos = currentTilemap.cellBounds.min;
-                //ÒÑ»æÖÆ·¶Î§µÄÓÒÉÏ½Ç×ø±ê
+                //å·²ç»˜åˆ¶èŒƒå›´çš„å³ä¸Šè§’åæ ‡
                 Vector3Int endPos = currentTilemap.cellBounds.max;
-                //±éÀúÊµ¼Ê»æÖÆ·¶Î§TileµÄx×ø±ê
+                //éå†å®é™…ç»˜åˆ¶èŒƒå›´Tileçš„xåæ ‡
                 for(int x = startPos.x; x < endPos.x; x++)
                 {
-                    //±éÀúÊµ¼Ê»æÖÆ·¶Î§TileµÄy×ø±ê
+                    //éå†å®é™…ç»˜åˆ¶èŒƒå›´Tileçš„yåæ ‡
                     for (int y = startPos.y; y < endPos.y; y++)
                     {
-                        //»ñÈ¡µ±Ç°µØÍ¼ÖĞµÄÃ¿Ò»¸öTile,TileBase±íÊ¾Ã¿Ò»¸öTile
+                        //è·å–å½“å‰åœ°å›¾ä¸­çš„æ¯ä¸€ä¸ªTile,TileBaseè¡¨ç¤ºæ¯ä¸€ä¸ªTile
                         TileBase tile = currentTilemap.GetTile(new Vector3Int(x,y,0));
                         if(tile != null)
                         {
@@ -71,7 +71,7 @@ public class GridMap : MonoBehaviour
                                 gridType = this.gridType,
                                 boolTypeValue = true
                             };
-                            //×îºó½«ÊÕ¼¯µ½µÄÈ«²¿Tile¼Óµ½tilePropertyesÁĞ±íÖĞ
+                            //æœ€åå°†æ”¶é›†åˆ°çš„å…¨éƒ¨TileåŠ åˆ°tilePropertyesåˆ—è¡¨ä¸­
                             mapData.tilePropertyes.Add(newTile);
                         }
                     }

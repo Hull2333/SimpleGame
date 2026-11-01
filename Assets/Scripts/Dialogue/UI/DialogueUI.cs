@@ -1,9 +1,9 @@
-using System.Collections;
+ï»¿using System.Collections;
 using UnityEngine;
 using UnityEngine.ProBuilder.Shapes;
 using UnityEngine.UI;
 
-public class DialogueUI : Singleton<DialogueUI> //µ÷ÓÃÔÚDialogueCanvas01ÉÏ
+public class DialogueUI : Singleton<DialogueUI> //è°ƒç”¨åœ¨DialogueCanvas01ä¸Š
 {
     [Header("Basic Elements")]
     public Image partrait;
@@ -17,19 +17,19 @@ public class DialogueUI : Singleton<DialogueUI> //µ÷ÓÃÔÚDialogueCanvas01ÉÏ
     public DialogueOptionUI optionPrefab;
     [Header("Data")]
     [HideInInspector] public DialogueData_OS currentData;
-    //´ÓÄÇÒ»Ìõ¿ªÊ¼¶Ô»°
+    //ä»é‚£ä¸€æ¡å¼€å§‹å¯¹è¯
     private int currentIndex = 0;
-    //ÕıÔÚºÍNPC¶Ô»°
+    //æ­£åœ¨å’ŒNPCå¯¹è¯
     public bool talkWithNPC;
-    //Ö±½ÓÏÔÊ¾È«²¿¶Ô»°×ÖÊı
+    //ç›´æ¥æ˜¾ç¤ºå…¨éƒ¨å¯¹è¯å­—æ•°
     private bool isSkip = false;
     /// <summary>
-    /// overrideÔÚSingletonµ¥ÀıÄ£Ê½ÏÂÆô¶¯
+    /// overrideåœ¨Singletonå•ä¾‹æ¨¡å¼ä¸‹å¯åŠ¨
     /// </summary>
     protected override void Awake()
     {
         base.Awake();
-        //µã»÷nextButton¼ÌĞøºóĞø¶Ô»°
+        //ç‚¹å‡»nextButtonç»§ç»­åç»­å¯¹è¯
         nextButton.onClick.AddListener(ContinueDialogue);
     }
     private void Update()
@@ -40,20 +40,20 @@ public class DialogueUI : Singleton<DialogueUI> //µ÷ÓÃÔÚDialogueCanvas01ÉÏ
         }
     }
     /// <summary>
-    /// ¼ÌĞø¶Ô»°
+    /// ç»§ç»­å¯¹è¯
     /// </summary>
     private void ContinueDialogue()
     {
-        //±ÜÃâ±¨´í£¬Ö»ÓĞcurrentIndexĞ¡ÓÚµ±Ç°¶Ô»°Êı¾İ¿âµÄpieceÊı²ÅÏÔÊ¾¶Ô»°
+        //é¿å…æŠ¥é”™ï¼Œåªæœ‰currentIndexå°äºå½“å‰å¯¹è¯æ•°æ®åº“çš„pieceæ•°æ‰æ˜¾ç¤ºå¯¹è¯
         if (currentIndex < currentData.dialoguePieces.Count)
         {
-            //µ±µ±Ç°¶Ô»°isEndÎªtrueÒ²½áÊø¶Ô»°
+            //å½“å½“å‰å¯¹è¯isEndä¸ºtrueä¹Ÿç»“æŸå¯¹è¯
             if (currentData.dialoguePieces[currentIndex].isEnd)
             {
                 partrait.gameObject.SetActive(false);
                 name.gameObject.SetActive(false);
                 dialoguePanel.SetActive(false);
-                //ÓĞnextButtonµÄ¶Ô»°½áÊøºóÊ±¼ä»Ö¸´
+                //æœ‰nextButtonçš„å¯¹è¯ç»“æŸåæ—¶é—´æ¢å¤
                 EventHandler.CallUpdateGameStateEvent(GameState.Gameplay);
                 EventHandler.CallPromoteNPCEvent();
                 talkWithNPC = false;
@@ -67,20 +67,20 @@ public class DialogueUI : Singleton<DialogueUI> //µ÷ÓÃÔÚDialogueCanvas01ÉÏ
                 UpdateMainDialogue(currentData.dialoguePieces[currentIndex]);
             }
         }
-        //µã»÷nextButtonºóÃæÃ»ÓĞ¶Ô»°ºó¹Ø±Õ¶Ô»°UI
+        //ç‚¹å‡»nextButtonåé¢æ²¡æœ‰å¯¹è¯åå…³é—­å¯¹è¯UI
         else
         {
             partrait.gameObject.SetActive(false);
             name.gameObject.SetActive(false);
             dialoguePanel.SetActive(false);
-            //ÓĞnextButtonµÄ¶Ô»°½áÊøºóÊ±¼ä»Ö¸´
+            //æœ‰nextButtonçš„å¯¹è¯ç»“æŸåæ—¶é—´æ¢å¤
             EventHandler.CallUpdateGameStateEvent(GameState.Gameplay);
             EventHandler.CallPromoteNPCEvent();
             talkWithNPC = false;
         }
     }
     /// <summary>
-    /// »ñÈ¡¶Ô»°Êı¾İ¿â
+    /// è·å–å¯¹è¯æ•°æ®åº“
     /// </summary>
     /// <param name="data"></param>
     public void UpdateDialogueData(DialogueData_OS data)
@@ -89,18 +89,18 @@ public class DialogueUI : Singleton<DialogueUI> //µ÷ÓÃÔÚDialogueCanvas01ÉÏ
         currentIndex = 0;
     }
     /// <summary>
-    /// ¿ªÆô¶Ô»°¿ò£¬ÉèÖÃ¶Ô»°¿òÒªËØ
+    /// å¼€å¯å¯¹è¯æ¡†ï¼Œè®¾ç½®å¯¹è¯æ¡†è¦ç´ 
     /// </summary>
     /// <param name="piece"></param>
     public void UpdateMainDialogue(DialoguePieces piece)
     {
         ClearOptions();
         talkWithNPC = true;
-        //¶Ô»°Ê±ÓÎÏ·Ê±¼äÔİÍ£
+        //å¯¹è¯æ—¶æ¸¸æˆæ—¶é—´æš‚åœ
         EventHandler.CallUpdateGameStateEvent(GameState.Pause);
         dialoguePanel.SetActive(true);
         currentIndex++;
-        //¿ØÖÆ¶Ô»°¿òÍ¼Æ¬ÏÔÊ¾
+        //æ§åˆ¶å¯¹è¯æ¡†å›¾ç‰‡æ˜¾ç¤º
         if (piece.Image != null)
         {
             partrait.gameObject.SetActive(true);
@@ -113,26 +113,26 @@ public class DialogueUI : Singleton<DialogueUI> //µ÷ÓÃÔÚDialogueCanvas01ÉÏ
             partrait.gameObject.SetActive(false);
             name.gameObject.SetActive(false);
         }
-        //ÔÚ¶Ô»°¿ªÊ¼Ç°½«nextButton°´Å¥¹Ø±Õ
+        //åœ¨å¯¹è¯å¼€å§‹å‰å°†nextButtonæŒ‰é’®å…³é—­
         nextButton.interactable = false;
         nextButton.gameObject.SetActive(false);
         StartCoroutine(DelayTime(piece));
     }
     /// <summary>
-    /// ÑÓ³ÙÎÄ±¾µÄ³öÏÖ
+    /// å»¶è¿Ÿæ–‡æœ¬çš„å‡ºç°
     /// </summary>
     /// <param name="currentpiece"></param>
     /// <returns></returns>
     private IEnumerator DelayTime(DialoguePieces currentpiece)
     {
-        isSkip = false; // ¿ªÊ¼Ê±ÖØÖÃ±ê¼Ç
+        isSkip = false; // å¼€å§‹æ—¶é‡ç½®æ ‡è®°
 
         yield return new WaitForSeconds(0.3f);
-        //½«¶Ô»°ÎÄ±¾³õÊ¼»¯
+        //å°†å¯¹è¯æ–‡æœ¬åˆå§‹åŒ–
         mainContent.text = "";
-        //ÓĞ{playerName}µÄ¾ÍÏÔÊ¾Îªµ±Ç°µÄÍæ¼ÒĞÕÃû
+        //æœ‰{playerName}çš„å°±æ˜¾ç¤ºä¸ºå½“å‰çš„ç©å®¶å§“å
         string fullText = currentpiece.text.Replace("{playerName}", FindObjectOfType<PlayerController>().playerName);
-        // Ã¿¸ö×Ö·û¼ä¸ôÊ±¼ä£¬¿É×ÔĞĞµ÷Õû
+        // æ¯ä¸ªå­—ç¬¦é—´éš”æ—¶é—´ï¼Œå¯è‡ªè¡Œè°ƒæ•´
         float charDelay = 0.05f;
         for (int i = 0; i < fullText.Length; i++)
         {
@@ -145,25 +145,25 @@ public class DialogueUI : Singleton<DialogueUI> //µ÷ÓÃÔÚDialogueCanvas01ÉÏ
             yield return new WaitForSeconds(charDelay);
         }
         isSkip = false;
-        //ÔÚÎÄ±¾ÍêÈ«ÏÔÊ¾ºóÔÙÉèÖÃnextButtonÏÔÊ¾
-        //µ±´ËpieceÃ»ÓĞOptionButtonÇÒ»¹ÓĞºóĞø¶Ô»°Ê±ÏÔÊ¾nextButton
+        //åœ¨æ–‡æœ¬å®Œå…¨æ˜¾ç¤ºåå†è®¾ç½®nextButtonæ˜¾ç¤º
+        //å½“æ­¤pieceæ²¡æœ‰OptionButtonä¸”è¿˜æœ‰åç»­å¯¹è¯æ—¶æ˜¾ç¤ºnextButton
         if (currentpiece.options.Count == 0 && currentData.dialoguePieces.Count > 0 )
         {
             nextButton.interactable = true;
             nextButton.gameObject.SetActive(true);
 
         }
-        //´´½¨Ñ¡Ïî
+        //åˆ›å»ºé€‰é¡¹
         CreateOption(currentpiece);
     }
     /// <summary>
-    /// Éú³ÉOptionButton
+    /// ç”ŸæˆOptionButton
     /// </summary>
     /// <param name="piece"></param>
     private void CreateOption(DialoguePieces piece)
     {
         ClearOptions();
-        //¸ù¾İpicecÉú³É¶ÔÓ¦ÊıÁ¿µÄoptionButton
+        //æ ¹æ®picecç”Ÿæˆå¯¹åº”æ•°é‡çš„optionButton
         for (int i = 0; i < piece.options.Count; i++)
         {
             var option = Instantiate(optionPrefab, optionPanel);
@@ -171,7 +171,7 @@ public class DialogueUI : Singleton<DialogueUI> //µ÷ÓÃÔÚDialogueCanvas01ÉÏ
         }
     }
     /// <summary>
-    /// Éú³ÉOptionButtonÊ±µÄ¶Ô»°½áÊøºó¹Ø±Õ¶Ô»°UI
+    /// ç”ŸæˆOptionButtonæ—¶çš„å¯¹è¯ç»“æŸåå…³é—­å¯¹è¯UI
     /// </summary>
     public void QuitDialogueUI()
     {
@@ -182,15 +182,15 @@ public class DialogueUI : Singleton<DialogueUI> //µ÷ÓÃÔÚDialogueCanvas01ÉÏ
         partrait.gameObject.SetActive(false);
     }
     /// <summary>
-    /// ¶¶¶¯NPCÍ·Ïñ
+    /// æŠ–åŠ¨NPCå¤´åƒ
     /// </summary>
     public void ShakePartraitImage()
     {
-        //¶¶¶¯NPCÍ·Ïñ
+        //æŠ–åŠ¨NPCå¤´åƒ
         partraitAnim.SetTrigger("partraitShaking");
     }
     /// <summary>
-    /// Çå³ı¶Ô»°Ñ¡Ïî
+    /// æ¸…é™¤å¯¹è¯é€‰é¡¹
     /// </summary>
     private void ClearOptions()
     {

@@ -1,30 +1,30 @@
-using System;
+ï»¿using System;
 using UnityEngine;
 [System.Serializable]
 public class ScheduleDetails : IComparable<ScheduleDetails>
 {
     public int hour, minute, day;
-    //ÓÅÏÈ¼¶Ô½Ğ¡ÓÅÏÈÖ´ĞĞ
+    //ä¼˜å…ˆçº§è¶Šå°ä¼˜å…ˆæ‰§è¡Œ
     public int priority;
-    //ÏŞ¶¨ÉúĞ§µÄ¼¾½Ú£¬¿ÉÒÔÌî¶à¸ö£¬²»Ìî(³¤¶ÈÎª0)±íÊ¾ËùÓĞ¼¾½Ú¶¼ÉúĞ§
+    //é™å®šç”Ÿæ•ˆçš„å­£èŠ‚ï¼Œå¯ä»¥å¡«å¤šä¸ªï¼Œä¸å¡«(é•¿åº¦ä¸º0)è¡¨ç¤ºæ‰€æœ‰å­£èŠ‚éƒ½ç”Ÿæ•ˆ
     public Season[] seasons;
-    //ÏŞ¶¨ÉúĞ§µÄĞÇÆÚ£¬¿ÉÒÔÌî¶à¸ö£¬²»Ìî(³¤¶ÈÎª0)±íÊ¾Ã¿Ìì¶¼ÉúĞ§
+    //é™å®šç”Ÿæ•ˆçš„æ˜ŸæœŸï¼Œå¯ä»¥å¡«å¤šä¸ªï¼Œä¸å¡«(é•¿åº¦ä¸º0)è¡¨ç¤ºæ¯å¤©éƒ½ç”Ÿæ•ˆ
     public Weekday[] weekdays;
-    //ÏŞ¶¨ÉúĞ§µÄÌìÆø£¬¿ÉÒÔÌî¶à¸ö£¬²»Ìî(³¤¶ÈÎª0)±íÊ¾ËùÓĞÌìÆø¶¼ÉúĞ§
+    //é™å®šç”Ÿæ•ˆçš„å¤©æ°”ï¼Œå¯ä»¥å¡«å¤šä¸ªï¼Œä¸å¡«(é•¿åº¦ä¸º0)è¡¨ç¤ºæ‰€æœ‰å¤©æ°”éƒ½ç”Ÿæ•ˆ
     public Weather[] weathers;
-    //ĞèÒª´ïµ½µÄ×îµÍºÃ¸Ğ¶È£¬Ìî0±íÊ¾²»ÏŞÖÆ
+    //éœ€è¦è¾¾åˆ°çš„æœ€ä½å¥½æ„Ÿåº¦ï¼Œå¡«0è¡¨ç¤ºä¸é™åˆ¶
     public float minFriendliness;
     public string targetScene;
     public Vector2Int targetGridPosition;
-    //ÌØÊâÊÂ¼şÖ´ĞĞµÄ¶¯×÷
+    //ç‰¹æ®Šäº‹ä»¶æ‰§è¡Œçš„åŠ¨ä½œ
     public AnimationClip clipAtStop;
-    //µ½´ïÄ¿µÄµãºóÊÇ·ñÒ»Ö±²¥·ÅClipAtStop¶¯»­£¬false±íÊ¾Ã¿¸ôÒ»¶ÎÊ±¼ä²¥·ÅÒ»´Î
+    //åˆ°è¾¾ç›®çš„ç‚¹åæ˜¯å¦ä¸€ç›´æ’­æ”¾ClipAtStopåŠ¨ç”»ï¼Œfalseè¡¨ç¤ºæ¯éš”ä¸€æ®µæ—¶é—´æ’­æ”¾ä¸€æ¬¡
     public bool alwaysPlayAnimation;
-    //µ½´ïÄ¿µÄµãºóNPCµÄ³¯Ïò£¬¶ÔÓ¦AnimatorµÄDirX¡¢DirY
+    //åˆ°è¾¾ç›®çš„ç‚¹åNPCçš„æœå‘ï¼Œå¯¹åº”Animatorçš„DirXã€DirY
     public int faceDirX, faceDirY;
-    //ÊÇ·ñ¿ÉÒÔ»¥¶¯
+    //æ˜¯å¦å¯ä»¥äº’åŠ¨
     public bool interactable;
-    //¹¹Ôìº¯Êı
+    //æ„é€ å‡½æ•°
     public ScheduleDetails(int hour, int minute, int day, int priority, Season[] seasons, string targetScene, Vector2Int targetGridPosition, AnimationClip clipAtStop, bool interactable)
     {
         this.hour = hour;
@@ -39,14 +39,14 @@ public class ScheduleDetails : IComparable<ScheduleDetails>
     }
     public int Time => (hour * 100) + minute;
     /// <summary>
-    /// µ±Ç°µÄScheduleDetailsÓëotherµÄScheduleDetails¶Ô±È·½·¨ÀïµÄÄÚÈİ
+    /// å½“å‰çš„ScheduleDetailsä¸otherçš„ScheduleDetailså¯¹æ¯”æ–¹æ³•é‡Œçš„å†…å®¹
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
     /// <exception cref="System.NotImplementedException"></exception>
     public int CompareTo( ScheduleDetails other)
     {
-        //Èç¹ûË«·½Ê±¼äÏàµÈ
+        //å¦‚æœåŒæ–¹æ—¶é—´ç›¸ç­‰
         if(Time == other.Time)
         {
             if(priority > other.priority)

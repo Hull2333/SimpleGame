@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,7 +6,7 @@ public class PatrolState : IState
 {
     private FSM manager;
     private Parameter parameter;
-    //¹ÖÎïÑ²Âßµã
+    //æ€ªç‰©å·¡é€»ç‚¹
     private int patrolPosition;
     public PatrolState(FSM manager)
     {
@@ -24,12 +24,12 @@ public class PatrolState : IState
     }
     public void OnUpdate()
     {
-        //µĞÈËÊÜÉË
+        //æ•Œäººå—ä¼¤
         if (parameter.isHurted)
         {
             manager.TransitionState(EnemyStateType.Hurted);
         }
-        //·¢ÏÖÄ¿±êÊ±×ªÎª×·»÷×´Ì¬
+        //å‘ç°ç›®æ ‡æ—¶è½¬ä¸ºè¿½å‡»çŠ¶æ€
         if (parameter.target != null)
         {
             if (manager.ShoutNoticeRay() && Vector2.Distance(parameter.target.position, parameter.parentPos.position) < 10f)
@@ -37,10 +37,10 @@ public class PatrolState : IState
                 manager.TransitionState(EnemyStateType.Chase);
             }
         }
-        //µĞÈËÒÔmoveSpeedÃæ³¯Ñ²ÂßµãÒÆ¶¯
+        //æ•Œäººä»¥moveSpeedé¢æœå·¡é€»ç‚¹ç§»åŠ¨
         manager.transform.position = Vector2.MoveTowards(manager.transform.position, parameter.patrolPoints[patrolPosition].position, parameter.moveSpeed * Time.deltaTime);
         manager.SetFaceDirection(parameter.patrolPoints[patrolPosition]);
-        //µ½´ïÑ²ÂßµãÊ±½øÈëµ½Idle×´Ì¬
+        //åˆ°è¾¾å·¡é€»ç‚¹æ—¶è¿›å…¥åˆ°IdleçŠ¶æ€
         if (Vector2.Distance(manager.transform.position, parameter.patrolPoints[patrolPosition].position) < 0.1f)
         {
             manager.TransitionState(EnemyStateType.Idle);
@@ -49,8 +49,8 @@ public class PatrolState : IState
     }
     public void OnExit()
     {
-        //ÍË³öÑ²Âßpatrol×´Ì¬Ê±£¬¸üĞÂÏÂÒ»¸öÑ²Âßµã
-        //ÊµÏÖµĞÈËÔ­Â·Íù·µ
+        //é€€å‡ºå·¡é€»patrolçŠ¶æ€æ—¶ï¼Œæ›´æ–°ä¸‹ä¸€ä¸ªå·¡é€»ç‚¹
+        //å®ç°æ•ŒäººåŸè·¯å¾€è¿”
         if(patrolPosition >= parameter.patrolPoints.Length - 1)
         {
             parameter.isBack = true;

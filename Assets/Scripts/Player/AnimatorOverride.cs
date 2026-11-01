@@ -1,25 +1,25 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using MFarm.Inventory;
 using Unity.VisualScripting;
-public class AnimatorOverride : MonoBehaviour   //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
+public class AnimatorOverride : MonoBehaviour   //è°ƒç”¨åœ¨Playerå¯¹è±¡ä¸Š
 {
 
     public GameObject holdItem;
-    [Header("½ÇÉ«¸÷²¿Î»¶¯»­")]
+    [Header("è§’è‰²å„éƒ¨ä½åŠ¨ç”»")]
     public List<AnimatorType> animatorTypes;
-    //×Öµä,Í¨¹ıÊäÈë¹Ø¼ü×ÖstringÀ´·µ»Ø¶ÔÓ¦µÄAnimator,´¢´æPlayer¶ÔÏóÏÂµÄËùÓĞAnimator
+    //å­—å…¸,é€šè¿‡è¾“å…¥å…³é”®å­—stringæ¥è¿”å›å¯¹åº”çš„Animator,å‚¨å­˜Playerå¯¹è±¡ä¸‹çš„æ‰€æœ‰Animator
     private Dictionary<string,Animator> animatorNameDict = new Dictionary<string,Animator>();
     public SpriteRenderer[] playerSprite;
     private PlayerController playerController;
-    //µ±Ç°×°±¸µÄ×°±¸ĞÅÏ¢
+    //å½“å‰è£…å¤‡çš„è£…å¤‡ä¿¡æ¯
     public ItemDetails equipHead,equipBody;
     private void Awake()
     {
         playerController = GetComponent<PlayerController>();
-        //±éÀúÍæ¼ÒÈ«ÉíµÄ¶¯»­
+        //éå†ç©å®¶å…¨èº«çš„åŠ¨ç”»
         foreach (Animator anim in playerController.animators)
         {
             animatorNameDict.Add(anim.name, anim);
@@ -54,7 +54,7 @@ public class AnimatorOverride : MonoBehaviour   //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
 
 
     /// <summary>
-    /// ÉèÖÃÇĞ»»³¡¾°ºó£¬ÊÖ²¿¶¯×÷»Ö¸´ÎªÄ¬ÈÏ£¬ÇÒÄÃ×ÅµÄ¶«Î÷»Øµ½±³°ü
+    /// è®¾ç½®åˆ‡æ¢åœºæ™¯åï¼Œæ‰‹éƒ¨åŠ¨ä½œæ¢å¤ä¸ºé»˜è®¤ï¼Œä¸”æ‹¿ç€çš„ä¸œè¥¿å›åˆ°èƒŒåŒ…
     /// </summary>
     private void OnBeforeSceneUnloadEvent()
     {
@@ -63,7 +63,7 @@ public class AnimatorOverride : MonoBehaviour   //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
     }
 
     /// <summary>
-    /// ²»Í¬µÄitemÀàĞÍÔÚÍæ¼ÒSlotÑ¡ÖĞÊ±·µ»Ø²»Í¬µÄÊÖ±Û¶¯»­
+    /// ä¸åŒçš„itemç±»å‹åœ¨ç©å®¶Sloté€‰ä¸­æ—¶è¿”å›ä¸åŒçš„æ‰‹è‡‚åŠ¨ç”»
     /// </summary>
     /// <param name="itemDetails"></param>
     /// <param name="isSelected"></param>
@@ -76,7 +76,7 @@ public class AnimatorOverride : MonoBehaviour   //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         }
         else
         {
-            //²»Í¬µÄItemType·µ»Ø²»Í¬µÄPartType
+            //ä¸åŒçš„ItemTypeè¿”å›ä¸åŒçš„PartType
             PartType currentType = itemDetails.itemType switch
             {
 
@@ -99,7 +99,7 @@ public class AnimatorOverride : MonoBehaviour   //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
                 _ => PartType.None
 
             };
-            //È¡ÏûÑ¡ÖĞÎïÆ·Ê±£¬½áÊø¾ÙÊÖ¶¯»­,Í¬Ê±¹Ø±ÕÍ·¶¥µÄÎïÆ·Í¼Æ¬
+            //å–æ¶ˆé€‰ä¸­ç‰©å“æ—¶ï¼Œç»“æŸä¸¾æ‰‹åŠ¨ç”»,åŒæ—¶å…³é—­å¤´é¡¶çš„ç‰©å“å›¾ç‰‡
             if (isSelected == false)
             {
                 currentType = PartType.None;
@@ -148,7 +148,7 @@ public class AnimatorOverride : MonoBehaviour   //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         holdItem.SetActive(false);
     }
     /// <summary>
-    /// ¸ù¾İµ±Ç°µÄÍæ¼Ò²¿Î»ÀàĞÍÀ´ÇĞ»»¶ÔÓ¦µÄÍæ¼Ò¶¯»­   
+    /// æ ¹æ®å½“å‰çš„ç©å®¶éƒ¨ä½ç±»å‹æ¥åˆ‡æ¢å¯¹åº”çš„ç©å®¶åŠ¨ç”»   
     /// </summary>
     /// <param name="partType"></param>
     private void SwitchAnimator(PartType partType)
@@ -157,21 +157,21 @@ public class AnimatorOverride : MonoBehaviour   //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
         {
             if (anim.partType == partType)
             {
-                //µ±Ã»ÓĞ×°±¸Í·²¿×°±¸Ê±
+                //å½“æ²¡æœ‰è£…å¤‡å¤´éƒ¨è£…å¤‡æ—¶
                 if(equipHead == null || equipHead.itemID == 0)
                 {
-                    //¸ü»»Í·²¿¶¯×÷
+                    //æ›´æ¢å¤´éƒ¨åŠ¨ä½œ
                     if(anim.partName == PartName.Head && anim.equipType == EquipType.None)
                     {
                         animatorNameDict[anim.partName.ToString()].runtimeAnimatorController = anim.overrideController;
                     }
                 }
-                //µ±Ã»ÓĞ×°±¸ÉíÌå×°±¸Ê±
+                //å½“æ²¡æœ‰è£…å¤‡èº«ä½“è£…å¤‡æ—¶
                 if(equipBody == null || equipBody.itemID == 0)
                 {
                     if(anim.equipType == EquipType.None)
                     {
-                        //¸ü»»ÊÖ²¿¡¢ÉíÌå¡¢¹¤¾ß¡¢Ó°×Ó¶¯»­
+                        //æ›´æ¢æ‰‹éƒ¨ã€èº«ä½“ã€å·¥å…·ã€å½±å­åŠ¨ç”»
                         if (anim.partName == PartName.Body)
                         {
                             animatorNameDict[anim.partName.ToString()].runtimeAnimatorController = anim.overrideController;
@@ -191,19 +191,19 @@ public class AnimatorOverride : MonoBehaviour   //µ÷ÓÃÔÚPlayer¶ÔÏóÉÏ
                     }
                    
                 }
-                //µ±×°ÁËÍ·²¿×°±¸Ê±
+                //å½“è£…äº†å¤´éƒ¨è£…å¤‡æ—¶
                 if(equipHead != null)
                 {
-                    //¸ü»»Í·²¿¶¯×÷
+                    //æ›´æ¢å¤´éƒ¨åŠ¨ä½œ
                     if (anim.partName == PartName.Head && anim.equipType == equipHead.equipType)
                     {
                         animatorNameDict[anim.partName.ToString()].runtimeAnimatorController = anim.overrideController;
                     }
                 }
-                //µ±×°±¸ÁËÉíÌå×°±¸Ê±
+                //å½“è£…å¤‡äº†èº«ä½“è£…å¤‡æ—¶
                 if(equipBody != null)
                 {
-                    //¸ü»»ÊÖ²¿¡¢ÉíÌå¡¢¹¤¾ß¡¢Ó°×Ó¶¯»­
+                    //æ›´æ¢æ‰‹éƒ¨ã€èº«ä½“ã€å·¥å…·ã€å½±å­åŠ¨ç”»
                     if (anim.equipType == equipBody.equipType)
                     {
                         if (anim.partName == PartName.Body)

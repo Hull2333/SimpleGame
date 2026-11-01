@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 [CreateAssetMenu(fileName = "SoundDetailsList_SO",menuName = "Sound/SoundDetailsList")]
@@ -6,7 +6,7 @@ public class SoundDetailsList_SO : ScriptableObject
 {
     public List<SoundDetails> soundDetailsList;
     /// <summary>
-    /// ²éÕÒÒôĞ§
+    /// æŸ¥æ‰¾éŸ³æ•ˆ
     /// </summary>
     /// <param name="name"></param>
     /// <returns></returns>
@@ -21,12 +21,12 @@ public class SoundDetails
 {
     public SoundName soundName;
     public AudioClip soundClip;
-    //ÉùÒôµÄÒôµ÷
+    //å£°éŸ³çš„éŸ³è°ƒ
     [Range(0.1f, 1.5f)]
     public float soundPatchMin;
     [Range(0.1f, 1.5f)]
     public float soundPatchMax;
-    //ÉùÒô´óĞ¡
+    //å£°éŸ³å¤§å°
     [Range(0.1f, 1f)]
     public float soundVolume;
 }

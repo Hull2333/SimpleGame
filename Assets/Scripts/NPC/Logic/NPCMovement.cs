@@ -1,4 +1,4 @@
-using Cinemachine;
+ï»¿using Cinemachine;
 using MFarm.AStar;
 using MFarm.Dialogue;
 using MFarm.Inventory;
@@ -13,91 +13,91 @@ using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(Animator))]
-public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞNPC¶¼Òª¹ÒÔØ
+public class NPCMovement : MonoBehaviour, ISaveable   //è°ƒç”¨åœ¨NPC01å¯¹è±¡ä¸Šï¼Œæ‰€æœ‰NPCéƒ½è¦æŒ‚è½½
 {
-    //NPCĞĞ³Ì±í
+    //NPCè¡Œç¨‹è¡¨
     public ScheduleDataList_SO scheduleData;
-    //ÅÅĞò²¢±£Ö¤Êı¾İÎ¨Ò»ĞÔ
+    //æ’åºå¹¶ä¿è¯æ•°æ®å”¯ä¸€æ€§
     private SortedSet<ScheduleDetails> scheduleSet;
     private ScheduleDetails currentSchedule;
-    //ÁÙÊ±´æ´¢ĞÅÏ¢
+    //ä¸´æ—¶å­˜å‚¨ä¿¡æ¯
     [SerializeField] private string currentScene;
     private string targetScene;
-    //µ±Ç°ºÍÄ¿±êÍø¸ñÎ»ÖÃ
+    //å½“å‰å’Œç›®æ ‡ç½‘æ ¼ä½ç½®
     private Vector3Int currentGridPosition;
     private Vector3Int targetGridPosition;
     private Vector3Int nextGridPosition;
-    //ÏÂÒ»²½µÄÊÀ½ç×ø±ê
+    //ä¸‹ä¸€æ­¥çš„ä¸–ç•Œåæ ‡
     private Vector3 nextWorldPosition;
-    //ÉèÖÃStartSceneµÄÖµÎªcurrentSceneµÄÖµ
+    //è®¾ç½®StartSceneçš„å€¼ä¸ºcurrentSceneçš„å€¼
     public string StartScene { set => currentScene = value; }
-    // ¼ÇÂ¼¿ªÊ¼ÒÆ¶¯µÄÊ±¼ä
+    // è®°å½•å¼€å§‹ç§»åŠ¨çš„æ—¶é—´
     private TimeSpan? movementStartTime;
-    [Header("ÒÆ¶¯ÊôĞÔ")]
+    [Header("ç§»åŠ¨å±æ€§")]
     private float normalSpeed = 3f;
-    //ÒÆ¶¯·½Ïò
+    //ç§»åŠ¨æ–¹å‘
     private Vector2 dir;
     public bool isMoving;
-    //NPC×é¼ş
+    //NPCç»„ä»¶
     private Rigidbody2D rb;
     private SpriteRenderer spriteRenderer;
     private BoxCollider2D coll;
     private Animator anim;
-    //npcµÄÂ·¾¶¶ÑÕ»
+    //npcçš„è·¯å¾„å †æ ˆ
     private Stack<MovementStep> movementSteps;
     public Grid grid;
-    //ÊÇ·ñÊÇµÚÒ»´Î¼ÓÔØ
+    //æ˜¯å¦æ˜¯ç¬¬ä¸€æ¬¡åŠ è½½
     private bool isInitialised;
-    //NPCÊÇ·ñÒÆ¶¯
+    //NPCæ˜¯å¦ç§»åŠ¨
     private bool npcMove;
-    //NPCÊÇ·ñ¿ÉÒÔ»¥¶¯
+    //NPCæ˜¯å¦å¯ä»¥äº’åŠ¨
     public bool interactable;
-    //ÊÇ·ñµÚÒ»´Î¼ÓÔØ
+    //æ˜¯å¦ç¬¬ä¸€æ¬¡åŠ è½½
     public bool isFirstLoad;
-    //¶ÁÈ¡ÓÎÏ·¼¾½Ú
+    //è¯»å–æ¸¸æˆå­£èŠ‚
     public Season currentSeason;
-    //³¡¾°ÊÇ·ñÕıÔÚ¼ÓÔØ
+    //åœºæ™¯æ˜¯å¦æ­£åœ¨åŠ è½½
     private bool sceneLoaded;
-    //¶¯»­¼ÆÊ±Æ÷
+    //åŠ¨ç”»è®¡æ—¶å™¨
     private float animationBreakTime;
     private bool canPlayStopAnimation;
     private AnimationClip stopAnimationClip;
-    //µ½´ïÄ¿µÄµãºóNPCµÄ³¯Ïò
+    //åˆ°è¾¾ç›®çš„ç‚¹åNPCçš„æœå‘
     private int faceDirX, faceDirY;
-    //µ½´ïÄ¿µÄµãºóÊÇ·ñÒ»Ö±²¥·ÅÍ£Ö¹¶¯»­
+    //åˆ°è¾¾ç›®çš„ç‚¹åæ˜¯å¦ä¸€ç›´æ’­æ”¾åœæ­¢åŠ¨ç”»
     private bool alwaysPlayAnimation;
-    //¶Ô»°Ê±ÁÙÊ±ÃæÏòµÄÄ¿±ê£¬²»Îª¿ÕÊ±ÓÅÏÈÃæÏòËü
+    //å¯¹è¯æ—¶ä¸´æ—¶é¢å‘çš„ç›®æ ‡ï¼Œä¸ä¸ºç©ºæ—¶ä¼˜å…ˆé¢å‘å®ƒ
     private Transform faceTarget;
-    //ÃæÏòÄ¿±êÖ®Ç°NPCµÄ³¯Ïò£¬¶Ô»°½áÊøºó»Ö¸´ÓÃ
+    //é¢å‘ç›®æ ‡ä¹‹å‰NPCçš„æœå‘ï¼Œå¯¹è¯ç»“æŸåæ¢å¤ç”¨
     private int originFaceDirX, originFaceDirY;
     public AnimationClip blankAnimationClip;
     private AnimatorOverrideController animOverride;
-    //ÓÎÏ·½áÊøÊ±µÄĞ­³Ì
+    //æ¸¸æˆç»“æŸæ—¶çš„åç¨‹
     private Coroutine npcMoveRoutine;
     private TimeSpan gameTime => TimeManager.Instance.gameTime;
-    //NPCµÄSpriteRendererÊÇ·ñ¼¤»î£¬Î´¼¤»î±íÊ¾NPCÔÚµ±Ç°³¡¾°²»¿É¼û
+    //NPCçš„SpriteRendereræ˜¯å¦æ¿€æ´»ï¼Œæœªæ¿€æ´»è¡¨ç¤ºNPCåœ¨å½“å‰åœºæ™¯ä¸å¯è§
     public bool spriteVisible => spriteRenderer.enabled;
 
     public string GUID => GetComponent<DataGUID>().guid;
-    //NPCºÃ¸Ğ¶ÈÊÂ¼ş
+    //NPCå¥½æ„Ÿåº¦äº‹ä»¶
     public NPCEventData_SO npcEventData;
     private DialoguaGiver dialoguaGiver;
     private DialogueController dialogueController;
     public NPCEvent currentNPCEvent;
-    //ÊÂ¼ş½ø¶È
+    //äº‹ä»¶è¿›åº¦
     public int NPCEventStep;
-    //¿ªÊ¼ÒÆ¶¯µ½ÏÂÒ»¸öÊÂ¼şµã
+    //å¼€å§‹ç§»åŠ¨åˆ°ä¸‹ä¸€ä¸ªäº‹ä»¶ç‚¹
     public bool timeToMoveNextPos;
     public CinemachineVirtualCamera cameraFollow;
     public UnityEngine.Transform playerTransform;
     private PlayerController playerController;
-    //NPCÊÂ¼ş¿ªÊ¼Ç°NPCµÄÎ»ÖÃ
+    //NPCäº‹ä»¶å¼€å§‹å‰NPCçš„ä½ç½®
     private Vector2 originNPCPos;
-    //EventNPCµÄÎ»ÖÃ
+    //EventNPCçš„ä½ç½®
     public Transform eventNPCParent;
-    //³öÏÖµÄÆäËûNPC×Öµä
+    //å‡ºç°çš„å…¶ä»–NPCå­—å…¸
     private Dictionary<GameObject, EventNPC> spawnedEventNPCs = new Dictionary<GameObject, EventNPC>();
-    [Header("NPCÃ¿ÌìÖØÖÃµÄ³¡¾°ºÍÎ»ÖÃ")]
+    [Header("NPCæ¯å¤©é‡ç½®çš„åœºæ™¯å’Œä½ç½®")]
     public AnimationClip resetAnimClip;
     public Vector2Int resetPos;
     public String resetSceneName;
@@ -108,14 +108,14 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
         coll = transform.GetChild(1).GetComponent<BoxCollider2D>();
         anim = GetComponent<Animator>();
         movementSteps = new Stack<MovementStep>();
-        //Í¨¹ı·´Ïò¸³ÖµÀ´³õÊ¼»¯ AnimatorOverrideController
+        //é€šè¿‡åå‘èµ‹å€¼æ¥åˆå§‹åŒ– AnimatorOverrideController
         animOverride = new AnimatorOverrideController(anim.runtimeAnimatorController);
         anim.runtimeAnimatorController = animOverride;
         scheduleSet = new SortedSet<ScheduleDetails>();
         dialoguaGiver = GetComponent<DialoguaGiver>();
         dialogueController = GetComponent<DialogueController>();
         playerController = playerTransform.GetComponent<PlayerController>();
-        //°ÑscheduleData.scheduleListÖĞµÄËùÓĞschedule°´ÔçÍíµÄË³Ğò·ÅÈëscheduleSetÁĞ±íÖĞ
+        //æŠŠscheduleData.scheduleListä¸­çš„æ‰€æœ‰scheduleæŒ‰æ—©æ™šçš„é¡ºåºæ”¾å…¥scheduleSetåˆ—è¡¨ä¸­
         foreach (var schedule in scheduleData.scheduleList)
         {
             scheduleSet.Add(schedule);
@@ -127,9 +127,9 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
         EventHandler.AfterSceneLoadedEvent += OnAfterSceneLoadedEvent;
         EventHandler.BeforeSceneUnloadEvent += OnBeforeSceneUnloadEvent;
         EventHandler.GameMinuteEvent += OnGameMinuteEvent;
-        //ÓÎÏ·¿ªÊ¼µÄÊÂ¼ş
+        //æ¸¸æˆå¼€å§‹çš„äº‹ä»¶
         EventHandler.StartNewGameEvent += OnStartNewGameEvent;
-        //ÓÎÏ·½áÊøµÄÊÂ¼ş
+        //æ¸¸æˆç»“æŸçš„äº‹ä»¶
         EventHandler.EndGameEvent += OnEndGameEvent;
         EventHandler.PromoteNPCEvent += OnPromoteNPCEvent;
         EventHandler.GameDayEvent += OnGameDayEvent;
@@ -160,33 +160,33 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
             SwitchAnimation();
 
         }
-        //¼ÆÊ±Æ÷
+        //è®¡æ—¶å™¨
         animationBreakTime -= Time.deltaTime;
         canPlayStopAnimation = animationBreakTime <= 0;
     }
 
     private void FixedUpdate()
     {
-        //µ±³¡¾°¼ÓÔØºó²Ånpc²Å¿ÉÒÔÒÆ¶¯
+        //å½“åœºæ™¯åŠ è½½åæ‰npcæ‰å¯ä»¥ç§»åŠ¨
         if (sceneLoaded)
         {
             Movement();
             if (timeToMoveNextPos && currentNPCEvent != null && currentNPCEvent.dialogueData.Length > 0)
             {
-                timeToMoveNextPos = false;   // ·ÀÖ¹ÖØ¸´´¥·¢
+                timeToMoveNextPos = false;   // é˜²æ­¢é‡å¤è§¦å‘
                 StartCoroutine(NPCMoveToNextPosRoutine());
             }
         }
     }
     /// <summary>
-    /// NPCÔÚÖ¸¶¨Ê±¼ä¶ÎÖ´ĞĞµÄÊÂ¼ş
+    /// NPCåœ¨æŒ‡å®šæ—¶é—´æ®µæ‰§è¡Œçš„äº‹ä»¶
     /// </summary>
     /// <param name="minute"></param>
     /// <param name="hour"></param>
     /// <param name="season"></param>
     private void OnGameMinuteEvent(int minute, int hour, int day, Season season)
     {
-        //ÓÎÏ·µÄÊµ¼ÊÊ±¼ä
+        //æ¸¸æˆçš„å®é™…æ—¶é—´
         int time = (hour * 100) + minute;
         currentSeason = season;
         ScheduleDetails matchSchedule = null;
@@ -198,38 +198,38 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
                 {
                     continue;
                 }
-                //ÌîĞ´ÁË¼¾½ÚµÄĞĞ³Ì£¬Óëµ±Ç°¼¾½Ú²»·ûÔòÌø¹ı£¬seasonsÎª¿Õ±íÊ¾ËùÓĞ¼¾½Ú¶¼ÉúĞ§
+                //å¡«å†™äº†å­£èŠ‚çš„è¡Œç¨‹ï¼Œä¸å½“å‰å­£èŠ‚ä¸ç¬¦åˆ™è·³è¿‡ï¼Œseasonsä¸ºç©ºè¡¨ç¤ºæ‰€æœ‰å­£èŠ‚éƒ½ç”Ÿæ•ˆ
                 if (schedule.seasons != null && schedule.seasons.Length > 0 &&
                     !schedule.seasons.Contains(season))
                 {
                     continue;
                 }
-                //ÌîĞ´ÁËĞÇÆÚµÄĞĞ³Ì£¬Óëµ±Ç°ĞÇÆÚ²»·ûÔòÌø¹ı£¬weekdaysÎª¿Õ±íÊ¾Ã¿Ìì¶¼ÉúĞ§
+                //å¡«å†™äº†æ˜ŸæœŸçš„è¡Œç¨‹ï¼Œä¸å½“å‰æ˜ŸæœŸä¸ç¬¦åˆ™è·³è¿‡ï¼Œweekdaysä¸ºç©ºè¡¨ç¤ºæ¯å¤©éƒ½ç”Ÿæ•ˆ
                 if (schedule.weekdays != null && schedule.weekdays.Length > 0 &&
                     !schedule.weekdays.Contains(TimeManager.Instance.gameWeekday))
                 {
                     continue;
                 }
-                //ÌîĞ´ÁËÌìÆøµÄĞĞ³Ì£¬Óëµ±ÌìÌìÆø²»·ûÔòÌø¹ı£¬weathersÎª¿Õ±íÊ¾ËùÓĞÌìÆø¶¼ÉúĞ§
+                //å¡«å†™äº†å¤©æ°”çš„è¡Œç¨‹ï¼Œä¸å½“å¤©å¤©æ°”ä¸ç¬¦åˆ™è·³è¿‡ï¼Œweathersä¸ºç©ºè¡¨ç¤ºæ‰€æœ‰å¤©æ°”éƒ½ç”Ÿæ•ˆ
                 if (schedule.weathers != null && schedule.weathers.Length > 0 &&
                     !schedule.weathers.Contains(TimeManager.Instance.currentWeather))
                 {
                     continue;
                 }
-                //ºÃ¸Ğ¶ÈÃ»´ïµ½¸ÃĞĞ³ÌÒªÇóµÄ×îµÍºÃ¸Ğ¶ÈÔòÌø¹ı
+                //å¥½æ„Ÿåº¦æ²¡è¾¾åˆ°è¯¥è¡Œç¨‹è¦æ±‚çš„æœ€ä½å¥½æ„Ÿåº¦åˆ™è·³è¿‡
                 if (dialoguaGiver.currentFriendliness < schedule.minFriendliness)
                 {
                     continue;
                 }
                 matchSchedule = schedule;
             }
-            //Èç¹ûÊ±¼ä²»¶Ô»òÕß»¹Ã»µ½¾ÍÌø³öÑ­»·
+            //å¦‚æœæ—¶é—´ä¸å¯¹æˆ–è€…è¿˜æ²¡åˆ°å°±è·³å‡ºå¾ªç¯
             else if (schedule.Time > time)
             {
                 break;
             }
         }
-        //¸ù¾İÓÎÏ·Ê±¼äºÍNPCÊÂ¼şÊ±¼äÆ¥ÅäµÄschedule¿ªÊ¼¹¹½¨Â·¾¶
+        //æ ¹æ®æ¸¸æˆæ—¶é—´å’ŒNPCäº‹ä»¶æ—¶é—´åŒ¹é…çš„scheduleå¼€å§‹æ„å»ºè·¯å¾„
         if (matchSchedule != null)
         {
             BuildPath(matchSchedule);
@@ -250,12 +250,12 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
         }
 
         sceneLoaded = true;
-        //¶ÁÈ¡´æµµÊ±£¬ÖØĞÂ¼ÓÔØNPC scheduleÊ¹Æä¿ÉÒÔÕı³£ÒÆ¶¯
+        //è¯»å–å­˜æ¡£æ—¶ï¼Œé‡æ–°åŠ è½½NPC scheduleä½¿å…¶å¯ä»¥æ­£å¸¸ç§»åŠ¨
         if (!isFirstLoad)
         {
             currentGridPosition = grid.WorldToCell(transform.position);
-            //ÖØĞÂÉú³ÉNPC Schedule
-            //seasons´«null±íÊ¾²»ÏŞÖÆ¼¾½Ú£¬ÕâÌõÊı¾İÖ»ÓÃÓÚÖØ½¨NPCËùÔÚÎ»ÖÃµÄÂ·¾¶£¬²»²ÎÓëĞĞ³ÌÆ¥Åä
+            //é‡æ–°ç”ŸæˆNPC Schedule
+            //seasonsä¼ nullè¡¨ç¤ºä¸é™åˆ¶å­£èŠ‚ï¼Œè¿™æ¡æ•°æ®åªç”¨äºé‡å»ºNPCæ‰€åœ¨ä½ç½®çš„è·¯å¾„ï¼Œä¸å‚ä¸è¡Œç¨‹åŒ¹é…
             var schedule = new ScheduleDetails(0, 0, 0, 0, null, targetScene, (Vector2Int)targetGridPosition, stopAnimationClip, interactable);
             BuildPath(schedule);
             isFirstLoad = true;
@@ -267,11 +267,11 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
         }
     }
     /// <summary>
-    /// ĞÂµÄÒ»Ìì¿ªÊ¼Ê±£¬°ÑNPCÖØÖÃµ½Ô¤ÉèµÄ³¡¾°¡¢Î»ÖÃºÍ¶¯×÷
+    /// æ–°çš„ä¸€å¤©å¼€å§‹æ—¶ï¼ŒæŠŠNPCé‡ç½®åˆ°é¢„è®¾çš„åœºæ™¯ã€ä½ç½®å’ŒåŠ¨ä½œ
     /// </summary>
     private void OnGameDayEvent(int day, Season season, Weekday weekday)
     {
-        // Í£Ö¹ÕıÔÚÖ´ĞĞµÄÒÆ¶¯Ğ­³Ì£¬²¢Çå¿ÕÊ£ÓàÂ·¾¶
+        // åœæ­¢æ­£åœ¨æ‰§è¡Œçš„ç§»åŠ¨åç¨‹ï¼Œå¹¶æ¸…ç©ºå‰©ä½™è·¯å¾„
         if (npcMoveRoutine != null)
         {
             StopCoroutine(npcMoveRoutine);
@@ -280,19 +280,19 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
         movementSteps.Clear();
         npcMove = false;
         movementStartTime = null;
-        // ³¡¾°Óë¸ñ×Ó×ø±êÍ³Ò»¸ÄÎªÔ¤ÉèÖµ
+        // åœºæ™¯ä¸æ ¼å­åæ ‡ç»Ÿä¸€æ”¹ä¸ºé¢„è®¾å€¼
         currentScene = resetSceneName;
         targetScene = resetSceneName;
         currentGridPosition = (Vector3Int)resetPos;
         targetGridPosition = (Vector3Int)resetPos;
         nextGridPosition = (Vector3Int)resetPos;
         CheckVisiable();
-        // ¸÷³¡¾°¹²ÓÃÍ¬Ò»Ì×Íø¸ñ×ø±ê£¬Ö±½ÓË²ÒÆµ½Ô¤ÉèÎ»ÖÃ
+        // å„åœºæ™¯å…±ç”¨åŒä¸€å¥—ç½‘æ ¼åæ ‡ï¼Œç›´æ¥ç¬ç§»åˆ°é¢„è®¾ä½ç½®
         if (grid != null)
         {
             transform.position = GetWorldPosition((Vector3Int)resetPos);
         }
-        // ²¥·ÅÔ¤Éè¶¯×÷£¬²¢±£³Öµ½ÏÂÒ»´ÎĞĞ³ÌÉúĞ§
+        // æ’­æ”¾é¢„è®¾åŠ¨ä½œï¼Œå¹¶ä¿æŒåˆ°ä¸‹ä¸€æ¬¡è¡Œç¨‹ç”Ÿæ•ˆ
         stopAnimationClip = resetAnimClip;
         alwaysPlayAnimation = true;
         if (resetAnimClip != null)
@@ -305,7 +305,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
 
 
     /// <summary>
-    /// µÈÒ»Ö¡£¬È·±£ËùÓĞ AfterSceneLoaded ´¦ÀíÍê
+    /// ç­‰ä¸€å¸§ï¼Œç¡®ä¿æ‰€æœ‰ AfterSceneLoaded å¤„ç†å®Œ
     /// </summary>
     /// <returns></returns>
     private IEnumerator DelayStartNPCEvent()
@@ -323,7 +323,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
     {
         sceneLoaded = false;
         npcMove = false;
-        //ÔÚÓÎÏ·ËæÊ±½áÊøÊ±£¬Í£Ö¹npc´ËÊ±ÕıÔÚÒÆ¶¯µÄĞ­³Ì
+        //åœ¨æ¸¸æˆéšæ—¶ç»“æŸæ—¶ï¼Œåœæ­¢npcæ­¤æ—¶æ­£åœ¨ç§»åŠ¨çš„åç¨‹
         if (npcMoveRoutine != null)
         {
             StopCoroutine(npcMoveRoutine);
@@ -334,11 +334,11 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
         if (currentNPCEvent.dialogueData.Length > 0)
         {
             NPCEventStep++;
-            //TODO:½áÊøÊÂ¼ş
-            //½øĞĞµ½¸Ã²½ÖèÊÇ·ñĞèÒªÇĞ»»ÉãÏñÍ·¸úËæ¶ÔÏó
+            //TODO:ç»“æŸäº‹ä»¶
+            //è¿›è¡Œåˆ°è¯¥æ­¥éª¤æ˜¯å¦éœ€è¦åˆ‡æ¢æ‘„åƒå¤´è·Ÿéšå¯¹è±¡
             if (NPCEventStep >= currentNPCEvent.dialogueData.Length)
             {
-                //ÇåÀíÆäËûNPC
+                //æ¸…ç†å…¶ä»–NPC
                 foreach (var npc in spawnedEventNPCs.Keys)
                 {
                     if (npc != null) Destroy(npc);
@@ -348,7 +348,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
                 cameraFollow.Follow = playerTransform;
                 currentNPCEvent.isHappened = true;
                 EventHandler.CallEndNPCEvent();
-                //»ñÈ¡ÊÂ¼ş½±ÀøµÀ¾ß
+                //è·å–äº‹ä»¶å¥–åŠ±é“å…·
                 if (currentNPCEvent.getItemID.Length > 0)
                 {
                     foreach (var itemID in currentNPCEvent.getItemID)
@@ -372,7 +372,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
     }
   
     /// <summary>
-    /// ¸ù¾İNPCËùÔÚ³¡¾°ÅĞ¶ÏÊÇ·ñ¿É¼û
+    /// æ ¹æ®NPCæ‰€åœ¨åœºæ™¯åˆ¤æ–­æ˜¯å¦å¯è§
     /// </summary>
     private void CheckVisiable()
     {
@@ -387,18 +387,18 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
     }
 
     /// <summary>
-    /// ³õÊ¼»¯NPC
+    /// åˆå§‹åŒ–NPC
     /// </summary>
     private void InitNPC()
     {
         targetScene = currentScene;
-        //±£Ö¤NPCÔÚµ±Ç°×ø±êµÄÍø¸ñÖĞĞÄµã
+        //ä¿è¯NPCåœ¨å½“å‰åæ ‡çš„ç½‘æ ¼ä¸­å¿ƒç‚¹
         currentGridPosition = grid.WorldToCell(transform.position);
         transform.position = new Vector3(currentGridPosition.x + Settings.gridCellSize / 2f, currentGridPosition.y + Settings.gridCellSize / 2f, 0);
         targetGridPosition = currentGridPosition;
     }
     /// <summary>
-    /// NPCÖ÷ÒªÒÆ¶¯·½·¨
+    /// NPCä¸»è¦ç§»åŠ¨æ–¹æ³•
     /// </summary>
     private void Movement()
     {
@@ -406,18 +406,18 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
         {
             if (movementSteps.Count > 0)
             {
-                //PopÒÆ³ıµÚÒ»¸ö²¢ÄÃ³öÀ´
+                //Popç§»é™¤ç¬¬ä¸€ä¸ªå¹¶æ‹¿å‡ºæ¥
                 MovementStep step = movementSteps.Pop();
-                // ÅĞ¶ÏÊÇ·ñ·¢ÉúÁË³¡¾°ÇĞ»»
+                // åˆ¤æ–­æ˜¯å¦å‘ç”Ÿäº†åœºæ™¯åˆ‡æ¢
                 bool sceneChanged = step.sceneName != currentScene;
-                //ÅĞ¶Ïµ±Ç°³¡¾°ÊÇ·ñÊÇÕâÒ»²½ËùÔÚµÄ³¡¾°
+                //åˆ¤æ–­å½“å‰åœºæ™¯æ˜¯å¦æ˜¯è¿™ä¸€æ­¥æ‰€åœ¨çš„åœºæ™¯
                 currentScene = step.sceneName;
                 CheckVisiable();
-                //ÏÂÒ»²½
+                //ä¸‹ä¸€æ­¥
                 nextGridPosition = (Vector3Int)step.gridCoordinate;
                 MoveToGridPosition(nextGridPosition, sceneChanged);
             }
-            //faceTarget²»Îª¿Õ±íÊ¾ÕıÔÚºÍÍæ¼Ò¶Ô»°£¬¶Ô»°ÖĞ²»²¥·ÅÍ£Ö¹¶¯»­
+            //faceTargetä¸ä¸ºç©ºè¡¨ç¤ºæ­£åœ¨å’Œç©å®¶å¯¹è¯ï¼Œå¯¹è¯ä¸­ä¸æ’­æ”¾åœæ­¢åŠ¨ç”»
             else if (!isMoving && canPlayStopAnimation && faceTarget == null)
             {
                 movementStartTime = null;
@@ -431,7 +431,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
         npcMoveRoutine = StartCoroutine(MoveRoutine(gridPos, sceneChanged));
     }
     /// <summary>
-    /// NPCÒÆ¶¯µÄĞ­³Ì
+    /// NPCç§»åŠ¨çš„åç¨‹
     /// </summary>
     /// <param name="gridPos"></param>
     /// <param name="stepTime"></param>
@@ -440,7 +440,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
     {
         npcMove = true;
         nextWorldPosition = GetWorldPosition(gridPos);
-        // ³¬¹ı30·ÖÖÓÓÎÏ·Ê±¼ä£¬Ö±½ÓË²ÒÆµ½×îÖÕÄ¿±êµã
+        // è¶…è¿‡30åˆ†é’Ÿæ¸¸æˆæ—¶é—´ï¼Œç›´æ¥ç¬ç§»åˆ°æœ€ç»ˆç›®æ ‡ç‚¹
         if (movementStartTime == null)
             movementStartTime = gameTime;
         if (gameTime - movementStartTime >= TimeSpan.FromMinutes(30))
@@ -455,7 +455,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
             interactable = true;
             yield break;
         }
-        // ³¡¾°ÇĞ»»Ê±£ºÖ±½ÓË²ÒÆµ½Ä¿±êÎ»ÖÃ£¬²»×öÆ½»¬ÒÆ¶¯
+        // åœºæ™¯åˆ‡æ¢æ—¶ï¼šç›´æ¥ç¬ç§»åˆ°ç›®æ ‡ä½ç½®ï¼Œä¸åšå¹³æ»‘ç§»åŠ¨
         if (sceneChanged)
         {
             rb.position = nextWorldPosition;
@@ -472,7 +472,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
             door.OpenDoor();
             yield return new WaitForSeconds(0.4f);
         }
-        // Ê¼ÖÕÔÈËÙÒÆ¶¯
+        // å§‹ç»ˆåŒ€é€Ÿç§»åŠ¨
         while (Vector3.Distance(transform.position, nextWorldPosition) > Settings.pixelSize)
         {
             dir = (nextWorldPosition - transform.position).normalized;
@@ -489,12 +489,12 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
 
     }
     /// <summary>
-    /// ¸ù¾İSchedule¹¹½¨Â·¾¶
+    /// æ ¹æ®Scheduleæ„å»ºè·¯å¾„
     /// </summary>
     /// <param name="schedule"></param>
     public void BuildPath(ScheduleDetails schedule)
     {
-        //ÏÈÇå¿Õ¶ÑÕ»
+        //å…ˆæ¸…ç©ºå †æ ˆ
         movementSteps.Clear();
         currentSchedule = schedule;
         targetScene = schedule.targetScene;
@@ -504,14 +504,14 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
         faceDirX = schedule.faceDirX;
         faceDirY = schedule.faceDirY;
         this.interactable = schedule.interactable;
-        //¿ªÊ¼×ßĞÂĞĞ³Ì£¬ÏÈ¹ØµôÉÏÒ»¸öĞĞ³Ì¿ÉÄÜÒ»Ö±²¥·ÅµÄÍ£Ö¹¶¯»­
+        //å¼€å§‹èµ°æ–°è¡Œç¨‹ï¼Œå…ˆå…³æ‰ä¸Šä¸€ä¸ªè¡Œç¨‹å¯èƒ½ä¸€ç›´æ’­æ”¾çš„åœæ­¢åŠ¨ç”»
         anim.SetBool("EventAnimation", false);
-        //Í¬³¡¾°ÒÆ¶¯
+        //åŒåœºæ™¯ç§»åŠ¨
         if (schedule.targetScene == currentScene)
         {
             AStar.Instance.buildPath(schedule.targetScene, (Vector2Int)currentGridPosition, schedule.targetGridPosition, movementSteps, false);
         }
-        //¿ç³¡¾°ÒÆ¶¯
+        //è·¨åœºæ™¯ç§»åŠ¨
         else if (schedule.targetScene != currentScene)
         {
             SceneRoute sceneRoute = NPCManager.Instance.GetSceneRoute(currentScene, schedule.targetScene);
@@ -519,25 +519,25 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
             {
                 for (int i = 0; i < sceneRoute.scenePathList.Count; i++)
                 {
-                    //NPCµÄÂ·¾¶ÆğÊ¼µãºÍÄ¿±êµã
+                    //NPCçš„è·¯å¾„èµ·å§‹ç‚¹å’Œç›®æ ‡ç‚¹
                     Vector2Int fromPos, gotoPos;
                     ScenePath path = sceneRoute.scenePathList[i];
-                    //µ±SceenRouteÖĞµÄfromGridCell´óÓÚ9999£¬ÄÇÃ´NPC¿ç³¡¾°Ê±ÆğÊ¼µã¾ÍÊÇÏÖÔÚ×Ô¼ºµÄÎ»ÖÃ
+                    //å½“SceenRouteä¸­çš„fromGridCellå¤§äº9999ï¼Œé‚£ä¹ˆNPCè·¨åœºæ™¯æ—¶èµ·å§‹ç‚¹å°±æ˜¯ç°åœ¨è‡ªå·±çš„ä½ç½®
                     if (path.fromGridCell.x >= Settings.maxGridSize || path.fromGridCell.y >= Settings.maxGridSize)
                     {
                         fromPos = (Vector2Int)currentGridPosition;
                     }
-                    //·ñÔòÆğÊ¼µã¾ÍÊÇSceenRouteÖĞµÄfromGridCell×ø±ê
+                    //å¦åˆ™èµ·å§‹ç‚¹å°±æ˜¯SceenRouteä¸­çš„fromGridCellåæ ‡
                     else
                     {
                         fromPos = path.fromGridCell;
                     }
-                    //µ±SceenRouteÖĞµÄgotoGridCell´óÓÚ9999£¬ÄÇÃ´NPC¿ç³¡¾°Ê±Ä¿±êµã¾ÍÊÇNPC×Ô¼ºscheduleÖĞµÄÄ¿±êµã
+                    //å½“SceenRouteä¸­çš„gotoGridCellå¤§äº9999ï¼Œé‚£ä¹ˆNPCè·¨åœºæ™¯æ—¶ç›®æ ‡ç‚¹å°±æ˜¯NPCè‡ªå·±scheduleä¸­çš„ç›®æ ‡ç‚¹
                     if (path.gotoGridCell.x >= Settings.maxGridSize || path.gotoGridCell.y >= Settings.maxGridSize)
                     {
                         gotoPos = (Vector2Int)schedule.targetGridPosition;
                     }
-                    //·ñÔòÖÕµã¾ÍÊÇSceenRouteÖĞµÄgotoGridCel×ø±ê
+                    //å¦åˆ™ç»ˆç‚¹å°±æ˜¯SceenRouteä¸­çš„gotoGridCelåæ ‡
                     else
                     {
                         gotoPos = path.gotoGridCell;
@@ -549,16 +549,16 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
         }
         if (movementSteps.Count > 1)
         {
-            //¸üĞÂÃ¿Ò»²½¶ÔÓ¦µÄÊ±¼ä´Á
+            //æ›´æ–°æ¯ä¸€æ­¥å¯¹åº”çš„æ—¶é—´æˆ³
             UPdateTimeOnPath();
         }
     }
     /// <summary>
-    /// ¸üĞÂÃ¿Ò»²½¶ÔÓ¦µÄÊ±¼ä´Á
+    /// æ›´æ–°æ¯ä¸€æ­¥å¯¹åº”çš„æ—¶é—´æˆ³
     /// </summary>
     private void UPdateTimeOnPath()
     {
-        //Ê±¼ä´Á
+        //æ—¶é—´æˆ³
         TimeSpan currentGameTime = gameTime;
 
         foreach (MovementStep step in movementSteps)
@@ -566,22 +566,22 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
             step.hour = currentGameTime.Hours;
             step.minute = currentGameTime.Minutes;
             step.second = currentGameTime.Seconds;
-            //×ß¹ıÃ¿Ò»¸ö¸ñ×ÓËùĞèÒªµÄÊ±¼ä£¨Ö»×ßÉÏÏÂ×óÓÒ£¬Ã¿²½ºÄÊ±ÏàÍ¬£©
+            //èµ°è¿‡æ¯ä¸€ä¸ªæ ¼å­æ‰€éœ€è¦çš„æ—¶é—´ï¼ˆåªèµ°ä¸Šä¸‹å·¦å³ï¼Œæ¯æ­¥è€—æ—¶ç›¸åŒï¼‰
             TimeSpan gridMovementStepTime = new TimeSpan(0, 0, (int)(Settings.gridCellSize / normalSpeed / Settings.secondThreshold));
-            //ÀÛ¼Ó»ñµÃÏÂÒ»²½µÄÊ±¼ä
+            //ç´¯åŠ è·å¾—ä¸‹ä¸€æ­¥çš„æ—¶é—´
             currentGameTime = currentGameTime.Add(gridMovementStepTime);
         }
     }
 
     /// <summary>
-    /// ¸ù¾İÍø¸ñ×ø±ê·µ»ØÊÀ½ç×ø±êÖĞĞÄµã
+    /// æ ¹æ®ç½‘æ ¼åæ ‡è¿”å›ä¸–ç•Œåæ ‡ä¸­å¿ƒç‚¹
     /// </summary>
     /// <param name="gridPos"></param>
     /// <returns></returns>
     private Vector3 GetWorldPosition(Vector3Int gridPos)
     {
 
-        //ÒòÎªÓÎÏ·Ä¬ÈÏµÄÍø¸ñ×ø±êÊÇÍø¸ñ×óÏÂ½ÇµÄ×ø±ê
+        //å› ä¸ºæ¸¸æˆé»˜è®¤çš„ç½‘æ ¼åæ ‡æ˜¯ç½‘æ ¼å·¦ä¸‹è§’çš„åæ ‡
         Vector3 worldPos = grid.CellToWorld(gridPos);
         return new Vector3(worldPos.x + Settings.gridCellSize / 2, worldPos.y + Settings.gridCellSize / 2, 0);
     }
@@ -604,14 +604,14 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
     }
     private IEnumerator SetStopAnimation()
     {
-        //ÉèÖÃNPCµÄÃæ³¯·½Ïò£¬¶Ô»°ÖĞ³¯Íæ¼Ò£¬·ñÔòÓÃĞĞ³Ì±íÅäÖÃµÄ³¯Ïò
+        //è®¾ç½®NPCçš„é¢æœæ–¹å‘ï¼Œå¯¹è¯ä¸­æœç©å®¶ï¼Œå¦åˆ™ç”¨è¡Œç¨‹è¡¨é…ç½®çš„æœå‘
         UpdateFaceDir();
         animationBreakTime = Settings.animationBreakTime;
         if (stopAnimationClip != null)
         {
             animOverride[blankAnimationClip] = stopAnimationClip;
             anim.SetBool("EventAnimation", true);
-            //ÅäÖÃÎªÒ»Ö±²¥·ÅÊ±²»¹Ø±Õ¶¯»­£¬·ñÔòµÈ¶¯»­²¥ÍêÒ»¸öÖÜÆÚÔÙ¹Ø±Õ
+            //é…ç½®ä¸ºä¸€ç›´æ’­æ”¾æ—¶ä¸å…³é—­åŠ¨ç”»ï¼Œå¦åˆ™ç­‰åŠ¨ç”»æ’­å®Œä¸€ä¸ªå‘¨æœŸå†å…³é—­
             if (!alwaysPlayAnimation)
             {
                 yield return new WaitForSeconds(stopAnimationClip.length);
@@ -625,7 +625,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
         }
     }
     /// <summary>
-    /// ¶Ô»°Ê±ÈÃNPCÃæÏòÍæ¼Ò£¬²¢¼ÇÂ¼µ±Ç°³¯Ïò
+    /// å¯¹è¯æ—¶è®©NPCé¢å‘ç©å®¶ï¼Œå¹¶è®°å½•å½“å‰æœå‘
     /// </summary>
     public void FaceToPlayer()
     {
@@ -633,11 +633,11 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
         originFaceDirY = Mathf.RoundToInt(anim.GetFloat("DirY"));
         faceTarget = playerTransform;
         UpdateFaceDir();
-        //¶Ô»°ÖĞ²»²¥·ÅÍ£Ö¹¶¯»­£¬¹ØµôÕıÔÚÒ»Ö±²¥·ÅµÄ¶¯»­
+        //å¯¹è¯ä¸­ä¸æ’­æ”¾åœæ­¢åŠ¨ç”»ï¼Œå…³æ‰æ­£åœ¨ä¸€ç›´æ’­æ”¾çš„åŠ¨ç”»
         anim.SetBool("EventAnimation", false);
     }
     /// <summary>
-    /// »Ö¸´ÎªÃæÏòÄ¿±êÖ®Ç°µÄ·½Ïò
+    /// æ¢å¤ä¸ºé¢å‘ç›®æ ‡ä¹‹å‰çš„æ–¹å‘
     /// </summary>
     public void RestoreFaceDirection()
     {
@@ -646,13 +646,13 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
         anim.SetFloat("DirY", originFaceDirY);
     }
     /// <summary>
-    /// ¸üĞÂNPCÃæ³¯·½Ïò£¬ÓĞÃæÏòÄ¿±êÊ±³¯Ä¿±ê£¬·ñÔòÓÃĞĞ³Ì±íÀïµÄ³¯Ïò
+    /// æ›´æ–°NPCé¢æœæ–¹å‘ï¼Œæœ‰é¢å‘ç›®æ ‡æ—¶æœç›®æ ‡ï¼Œå¦åˆ™ç”¨è¡Œç¨‹è¡¨é‡Œçš„æœå‘
     /// </summary>
     private void UpdateFaceDir()
     {
         if (faceTarget != null)
         {
-            //¶¯»­Ö»ÓĞÉÏÏÂ×óÓÒËÄ¸ö·½Ïò£¬È¡Æ«ÒÆÁ¿´óµÄÄÇÒ»Öá
+            //åŠ¨ç”»åªæœ‰ä¸Šä¸‹å·¦å³å››ä¸ªæ–¹å‘ï¼Œå–åç§»é‡å¤§çš„é‚£ä¸€è½´
             Vector2 targetDir = faceTarget.position - transform.position;
             if (Mathf.Abs(targetDir.x) > Mathf.Abs(targetDir.y))
             {
@@ -671,12 +671,12 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
             anim.SetFloat("DirY", faceDirY);
         }
     }
-    #region ÉèÖÃNPCÏÔÊ¾Çé¿ö
+    #region è®¾ç½®NPCæ˜¾ç¤ºæƒ…å†µ
     private void SetActiveInScene()
     {
         spriteRenderer.enabled = true;
         coll.enabled = true;
-        //TODO:Ó°×Ó¹Ø±Õ
+        //TODO:å½±å­å…³é—­
         //transform.GetChild(0).gameObject.SetActive(true);
     }
 
@@ -684,27 +684,27 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
     {
         spriteRenderer.enabled = false;
         coll.enabled = false;
-        //TODO:Ó°×Ó¹Ø±Õ
+        //TODO:å½±å­å…³é—­
         //transform.GetChild(0).gameObject.SetActive(false);
     }
     #endregion
     /// <summary>
-    /// ¿ªÊ¼NPCÊÂ¼ş
+    /// å¼€å§‹NPCäº‹ä»¶
     /// </summary>
     public void StartNPCEvent()
     {
-        //¶Ô½¹NPC
+        //å¯¹ç„¦NPC
         cameraFollow.Follow = GameObject.Find(currentNPCEvent.npcName).transform;
         HandleEventNPCs(0);
         if (NPCEventStep == 0)
         {
             anim.SetBool("ActionExit", false);
-            //²¥·ÅÕâ¶Î¶Ô»°µÄ¶¯×÷
+            //æ’­æ”¾è¿™æ®µå¯¹è¯çš„åŠ¨ä½œ
             anim.Play(currentNPCEvent.animClip[0].name);
             originNPCPos = transform.position;
-            //ÉèÖÃÊÂ¼ş×î¿ªÊ¼µÄÎ»ÖÃ
+            //è®¾ç½®äº‹ä»¶æœ€å¼€å§‹çš„ä½ç½®
             rb.position = currentNPCEvent.nextPos[0].pos;
-            //ÉèÖÃ¶Ô»°
+            //è®¾ç½®å¯¹è¯
             dialogueController.currentData = currentNPCEvent.dialogueData[NPCEventStep];
         }
         EventHandler.CallStartNPCEvent();
@@ -712,7 +712,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
 
     }
     /// <summary>
-    /// µÈ´ıÍæ¼ÒÒÆ¶¯µ½Ö¸¶¨Î»ÖÃºó¿ªÊ¼NPCÊÂ¼ş
+    /// ç­‰å¾…ç©å®¶ç§»åŠ¨åˆ°æŒ‡å®šä½ç½®åå¼€å§‹NPCäº‹ä»¶
     /// </summary>
     /// <returns></returns>
     private IEnumerator StartNPCEventRoutine()
@@ -731,7 +731,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
         StartCoroutine(WaitForOpenStartDialue());
     }
     /// <summary>
-    /// NPCÒÆ¶¯µ½ÏÂÒ»¸öÊÂ¼şÎ»ÖÃ
+    /// NPCç§»åŠ¨åˆ°ä¸‹ä¸€ä¸ªäº‹ä»¶ä½ç½®
     /// </summary>
     //public void NPCMoveToNextPos()
     //{
@@ -743,33 +743,33 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
     //    rb.MovePosition(newPos);
     //    if(NPCEventStep < currentNPCEvent.playerPos.Length)
     //    {
-    //        //Íæ¼ÒÒÆ¶¯
+    //        //ç©å®¶ç§»åŠ¨
     //        playerController.SetPlayerPos(currentNPCEvent.playerPos[NPCEventStep], currentNPCEvent.normalSpeed, currentNPCEvent.playerFaceDir[NPCEventStep]);
     //    }
     //    if (Vector2.Distance(transform.position, currentNPCEvent.nextPos[NPCEventStep]) <= 0.01f)
     //    {
     //        anim.SetBool("ActionExit", false);
     //        anim.Play(currentNPCEvent.animClip[NPCEventStep].name);
-    //        //ÉèÖÃ¶Ô»°
+    //        //è®¾ç½®å¯¹è¯
     //        dialogueController.currentData = currentNPCEvent.dialogueData[NPCEventStep];
-    //        //¿ªÊ¼¶Ô»°
+    //        //å¼€å§‹å¯¹è¯
     //        StartCoroutine(WaitForOpenStartDialue());
     //        timeToMoveNextPos = false;
     //    }
     //}
     /// <summary>
-    /// µÈ´ı³¡¾°¼ÓÔØ³öÀ´ÔÚÏÔÊ¾NPCÊÂ¼ş¶Ô»°
+    /// ç­‰å¾…åœºæ™¯åŠ è½½å‡ºæ¥åœ¨æ˜¾ç¤ºNPCäº‹ä»¶å¯¹è¯
     /// </summary>
     /// <returns></returns>
     private IEnumerator WaitForOpenStartDialue()
     {
         yield return new WaitForSeconds(1.5f);
 
-        //¿ªÊ¼µÚÒ»¶Î¶Ô»°
+        //å¼€å§‹ç¬¬ä¸€æ®µå¯¹è¯
         dialogueController.OpenDialogue();
     }
     /// <summary>
-    /// NPCÒÆ¶¯µ½ÏÂÒ»¸öÊÂ¼şÎ»ÖÃ
+    /// NPCç§»åŠ¨åˆ°ä¸‹ä¸€ä¸ªäº‹ä»¶ä½ç½®
     /// </summary>
     /// <returns></returns>
     private IEnumerator NPCMoveToNextPosRoutine()
@@ -777,13 +777,13 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
         npcMove = true;
         Coroutine eventMoveRoutine = StartCoroutine(MoveEventNPCsToPos(NPCEventStep));
         float currentNPCSpeed;
-        // Íæ¼ÒËÙ¶È ¡ª ¸ù¾İ playerPos
+        // ç©å®¶é€Ÿåº¦ â€” æ ¹æ® playerPos
         float playerSpeed = currentNPCEvent.playerPos[NPCEventStep].isMaxSpeed
             ? currentNPCEvent.maxSpeed : currentNPCEvent.normalSpeed;
-        // Ö÷ NPC ËÙ¶È ¡ª ¸ù¾İ nextPos
+        // ä¸» NPC é€Ÿåº¦ â€” æ ¹æ® nextPos
         float mainNPCSpeed = currentNPCEvent.nextPos[NPCEventStep].isMaxSpeed
             ? currentNPCEvent.maxSpeed : currentNPCEvent.normalSpeed;
-        // ´¥·¢Íæ¼ÒÒÆ¶¯£¨Ò»´Î£©
+        // è§¦å‘ç©å®¶ç§»åŠ¨ï¼ˆä¸€æ¬¡ï¼‰
         if (NPCEventStep < currentNPCEvent.playerPos.Length)
         {
             StartCoroutine(playerController.SetPlayerPos(
@@ -793,7 +793,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
                  currentNPCEvent.playerPos[NPCEventStep].isSit
             ));
         }
-        // A* Ñ°Â·
+        // A* å¯»è·¯
         Vector3Int startGrid = grid.WorldToCell(transform.position);
         Vector3Int targetGrid = grid.WorldToCell((Vector3)currentNPCEvent.nextPos[NPCEventStep].pos);
 
@@ -810,7 +810,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
             {
                 Vector3 worldPos = grid.CellToWorld(new Vector3Int(path[i].x, path[i].y, 0));
                 worldPos = new Vector3(worldPos.x + Settings.gridCellSize / 2, worldPos.y + Settings.gridCellSize / 2, 0);
-                // ¼ì²éÄ¿±êÎ»ÖÃÊÇ·ñÓĞÃÅ
+                // æ£€æŸ¥ç›®æ ‡ä½ç½®æ˜¯å¦æœ‰é—¨
                 Door door = FindObjectsByType<Door>(FindObjectsSortMode.None)
       .OrderBy(d => Vector2.Distance(d.transform.position, worldPos))
       .FirstOrDefault(d => Vector2.Distance(d.transform.position, worldPos) < 0.7f);
@@ -830,7 +830,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
                 }
             }
         }
-        // µ½´ïÄ¿±êµã
+        // åˆ°è¾¾ç›®æ ‡ç‚¹
         anim.SetBool("ActionExit", false);
         anim.Play(currentNPCEvent.animClip[NPCEventStep].name);
         yield return eventMoveRoutine;
@@ -840,7 +840,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
         npcMove = false;
     }
     /// <summary>
-    /// ¸ù¾İ²½Öè´¦Àí EventNPC µÄ³ö³¡
+    /// æ ¹æ®æ­¥éª¤å¤„ç† EventNPC çš„å‡ºåœº
     /// </summary>
     private void HandleEventNPCs(int step)
     {
@@ -854,7 +854,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
                 spawnedEventNPCs[instance] = eventNPCData;
             }
         }
-        //¸üĞÂÉãÏñÍ·¸úËæ¶ÔÏó
+        //æ›´æ–°æ‘„åƒå¤´è·Ÿéšå¯¹è±¡
         if (currentNPCEvent.changeCameraFollow.Length > 0)
         {
             foreach (var ccf in currentNPCEvent.changeCameraFollow)
@@ -867,7 +867,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
         }
     }
     /// <summary>
-    /// Ê¹ÓÃA*½«µ±Ç°²½ÖèÓĞNPCMovePosµÄEventNPCÒÆ¶¯µ½Ä¿±êÎ»ÖÃ
+    /// ä½¿ç”¨A*å°†å½“å‰æ­¥éª¤æœ‰NPCMovePosçš„EventNPCç§»åŠ¨åˆ°ç›®æ ‡ä½ç½®
     /// </summary>
     private IEnumerator MoveEventNPCsToPos(int step)
     {
@@ -903,7 +903,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
     }
 
     /// <summary>
-    /// µ¥¸öEventNPCµÄA*Íø¸ñÒÆ¶¯
+    /// å•ä¸ªEventNPCçš„A*ç½‘æ ¼ç§»åŠ¨
     /// </summary>
     private IEnumerator MoveSingleEventNPC(GameObject npc, Vector2 targetWorldPos, float speed, AnimationClip animClip)
     {
@@ -920,7 +920,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
             path.Add(pathStack.Pop().gridCoordinate);
 
         Animator npcAnim = npc.GetComponent<Animator>();
-        // ¿ªÊ¼ÒÆ¶¯¶¯»­
+        // å¼€å§‹ç§»åŠ¨åŠ¨ç”»
         if (npcAnim != null)
         {
             npcAnim.SetBool("ActionExit", true);
@@ -931,7 +931,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
         {
             Vector3 worldPos = grid.CellToWorld(new Vector3Int(path[i].x, path[i].y, 0));
             worldPos = new Vector3(worldPos.x + Settings.gridCellSize / 2, worldPos.y + Settings.gridCellSize / 2, 0);
-            // ¼ì²éÄ¿±êÎ»ÖÃÊÇ·ñÓĞÃÅ
+            // æ£€æŸ¥ç›®æ ‡ä½ç½®æ˜¯å¦æœ‰é—¨
             Door door = FindObjectsByType<Door>(FindObjectsSortMode.None)
        .OrderBy(d => Vector2.Distance(d.transform.position, worldPos))
        .FirstOrDefault(d => Vector2.Distance(d.transform.position, worldPos) < 0.7f);
@@ -947,7 +947,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
                 npcAnim.SetFloat("DirX", moveDir.x);
                 npcAnim.SetFloat("DirY", moveDir.y);
             }
-            // ÓÃ´«ÈëµÄËÙ¶È
+            // ç”¨ä¼ å…¥çš„é€Ÿåº¦
             float moveSpeed = speed;  
             while (Vector2.Distance(npc.transform.position, worldPos) > Settings.pixelSize)
             {
@@ -958,7 +958,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
                 yield return null;
             }
         }
-        // Í£Ö¹ÒÆ¶¯¶¯»­
+        // åœæ­¢ç§»åŠ¨åŠ¨ç”»
         if (npcAnim != null)
         {
             npcAnim.SetBool("isMoving", false);
@@ -967,7 +967,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
             if (animClip != null)
                 npcAnim.Play(animClip.name);
         }
-        // ²¥·Åµ±Ç° step ¶ÔÓ¦µÄ¶¯»­
+        // æ’­æ”¾å½“å‰ step å¯¹åº”çš„åŠ¨ç”»
         //if (spawnedEventNPCs.TryGetValue(npc, out EventNPC eventData) && npcAnim != null)
         //{
         //    foreach (StepPos sp in eventData.NPCMovePos)
@@ -985,18 +985,18 @@ public class NPCMovement : MonoBehaviour, ISaveable   //µ÷ÓÃÔÚNPC01¶ÔÏóÉÏ£¬ËùÓĞN
         isInitialised = true;
         GameSaveData saveData = new GameSaveData();
         saveData.characterPosDict = new Dictionary<string, SerializableVector3>();
-        //´æµµNPCµÄÄ¿±êÎ»ÖÃ£¬µ±Ç°Î»ÖÃ£¬Ä¿±ê³¡¾°£¬µ±Ç°³¡¾°
+        //å­˜æ¡£NPCçš„ç›®æ ‡ä½ç½®ï¼Œå½“å‰ä½ç½®ï¼Œç›®æ ‡åœºæ™¯ï¼Œå½“å‰åœºæ™¯
         saveData.characterPosDict.Add("targetGridPosition", new SerializableVector3(targetGridPosition));
         saveData.characterPosDict.Add("currentPositon", new SerializableVector3(transform.position));
         saveData.dataSceneName = currentScene;
         saveData.targetScene = this.targetScene;
-        //´æµµNPCµÄ¶¯×÷
+        //å­˜æ¡£NPCçš„åŠ¨ä½œ
         if (stopAnimationClip != null)
         {
             saveData.animationInstanceID = stopAnimationClip.GetInstanceID();
         }
         saveData.interactable = this.interactable;
-        //´æµµ¼¾½Ú
+        //å­˜æ¡£å­£èŠ‚
         saveData.timeDict = new Dictionary<string, int>();
         saveData.timeDict.Add("currentSeason", (int)currentSeason);
         return saveData;

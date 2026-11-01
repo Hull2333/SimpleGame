@@ -1,4 +1,4 @@
-using MFarm.Map;
+ï»¿using MFarm.Map;
 using MFarm.Save;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,28 +7,28 @@ using Unity.VisualScripting;
 using UnityEngine;
 namespace MFarm.Task
 {
-    public class TaskManager : Singleton<TaskManager> //µ÷ÓÃÔÚTaskManager¶ÔÏóÉÏ
+    public class TaskManager : Singleton<TaskManager> //è°ƒç”¨åœ¨TaskManagerå¯¹è±¡ä¸Š
     {
         public Transform taskPanel;
         public TaskData_SO taskData;
-        //µ±Ç°½ÓÊÜµÄÈÎÎñ
+        //å½“å‰æ¥å—çš„ä»»åŠ¡
         [HideInInspector] public TaskDetails currentTaskDetails;
-        //¹«¸æÀ¸Ãæ°å
+        //å…¬å‘Šæ é¢æ¿
         public GameObject bulletinBoardPanel;
         public GameObject playerTaskPanel;
-        //Ëæ»ú»ñÈ¡¹«¸æÀ¸ÈÎÎñID¡¢TaskDetail
+        //éšæœºè·å–å…¬å‘Šæ ä»»åŠ¡IDã€TaskDetail
         private int randomTaskID;
         [HideInInspector] public TaskDetails randomTaskDetail;
-        //Íæ¼Ò½ÓÊÜÈÎÎñÁĞ±í
+        //ç©å®¶æ¥å—ä»»åŠ¡åˆ—è¡¨
         [HideInInspector] public List<TaskDetails> playerAcceptTaskDetails = new List<TaskDetails>();
-        //Íæ¼ÒÃæ°å½ÓÊÜÈÎÎñÔ¤ÖÆÌå
+        //ç©å®¶é¢æ¿æ¥å—ä»»åŠ¡é¢„åˆ¶ä½“
         public GameObject taskImagePrefab;
-        //½ÓÊÜÈÎÎñÔ¤ÖÆÌåÊı×é
+        //æ¥å—ä»»åŠ¡é¢„åˆ¶ä½“æ•°ç»„
         public GameObject[] playerTaskImages = new GameObject[20];
-        //ÈÎÎñË¢ĞÂÌìÊı
+        //ä»»åŠ¡åˆ·æ–°å¤©æ•°
         private int taskFreshDay;
 
-        //¼õÉÙÒ»ÌìÈÎÎñÊ±¼ä
+        //å‡å°‘ä¸€å¤©ä»»åŠ¡æ—¶é—´
         public bool canDeductTaskDay = false;
         public void OnEnable()
         {
@@ -46,9 +46,9 @@ namespace MFarm.Task
 
         private void OnStartNewGameEvent(int obj)
         {
-            //Çå¿ÕÍæ¼Ò½ÓÊÜÈÎÎñÁĞ±í
+            //æ¸…ç©ºç©å®¶æ¥å—ä»»åŠ¡åˆ—è¡¨
             playerAcceptTaskDetails.Clear();
-            //ÖØÖÃÈÎÎñÁĞ±í
+            //é‡ç½®ä»»åŠ¡åˆ—è¡¨
             for(int t = 0;t< taskData.taskDetailsList.Count; t++)
             {
                 taskData.taskDetailsList[t].isInstantiate = false;
@@ -57,7 +57,7 @@ namespace MFarm.Task
         }
 
         /// <summary>
-        /// Éú³ÉTaskImage
+        /// ç”ŸæˆTaskImage
         /// </summary>
         public void OnTaskStartEvent()
         {
@@ -72,14 +72,14 @@ namespace MFarm.Task
                     taskAcceptImage.GetComponent<TaskImage>().isFristSet = false;
                 }
             }
-            //²éÕÒÒÑÉú³ÉµÄ½ÓÊÜÈÎÎñÔ¤ÖÆÌå
+            //æŸ¥æ‰¾å·²ç”Ÿæˆçš„æ¥å—ä»»åŠ¡é¢„åˆ¶ä½“
             playerTaskImages = GameObject.FindGameObjectsWithTag("TaskImage");
 
         }
 
         private void OnGameDayEvent(int arg1, Season season, Weekday weekday)
         {
-            ///¹«¸æÀ¸ÈÎÎñË¢ĞÂÊ±¼äÎª3µ½4Ìì
+            ///å…¬å‘Šæ ä»»åŠ¡åˆ·æ–°æ—¶é—´ä¸º3åˆ°4å¤©
             if(taskFreshDay == 0)
             {
                 randomTaskID = UnityEngine.Random.Range(5001, 5004);
@@ -98,7 +98,7 @@ namespace MFarm.Task
             StartCoroutine(ReductTaskDay());
         }
         /// <summary>
-        /// ¿Û³ıµ±Ç°½ÓÊÜÈÎÎñµÄÌìÊı
+        /// æ‰£é™¤å½“å‰æ¥å—ä»»åŠ¡çš„å¤©æ•°
         /// </summary>
         /// <returns></returns>
         private IEnumerator ReductTaskDay()
@@ -115,12 +115,12 @@ namespace MFarm.Task
                 }
             }
             playerTaskPanel.SetActive(false);
-            //µÈ´ıÉÏÃæµÄ´úÂëÍê³É
+            //ç­‰å¾…ä¸Šé¢çš„ä»£ç å®Œæˆ
             yield return null;
             
         }
         /// <summary>
-        /// ¹Ø±ÕÈÎÎñ¹«¸æÀ¸Ãæ°å
+        /// å…³é—­ä»»åŠ¡å…¬å‘Šæ é¢æ¿
         /// </summary>
         public void QuitBulletinBoard()
         {
@@ -128,17 +128,17 @@ namespace MFarm.Task
             
         }
         /// <summary>
-        /// ´ò¿ª¹«¸æÀ¸Ãæ°å
+        /// æ‰“å¼€å…¬å‘Šæ é¢æ¿
         /// </summary>
         public void OpenBulletinBoard()
         {
             bulletinBoardPanel.SetActive(true);
         }
         /// <summary>
-        /// ²éÕÒPlayerAcceptTaskDetailsÁĞ±íÖĞÊÇ·ñ´æÔÚ¸ÃÈÎÎñ
+        /// æŸ¥æ‰¾PlayerAcceptTaskDetailsåˆ—è¡¨ä¸­æ˜¯å¦å­˜åœ¨è¯¥ä»»åŠ¡
         /// </summary>
         /// <param name="task"></param>
-        /// <returns>²»´æÔÚ·µ»Ø-1</returns>
+        /// <returns>ä¸å­˜åœ¨è¿”å›-1</returns>
         public int FindPlayerAcceptTaskDetails(TaskDetails task)
         {
             for(int i = 0; i < playerAcceptTaskDetails.Count; i++)
@@ -151,7 +151,7 @@ namespace MFarm.Task
             return -1;
         }
         /// <summary>
-        /// ÔÚ½ÓÊÜÈÎÎñÁĞ±íÒÆ³ıÈÎÎñ
+        /// åœ¨æ¥å—ä»»åŠ¡åˆ—è¡¨ç§»é™¤ä»»åŠ¡
         /// </summary>
         /// <param name="ID"></param>
         public void DeleteTaskDetailsInPlayerAcceptTaskDetails(int ID)

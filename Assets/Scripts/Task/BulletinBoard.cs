@@ -1,4 +1,4 @@
-using DG.Tweening;
+ï»¿using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,7 +6,7 @@ using static BulletinBoardUI;
 namespace MFarm.Task
 {
     
-    public class BulletinBoard : MonoBehaviour //µ÷ÓÃÔÚBulletinBoard¶ÔÏóÉÏ
+    public class BulletinBoard : MonoBehaviour //è°ƒç”¨åœ¨BulletinBoardå¯¹è±¡ä¸Š
     {
        
         private CursorManager cursorManager;
@@ -19,7 +19,7 @@ namespace MFarm.Task
         {
             if (other.CompareTag("Player"))
             {
-                //´ò¿ª¹«¸æÀ¸
+                //æ‰“å¼€å…¬å‘Šæ 
                 if (Input.GetKey(KeyCode.Mouse1) && cursorManager.canCheck)
                 {
                     BulletinBoardUI.Instance.OpenBulletinBoardUI();
@@ -27,12 +27,12 @@ namespace MFarm.Task
                 //cursorManager = GameObject.FindWithTag("CursorManager").GetComponent<CursorManager>();
                 // Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 //Collider2D boardCollider = Physics2D.OverlapPoint(mousePos);
-                //ÓÒ¼üµã»÷¹«¸æÀ¸ÏÔÊ¾¹«¸æÀ¸ÈÎÎñUI
+                //å³é”®ç‚¹å‡»å…¬å‘Šæ æ˜¾ç¤ºå…¬å‘Šæ ä»»åŠ¡UI
                 //if (boardCollider != null)
                 //{
                 //    if(boardCollider.name == "BulletinBoardTrigger")
                 //    {
-                //        //ÏÔÊ¾¶¯Ì¬Êó±ê
+                //        //æ˜¾ç¤ºåŠ¨æ€é¼ æ ‡
                 //        EventHandler.CallCursorImagerChagerEvent("Check",true);
                         
                 //    }

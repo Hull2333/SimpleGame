@@ -1,8 +1,8 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ExclamationMark : MonoBehaviour    //µ÷ÓÃÔÚExclamation Mark¶ÔÏóÉÏ
+public class ExclamationMark : MonoBehaviour    //è°ƒç”¨åœ¨Exclamation Markå¯¹è±¡ä¸Š
 {
     public PlayerController playerController;
     public void CloseMark()
