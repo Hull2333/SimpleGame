@@ -41,6 +41,24 @@ description: 在 D:\SimpleGame\SimpleGame 这个 Unity 2022.3 的 2D 像素 TopD
 - **像素**：1 像素 = `Settings.pixelSize` = 0.05 世界单位；新增 Sprite 保持与现有资源相同 PPU；不改 Sorting Layer 顺序。
 - **注释**：新增代码一律中文注释；逻辑不直观的地方在代码上方说明作用。
 
+## 改含中文的 `.cs` 时必须字节安全写入
+
+`Assets/` 下的 `.cs` **不是** UTF-8：绝大多数是 GBK（无 BOM、CRLF），个别文件是纯 LF（如 `Player/PlayerController.cs`）。直接对这类文件使用文本编辑工具，会把 GBK 中文写成 UTF-8 字节，注释整段变成 `?`。改动前先逐文件探测，按探测结果写回。
+
+**探测**：读全部字节 → 用 `New-Object Text.UTF8Encoding($false,$true)` 严格解码，成功即 UTF-8，抛异常即 GBK；再统计 `\r` 与 `\n` 数量判断行尾（CR 数为 0 即纯 LF）。
+
+**写入**（`SKILL.md`、`*.uxml`、`*.md` 是 UTF-8，可直接编辑，以下只针对 GBK 源码）：
+
+1. 读写脚本存成 `.ps1` 放在项目外（如 `%TEMP%`），**脚本本身必须是纯 ASCII** —— PowerShell 5 会把无 BOM 的 UTF-8 脚本按 ANSI 解析，脚本里出现中文会让锚点匹配失败。
+2. 要插入的中文先单独写进一个 UTF-8 临时文件，脚本里用 `[IO.File]::ReadAllText($p, $utf8)` 显式读取，并 `TrimStart([char]0xFEFF)` 去掉 BOM。
+3. 源码读写：`$gbk = [Text.Encoding]::GetEncoding(936)`，`$t = $gbk.GetString([IO.File]::ReadAllBytes($f))` → `$t.Replace(锚点, 锚点 + "`r`n" + $中文)` → `[IO.File]::WriteAllBytes($f, $gbk.GetBytes($t))`。
+4. 只替换 ASCII 代码行时可用字节透传 `[Text.Encoding]::GetEncoding(28591)`（PowerShell 5 没有 `[Text.Encoding]::Latin1`），避免解码再编码整份文件。
+5. **最大坑**：Latin1 透传流程里把 UTF-8 读出的中文直接拼进去，会原样写成 UTF-8 字节 → GBK 解码后变成 `?`。中文必须先用 `$gbk.GetBytes($中文)` 转成 GBK 字节，再转 Latin1 字符串拼接。
+6. 插入行的行尾要和文件其余部分一致；混入 CRLF 或 LF 会产生整文件行尾噪声（写回后用 CR / LF 计数复核）。
+7. PowerShell 正则匹配 `?` 必须转义成 `\?`，否则报 `Quantifier {x,y} following nothing`。
+
+**交付前校验**：花括号数量配对、`[\u4e00-\u9fff]` CJK 计数合理、`\?` 计数（注意三元运算符的 `?` 是正常的）、按原编码抽查新增行能否正确显示、`git diff --numstat` 只有新增没有删改、临时脚本与临时文本文件全部清理。
+
 ## 常见需求落点
 
 | 需求 | 落点 |

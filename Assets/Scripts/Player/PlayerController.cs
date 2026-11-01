@@ -80,6 +80,8 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
     public string GUID => GetComponent<DataGUID>().guid;
     //人物面朝方向
     private bool faceUp, faceDown, faceLeft, faceRight;
+    // 玩家当前面朝方向（供钓鱼等外部逻辑读取）
+    public Vector2 FaceDirection => faceUp ? Vector2.up : faceDown ? Vector2.down : faceLeft ? Vector2.left : Vector2.right;
     public GameObject cursorManager;
     private CursorManager cM;
     //玩家动作组

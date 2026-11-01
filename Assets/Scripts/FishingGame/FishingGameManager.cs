@@ -27,10 +27,20 @@ public class FishingGameManager : Singleton<FishingGameManager> //调用在FishBg对
     public Transform RightEdgePos;
     //钓鱼进度条UI
     public GameObject fishProgressCanvas;
+
+    [Header("新钓鱼游戏")]
+    //鱼逃脱临界线
+    public GameObject fishAwayLine;
     public void OnEnable()
     {
         fishProgressCanvas.SetActive(true);
         playerController = GetComponentInParent<PlayerController>();
+        // 鱼逃脱临界线：放到玩家钓鱼方向前方3格处
+        fishAwayLine.SetActive(true);
+        Vector2 fishingDir = playerController.FaceDirection;
+        fishAwayLine.transform.position = (Vector2)playerController.transform.position + fishingDir * (3f * Settings.gridCellSize);
+        // 竖线在左右朝向时方向正确，上下朝向时旋转90度改为横线
+        fishAwayLine.transform.rotation = (fishingDir.y != 0f) ? Quaternion.Euler(0f, 0f, 90f) : Quaternion.identity;
         line.positionCount = 50;
         smallFish.transform.position = smallFishStartPos.position;
         currentFishProgress = 1.5f;
