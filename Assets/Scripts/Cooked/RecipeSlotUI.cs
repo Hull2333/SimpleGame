@@ -5,7 +5,6 @@ using UnityEngine.EventSystems;
 using MFarm.Inventory;
 using UnityEngine.UI;
 using MFarm.Cooked;
-using static UnityEditor.Progress;
 using TMPro;
 
 public class RecipeSlotUI : MonoBehaviour, IPointerClickHandler //调用在RecipeSlot按钮上

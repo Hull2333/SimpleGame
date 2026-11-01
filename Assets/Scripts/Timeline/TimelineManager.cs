@@ -41,7 +41,7 @@ public class TimelineManager : Singleton<TimelineManager>    //调用在TimelineMan
 
     private void OnDisable()
     {
-        EventHandler.AfterSceneLoadedEvent += OnAfterSceneLoadedEvent;
+        EventHandler.AfterSceneLoadedEvent -= OnAfterSceneLoadedEvent;
     }
     /// <summary>
     /// 场景加载后开始播放PlayableDirector动画

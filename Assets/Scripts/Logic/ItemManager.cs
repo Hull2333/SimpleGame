@@ -96,7 +96,7 @@ namespace MFarm.Inventory
             EventHandler.StartNewGameEvent -= OnStartNewGameEvent;
             EventHandler.InstantiateBuildingOnMapEvent -= OnInstantiateBuildingOnMapEvent;
             EventHandler.GetCurrentBuildCode -= OnGetCurrentBuildCode;
-            EventHandler.InstantiateAniamlProduceItemEvent += OnInstantiateAniamlProduceItemEvent;
+            EventHandler.InstantiateAniamlProduceItemEvent -= OnInstantiateAniamlProduceItemEvent;
             EventHandler.AnimalArrivedAtHomeEvent -= OnAnimalArrivedAtHomeEvent;
             EventHandler.AnimalExitCoopEvent -= OnAnimalExitCoopEvent;
             EventHandler.GameMinuteEvent -= OnGameMinuteEvent;

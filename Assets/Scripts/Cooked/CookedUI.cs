@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.Progress;
 namespace MFarm.Cooked 
 {
     public class CookedUI :Singleton<CookedUI> //调用在CookedCanvas上

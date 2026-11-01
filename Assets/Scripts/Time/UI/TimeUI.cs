@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using UnityEngine.UI;
-using UnityEditor.Scripting;
 using static AnimalData_SO;
 
 public class TimeUI : MonoBehaviour //调用在GameTime对象上

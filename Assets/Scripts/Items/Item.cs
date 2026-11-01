@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Unity.VisualScripting.Dependencies.Sqlite;
 using UnityEngine;
 using MFarm.CropPlant;
-using static UnityEditor.Progress;
 
 namespace MFarm.Inventory
 {

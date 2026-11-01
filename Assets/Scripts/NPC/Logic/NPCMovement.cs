@@ -140,7 +140,7 @@ public class NPCMovement : MonoBehaviour, ISaveable   //调用在NPC01对象上，所有N
         EventHandler.AfterSceneLoadedEvent -= OnAfterSceneLoadedEvent;
         EventHandler.BeforeSceneUnloadEvent -= OnBeforeSceneUnloadEvent;
         EventHandler.GameMinuteEvent -= OnGameMinuteEvent;
-        EventHandler.StartNewGameEvent += OnStartNewGameEvent;
+        EventHandler.StartNewGameEvent -= OnStartNewGameEvent;
         EventHandler.EndGameEvent -= OnEndGameEvent;
         EventHandler.PromoteNPCEvent -= OnPromoteNPCEvent;
         EventHandler.GameDayEvent -= OnGameDayEvent;

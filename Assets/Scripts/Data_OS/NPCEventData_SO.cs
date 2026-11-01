@@ -1,6 +1,5 @@
 
 using System.Collections.Generic;
-using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 [CreateAssetMenu(fileName = "NPCEventData_SO", menuName = "NPC/NPCEventData")]
