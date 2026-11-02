@@ -24,6 +24,8 @@ public class ItemDetails
     public FishlifeSeason fishlifeSeason;
     public FishlifeTime fishlifeTime;
     public int[] likeBaits;
+    public float fishStamina;
+    public float fishMaxSpeed;
     public Sprite itemIcon;
     public Sprite[] itemOnWorldSprites;
     [TextArea]

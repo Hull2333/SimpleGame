@@ -44,7 +44,7 @@ public class Settings //不需要调用在任何物体上
     //鱼钩抛物线中点比例
     public const float fishParabolaPercent = 0.4f;
     //鱼钩抛物线偏移量
-    public const float fishaParabolaOffsetY = -4f;
+    public const float fishaParabolaOffsetY = -8f;
     //鱼线的中点比例
     public const float fishLinePercent = 0.2f;
     //鱼线的偏移量
