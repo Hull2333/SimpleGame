@@ -116,13 +116,16 @@ namespace MFarm.Inventory
         {
             recerveUIPanel.gameObject.SetActive(true);
             StartCoroutine(DelayedSetPanelPosition());
-            StartCoroutine(BounceLoopDoTween(item));
             bounceCoroutine = StartCoroutine(BounceLoopDoTween(item));
         }
         private void OnQuitRecerveItemUIEvent()
         {
             recerveUIPanel.gameObject.SetActive(false);
-            StopCoroutine(bounceCoroutine);
+            //钓鱼收获等流程没有触发RecerveItemEvent，此时协程从未启动
+            if (bounceCoroutine != null)
+            {
+                StopCoroutine(bounceCoroutine);
+            }
         }
         /// <summary>
         /// 定位Player

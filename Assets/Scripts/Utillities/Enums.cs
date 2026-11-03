@@ -101,7 +101,7 @@ public enum GameState
 /// </summary>
 public enum LightShift
 {
-    Morning,Night
+    Morning,Dusk,Night
 }
 /// <summary>
 /// 声音类型

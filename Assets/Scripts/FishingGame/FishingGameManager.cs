@@ -30,6 +30,9 @@ public class FishingGameManager : Singleton<FishingGameManager> //调用在FishP
     private float currentFishStamina;
     //鱼的体力条
     public Image fishStaminaProgress;
+    public Image fishStaminaBg;
+    //提示拉鱼
+    public GameObject pullFishTip;
     //玩家钓鱼体力值
     private float playerFishStamina = 5f;
     //玩家当前的钓鱼体力值
@@ -37,9 +40,16 @@ public class FishingGameManager : Singleton<FishingGameManager> //调用在FishP
     //玩家钓鱼体力条
     public Image playerFishStaminaProgress;
     //鱼体力的下降速度
-    private float fishStaminaDeclineSpeed = 1f;
+    private float fishStaminaDeclineSpeed = 0.5f;
     //玩家钓鱼体力变化速度
     private float playerFishStaminaChangeSpeed = 0.5f;
+    //鱼体力下降的速度区间最小值
+    private float staminaSpeedMin = -0.4f;
+    //鱼体力下降的速度区间最大值
+    private float staminaSpeedMax = 0.3f;
+    [Header("鱼钩对象")]
+    //鱼钩的移动方向
+    private float baitX,baitY;
     public void OnEnable()
     {
         //鱼的最大速度和体力取自本次钓到的鱼
@@ -48,7 +58,7 @@ public class FishingGameManager : Singleton<FishingGameManager> //调用在FishP
         // 鱼逃脱临界线：从鱼钩沿朝向逐格外推，遇到不可钓的格子就停在它的前一格（3格全可钓则取第3格）
         fishAwayLine.SetActive(true);
         fishingDir = playerController.FaceDirection;
-        Vector3 hookPos = playerController.baitGameObject.transform.position;
+        Vector3 hookPos = playerController.baitManager.baitGameObject.transform.position;
         Grid grid = FindObjectOfType<Grid>();
         Vector3Int hookCell = grid.WorldToCell(hookPos);
         Vector3Int dirCell = new Vector3Int(Mathf.RoundToInt(fishingDir.x), Mathf.RoundToInt(fishingDir.y), 0);
@@ -86,6 +96,14 @@ public class FishingGameManager : Singleton<FishingGameManager> //调用在FishP
         currentPlayerFishStamina = playerFishStamina;
         isFishStaminaRecovering = false;
         awayLineOverTime = 0f;
+        //鱼抵抗动画：面朝方向在开局赋值，抵抗状态默认关闭
+        playerController.baitManager.SetFishFaceDirection(fishingDir);
+        playerController.baitManager.SetFishResist(false);
+    }
+    private void OnDisable()
+    {
+        //小游戏结束（成功或失败）后关闭逃脱线
+        fishAwayLine.SetActive(false);
     }
     private void Update()
     {
@@ -112,7 +130,10 @@ public class FishingGameManager : Singleton<FishingGameManager> //调用在FishP
                 hookSpeed = 0f;
                 break;
         }
-        Vector3 hookNewPos = playerController.baitGameObject.transform.position + (Vector3)fishingDir * (hookSpeed * Time.deltaTime);
+        //鱼钩动画方向由玩家输入和是否脱力决定：未脱力松手朝钓鱼方向，按住朝反方向；脱力松手时停住播待机
+        Vector2 moveDir = holdingMouse ? -fishingDir : (isFishStaminaRecovering ? Vector2.zero : fishingDir);
+        playerController.baitManager.SetBaitMoveDirection(moveDir);
+        Vector3 hookNewPos = playerController.baitManager.baitGameObject.transform.position + (Vector3)fishingDir * (hookSpeed * Time.deltaTime);
         //速度为负时鱼钩往回走，最多退到起点后方最远的可钓格
         if (fishingDir.x > 0f)
         {
@@ -130,7 +151,7 @@ public class FishingGameManager : Singleton<FishingGameManager> //调用在FishP
         {
             hookNewPos.y = Mathf.Min(hookNewPos.y, hookBackLimitPos.y);
         }
-        playerController.baitGameObject.transform.position = hookNewPos;
+        playerController.baitManager.SetBaitPosition(hookNewPos);
         //鱼体力：速度保持在-0.2~0.2之间时下降，耗尽后每秒恢复20%
         if (isFishStaminaRecovering)
         {
@@ -141,7 +162,7 @@ public class FishingGameManager : Singleton<FishingGameManager> //调用在FishP
                 isFishStaminaRecovering = false;
             }
         }
-        else if (hookSpeed >= -0.2f && hookSpeed <= 0.2f)
+        else if (hookSpeed >= staminaSpeedMin && hookSpeed <= staminaSpeedMax)
         {
             currentFishStamina = Mathf.Max(currentFishStamina - fishStaminaDeclineSpeed * Time.deltaTime, 0f);
             if (currentFishStamina <= 0f)
@@ -150,14 +171,16 @@ public class FishingGameManager : Singleton<FishingGameManager> //调用在FishP
                 isFishStaminaRecovering = true;
             }
         }
+        //鱼抵抗动画：仅在鱼体力下降时播放
+        playerController.baitManager.SetFishResist(!isFishStaminaRecovering && hookSpeed >= staminaSpeedMin && hookSpeed <= staminaSpeedMax);
         //玩家体力：鱼未脱力时猛拉消耗、被鱼拉走恢复；鱼脱力恢复期间不变
         if (!isFishStaminaRecovering)
         {
-            if (hookSpeed < -0.2f)
+            if (hookSpeed < staminaSpeedMin)
             {
                 currentPlayerFishStamina = Mathf.Max(currentPlayerFishStamina - playerFishStaminaChangeSpeed * Time.deltaTime, 0f);
             }
-            else if (hookSpeed > 0.2f)
+            else if (hookSpeed > staminaSpeedMax)
             {
                 //恢复速度是下降速度的1/5
                 currentPlayerFishStamina = Mathf.Min(currentPlayerFishStamina + playerFishStaminaChangeSpeed / 5f * Time.deltaTime, playerFishStamina);
@@ -166,6 +189,10 @@ public class FishingGameManager : Singleton<FishingGameManager> //调用在FishP
         //体力条显示
         fishStaminaProgress.fillAmount = currentFishStamina / fishStamina;
         playerFishStaminaProgress.fillAmount = currentPlayerFishStamina / playerFishStamina;
+        //鱼体力为空（脱力）时背景变红并显示拉鱼提示
+        bool isFishStaminaEmpty = isFishStaminaRecovering;
+        fishStaminaBg.color = isFishStaminaEmpty ? new Color32(255, 57, 0, 255) : Color.white;
+        pullFishTip.SetActive(isFishStaminaEmpty);
         //成功：鱼脱力恢复期间，玩家拉动鱼钩退到最后方的可钓格
         if (isFishStaminaRecovering && hookSpeed < 0f && Vector2.Dot((Vector2)(hookNewPos - hookBackLimitPos), fishingDir) <= 0f)
         {

@@ -22,10 +22,11 @@ public class LightPattenList_SO : ScriptableObject
 public class LightDetails
 {
     public Season season;
+    public Weather weather;
     //灯光模式
     public LightShift lightShift;
     public Color lightColor;
     //灯光强度
-    public float lightAmount;
+    public float lightStrength;
 
 }

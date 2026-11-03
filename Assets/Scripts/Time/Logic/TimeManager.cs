@@ -291,16 +291,20 @@ public class TimeManager : Singleton<TimeManager>,ISaveable    //调用在TimeMa
     /// <returns></returns>
     private LightShift GetCurrentLightShift()
     {
-        if(gameTime >= Settings.morningTime &&  gameTime < Settings.nightTime)
+        if(gameTime >= Settings.morningTime &&  gameTime < Settings.duskTime)
         {
             timeDifference = (float)(gameTime - Settings.morningTime).TotalMinutes;
             return LightShift.Morning;
         }
-        if(gameTime < Settings.morningTime || gameTime >= Settings.nightTime)
+        if (gameTime >= Settings.duskTime && gameTime < Settings.nightTime)
+        {
+            timeDifference = (float)(gameTime - Settings.duskTime).TotalMinutes;
+            return LightShift.Dusk;
+        }
+        if (gameTime < Settings.morningTime || gameTime >= Settings.nightTime)
         {
             //Abs绝对值
             timeDifference = Mathf.Abs((float)(gameTime - Settings.nightTime).TotalMinutes);
-            Debug.Log(timeDifference);
             return LightShift.Night;
         }
         return LightShift.Morning;

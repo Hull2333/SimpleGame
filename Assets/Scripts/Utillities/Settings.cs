@@ -34,7 +34,8 @@ public class Settings //不需要调用在任何物体上
     public const float lightChangeDuration = 25f;
     //早上和晚上的时间戳
     public static TimeSpan morningTime = new TimeSpan(5, 0, 0);
-    public static TimeSpan nightTime = new TimeSpan(19, 0, 0);
+    public static TimeSpan duskTime = new TimeSpan(18, 0, 0);
+    public static TimeSpan nightTime = new TimeSpan(20, 0, 0);
     //主角初始坐标
     public static Vector3 playerStartPos = new Vector3(10f,-10f,0);
     //初始金额

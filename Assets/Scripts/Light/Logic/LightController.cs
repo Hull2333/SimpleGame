@@ -32,13 +32,13 @@ public class LightController : MonoBehaviour    //调用在所有光对象上
             currentLight.color += colorOffset;
             //颜色开始逐渐切换
             DOTween.To(() => currentLight.color, c => currentLight.color = c, currentLightDetails.lightColor, Settings.lightChangeDuration - timeDifference);
-            DOTween.To(() => currentLight.intensity, i => currentLight.intensity = i, currentLightDetails.lightAmount, Settings.lightChangeDuration - timeDifference);
+            DOTween.To(() => currentLight.intensity, i => currentLight.intensity = i, currentLightDetails.lightStrength, Settings.lightChangeDuration - timeDifference);
         }
         //切换时间已到,直接切换到目标颜色
         if(timeDifference >= Settings.lightChangeDuration)
         {
             currentLight.color = currentLightDetails.lightColor;
-            currentLight.intensity = currentLightDetails.lightAmount;
+            currentLight.intensity = currentLightDetails.lightStrength;
         }
     }
 }
