@@ -29,7 +29,11 @@ public class HoldItem : MonoBehaviour //调用在Player的HoldItem对象上
         
         EventHandler.CallPlayerDecreaseHealthEvent(-itemDetails.recoverHealth);
         EventHandler.CallPlayerDecreaseStminaEvent(-itemDetails.recoverStmina);
-        EventHandler.CallParticleEffectEvent(ParticalEffectType.Eat01,transform.position,Vector2.zero);
+        //吃食物时把粒子Shape纹理设为该物品的世界贴图
+        Sprite eatSprite = itemDetails.itemOnWorldSprites != null && itemDetails.itemOnWorldSprites.Length > 0
+            ? itemDetails.itemOnWorldSprites[0]
+            : null;
+        EventHandler.CallParticleEffectEvent(ParticalEffectType.Eat01, transform.position, Vector2.zero, eatSprite);
         
     }
     /// <summary>

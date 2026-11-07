@@ -39,6 +39,7 @@ public class ItemDetails
     public bool isBait;
     public float decreaseFishingTime;
     public int itemPrice;
+    public Color foodColor;
     public int recoverHealth;
     public int recoverStmina;
     public EquipType equipType;

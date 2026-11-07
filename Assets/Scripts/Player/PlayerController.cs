@@ -15,6 +15,8 @@ using MFarm.AStar;
 using System.Linq;
 using DG.Tweening;
 using MFarm.Transition;
+using UnityEngine.Experimental.GlobalIllumination;
+using UnityEngine.Rendering.Universal;
 public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对象上
 {
     [Header("玩家属性")]
@@ -188,13 +190,25 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对�
     private bool isSittingOnChair;
     private Chair currentChair;
     // 正在弧线移动中
-    private bool isSittingInProgress;  
+    private bool isSittingInProgress;
+    public GameObject playerLight;
+    //玩家灯光组件与渐亮Tween
+    private Light2D playerLight2D;
+    private Tween playerLightTween;
+    //玩家灯是否已处于夜晚打开状态，避免每游戏分钟重复触发渐亮
+    private bool playerLightOn;
     public void Awake()
     {
 
         foreach (var playerAnim in playerAnimatorGroup)
         {
             animators.Add(playerAnim.GetComponent<Animator>());
+        }
+        //缓存玩家灯光组件并默认关闭，进入夜晚时再打开
+        if (playerLight != null)
+        {
+            playerLight2D = playerLight.GetComponent<Light2D>();
+            playerLight.SetActive(false);
         }
         rb = GetComponent<Rigidbody2D>();
         //获取所有子物体下的Animator组件
@@ -329,6 +343,8 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对�
         EventHandler.SleepEvent += OnSleepEvent;
         EventHandler.SettleUIGenerateDoneEvent += OnSettleUIGenerateDoneEvent;
         EventHandler.SettleUIHideDoneEvent += OnSettleUIHideDoneEvent;
+        //监听时段变化，用于夜晚开关玩家灯
+        EventHandler.LightShiftChangeEvent += OnLightShiftChangeEvent;
     }
 
    
@@ -360,6 +376,16 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对�
         EventHandler.SleepEvent -= OnSleepEvent;
         EventHandler.SettleUIGenerateDoneEvent -= OnSettleUIGenerateDoneEvent;
         EventHandler.SettleUIHideDoneEvent -= OnSettleUIHideDoneEvent;
+        EventHandler.LightShiftChangeEvent -= OnLightShiftChangeEvent;
+        //终止渐亮Tween，避免对象销毁后回调访问已销毁的Light2D
+        playerLightTween?.Kill();
+        playerLightTween = null;
+        //关闭玩家灯并重置状态，保证再次启用时不会停留在半亮状态
+        if(playerLight != null)
+        {
+            playerLight.SetActive(false);
+        }
+        playerLightOn = false;
     }
 
   
@@ -994,6 +1020,50 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对�
         baitGrid = FindObjectOfType<Grid>();
         //切换场景后恢复对玩家的操作
         inputDisable = false;
+        //按当前时间同步玩家灯，避免读档或切场景后停留在错误状态
+        RefreshPlayerLight(IsNightTime());
+    }
+
+    private void OnLightShiftChangeEvent(Season season, LightShift lightShift, float timeDifference)
+    {
+        //只在进入或离开夜晚时切换玩家灯
+        RefreshPlayerLight(lightShift == LightShift.Night);
+    }
+
+    /// <summary>
+    /// 当前是否处于夜晚时段
+    /// </summary>
+    private bool IsNightTime()
+    {
+        TimeSpan time = TimeManager.Instance.gameTime;
+        return time >= Settings.nightTime || time < Settings.morningTime;
+    }
+
+    /// <summary>
+    /// 夜晚打开玩家灯并在2秒内从0渐亮到1，天亮时关闭
+    /// </summary>
+    private void RefreshPlayerLight(bool isNight)
+    {
+        if(playerLight == null || playerLight2D == null || playerLightOn == isNight)
+        {
+            return;
+        }
+        playerLightOn = isNight;
+        //切换前先终止上一段渐亮，避免多个Tween同时修改强度
+        playerLightTween?.Kill();
+        playerLightTween = null;
+
+        if(isNight)
+        {
+            playerLight.SetActive(true);
+            playerLight2D.intensity = 0;
+            playerLightTween = DOTween.To(() => playerLight2D.intensity, i => playerLight2D.intensity = i, 1f, 2f);
+        }
+        else
+        {
+            playerLight.SetActive(false);
+            playerLight2D.intensity = 0;
+        }
     }
 
     //玩家已弹出过睡觉面板，需要先离开SleepBox后才允许再次弹出
@@ -1101,6 +1171,8 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对�
         TimeManager.Instance.gameSecond = 0;
         EventHandler.CallGameMinuteEvent(TimeManager.Instance.gameMinute, TimeManager.Instance.gameHour, TimeManager.Instance.gameDay, TimeManager.Instance.gameSeason);
         EventHandler.CallGameDateEvemnt(TimeManager.Instance.gameHour, TimeManager.Instance.gameDay, TimeManager.Instance.gameMonth, TimeManager.Instance.gameYear, TimeManager.Instance.gameSeason);
+        //睡觉直接跳到早上7点，立即关闭玩家灯
+        RefreshPlayerLight(false);
         // Eye curtain open: open to a medium size, wobble up and down, then open the whole screen
         yield return TransitionManager.Instance.PlayEyeOpen();
         //恢复玩家操作
@@ -1133,6 +1205,8 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对�
         exploreCurrentEXP = 0;
         inputDisable = false;
         transform.position = Settings.playerStartPos;
+        //新游戏从早上7点开始，关闭玩家灯
+        RefreshPlayerLight(false);
     }
     public void OnIncreasePlantingSkillEvent(int EXP)
     {

@@ -140,11 +140,15 @@ public static class EventHandler
     {
         RefreshCurrentMap?.Invoke();
     }
-    //调用粒子特效的事件
-    public static event Action<ParticalEffectType, Vector3 , Vector2> ParticleEffectEvent;
+    //调用粒子特效的事件，shapeTexture可选：不为空时设置粒子Shape模块的texture
+    public static event Action<ParticalEffectType, Vector3 , Vector2, Sprite> ParticleEffectEvent;
     public static void CallParticleEffectEvent(ParticalEffectType effectType, Vector3 pos , Vector2 dirction)
     {
-        ParticleEffectEvent?.Invoke(effectType, pos , dirction);
+        ParticleEffectEvent?.Invoke(effectType, pos , dirction, null);
+    }
+    public static void CallParticleEffectEvent(ParticalEffectType effectType, Vector3 pos, Vector2 dirction, Sprite shapeTexture)
+    {
+        ParticleEffectEvent?.Invoke(effectType, pos, dirction, shapeTexture);
     }
     //预生成Crop事件
     public static event Action GenerateCropEvent;
