@@ -75,23 +75,16 @@ namespace MFarm.AStar
             //获取NPC移动的初始节点和终点，gridNodes的范围是从0,0开始，所以需要减去原点坐标得到实际位置
             startNode = gridNodes.GetGridNode(startPos.x - originX, startPos.y - originY);
             targetNode = gridNodes.GetGridNode(endPos.x - originX, endPos.y - originY);
-            for(int x = 0; x < gridWidth; x++)
+            //从 GridMapManager 的障碍网格缓存读取，避免每次寻路都遍历全图查字典
+            bool[,] obstacleGrid = GridMapManager.Instance.GetObstacleGrid(sceneName);
+            for (int x = 0; x < gridWidth; x++)
             {
-                for(int y = 0; y < gridHeight; y++)
+                for (int y = 0; y < gridHeight; y++)
                 {
-                    //使获取到的瓦片坐标为正数
-                    Vector3Int tilePos = new Vector3Int(x + originX, y + originY, 0);
-                    var key = tilePos.x + "X" + tilePos.y + "Y" + sceneName;
-
-                    TileDetails tile = GridMapManager.Instance.GetTileDetails(key);
-                    if(tile != null)
+                    Node node = gridNodes.GetGridNode(x, y);
+                    if (obstacleGrid != null && obstacleGrid[x, y])
                     {
-                        Node node = gridNodes.GetGridNode(x,y);
-                        //判断格子是否为障碍物
-                        if (tile.isNPCObstacle)
-                        {
-                            node.isObstacle = true;
-                        }
+                        node.isObstacle = true;
                     }
                 }
             }

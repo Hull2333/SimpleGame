@@ -58,7 +58,7 @@ public class PoolManager : MonoBehaviour    //调用在PoolManager对象上
         }
     }
 
-    private void OnParticleEffectEvent(ParticalEffectType effectType, Vector3 pos, Vector2 dir, Sprite shapeTexture)
+    private void OnParticleEffectEvent(ParticalEffectType effectType, Vector3 pos, Vector2 dir, Color? startColor)
     {
         //WORKFOLLOW：根据粒子特效补全
         ObjectPool<GameObject> objPool = effectType switch
@@ -98,12 +98,15 @@ public class PoolManager : MonoBehaviour    //调用在PoolManager对象上
         {
             obj.transform.rotation = Quaternion.LookRotation(dir);
         }
-        //设置粒子Shape模块的纹理；为空时重置，避免对象池复用残留上一次的纹理
-        ParticleSystem ps = obj.GetComponent<ParticleSystem>();
-        if (ps != null)
+        //传入颜色时覆盖粒子StartColor，未传入则保持预制体自身颜色
+        if (startColor.HasValue)
         {
-            var shape = ps.shape;
-            shape.texture = shapeTexture != null ? shapeTexture.texture : null;
+            var ps = obj.GetComponent<ParticleSystem>();
+            if (ps != null)
+            {
+                var main = ps.main;
+                main.startColor = startColor.Value;
+            }
         }
         StartCoroutine(ReleaseRoutine(objPool, obj));
     }

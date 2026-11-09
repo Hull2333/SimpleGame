@@ -36,6 +36,9 @@ namespace MFarm.Map
         public Dictionary<string,TileDetails> tileDetailsDict = new Dictionary<string,TileDetails>();
         //string场景名称，bool是否为第一次加载
         public Dictionary<string,bool> firstLoadDict = new Dictionary<string,bool>();
+        //场景名 -> 障碍网格缓存，供 A* 复用，避免每次寻路都遍历全图查字典
+        //二维数组索引为 [gridX - originX, gridY - originY]，true 表示该格是 NPC/怪物不可通行的障碍
+        private Dictionary<string,bool[,]> obstacleGridCache = new Dictionary<string,bool[,]>();
         //本次游玩经过的天数，用于计算各场景错过了多少天的随机资源生成
         private int elapsedDays;
         //记录每个场景最近一次生成随机资源时经过的天数
@@ -121,6 +124,8 @@ namespace MFarm.Map
             waterTilemap = GameObject.FindGameObjectWithTag("Water").GetComponent<Tilemap>();
             valueMap = GameObject.FindGameObjectWithTag("ValueTile").GetComponent<Tilemap>();
             canGetPlayerPos = true;
+            //每进入一个场景都重新累计击杀点数，避免上一个场景的计数残留导致传送点提前出现
+            needPoint = 2;
             //进入场景时同步当前季节，否则冬季重新进入场景后耕地仍按普通图块显示
             currentSeason = TimeManager.Instance.gameSeason;
             if (firstLoadDict[SceneManager.GetActiveScene().name])
@@ -206,6 +211,12 @@ namespace MFarm.Map
             needPoint--;
             if(needPoint <= 0)
             {
+                //当前场景没有地图数据或瓦片列表为空时无法取随机位置，直接跳过，避免下标越界
+                if (currentSceneMap == null || currentSceneMap.tilePropertyes.Count == 0)
+                {
+                    Debug.LogWarning("当前场景没有可用的地图瓦片数据，无法生成传送点：" + SceneManager.GetActiveScene().name);
+                    return;
+                }
                 TileProperty appearTilePos;
                 TileDetails appearTile;
                 //随机循环传送点的位置，直到随机循环出合适的位置就生成传送点
@@ -214,6 +225,12 @@ namespace MFarm.Map
                     appearTilePos = currentSceneMap.tilePropertyes[Random.Range(0, currentSceneMap.tilePropertyes.Count)];
                     string key = appearTilePos.tileCoordinate.x + "X" + appearTilePos.tileCoordinate.y + "Y" + SceneManager.GetActiveScene().name;
                     appearTile = GetTileDetails(key);
+                    //地图数据与实际场景不匹配时查不到瓦片信息，直接跳过，避免下面的 while 条件空引用
+                    if (appearTile == null)
+                    {
+                        Debug.LogWarning("找不到与地图数据对应的瓦片信息，无法生成传送点：" + key);
+                        return;
+                    }
                 }
                 while (appearTile.haveBigRock != -1 || appearTile.haveBigWeeds != -1 || appearTile.haveRock != -1 || appearTile.haveChop != -1);
                Instantiate(teleportPos, new Vector2(appearTile.gridX + 0.5f, appearTile.gridY + 0.5f), Quaternion.identity);
@@ -993,6 +1010,40 @@ namespace MFarm.Map
                 } 
             }
             return false;
+        }
+        /// <summary>
+        /// 获取指定场景的障碍网格缓存（懒加载构建）。
+        /// 从 mapData 的 tilePropertyes 中直接读取 NPCObstalacle 标记，不依赖 tileDetailsDict，
+        /// 避免每次 A* 寻路都遍历全图查字典。
+        /// </summary>
+        /// <param name="sceneName">场景名称</param>
+        /// <returns>二维数组 [gridX-originX, gridY-originY]，true 为障碍；场景不存在返回 null</returns>
+        public bool[,] GetObstacleGrid(string sceneName)
+        {
+            if (obstacleGridCache.TryGetValue(sceneName, out var grid))
+            {
+                return grid;
+            }
+            MapData_SO mapData = mapDataList.Find(m => m.sceneName == sceneName);
+            if (mapData == null)
+            {
+                return null;
+            }
+            bool[,] obstacle = new bool[mapData.gridWidth, mapData.gridHeight];
+            foreach (var tileProperty in mapData.tilePropertyes)
+            {
+                if (tileProperty.gridType == GridType.NPCObstalacle && tileProperty.boolTypeValue)
+                {
+                    int x = tileProperty.tileCoordinate.x - mapData.originX;
+                    int y = tileProperty.tileCoordinate.y - mapData.originY;
+                    if (x >= 0 && x < mapData.gridWidth && y >= 0 && y < mapData.gridHeight)
+                    {
+                        obstacle[x, y] = true;
+                    }
+                }
+            }
+            obstacleGridCache[sceneName] = obstacle;
+            return obstacle;
         }
         /// <summary>
         /// 显示可互动瓦片
