@@ -140,15 +140,15 @@ public static class EventHandler
     {
         RefreshCurrentMap?.Invoke();
     }
-    //调用粒子特效的事件，startColor可选：为空时保持预制体自身颜色
-    public static event Action<ParticalEffectType, Vector3 , Vector2, Color?> ParticleEffectEvent;
-    public static void CallParticleEffectEvent(ParticalEffectType effectType, Vector3 pos , Vector2 dirction)
+    //调用粒子特效的事件，rotation可选：为空时保持预制体自身旋转，startColor可选：为空时保持预制体自身颜色
+    public static event Action<ParticalEffectType, Vector3, Quaternion?, Color?> ParticleEffectEvent;
+    public static void CallParticleEffectEvent(ParticalEffectType effectType, Vector3 pos, Quaternion? rotation)
     {
-        ParticleEffectEvent?.Invoke(effectType, pos , dirction, null);
+        ParticleEffectEvent?.Invoke(effectType, pos, rotation, null);
     }
-    public static void CallParticleEffectEvent(ParticalEffectType effectType, Vector3 pos, Vector2 dirction, Color startColor)
+    public static void CallParticleEffectEvent(ParticalEffectType effectType, Vector3 pos, Quaternion? rotation, Color startColor)
     {
-        ParticleEffectEvent?.Invoke(effectType, pos, dirction, startColor);
+        ParticleEffectEvent?.Invoke(effectType, pos, rotation, startColor);
     }
     //预生成Crop事件
     public static event Action GenerateCropEvent;

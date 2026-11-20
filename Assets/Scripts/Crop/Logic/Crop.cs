@@ -51,7 +51,7 @@ namespace MFarm.CropPlant
                 //TODO:播放粒子效果
                 if(cropDetails.hasParticalEffect)
                 {
-                    EventHandler.CallParticleEffectEvent(cropDetails.effectType, transform.position + cropDetails.effectPos , Vector2.zero);
+                    EventHandler.CallParticleEffectEvent(cropDetails.effectType, transform.position + cropDetails.effectPos , null);
                 }
                 
                 //TODO:播放声音
@@ -215,7 +215,7 @@ namespace MFarm.CropPlant
                 //TODO:播放粒子效果
                 if (cropDetails.hasParticalEffect)
                 {
-                    EventHandler.CallParticleEffectEvent(cropDetails.effectType, transform.position + cropDetails.effectPos, Vector2.zero);
+                    EventHandler.CallParticleEffectEvent(cropDetails.effectType, transform.position + cropDetails.effectPos, null);
                 }
 
                 //TODO:播放声音
@@ -255,7 +255,7 @@ namespace MFarm.CropPlant
             //TODO:播放粒子效果
             if (cropDetails.hasParticalEffect)
             {
-                EventHandler.CallParticleEffectEvent(cropDetails.effectType, transform.position + cropDetails.effectPos, Vector2.zero);
+                EventHandler.CallParticleEffectEvent(cropDetails.effectType, transform.position + cropDetails.effectPos, null);
             }
             //TODO:播放声音
             if (cropDetails.soundEffect != SoundName.none)

@@ -35,6 +35,11 @@ public class SwapTimemap : MonoBehaviour //挂在每个scene的Grid上，随季�
         {
             for (int i = 0; i < seasonTileBases[season].Length; i++)
             {
+                //该季节数组未配置的空位跳过，否则以 null 作为字典键会抛异常
+                if (seasonTileBases[season][i] == null)
+                {
+                    continue;
+                }
                 if (!tileIndexDic.ContainsKey(seasonTileBases[season][i]))
                 {
                     tileIndexDic.Add(seasonTileBases[season][i], i);

@@ -663,7 +663,7 @@ namespace MFarm.Map
                     case ItemType.HoeTool:
                         if(canSetTile)
                         {
-                            EventHandler.CallParticleEffectEvent(ParticalEffectType.HoeEffect02, new Vector3(mouseGridPos.x+0.5f, mouseGridPos.y + 0.5f, mouseGridPos.z), Vector2.zero);
+                            EventHandler.CallParticleEffectEvent(ParticalEffectType.HoeEffect02, new Vector3(mouseGridPos.x+0.5f, mouseGridPos.y + 0.5f, mouseGridPos.z), null);
                             SetDigGround(currentTile);
                             currentTile.daysSinceDug = 0;
                             //雨天/雷雨天挖出来的坑直接是湿的
@@ -680,7 +680,7 @@ namespace MFarm.Map
                             break;
                         }
                         EventHandler.CallPlayerDecreaseStminaEvent(2);
-                        EventHandler.CallParticleEffectEvent(ParticalEffectType.HoeEffect,new Vector3(mouseGridPos.x+0.5f, mouseGridPos.y+0.5f,mouseGridPos.z), Vector2.zero);
+                        EventHandler.CallParticleEffectEvent(ParticalEffectType.HoeEffect,new Vector3(mouseGridPos.x+0.5f, mouseGridPos.y+0.5f,mouseGridPos.z), null);
                        
                         //音效
                         break;
@@ -705,7 +705,7 @@ namespace MFarm.Map
                             else
                             {
                                 //播放锄到地上的粒子特效
-                                EventHandler.CallParticleEffectEvent(ParticalEffectType.EarthenEffect, new Vector2(mouseGridPos.x + 0.5f,mouseGridPos.y + 0.5f), Vector2.zero);
+                                EventHandler.CallParticleEffectEvent(ParticalEffectType.EarthenEffect, new Vector2(mouseGridPos.x + 0.5f,mouseGridPos.y + 0.5f), null);
                             }
 
                         }
@@ -720,7 +720,7 @@ namespace MFarm.Map
                             }
                             else
                             {
-                                EventHandler.CallParticleEffectEvent(ParticalEffectType.EarthenEffect, new Vector2(mouseGridPos.x + 0.5f, mouseGridPos.y + 0.5f), Vector2.zero);
+                                EventHandler.CallParticleEffectEvent(ParticalEffectType.EarthenEffect, new Vector2(mouseGridPos.x + 0.5f, mouseGridPos.y + 0.5f), null);
                             }
 
                         }

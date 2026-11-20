@@ -48,7 +48,7 @@ public class KnockableItem : MonoBehaviour //调用在可收割物体预制体�
         interactionCount --;
         SwitchRockShake();
         //石子粒子特效
-        EventHandler.CallParticleEffectEvent(rockEffectType, transform.position + Vector3.up * 0.25f, Vector2.zero);
+        EventHandler.CallParticleEffectEvent(rockEffectType, transform.position + Vector3.up * 0.25f, null);
         //物体已被敲碎
         if (interactionCount <= 0)
         {
@@ -90,11 +90,11 @@ public class KnockableItem : MonoBehaviour //调用在可收割物体预制体�
         //播放砍树和砍树桩的粒子特效
         if(trunkEffectType == ParticalEffectType.None)
         {
-            EventHandler.CallParticleEffectEvent(treeEffectType, transform.position + Vector3.up * 2.5f, Vector2.zero);
+            EventHandler.CallParticleEffectEvent(treeEffectType, transform.position + Vector3.up * 2.5f, null);
         }
         else
         {
-            EventHandler.CallParticleEffectEvent(trunkEffectType, transform.position + Vector3.up * 0.25f, Vector2.zero);
+            EventHandler.CallParticleEffectEvent(trunkEffectType, transform.position + Vector3.up * 0.25f, null);
         }
         //树被砍倒
         if (interactionCount <= 0)
@@ -149,7 +149,7 @@ public class KnockableItem : MonoBehaviour //调用在可收割物体预制体�
         interactionCount--;
         SwitchChopItemShake();
         //粒子特效
-        EventHandler.CallParticleEffectEvent(ParticalEffectType.WoodEffect01, transform.position + Vector3.up * 0.25f, Vector2.zero);
+        EventHandler.CallParticleEffectEvent(ParticalEffectType.WoodEffect01, transform.position + Vector3.up * 0.25f, null);
         //物体已被敲碎
         if (interactionCount <= 0)
         {

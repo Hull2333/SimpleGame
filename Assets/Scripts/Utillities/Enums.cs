@@ -86,7 +86,8 @@ public enum GridType
 public enum ParticalEffectType
 {
     None,LeavesFall01,LeavesFall02,Rock,ReapableScenery,EnemyHit01,Eat01,HoeEffect,WeedFall_Spring,WaterEffect01,EarthenEffect,WoodEffect01,CropEffect01,FeatherEffect01, FeatherEffect02,
-    HoeEffect02, WeedFall_Summer,WeedFall_Autumn,WeedFall_Winter,WeedDisappear_Spring, WeedDisappear_Summer, WeedDisappear_Autumn, WeedDisappear_Winter,BigWeedFallEffect,
+    HoeEffect02, WeedFall_Summer,WeedFall_Autumn,WeedFall_Winter,WeedDisappear_Spring, WeedDisappear_Summer, WeedDisappear_Autumn, WeedDisappear_Winter,BigWeedFallEffect,MonsterHurtEffect01,
+    MonsterHurtEffect02, MonsterHurtEffect03, MonsterHurtEffect04, MonsterHurtEffect05, MonsterHurtEffect06, MonsterHurtEffect07,
 
 }
 /// <summary>
@@ -119,6 +120,18 @@ public enum SoundName
 public enum EnemyStateType
 {
     Idle,Patrol,Chase,Attack,Hurted,Death,Fainting,
+}
+/// <summary>
+/// 怪物类型：决定待机、巡逻、追击的移动方式
+/// </summary>
+public enum EnemyType
+{
+    //地面怪：A* 巡逻，追击受视野遮挡和领地范围限制
+    Ground,
+    //飞行冲撞怪：原地待机，玩家进入 ChaseArea 后速度冲刺冲撞，攻击框常开
+    FlyingRam,
+    //飞行近战怪：和地面怪一样巡逻与攻击，追击直线无视地形且永不放弃
+    FlyingMelee
 }
 /// <summary>
 /// 菜肴名称

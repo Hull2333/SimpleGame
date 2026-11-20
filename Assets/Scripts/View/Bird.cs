@@ -96,7 +96,7 @@ public class Bird : MonoBehaviour //调用在场景的Bird对象上
     {
         if (other.CompareTag("Player"))
         {
-            EventHandler.CallParticleEffectEvent(effectType, transform.position,Vector2.zero);
+            EventHandler.CallParticleEffectEvent(effectType, transform.position, null);
             isMove = false;
             isFly = true;
             //在玩家左边

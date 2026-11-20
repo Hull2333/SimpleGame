@@ -66,7 +66,11 @@ public class AttackState : IState
 
     public void OnExit()
     {
-
+        //离开攻击状态时确保攻击框关闭：动画缺少收招帧事件时攻击框会一直开着
+        foreach (Collider2D box in parameter.attackBox)
+        {
+            box.enabled = false;
+        }
     }
 
     public void OnFixUpdate()

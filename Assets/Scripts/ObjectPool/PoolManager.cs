@@ -58,7 +58,7 @@ public class PoolManager : MonoBehaviour    //调用在PoolManager对象上
         }
     }
 
-    private void OnParticleEffectEvent(ParticalEffectType effectType, Vector3 pos, Vector2 dir, Color? startColor)
+    private void OnParticleEffectEvent(ParticalEffectType effectType, Vector3 pos, Quaternion? rotation, Color? startColor)
     {
         //WORKFOLLOW：根据粒子特效补全
         ObjectPool<GameObject> objPool = effectType switch
@@ -87,16 +87,27 @@ public class PoolManager : MonoBehaviour    //调用在PoolManager对象上
             ParticalEffectType.WeedDisappear_Autumn => poolEffectList[21],
             ParticalEffectType.WeedDisappear_Winter => poolEffectList[22],
             ParticalEffectType.BigWeedFallEffect => poolEffectList[23],
+            ParticalEffectType.MonsterHurtEffect01 => poolEffectList[24],
+            ParticalEffectType.MonsterHurtEffect02 => poolEffectList[25],
+            ParticalEffectType.MonsterHurtEffect03 => poolEffectList[26],
+            ParticalEffectType.MonsterHurtEffect04 => poolEffectList[27],
+            ParticalEffectType.MonsterHurtEffect05 => poolEffectList[28],
+            ParticalEffectType.MonsterHurtEffect06 => poolEffectList[29],
+            ParticalEffectType.MonsterHurtEffect07 => poolEffectList[30],
             _ => null,
         };
+        //没有配置对应特效时直接跳过，避免抛异常打断调用方后续逻辑
+        if (objPool == null)
+        {
+            return;
+        }
         //在对象池中获取、释放对象
         GameObject obj = objPool.Get();
         obj.transform.position = pos;
-        //dir为0表示该特效不需要朝向，此时保留预制体自身的旋转
-        //LookRotation(Vector3.zero)会返回单位旋转，覆盖预制体的-90度X旋转，导致粒子发射面被压扁成一条线
-        if (dir != Vector2.zero)
+        //传入旋转时直接使用，未传入则保留预制体自身的旋转
+        if (rotation.HasValue)
         {
-            obj.transform.rotation = Quaternion.LookRotation(dir);
+            obj.transform.rotation = rotation.Value;
         }
         //传入颜色时覆盖粒子StartColor，未传入则保持预制体自身颜色
         if (startColor.HasValue)

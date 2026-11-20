@@ -108,13 +108,13 @@ public class ReapableItem : MonoBehaviour  //调用在地图杂草、地图小�
                         break;
                 };
                 //杂草粒子特效
-                EventHandler.CallParticleEffectEvent(WeedFullEffect, transform.position + Vector3.up, Vector2.zero);
-                EventHandler.CallParticleEffectEvent(WeedDisappearEffect, transform.position + Vector3.up, Vector2.zero);
+                EventHandler.CallParticleEffectEvent(WeedFullEffect, transform.position + Vector3.up, null);
+                EventHandler.CallParticleEffectEvent(WeedDisappearEffect, transform.position + Vector3.up, null);
             }
             else
             {
                 //杂草粒子特效
-                EventHandler.CallParticleEffectEvent(ParticalEffectType.BigWeedFallEffect, transform.position, Vector2.zero);
+                EventHandler.CallParticleEffectEvent(ParticalEffectType.BigWeedFallEffect, transform.position, null);
             }
             //获取当前生成地图杂草地块的TileDetail
             var currentTileDetails = GridMapManager.Instance.GetTileDetailsOnMousePosition(weedGridPos);

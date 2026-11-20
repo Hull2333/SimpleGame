@@ -16,23 +16,35 @@ public class Parameter
     public float moveSpeed;
     public float chaseSpeed;
     public float idleTime;
-    [Header("巡逻点")]
+    [Header("巡逻点,陷阱型敌人巡逻点设置为0")]
     //巡逻点
     public Transform[] patrolPoints;
-    //当前巡逻点索引，供 PatrolState 和 ChaseState 共享（追击失败后回到巡逻序列的下一个点）
+    //当前巡逻点索引，PatrolState 用
     [HideInInspector] public int patrolPosition = 0;
     //是否原地返回巡逻
     [HideInInspector] public bool isBack = false;
+    [Header("陷阱型敌人")]
+    //陷阱型敌人（如蜘蛛）：由 TrapPlace 触发出场，无巡逻点，放弃追击后 A* 回到落点驻守
+    public bool isTrapEnemy;
+    //预警效果预制体（影子、光圈等）：TrapPlace 触发时先在落点实例化这个预制体，
+    //等其效果播完后才让敌人从天而降。非陷阱型敌人忽略此字段。
+    public GameObject appearPreviewPrefab;
+    [Header("怪物类型")]
+    //怪物类型，决定待机、巡逻、追击的移动方式
+    public EnemyType enemyType = EnemyType.Ground;
+    //飞行冲撞怪的冲刺加速度，最大速度沿用 chaseSpeed
+    public float flyAcceleration = 10f;
+    //飞行冲撞怪被击退时的力度倍率：速度驱动，击退冲量会完整保留，过大会被打飞很远
+    [Range(0f, 1f)] public float flyKnockbackForceRate = 0.6f;
     [Header("追击相关")]
      public Transform parentPos;
-    //与玩家距离小于该值且视线无遮挡时，改用直线追击，不再走 A*（防止玩家站在障碍标记格上时怪物永远差一格）
-    public float directChaseRange = 2.5f;
     [HideInInspector] public CircleCollider2D chaseArae;
     //射线阻挡图层
     public LayerMask obstacleLayer;
     //追击目标
     [HideInInspector] public Transform playerTransform;
-     public Transform target;
+    //追击目标，运行时由 FindPlayer 赋值
+    [HideInInspector] public Transform target;
     [HideInInspector] public Animator animator;
     //敌人对着目标方向
     [HideInInspector] public float moveX;
@@ -45,15 +57,26 @@ public class Parameter
     [Header("攻击相关")]
     //需要攻击目标所在的图层,攻击范围
     public int enemyDamage;
-    [HideInInspector] public float attackArea = 0.8f;
+    public float attackArea;
     //各类攻击框
     public Collider2D[] attackBox;
     //攻击冷却
     [HideInInspector] public float attackCD;
     [HideInInspector] public bool inAttackCD = false;
-    //是否眩晕
-    public bool isFainting;
+    [Header("远程攻击")]
+    //是否为远程攻击：开启后进入攻击范围时不再播放近战攻击动画，而是朝玩家当前位置发射投射物
+    public bool isRangedAttack = false;
+    //远程攻击的投射物预制体
+    public GameObject projectilePrefab;
+    //投射物的生成点，发射方法传入的序号对应这里的下标
+    public Transform[] projectileSpawnPoints;
+    //发射投射物时在生成点播放的粒子特效预制体
+    public GameObject projectileSpawnEffectPrefab;
+    //是否眩晕，运行时由攻击框、防御框等逻辑设置
+    [HideInInspector] public bool isFainting;
     [Header("受击相关")]
+    //受击时播放的粒子特效类型（可在 Inspector 里为每种敌人单独指定）
+    public ParticalEffectType hurtEffectType = ParticalEffectType.EnemyHit01;
     [HideInInspector] public SpriteRenderer spriteRenderer;
     //敌人是否处于击退、击退的力、击退持续时间
     [HideInInspector] public bool isKnockback;
@@ -88,17 +111,17 @@ public class FSM : MonoBehaviour
     private Material material;
     //白色程度
     private float blinkFactor;
-    //是否在闪白
-    public bool isBlink;
+    //是否在闪白，运行时状态
+    [HideInInspector] public bool isBlink;
     private GameState gameState;
     //A* 寻路相关
     private Grid grid;
     //当前移动协程
     private Coroutine moveRoutine;
-    //是否正在沿 A* 路径移动
-    public bool isMoving;
+    //是否正在沿 A* 路径移动，运行时状态
+    [HideInInspector] public bool isMoving;
     //最近一次 StartMoveTo 是否成功找到路径，供状态判断目标是否可达
-    public bool lastPathFound;
+    [HideInInspector] public bool lastPathFound;
     //路径走完后的回调
     public Action onMoveComplete;
 
@@ -117,6 +140,16 @@ public class FSM : MonoBehaviour
     private void OnUpdateGameStateEvent(GameState state)
     {
         gameState = state;
+        //暂停（如打开背包）时停止怪物的移动表现，恢复后按当前状态继续
+        if (state == GameState.Pause)
+        {
+            parameter.animator.SetBool("isMoving", false);
+            parameter.rigidbody2D.velocity = Vector2.zero;
+        }
+        else
+        {
+            parameter.animator.SetBool("isMoving", parameter.isMoving);
+        }
     }
     private void Awake()
     {
@@ -124,7 +157,16 @@ public class FSM : MonoBehaviour
         parameter.spriteRenderer = GetComponent<SpriteRenderer>();
         parameter.rigidbody2D = GetComponent<Rigidbody2D>();
         parameter.collider2D = GetComponent<Collider2D>();
-        parameter.chaseArae = transform.GetChild(1).GetComponent<CircleCollider2D>();
+        //追击检测圈按名字查找：不同敌人的子物体数量和顺序不同（如多方向攻击框），不能依赖固定下标
+        Transform chaseAreaTransform = transform.Find("ChaseArea");
+        if (chaseAreaTransform != null)
+        {
+            parameter.chaseArae = chaseAreaTransform.GetComponent<CircleCollider2D>();
+        }
+        else if (transform.childCount > 1)
+        {
+            parameter.chaseArae = transform.GetChild(1).GetComponent<CircleCollider2D>();
+        }
         parameter.playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
         material = parameter.spriteRenderer.material;
         grid = FindObjectOfType<Grid>();
@@ -289,6 +331,54 @@ public class FSM : MonoBehaviour
         parameter.attackBox[boxIndex].enabled = true;
     }
     /// <summary>
+    /// 朝玩家当前位置发射投射物，调用在远程敌人的攻击动画帧上
+    /// spawnIndex 为生成点序号，对应 projectileSpawnPoints 的下标
+    /// 投射物自身的运动与伤害逻辑后续实现
+    /// </summary>
+    public void FireProjectile(int spawnIndex)
+    {
+        if (parameter.projectilePrefab == null || parameter.target == null)
+        {
+            return;
+        }
+        //取对应序号的生成点，未配置或越界时回退到怪物自身位置
+        Vector3 spawnPos = transform.position;
+        if (parameter.projectileSpawnPoints != null
+            && spawnIndex >= 0
+            && spawnIndex < parameter.projectileSpawnPoints.Length
+            && parameter.projectileSpawnPoints[spawnIndex] != null)
+        {
+            spawnPos = parameter.projectileSpawnPoints[spawnIndex].position;
+        }
+        Vector2 dir = (parameter.target.position - spawnPos).normalized;
+        float angleZ = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        //在生成点播放发射粒子特效
+        PlayProjectileSpawnEffect(spawnPos);
+        //投射物预制体默认朝上（+Y），再减 90 度让它的朝向对准玩家
+        GameObject projectileObj = Instantiate(parameter.projectilePrefab, spawnPos, Quaternion.Euler(0f, 0f, angleZ - 90f));
+        //把当前敌人的攻击力传给投射物
+        EnemyProjectile projectile = projectileObj.GetComponent<EnemyProjectile>();
+        if (projectile != null)
+        {
+            projectile.damage = parameter.enemyDamage;
+        }
+    }
+    /// <summary>
+    /// 在投射物生成点播放发射粒子特效，播放完自动销毁
+    /// </summary>
+    private void PlayProjectileSpawnEffect(Vector3 spawnPos)
+    {
+        if (parameter.projectileSpawnEffectPrefab == null)
+        {
+            return;
+        }
+        GameObject effect = Instantiate(parameter.projectileSpawnEffectPrefab, spawnPos, Quaternion.identity);
+        //按粒子总时长销毁，避免场景里堆积
+        ParticleSystem particle = effect.GetComponent<ParticleSystem>();
+        float lifeTime = particle != null ? particle.main.duration + particle.main.startLifetime.constantMax : 1f;
+        Destroy(effect, lifeTime);
+    }
+    /// <summary>
     /// 关闭攻击框、调用在敌人攻击动画帧上
     /// </summary>
     public void SetDownAttackBox()
@@ -387,10 +477,18 @@ public class FSM : MonoBehaviour
     private IEnumerator KnockbackCoroutine(Vector3 pos)
     {
         var direction = (transform.position - pos).normalized;
+        //记录原质量，击退结束后恢复，避免把飞行怪等不同质量的敌人统一改回 500
+        float originMass = parameter.rigidbody2D.mass;
+        float knockbackForce = parameter.knockbackForce;
+        if (parameter.enemyType == EnemyType.FlyingRam)
+        {
+            //飞行冲撞怪靠速度移动，击退冲量不会像地面怪那样被 MovePosition 立刻覆盖，按倍率削减击退距离
+            knockbackForce *= parameter.flyKnockbackForceRate;
+        }
         parameter.rigidbody2D.mass = 1;
-        parameter.rigidbody2D.AddForce(direction * parameter.knockbackForce, ForceMode2D.Impulse);
+        parameter.rigidbody2D.AddForce(direction * knockbackForce, ForceMode2D.Impulse);
         yield return new WaitForSeconds(parameter.knockbackDuration);
-        parameter.rigidbody2D.mass = 500;
+        parameter.rigidbody2D.mass = originMass;
     }
     /// <summary>
     /// 在死亡动画最后一帧执行销毁敌人对象并生成道具
@@ -502,8 +600,14 @@ public class FSM : MonoBehaviour
             parameter.moveY = dir.y;
             parameter.animator.SetFloat("MoveX", parameter.moveX);
             parameter.animator.SetFloat("MoveY", parameter.moveY);
-            while (Vector2.Distance(transform.position, targetWorld) > 0.01f)
+            while (Vector2.Distance(transform.position, targetWorld) > 0.02f)
             {
+                //游戏暂停（如打开背包）时不移动，恢复后继续沿路径前进
+                if (gameState != GameState.Gameplay)
+                {
+                    yield return null;
+                    continue;
+                }
                 parameter.rigidbody2D.MovePosition(Vector2.MoveTowards(transform.position, targetWorld, speed * Time.deltaTime));
                 yield return null;
             }

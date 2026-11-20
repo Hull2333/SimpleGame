@@ -32,11 +32,21 @@ public class IdleState : IState
         {
             manager.TransitionState(EnemyStateType.Hurted);
         }
+        //飞行冲撞怪：原地等待，玩家进入 ChaseArea 后直接开始追击，且不会转入巡逻
+        if (parameter.enemyType == EnemyType.FlyingRam)
+        {
+            if (parameter.target != null)
+            {
+                manager.TransitionState(EnemyStateType.Chase);
+            }
+            return;
+        }
         idleTimer += Time.deltaTime;
-        //发现目标时转为追击状态
+        //发现目标时转为追击状态：飞行近战怪无视视野与领地，地面怪要求视线无遮挡且在领地范围内
         if(parameter.target != null )
         {
-            if (manager.ShoutNoticeRay() && Vector2.Distance(parameter.target.position, parameter.parentPos.position) < 10f)
+            if (parameter.enemyType == EnemyType.FlyingMelee
+                || (manager.ShoutNoticeRay() && Vector2.Distance(parameter.target.position, parameter.parentPos.position) < 10f))
             {
                 manager.TransitionState(EnemyStateType.Chase);
             }

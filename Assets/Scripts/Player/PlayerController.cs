@@ -23,6 +23,8 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对�
     public string playerName;
     public float speed;
     public float tiredSpeed;
+    //外部施加的移动速度倍率（如踩在蛛网陷阱上减速），1 为正常速度
+    private float speedMultiplier = 1f;
     public float maxHealth;
     public float currentHealth;
     public float maxStmina;
@@ -308,6 +310,12 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对�
         if (inputDisable == false)
         {
             Movement();
+        }
+        else if (isKnocking == false)
+        {
+            //禁用操作期间（使用工具、NPC事件等）不再调用 MovePosition，
+            //清除碰撞或移动残留的速度，避免玩家在挥刀等动作中继续滑动
+            rb.velocity = Vector2.zero;
         }
         if (fishMove)
         {
@@ -747,7 +755,7 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对�
                 }
                 isBait = false;
                 //播放水花粒子效果
-                EventHandler.CallParticleEffectEvent(ParticalEffectType.WaterEffect01, baitPos, Vector2.up);
+                EventHandler.CallParticleEffectEvent(ParticalEffectType.WaterEffect01, baitPos, Quaternion.LookRotation(Vector3.up));
                 //鱼钩到达可钓鱼瓦片后播放待机动画
                 baitManager.PlayIdle();
                 //播放玩家FishingIdle动画
@@ -1335,12 +1343,19 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对�
         //当体力值小于等于0时，速度减慢
         if (currentStmina <= 0)
         {
-            rb.MovePosition(rb.position + movementInput * tiredSpeed * Time.deltaTime);
+            rb.MovePosition(rb.position + movementInput * tiredSpeed * speedMultiplier * Time.deltaTime);
         }
         else
         {
-            rb.MovePosition(rb.position + movementInput * speed * Time.deltaTime);
+            rb.MovePosition(rb.position + movementInput * speed * speedMultiplier * Time.deltaTime);
         }
+    }
+    /// <summary>
+    /// 设置移动速度倍率，用于踩到陷阱等减速区域（1 为正常速度）
+    /// </summary>
+    public void SetSpeedMultiplier(float multiplier)
+    {
+        speedMultiplier = multiplier;
     }
     /// <summary>
     /// 实现玩家移动和站立的动画切换

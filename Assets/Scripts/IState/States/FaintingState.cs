@@ -22,6 +22,11 @@ public class FaintingState : IState
         {
             box.enabled = false;
         }
+        //飞行怪眩晕时停止飞行，眩晕结束后由追击状态重新加速
+        if (parameter.enemyType != EnemyType.Ground)
+        {
+            parameter.rigidbody2D.velocity = Vector2.zero;
+        }
     }
 
     public void OnUpdate()

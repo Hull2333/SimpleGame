@@ -29,7 +29,7 @@ public class HoldItem : MonoBehaviour //调用在Player的HoldItem对象上
         
         EventHandler.CallPlayerDecreaseHealthEvent(-itemDetails.recoverHealth);
         EventHandler.CallPlayerDecreaseStminaEvent(-itemDetails.recoverStmina);
-        EventHandler.CallParticleEffectEvent(ParticalEffectType.Eat01, transform.position, Vector2.zero, itemDetails.foodColor);
+        EventHandler.CallParticleEffectEvent(ParticalEffectType.Eat01, transform.position, null, itemDetails.foodColor);
         
     }
     /// <summary>

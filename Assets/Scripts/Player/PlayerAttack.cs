@@ -19,6 +19,8 @@ public class PlayerAttack : MonoBehaviour   //调用在Tool对象上
     public LayerMask enemyLayer;
     //收割场景图层
     public LayerMask reapableLayer;
+    //可被攻击反弹的投射物图层
+    public LayerMask projectileLayer;
     public CursorManager cursorManager;
     //防御碰撞框
     public BoxCollider2D[] defenceBoxs;
@@ -32,7 +34,7 @@ public class PlayerAttack : MonoBehaviour   //调用在Tool对象上
         //调整向下攻击框的偏移量
         if (attackClip == 1)
         {
-            attackBoxSize = new Vector2(2.5f, 1f);
+            attackBoxSize = new Vector2(2.5f, 2f);
             offsetX = 0f;
             offsetY = 0.2f;
             attackBoxCenterOffset = new Vector2(attackBoxCenter.position.x + offsetX, attackBoxCenter.position.y + offsetY);
@@ -40,7 +42,7 @@ public class PlayerAttack : MonoBehaviour   //调用在Tool对象上
         //左攻击框
         if (attackClip == 2)
         {
-            attackBoxSize = new Vector2(1f, 2.5f);
+            attackBoxSize = new Vector2(2f, 2.5f);
             offsetX = -1f;
             offsetY = 1.5f;
             attackBoxCenterOffset = new Vector2(attackBoxCenter.position.x + offsetX, attackBoxCenter.position.y + offsetY);
@@ -48,7 +50,7 @@ public class PlayerAttack : MonoBehaviour   //调用在Tool对象上
         //右攻击框
         if (attackClip == 3)
         {
-            attackBoxSize = new Vector2(1f, 2.5f);
+            attackBoxSize = new Vector2(2f, 2.5f);
             offsetX = 1f;
             offsetY = 1.5f;
             attackBoxCenterOffset = new Vector2(attackBoxCenter.position.x + offsetX, attackBoxCenter.position.y + offsetY);
@@ -56,7 +58,7 @@ public class PlayerAttack : MonoBehaviour   //调用在Tool对象上
         //上攻击框
         if (attackClip == 4)
         {
-            attackBoxSize = new Vector2(2.5f, 1f);
+            attackBoxSize = new Vector2(2.5f, 2f);
             offsetX = 0f;
             offsetY = 2.5f;
             attackBoxCenterOffset = new Vector2(attackBoxCenter.position.x + offsetX, attackBoxCenter.position.y + offsetY);
@@ -95,6 +97,16 @@ public class PlayerAttack : MonoBehaviour   //调用在Tool对象上
                     if (hitCollider.GetComponent<KnockableItem>() != null)
                     {
                         hitCollider.GetComponent<KnockableItem>().ChopItems();
+                    }
+                }
+                //攻击框内检测投射物，击中后让投射物原路返回
+                Collider2D[] projectileColliders = Physics2D.OverlapBoxAll(attackBoxCenterOffset, attackBoxSize, 0, projectileLayer);
+                foreach (Collider2D projectileCollider in projectileColliders)
+                {
+                    EnemyProjectile projectile = projectileCollider.GetComponentInParent<EnemyProjectile>();
+                    if (projectile != null)
+                    {
+                        projectile.Reverse();
                     }
                 }
                 break;
