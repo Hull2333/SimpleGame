@@ -72,8 +72,10 @@ namespace MFarm.Map
         [Header("出现传送点")]
         //传送点
         public GameObject teleportPos;
-        //传送点出现需要的点数
-        private int needPoint = 2;
+        //连续未出现传送点的次数：首次10%，每次失败增加5%，第11次必出
+        private int teleportFailCount;
+        //当前场景是否已经生成过传送点，避免同一场景重复生成
+        private bool hasTeleportAppeared;
         [Header("家具和建筑")]
         private BluPrintDetails bluPrintDetails;
         private BuildingDetails buildingDetails;
@@ -124,8 +126,9 @@ namespace MFarm.Map
             waterTilemap = GameObject.FindGameObjectWithTag("Water").GetComponent<Tilemap>();
             valueMap = GameObject.FindGameObjectWithTag("ValueTile").GetComponent<Tilemap>();
             canGetPlayerPos = true;
-            //每进入一个场景都重新累计击杀点数，避免上一个场景的计数残留导致传送点提前出现
-            needPoint = 2;
+            //每进入一个场景都从10%开始重新累计，并允许生成一次传送点
+            teleportFailCount = 0;
+            hasTeleportAppeared = false;
             //进入场景时同步当前季节，否则冬季重新进入场景后耕地仍按普通图块显示
             currentSeason = TimeManager.Instance.gameSeason;
             if (firstLoadDict[SceneManager.GetActiveScene().name])
@@ -206,35 +209,26 @@ namespace MFarm.Map
                     break;
             }
         }
-        private void OnNextTeleportAppearEvent()
+        private void OnNextTeleportAppearEvent(Vector3 sourcePosition)
         {
-            needPoint--;
-            if(needPoint <= 0)
+            //当前场景已经生成过传送点时，后续破坏和击杀不再触发概率判定
+            if (hasTeleportAppeared)
             {
-                //当前场景没有地图数据或瓦片列表为空时无法取随机位置，直接跳过，避免下标越界
-                if (currentSceneMap == null || currentSceneMap.tilePropertyes.Count == 0)
-                {
-                    Debug.LogWarning("当前场景没有可用的地图瓦片数据，无法生成传送点：" + SceneManager.GetActiveScene().name);
-                    return;
-                }
-                TileProperty appearTilePos;
-                TileDetails appearTile;
-                //随机循环传送点的位置，直到随机循环出合适的位置就生成传送点
-                do
-                {
-                    appearTilePos = currentSceneMap.tilePropertyes[Random.Range(0, currentSceneMap.tilePropertyes.Count)];
-                    string key = appearTilePos.tileCoordinate.x + "X" + appearTilePos.tileCoordinate.y + "Y" + SceneManager.GetActiveScene().name;
-                    appearTile = GetTileDetails(key);
-                    //地图数据与实际场景不匹配时查不到瓦片信息，直接跳过，避免下面的 while 条件空引用
-                    if (appearTile == null)
-                    {
-                        Debug.LogWarning("找不到与地图数据对应的瓦片信息，无法生成传送点：" + key);
-                        return;
-                    }
-                }
-                while (appearTile.haveBigRock != -1 || appearTile.haveBigWeeds != -1 || appearTile.haveRock != -1 || appearTile.haveChop != -1);
-               Instantiate(teleportPos, new Vector2(appearTile.gridX + 0.5f, appearTile.gridY + 0.5f), Quaternion.identity);
+                return;
             }
+            float appearChance = 0.1f + teleportFailCount * 0.05f;
+            //连续十次未出现后，第十一次必定出现，不再进行随机判定
+            if (teleportFailCount < 10 && Random.value >= appearChance)
+            {
+                teleportFailCount++;
+                return;
+            }
+            //传送点生成在此次被破坏物或死亡怪物所在的Grid格子中心
+            Vector3Int gridPosition = currentGrid.WorldToCell(sourcePosition);
+            Instantiate(teleportPos, new Vector2(gridPosition.x + 0.5f, gridPosition.y + 0.5f), Quaternion.identity);
+            hasTeleportAppeared = true;
+            //只有真正生成传送点后才从10%重新累计
+            teleportFailCount = 0;
         }
         private void OnGetCurrentBluPrintDetails(BluPrintDetails bluPrint,Transform parent,List<TileDetails> list)
         {

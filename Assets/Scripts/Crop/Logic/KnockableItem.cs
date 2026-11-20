@@ -221,6 +221,14 @@ public class KnockableItem : MonoBehaviour //调用在可收割物体预制体�
     /// </summary>
     public void DestroySelfGameObject()
     {
+        EventHandler.CallNextTeleportAppearEvent(transform.position);
+        Destroy(gameObject);
+    }
+    /// <summary>
+    /// 调用在不需要累计传送点进度的资源摧毁动画帧中
+    /// </summary>
+    public void DestroySelfGameObjectWithoutTeleport()
+    {
         Destroy(gameObject);
     }
     /// <summary>

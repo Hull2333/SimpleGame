@@ -439,11 +439,11 @@ public static class EventHandler
     {
         ControlPlayerBagOpen?.Invoke(canOpen);
     }
-    //下一个传送点出现事件
-    public static event Action NextTeleportAppearEvent;
-    public static void CallNextTeleportAppearEvent()
+    //下一个传送点出现事件，参数为触发者的世界坐标
+    public static event Action<Vector3> NextTeleportAppearEvent;
+    public static void CallNextTeleportAppearEvent(Vector3 sourcePosition)
     {
-        NextTeleportAppearEvent?.Invoke();
+        NextTeleportAppearEvent?.Invoke(sourcePosition);
     }
     //吃东西事件
     public static event Action<int> PlayEatAnimEvent;

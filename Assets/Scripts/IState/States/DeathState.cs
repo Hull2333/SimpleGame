@@ -12,7 +12,7 @@ public class DeathState : IState
     }
     public void OnEnter()
     {
-        EventHandler.CallNextTeleportAppearEvent();
+        EventHandler.CallNextTeleportAppearEvent(manager.transform.position);
         parameter.animator.Play("Death");
         parameter.collider2D.enabled = false;
         //飞行怪死亡后停止移动，避免残留速度继续飞行
