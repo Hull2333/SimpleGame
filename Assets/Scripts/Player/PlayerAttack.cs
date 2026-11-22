@@ -91,7 +91,9 @@ public class PlayerAttack : MonoBehaviour   //调用在Tool对象上
                         {
                             hitCollider.GetComponent<FSM>().EnemyHurted(UnityEngine.Random.Range(cursorManager.currentItem.minValue, cursorManager.currentItem.maxValue), cursorManager.currentItem.forceValue);
                         }
-                        
+                        //在攻击框打到怪物碰撞体的位置播放命中特效
+                        Vector2 hitPoint = hitCollider.ClosestPoint(attackBoxCenterOffset);
+                        EventHandler.CallParticleEffectEvent(ParticalEffectType.EnemyHit02, hitPoint, null);
                     }
                     //用剑破坏物体
                     if (hitCollider.GetComponent<KnockableItem>() != null)

@@ -87,7 +87,7 @@ public enum ParticalEffectType
 {
     None,LeavesFall01,LeavesFall02,Rock,ReapableScenery,EnemyHit01,Eat01,HoeEffect,WeedFall_Spring,WaterEffect01,EarthenEffect,WoodEffect01,CropEffect01,FeatherEffect01, FeatherEffect02,
     HoeEffect02, WeedFall_Summer,WeedFall_Autumn,WeedFall_Winter,WeedDisappear_Spring, WeedDisappear_Summer, WeedDisappear_Autumn, WeedDisappear_Winter,BigWeedFallEffect,MonsterHurtEffect01,
-    MonsterHurtEffect02, MonsterHurtEffect03, MonsterHurtEffect04, MonsterHurtEffect05, MonsterHurtEffect06, MonsterHurtEffect07,
+    MonsterHurtEffect02, MonsterHurtEffect03, MonsterHurtEffect04, MonsterHurtEffect05, MonsterHurtEffect06, MonsterHurtEffect07, EnemyHit02,
 
 }
 /// <summary>

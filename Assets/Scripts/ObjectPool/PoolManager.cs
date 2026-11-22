@@ -94,6 +94,7 @@ public class PoolManager : MonoBehaviour    //调用在PoolManager对象上
             ParticalEffectType.MonsterHurtEffect05 => poolEffectList[28],
             ParticalEffectType.MonsterHurtEffect06 => poolEffectList[29],
             ParticalEffectType.MonsterHurtEffect07 => poolEffectList[30],
+            ParticalEffectType.EnemyHit02 => poolEffectList[31],
             _ => null,
         };
         //没有配置对应特效时直接跳过，避免抛异常打断调用方后续逻辑

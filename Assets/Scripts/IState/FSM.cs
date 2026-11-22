@@ -106,7 +106,7 @@ public class FSM : MonoBehaviour
     private Dictionary<EnemyStateType,IState> states = new Dictionary<EnemyStateType,IState>();
     public ReapItem reapItem;
     //敌人闪白后减弱速度
-    private float blinkDecaySpeed = 5f;
+    private float blinkDecaySpeed = 10f;
     //敌人材质
     private Material material;
     //白色程度

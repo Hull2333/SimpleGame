@@ -73,9 +73,12 @@ public class KnockableItem : MonoBehaviour //调用在可收割物体预制体�
                 }
             }
            
-            //获取当前生成地图石块地块的TileDetail
-            var rockTileDetails = GridMapManager.Instance.GetTileDetailsOnMousePosition(KnockableGridPos);
-            rockTileDetails.haveRock = -1;
+            //直接使用调用方传入的当前地块：大石块的中心坐标可能偏移到没有瓦片数据的格子，
+            //按自身坐标重新查询会拿到空值
+            if (rockTile != null)
+            {
+                rockTile.haveRock = -1;
+            }
             EventHandler.CallInCreaseExploreSkillEvent(5);
             PlayRockDestroyAnim();
         }
