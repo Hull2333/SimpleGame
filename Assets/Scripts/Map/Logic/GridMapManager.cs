@@ -596,6 +596,8 @@ namespace MFarm.Map
                                     EventHandler.CallDropItemEvent(itemDetails.itemID, mouseWorldPos, itemDetails.itemType);
                                     //播放种植音效
                                     EventHandler.CallPlaySoundEvent(SoundName.Plant);
+                                    //播放头顶种子的播种动画
+                                    EventHandler.CallPlayPlantAnimEvent();
                                 }
                                 else
                                 {

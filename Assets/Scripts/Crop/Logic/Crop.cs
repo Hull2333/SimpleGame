@@ -288,6 +288,11 @@ namespace MFarm.CropPlant
         
         public void OnTriggerEnter2D(Collider2D other)
         {
+            //开启了物理碰撞体的作物（玩家会被挡住）不播放摇晃动画
+            if (cropDetails != null && cropDetails.openCollider)
+            {
+                return;
+            }
             if (other.transform.CompareTag("Player"))
             {
                 if (other.transform.parent.transform.position.x >= transform.position.x)

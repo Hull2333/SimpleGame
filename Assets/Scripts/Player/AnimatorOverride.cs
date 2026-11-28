@@ -35,6 +35,7 @@ public class AnimatorOverride : MonoBehaviour   //调用在Player对象上
         EventHandler.PlayEatAnimEvent += OnPlayEatAnimEvent;
         EventHandler.RecerveItemEvent += OnRecerveItemEvent;
         EventHandler.QuitRecerveItemUIEvent += OnQuitRecerveItemUIEvent;
+        EventHandler.PlayPlantAnimEvent += OnPlayPlantAnimEvent;
     }
     private void OnDisable()
     {
@@ -45,6 +46,7 @@ public class AnimatorOverride : MonoBehaviour   //调用在Player对象上
         EventHandler.PlayEatAnimEvent -= OnPlayEatAnimEvent;
         EventHandler.RecerveItemEvent -= OnRecerveItemEvent;
         EventHandler.QuitRecerveItemUIEvent -= OnQuitRecerveItemUIEvent;
+        EventHandler.PlayPlantAnimEvent -= OnPlayPlantAnimEvent;
     }
 
    
@@ -137,6 +139,13 @@ public class AnimatorOverride : MonoBehaviour   //调用在Player对象上
         holdItem.SetActive(true);
         holdItem.GetComponent<SpriteRenderer>().sprite = InventoryManager.Instance.GetItemDetails(ID).itemOnWorldSprites[0];
         holdItem.gameObject.GetComponent<Animator>().SetTrigger("isEat");
+    }
+    /// <summary>
+    /// 每次播种成功后，播放头顶物品的播种动画
+    /// </summary>
+    private void OnPlayPlantAnimEvent()
+    {
+        holdItem.gameObject.GetComponent<Animator>().SetTrigger("isPlanting");
     }
     private void OnRecerveItemEvent(ItemDetails item)
     {

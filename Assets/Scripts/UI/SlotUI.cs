@@ -365,7 +365,18 @@ namespace MFarm.Inventory
                         //拖到背包格
                         if (targetSlot.slotType == slotType)
                         {
-                            InventoryManager.Instance.Swapitem(slotIndex, targetIndex, itemAmount,currentAmount);
+                            //先记录拖动物品的ID，Swapitem会刷新背包UI，源格变空时itemDetails会被置空
+                            int draggedItemID = itemDetails.itemID;
+                            InventoryManager.Instance.Swapitem(slotIndex, targetIndex, itemAmount, currentAmount);
+                            //换格完成后，当前选中的物品切换为拖动后的目标格物品（半格拖拽也切换）
+                            //目标格物品ID与拖动ID不一致说明交换未实际发生，此时不切换
+                            if (targetSlot.itemDetails != null && targetSlot.itemDetails.itemID == draggedItemID)
+                            {
+                                targetSlot.isSelected = true;
+                                inventoryUI.UpdateSlotHighlight(targetSlot.slotIndex);
+                                InventoryManager.Instance.currentSelectedItem = targetSlot.itemDetails;
+                                EventHandler.CallItemSelectEvent(targetSlot.itemDetails, true);
+                            }
                             return;
                         }
                         //从玩家背包拖拽到装备(头)上

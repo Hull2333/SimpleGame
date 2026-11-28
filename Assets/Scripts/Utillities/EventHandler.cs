@@ -128,6 +128,12 @@ public static class EventHandler
     {
         PlantSeedEvent?.Invoke(ID, tile);
     }
+    //种子真正种下成功后播放头顶物品动画的事件（读档恢复地块时不触发）
+    public static event Action PlayPlantAnimEvent;
+    public static void CallPlayPlantAnimEvent()
+    {
+        PlayPlantAnimEvent?.Invoke();
+    }
     //收获农作物或材料时的事件  
     public static event Action<int> HarvestAtPlayerPosition;
     public static void CallHarvestAtPlayerPosition(int ID)

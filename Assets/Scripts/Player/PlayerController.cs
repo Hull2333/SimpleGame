@@ -790,13 +790,15 @@ public class PlayerController : MonoBehaviour, ISaveable  //调用在Player对�
             cM.fishingEventDisable = false;
             isBait = false;
             baitManager.HideBait();
+            EventHandler.CallControlPlayerBagOpen(true);
             //恢复移动和站立动画
             foreach (var anim in animators)
             {
                 anim.SetTrigger("toIdle");
             }
             inputDisable = false;
-
+            //恢复游戏状态，否则停在Pause会屏蔽左键和背包
+            EventHandler.CallUpdateGameStateEvent(GameState.Gameplay);
         }
     }
     /// <summary>
