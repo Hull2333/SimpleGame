@@ -24,7 +24,6 @@ namespace MFarm.Map
         public RuleTile diaWinterTile;
         public RuleTile waterTile;
         public RuleTile availableTilemap;
-        public RuleTile unAvailableTilemap;
         private Tilemap digTilemap;
         private Tilemap waterTilemap;
         private Tilemap valueMap;
@@ -1079,7 +1078,7 @@ namespace MFarm.Map
                                 else
                                 {
                                     canSetTile = false;
-                                    valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), unAvailableTilemap);
+                                    valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), null);
                                 }
                                 break;
                             case ItemType.WaterTool:
@@ -1093,7 +1092,7 @@ namespace MFarm.Map
                                 else
                                 {
                                     canSetTile = false;
-                                    valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), unAvailableTilemap);
+                                    valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), null);
                                 }
                                 break;
                             case ItemType.TreeSeed:
@@ -1105,7 +1104,7 @@ namespace MFarm.Map
                                 else
                                 {
                                     canSetTile = false;
-                                    valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), unAvailableTilemap);
+                                    valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), null);
                                 }
                                 break;
                             case ItemType.Seed:
@@ -1118,7 +1117,7 @@ namespace MFarm.Map
                                 else
                                 {
                                     canSetTile = false;
-                                    valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), unAvailableTilemap);
+                                    valueMap.SetTile(new Vector3Int(tile.Value.gridX, tile.Value.gridY), null);
                                 }
                                 break;
                         }
@@ -1148,7 +1147,7 @@ namespace MFarm.Map
                     }
                     else
                     {
-                        valueMap.SetTile(new Vector3Int(tile.gridX, tile.gridY), unAvailableTilemap);
+                        valueMap.SetTile(new Vector3Int(tile.gridX, tile.gridY), null);
                     }
                 }
             }
